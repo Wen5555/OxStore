@@ -1,0 +1,27 @@
+# 后端
+backend/target/
+*.class
+application-local.yml
+.env
+.env.*
+!.env.example
+.work/
+
+# 前端
+frontend/node_modules/
+frontend/dist/
+
+# 上传文件
+uploads/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log

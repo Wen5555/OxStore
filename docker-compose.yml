@@ -1,0 +1,43 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?请在本地 .env 配置 DB_PASSWORD}
+      MYSQL_DATABASE: shop
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # 仅空卷首次初始化；已有卷必须单独运行迁移脚本
+      - ./backend/src/main/resources/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysql -uroot -h 127.0.0.1 -e 'SELECT 1' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  backend:
+    build: ./backend
+    environment:
+      DB_HOST: mysql
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD:?请在本地 .env 配置 DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?请在本地 .env 配置 JWT_SECRET}
+      TOKEN_LOOKUP_KEY: ${TOKEN_LOOKUP_KEY:?请在本地 .env 配置 TOKEN_LOOKUP_KEY}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-}
+      HISTORY_COMPLETE_SINCE: ${HISTORY_COMPLETE_SINCE:-}
+      TZ: Asia/Shanghai
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/uploads
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+volumes:
+  mysql_data:
+  uploads:

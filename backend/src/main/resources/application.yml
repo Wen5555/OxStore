@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: online-shop-mvp
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:shop}?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: never
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
+# 应用自定义配置
+shop:
+  upload-dir: uploads
+  token-lookup-key: ${TOKEN_LOOKUP_KEY}
+  history-complete-since: ${HISTORY_COMPLETE_SINCE:}
+  admin:
+    initial-password: ${ADMIN_INITIAL_PASSWORD:}
+  jwt:
+    secret: ${JWT_SECRET}
+    # 令牌有效期（毫秒），默认 2 小时
+    expire-ms: 7200000
+
+logging:
+  level:
+    com.team.shop: debug
