@@ -1,0 +1,47 @@
+name: OxStore CI
+
+on: [push, pull_request]
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Build and Test Backend
+      run: |
+        cd backend
+        mvn clean test
+
+  frontend-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        # 已移除 cache 和 cache-dependency-path 避免缓存找不到 package-lock.json 报错
+    - name: Install and Test Frontend
+      run: |
+        cd frontend
+        npm install
+        npm run build
+
+  docker-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Validate Docker Compose
+      # 添加虚拟环境变量，让 docker compose config 能够在 CI 中顺利执行
+      env:
+        DB_PASSWORD: ci_dummy_password
+        JWT_SECRET: ci_dummy_secret
+        TOKEN_LOOKUP_KEY: ci_dummy_key
+        ADMIN_INITIAL_PASSWORD: ci_dummy_admin
+      run: docker compose config
