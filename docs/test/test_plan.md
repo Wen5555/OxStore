@@ -24,7 +24,27 @@
 
 ## 5. 当前测试报告
 - **本地后端单测**：`mvn test` 执行成功，47个测试用例全部通过。
+  ![本地mvn test成功](screenshots/local_mvn_test.png)
 - **云端 CI 流水线**：PR #1 中 6 checks passed，后端、前端、Docker 校验全绿，已合并 main。
-![alt text](screenshots/local_mvn_test.png)
-![alt text](screenshots/ci_green.png)
-![alt text](screenshots/pr_merged.png)
+  ![CI全绿](screenshots/ci_green.png)
+  ![PR合并成功](screenshots/pr_merged.png)
+- **联调进展（2026-10-04）**：已完成与 R2 的第一轮接口评审，确认了前后端联调约定，发现 2 个阻塞性架构缺口，已登记至缺陷库。
+
+## 6. 前后端联调测试约定（API 测试基线）
+根据与 R2、R3 的沟通，后续 API 与 UI 测试将严格执行以下断言标准：
+1. **统一响应格式**：所有接口响应必须为 `{code, message, data}`。断言 `code=0` 为成功；`code=401` 时，前端拦截器必须能清 token 并跳转登录页。
+2. **发布商品接口（Multipart）**：参数必须包含 `name`, `description`, `price`, `image`（文件字段名必须为 `image`，`imagePath` 由后端生成，前端不传）。
+3. **历史列表分页**：断言 `page` 从 `0` 开始，默认 `size=10`。
+4. **图片访问**：前端直接通过 `<img src={imagePath}>` 渲染，断言后端生成的 `imagePath` 路径（如 `/api/images/xxx.png`）可直接访问。
+5. **接口全覆盖**：R2 声称 15 个接口全部实测可用，R4 将逐一核对 `api/*.ts` 定义，确保一一对应后开始写页面测试。
+
+## 7. 联调阻塞项与架构缺口（待 R1 决策）
+在评审中发现以下 2 个设计层面问题，目前测试无法覆盖完整流程，已在缺陷库登记：
+- **BUG-001（高危）**：`GET /api/admin/intents` 只返回 `QUEUING` 意向。交易失败递补后，交易中的买家从队列“消失”，卖家拿不到 `intentId`，无法调用 `success/fail` 接口。建议改为“返回队列+交易中一条”或新增 `GET /api/admin/intents/current`。**待 R1 拍板后同步修改前后端。**
+- **BUG-002（中危）**：基线需求（REQ-019、REQ-024）要求提交意向包含“备注”字段，但当前设计砍掉了备注。**待 R1 确认是有意为之还是遗漏。**
+
+## 8. 数据库与环境状态确认（联调前置）
+- 本地 `shop` 库已通过 `backend/src/main/resources/db/schema.sql` 建好，三表结构与脚本一致，未发生改动。
+- 本地演示数据包含历史乱码记录，测试前需执行清表操作重置数据。
+- 数据源密码已改为 `DB_PASSWORD` 环境变量可覆盖（默认值不变）。
+- 未登录访问后台已由 Spring 默认错误格式改为统一 `{code:401, message}` JSON，需回归测试其安全性。
