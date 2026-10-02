@@ -1,10 +1,6 @@
 name: OxStore CI
 
-on:
-  push:
-    branches: [ "main", "develop" ]
-  pull_request:
-    branches: [ "main", "develop" ]
+on: [push, pull_request]
 
 jobs:
   backend-test:
@@ -30,12 +26,11 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
+        # 已移除 cache 和 cache-dependency-path 避免缓存找不到 package-lock.json 报错
     - name: Install and Test Frontend
       run: |
         cd frontend
-        npm ci
+        npm install
         npm test -- --watchAll=false
 
   docker-check:
@@ -43,4 +38,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Validate Docker Compose
+      # 添加虚拟环境变量，让 docker compose config 能够在 CI 中顺利执行
+      env:
+        DB_PASSWORD: ci_dummy_password
+        JWT_SECRET: ci_dummy_secret
+        TOKEN_LOOKUP_KEY: ci_dummy_key
+        ADMIN_INITIAL_PASSWORD: ci_dummy_admin
       run: docker compose config
