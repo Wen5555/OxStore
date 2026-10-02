@@ -2,6 +2,8 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import ProductPage from './pages/buyer/ProductPage'
 import IntentQueryPage from './pages/buyer/IntentQueryPage'
 import LoginPage from './pages/admin/LoginPage'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import AdminLayout from './pages/admin/AdminLayout'
 import CurrentProductPage from './pages/admin/CurrentProductPage'
 import PublishProductPage from './pages/admin/PublishProductPage'
 import ProductHistoryPage from './pages/admin/ProductHistoryPage'
@@ -25,11 +27,16 @@ export default function App() {
 
       {/* 卖家端 */}
       <Route path="/admin/login" element={<LoginPage />} />
-      <Route path="/admin/products/current" element={<RequireAuth><CurrentProductPage /></RequireAuth>} />
-      <Route path="/admin/products/publish" element={<RequireAuth><PublishProductPage /></RequireAuth>} />
-      <Route path="/admin/products/history" element={<RequireAuth><ProductHistoryPage /></RequireAuth>} />
-      <Route path="/admin/intents" element={<RequireAuth><IntentQueuePage /></RequireAuth>} />
-      <Route path="/admin/password" element={<RequireAuth><ChangePasswordPage /></RequireAuth>} />
+      <Route path="/admin" element={<RequireAuth><AdminLayout /></RequireAuth>}>
+        <Route index element={<AdminDashboardPage />} />
+        <Route path="products/current" element={<CurrentProductPage />} />
+        <Route path="products/publish" element={<PublishProductPage />} />
+        <Route path="products/history" element={<ProductHistoryPage />} />
+        <Route path="products/history/:id" element={<ProductHistoryPage />} />
+        <Route path="products/:id/records" element={<ProductHistoryPage />} />
+        <Route path="intents" element={<IntentQueuePage />} />
+        <Route path="password" element={<ChangePasswordPage />} />
+      </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

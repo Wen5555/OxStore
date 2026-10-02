@@ -15,7 +15,7 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        format_sql: true
+      "[format_sql]": true
   sql:
     init:
       mode: never
@@ -38,4 +38,4 @@ shop:
 
 logging:
   level:
-    com.team.shop: debug
+    "[com.team.shop]": debug

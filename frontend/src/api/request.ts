@@ -32,7 +32,9 @@ instance.interceptors.response.use(
     message.error(msg)
     if (error.response?.status === 401) {
       localStorage.removeItem('shop_token')
-      window.location.href = '/admin/login'
+      if (!error.config?.url?.endsWith('/admin/auth/login')) {
+        window.location.href = '/admin/login'
+      }
     }
     return Promise.reject(error)
   },

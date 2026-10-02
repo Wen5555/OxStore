@@ -16,7 +16,7 @@ export function queryIntent(code: string) {
 }
 
 // 凭口令码修改信息
-export function modifyIntent(code: string, data: { buyerName: string; buyerPhone: string }) {
+export function modifyIntent(code: string, data: { buyerName?: string; buyerPhone?: string }) {
   return request<Intent>({ url: `/intents/${code}`, method: 'PUT', data })
 }
 

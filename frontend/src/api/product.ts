@@ -1,5 +1,5 @@
 import { request } from './request'
-import type { Product, ProductRecords } from '../types/product'
+import type { Product, ProductHistoryDetail, ProductRecords } from '../types/product'
 import type { Page } from '../types/common'
 // 获取当前商品（在售/冻结/无商品）
 export function getCurrentProduct() {
@@ -30,7 +30,7 @@ export function getProductRecords(id: number) {
 }
 // 仅已售商品历史详情
 export function getProductHistoryDetail(id: number) {
-  return request<ProductRecords>({ url: `/admin/products/history/${id}`, method: 'GET' })
+  return request<ProductHistoryDetail>({ url: `/admin/products/history/${id}`, method: 'GET' })
 }
 // 手动冻结
 export function freezeProduct() {

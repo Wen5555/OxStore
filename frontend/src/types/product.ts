@@ -43,3 +43,8 @@ export interface ProductRecords {
   legacyRecordsMayBeIncomplete: boolean
   historyCompleteSince: string | null
 }
+
+export interface ProductHistoryDetail {
+  product: Product
+  intents: Intent[]
+}
