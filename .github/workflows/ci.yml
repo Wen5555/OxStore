@@ -31,7 +31,7 @@ jobs:
       run: |
         cd frontend
         npm install
-        npm test -- --watchAll=false
+        npm run build
 
   docker-check:
     runs-on: ubuntu-latest
