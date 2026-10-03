@@ -30,6 +30,27 @@
   ![PR合并成功](screenshots/pr_merged.png)
 - **联调进展（2026-10-04）**：已完成与 R2 的第一轮接口评审，确认了前后端联调约定，发现 2 个阻塞性架构缺口，已登记至缺陷库。
 
+### 5.2 API 真实测试执行记录 (2026-10-03)
+本次测试在本地环境真实执行了 7 个核心接口（共10次请求），完成了从发布到售出的完整业务闭环，全部通过。
+
+| 测试步骤 | 接口 | 方法 | 真实结果 | 状态 | 关联需求 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 1 | /api/products/current | GET | 200 OK，{code:0, data:null} | ✅ 通过 | REQ-025 |
+| 2 | /api/admin/auth/login | POST | 200 OK，成功获取 Token | ✅ 通过 | REQ-003 |
+| 3 | /api/admin/products | POST | 200 OK，{id:1, status:ONLINE, imagePath:...} | ✅ 通过 | REQ-006, REQ-009 |
+| 4 | /api/products/current | GET | 200 OK，成功获取商品详情 | ✅ 通过 | REQ-025 |
+| 5 | /api/intents | POST | 200 OK，{code:"ctCKcaFC", position:1} | ✅ 通过 | REQ-024 |
+| 6 | /api/admin/intents | GET | 200 OK，队列包含 QUEUING 状态的张三 | ✅ 通过 | REQ-028 |
+| 7 | /api/admin/intents/1/start | POST | 200 OK，商品状态变为 FROZEN | ✅ 通过 | REQ-027 |
+| 8 | /api/admin/intents | GET | 200 OK，包含 IN_TRANSACTION 状态及 currentTradeAttemptId | ✅ 通过 | REQ-028, REQ-029 |
+| 9 | /api/admin/intents/1/success | POST | 200 OK，交易成功完成 | ✅ 通过 | REQ-028 |
+| 10 | /api/products/current | GET | 404 Not Found，友好提示“当前没有在售商品” | ✅ 通过 | REQ-023, REQ-025 |
+
+![发布商品成功](docs/test/screenshots/api_03_product_publish_success.png)
+![提交意向成功](docs/test/screenshots/api_05_intent_submit_success.png)
+![确认成交成功](docs/test/screenshots/api_09_confirm_success.png)
+![售出后查询404](docs/test/screenshots/api_10_current_sold_out_404.png)
+
 ## 6. 前后端联调测试约定（API 测试基线）
 根据与 R2、R3 的沟通，后续 API 与 UI 测试将严格执行以下断言标准：
 1. **统一响应格式**：所有接口响应必须为 `{code, message, data}`。断言 `code=0` 为成功；`code=401` 时，前端拦截器必须能清 token 并跳转登录页。

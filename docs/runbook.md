@@ -15,6 +15,23 @@
 
 ⚠️ **安全提醒**：严禁在仓库、聊天记录或日志中提交真实密码。`.env` 文件已在 `.gitignore` 中。
 
+## 2.5 本地启动前置环境变量（PowerShell）
+Spring Boot 不直接读取 .env 文件，首次启动前需在终端执行以下命令（密码请换成你本地的）：
+
+```powershell
+# 1. 数据库密码（必须与本地 MySQL 保持一致）
+$env:DB_PASSWORD="你的本地MySQL密码"
+
+# 2. JWT 密钥与 Token 查找密钥（建议为32位以上随机字符串）
+$env:JWT_SECRET="this_is_a_very_long_and_secure_jwt_secret_key_for_local"
+$env:TOKEN_LOOKUP_KEY="this_is_a_very_long_and_secure_token_lookup_key_for_local"
+
+# 3. 管理员初始密码（首次启动建库时必须提供，之后修改数据库中密码会生效）
+$env:ADMIN_INITIAL_PASSWORD="AdminPass2026!"
+
+# 4. 启动后端
+mvn spring-boot:run
+
 ## 3. 本地启动（前后端分离）
 **步骤 1：启动后端**
 ```bash
