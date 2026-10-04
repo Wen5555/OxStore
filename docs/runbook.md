@@ -48,7 +48,7 @@ docker compose down
 
 ### 1. 建库
 
-空库初始化见[数据库说明](design/database.md#首次建库)。当前JPA配置为 `ddl-auto: none`，SQL初始化为 `mode: never`，因此启动应用前应先导入schema。
+空库初始化见[数据库说明](design/database.md#5-首次建库)。当前JPA配置为 `ddl-auto: none`，SQL初始化为 `mode: never`，因此启动应用前应先导入schema。
 
 ### 2. 配置并启动后端
 
