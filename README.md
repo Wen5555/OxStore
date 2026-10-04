@@ -1,39 +1,189 @@
-# OxStore（单卖家、单商品 MVP）
+# OxStore
 
-Java 17 / Spring Boot 3.2 / JPA / MySQL 8，前端 React + TypeScript。买家匿名排队，卖家以 JWT 管理商品与线下交易。
+[![CI](https://github.com/Wen5555/OxStore/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Wen5555/OxStore/actions/workflows/ci.yml)
 
-## 首次建库与运行
+**面向线下交付的轻量商品售卖系统。**
 
-1. 复制 `.env.example` 为 **不提交版本库**的 `.env`；设置独立的 `DB_PASSWORD`、`JWT_SECRET`、`TOKEN_LOOKUP_KEY` 和首次建号用的 `ADMIN_INITIAL_PASSWORD`。分别用 `openssl rand -hex 32` 生成 JWT 与口令索引密钥；管理员密码须为 8–64 位且含字母、数字和特殊字符。旧公开的初始密码及 JWT 密钥均不能继续使用。
-2. Docker：`docker compose up --build`。空 MySQL 卷自动执行 `backend/src/main/resources/db/schema.sql`。卖家用户名仍为 `admin`，密码由首次配置决定。
-3. 本地运行：先新建 UTF8MB4 的 MySQL `shop` 库并执行同一个 `schema.sql`，导出 `DB_HOST/DB_PORT/DB_NAME/DB_USERNAME/DB_PASSWORD/JWT_SECRET/TOKEN_LOOKUP_KEY/ADMIN_INITIAL_PASSWORD`（已有账号时可不设置初始密码），再在 `backend/` 运行 `./mvnw spring-boot:run`；前端在 `frontend/` 运行 `npm install && npm run dev`。业务时区为 **Asia/Shanghai**，数据库/应用环境的 `TZ` 也保持一致。
+OxStore 将商品展示、购买意向排队和卖家交易管理连接起来：买家匿名登记意向，凭口令查询和管理自己的排队记录；卖家在后台发布商品、处理交易并查看完整历史。当前版本采用单卖家、逐件售卖模式，同一时间至多一件商品在售或冻结，付款与交货在线下完成。
 
-首次创建 `admin` 后，即使删除 `ADMIN_INITIAL_PASSWORD` 再启动也不会重置已有密码。请登录后立即改密。更换 `JWT_SECRET` 会使旧 JWT 失效；更换它**不会**自动更改卖家密码。已用旧公开密钥/默认密码部署的实例必须两者都换。不要把真实密钥或密码写入仓库/日志。
+[功能](#功能) · [快速开始](#快速开始) · [本地开发](#本地开发) · [技术栈](#技术栈) · [文档](#文档)
 
-`TOKEN_LOOKUP_KEY` 用于 HMAC 索引新买家口令，**不得跟随 JWT 密钥一起轮换**：只要还有有效买家口令，就必须保留原口令索引密钥及其备份，否则新口令的索引查找将失效。数据库仍存 BCrypt 哈希进行验证，不返回索引摘要给客户端。
+## 功能
 
-### 现有数据升级
+| 买家前台 | 卖家后台 |
+| --- | --- |
+| 查看当前商品的名称、描述、图片和价格 | 登录后台、修改密码 |
+| 无需注册，填写姓名和联系电话即可提交意向 | 发布商品、上传主图 |
+| 提交成功后获得专属口令，查询状态与排队位置 | 查看当前商品及购买意向队列 |
+| 排队期间凭口令修改信息、撤销意向 | 手动冻结或解冻商品，选择队首开始交易 |
+| 失败后重新排队，继续使用原口令 | 确认成交，或将失败意向作废、重排到队尾 |
+| 冻结期间查看商品及交易提示 | 自动递补下一位，查看历史商品、交易尝试和状态事件 |
 
-**禁止将空库 `schema.sql` 当成旧表升级脚本**：已有 MySQL 卷不会重新执行 Docker 初始化。暂停业务写入，备份数据，在副本上演练 `backend/src/main/resources/db/migrations/V2__queue_history.sql`，先结束全部 `IN_TRANSACTION` 意向（脚本会阻止带交易升级）；再以 MySQL 命令行一次性执行，核对迁移前后行数、状态分布、序号无空/无重复及新表约束。若中途失败，不要盲目重跑；[MySQL DDL 会隐式提交](https://dev.mysql.com/doc/refman/8.0/en/implicit-commit.html)。
+系统保留首次意向提交时间和每次交易记录。商品售出后从前台下架，相关口令失效，卖家仍可查看历史。交易期间须先确认交易结果，再恢复售卖。
 
-旧行以迁移时 `submitted_at` 值排序回填 `queue_seq`；曾被旧版 REQUEUE 覆盖的原始时间、此前失败交易及手动操作历史**不能恢复**。设置 `HISTORY_COMPLETE_SINCE=升级截止时间`（格式如 `2026-10-01T10:00:00`），后台记录接口会返回 `legacyRecordsMayBeIncomplete=true` 与该截止时间。迁移后的新交易必有开始时间。不能把旧应用直接回退后继续写入，否则又会覆盖首次提交时间且不写新历史；必要时停写并从备份恢复。
+## 交易流程
 
-若 V2 仅在前置检查被交易中意向拦截，且确认还未执行任何表变更，可在结束交易后重试修订后的 V2；脚本会清理遗留的辅助过程并重新检查。其他中途失败仍须先核对结构，不能盲目重跑。已经执行旧版 V2 的实例另用 `V3__trade_attempt_completion_check.sql` 收紧交易结果非空约束；脚本遇到不完整旧记录会拒绝升级，须核实真实结果后处理，不自动补造历史。新库或修订后的 V2 无须额外执行 V3。
+```mermaid
+flowchart LR
+    A[卖家发布商品] --> B[买家提交意向并排队]
+    B --> C[卖家与队首开始交易]
+    C --> D[商品冻结]
+    D --> E{交易结果}
+    E -->|成功| F[商品售出并保留历史]
+    E -->|失败| G[作废或重新排队]
+    G --> H[自动递补下一位]
+    H --> C
+```
 
-旧口令的 `token_lookup` 保持 `NULL`，继续按原 BCrypt 全量比对，不会因迁移失效；**若同一商品仍有大量旧有效码，该兼容回退路径可能超过 2 秒**。待旧商品正常成交/口令自然失效后，新口令走索引查询。不要为追求速度强制清除旧口令。
+失败后若没有待处理意向，商品恢复在售；重新排队的意向仍保留原口令。
 
-## 新增/变更 API 与记录权限
+## 快速开始
 
-- `GET /api/admin/products/{id}/records`：商品任意业务状态均可读 `product/intents/tradeAttempts/statusEvents/legacyRecordsMayBeIncomplete/historyCompleteSince`；不存在为 404。`GET /api/admin/products/history/{id}` 仍只支持 `SOLD`，但返回相同结构。`GET /api/admin/intents` 仍仅是当前交易中及排队队列，排队位置从 1 起。
-- `ProductResponse` 新增 `statusUpdatedAt`。`IntentResponse` 新增 `processedAt`（**最近一次意向状态处理时间**）和 `currentTradeAttemptId`（仅后台队列中的交易中意向及失败自动递补响应有值）。`submittedAt` 是首次提交时间；`queueSeq` 仅内部排序，不等于动态位次。
-- `POST /api/admin/intents/{id}/start` 保持原请求与空响应；随后刷新队列取得 `currentTradeAttemptId`。成功确认须发送 `{ "tradeAttemptId": 12 }`；失败确认须发送 `{ "action": "REQUEUE", "tradeAttemptId": 12 }`（或 `DISCARD`）。缺字段返回 400；重复/延迟的旧尝试 ID 返回 409，须刷新队列；失败响应的 `data` 为新的交易中意向或 `null`。
-- 成功商品为 `SOLD`，`soldAt` 是成交时间；意向 `SUCCESS/FAILED/CANCELLED/UNSOLD` 为最终状态。一个意向可有多次尝试，早先的失败只在 `tradeAttempts` 列表中展示；未结束尝试的 `finishedAt/result/failAction` 为 `null`。事件按时间及 ID 排序，同一事务内失败恢复在售和再冻结分别记录。
-- 输入电话遵循 V1：**恰好 11 位数字**，不限定 1 开头。公开商品接口不返回买家数据；意向及尝试/事件记录仅后台可读；买家凭码仅可查本人。
+推荐使用 Docker Compose，统一启动前端、后端和数据库。需要安装 Docker，并启用 Compose。
 
-前端队列/历史页面目前仍为占位页面：此仓库同步了 TypeScript API 签名与数据类型，**不代表页面联调/需求验收完成**。
+### 1. 获取代码
 
-## 测试与注意事项
+```powershell
+git clone https://github.com/Wen5555/OxStore.git
+cd OxStore
+Copy-Item .env.example .env
+```
 
-后端：`cd backend && ./mvnw test`；前端：`cd frontend && npm run build`。本机曾在独立 MySQL 8 测试库跑锁等待并发、回滚、迁移及保留卷重启；真实目标部署环境仍须复验。接口仅能读取并不等于页面或全量性能达标。发布失败后尝试清理孤儿图片；已售商品的裸图片 URL 是否也要禁止买家访问属于待确认的需求解释问题，不能假定当前实现已经满足。
+### 2. 配置环境
 
-业务状态变更以现有 Service 事务为边界，商品行锁作为卖家操作和提交意向的串行化点；参考 [Spring Data JPA 锁说明](https://docs.spring.io/spring-data/jpa/reference/jpa/locking.html)与[事务说明](https://docs.spring.io/spring-data/jpa/reference/jpa/transactions.html)。
+编辑 `.env`，填写以下配置：
+
+| 变量 | 用途 |
+| --- | --- |
+| `DB_PASSWORD` | MySQL 密码 |
+| `JWT_SECRET` | 卖家登录令牌签名密钥，至少32字节 |
+| `TOKEN_LOOKUP_KEY` | 买家口令查询索引密钥，至少32字节 |
+| `ADMIN_INITIAL_PASSWORD` | 首次创建卖家账号的密码，8–64位且含字母、数字和特殊字符 |
+
+可以用 PowerShell 7 生成随机密钥；分别执行两次，为 JWT 和口令索引使用不同值：
+
+```powershell
+[Convert]::ToHexString([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
+```
+
+`.env` 已被 Git 忽略。`TOKEN_LOOKUP_KEY` 应保持稳定，以便已发放的买家口令继续可用。卖家账号创建后，重新启动不会重置其密码。
+
+### 3. 启动
+
+```powershell
+docker compose up -d --build
+```
+
+| 入口 | 地址 |
+| --- | --- |
+| 买家前台 | [http://localhost/](http://localhost/) |
+| 卖家登录 | [http://localhost/admin/login](http://localhost/admin/login) |
+
+卖家用户名为 `admin`，首次密码使用刚填写的 `ADMIN_INITIAL_PASSWORD`。登录后可在后台修改密码。
+
+Compose 为 MySQL 和上传图片配置持久化数据卷，空库首次启动会自动执行建表脚本。默认占用宿主机80和3306端口；已有数据库的升级步骤见[运行手册](docs/runbook.md#已有数据库升级)。
+
+查看运行状态或停止服务：
+
+```powershell
+docker compose ps
+docker compose logs --tail 100 backend
+docker compose down
+```
+
+## 本地开发
+
+需要 JDK 17、Node.js 20或更高版本、Maven 3.9或更高版本，以及 MySQL 8.0.16或更高版本。
+
+### 初始化数据库
+
+在项目根目录执行，`-p` 会交互询问数据库密码：
+
+```powershell
+mysql -uroot -p --default-character-set=utf8mb4 -e "CREATE DATABASE shop CHARACTER SET utf8mb4;"
+mysql -uroot -p --default-character-set=utf8mb4 shop -e "source backend/src/main/resources/db/schema.sql;"
+```
+
+### 启动后端
+
+将上表中的配置设为当前终端环境变量，PowerShell 写法为 `$env:变量名 = '配置值'`。本地 Spring Boot 读取环境变量，详细示例见[运行手册](docs/runbook.md#本地开发)。
+
+```powershell
+cd backend
+mvn spring-boot:run
+```
+
+后端默认运行在 `http://localhost:8080`。数据库默认连接 `localhost:3306/shop`，用户名为 `root`；可通过 `DB_HOST`、`DB_PORT`、`DB_NAME`、`DB_USERNAME` 调整。
+
+### 启动前端
+
+在另一个终端执行：
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+访问 [http://localhost:5173/](http://localhost:5173/)。Vite 会将 `/api` 请求代理到本地后端。
+
+## 技术栈
+
+| 层次 | 技术 |
+| --- | --- |
+| 前端 | React 18、TypeScript 5、Vite 5、Ant Design 5、React Router、axios |
+| 后端 | Java 17、Spring Boot 3.2、Spring Data JPA、Spring Security、JWT |
+| 数据库 | MySQL 8、InnoDB、utf8mb4 |
+| 构建与部署 | Maven、npm、Docker Compose、Nginx |
+| 测试与持续集成 | JUnit 5、Mockito、GitHub Actions |
+
+前端通过 REST API 与后端通信。Docker 部署中，Nginx 提供前端静态资源并转发 `/api` 请求；后端通过 JPA 访问数据库。交易逻辑使用事务、行锁及唯一约束维护商品与意向状态的一致性。
+
+## 项目结构
+
+```text
+OxStore/
+├── backend/             # Spring Boot 服务、实体、建表和迁移脚本
+├── frontend/            # React 买家前台与卖家后台
+├── docs/                # 设计、运行、测试与协作文档
+├── scripts/             # 数据库验证工具
+├── docker-compose.yml   # 服务编排
+├── .env.example         # 环境配置模板
+└── .github/workflows/   # 持续集成
+```
+
+## 测试
+
+后端测试与打包：
+
+```powershell
+cd backend
+mvn test package
+```
+
+前端生产构建：
+
+```powershell
+cd frontend
+npm run build
+```
+
+构建后端后，可在项目根目录运行数据库集成验证。需要 Python 3.10或更高版本、Docker 和 Java 17，脚本仅依赖 Python 标准库：
+
+```powershell
+python scripts/verify_database.py
+```
+
+验证覆盖建库、数据库约束、迁移、购买意向、交易历史和重启持久化，使用独立测试容器；实际结果与验证范围见[数据库验证报告](docs/test/db-validation.md)。
+
+## 文档
+
+- [项目 Wiki](https://github.com/Wen5555/OxStore/wiki)：需求、架构和协作资料
+- [运行手册](docs/runbook.md)：环境配置、启动与数据升级
+- [数据库设计](docs/design/database.md)：ER 图、数据字典及约束
+- [交易与记录接口](docs/design/api.md)：接口约定和数据含义
+- [测试计划](docs/test/test_plan.md)与[缺陷记录](docs/test/defects.md)
+
+## 参与协作
+
+欢迎通过 [Issue](https://github.com/Wen5555/OxStore/issues) 提交问题或建议，通过 Pull Request 提交改进。报告问题时请附上复现步骤、运行环境和预期行为；修改涉及交易规则或数据库时，同步更新文档和相关验证。
