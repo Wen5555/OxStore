@@ -125,14 +125,12 @@ public class PurchaseIntent {
         this.tokenLookup = null;
     }
 
-    /** 交易失败：仅更新排序序号，首次提交时间不变，旧口令失效。 */
+    /** 交易失败后重排：保留意向口令和首次提交时间，仅更新排序序号。 */
     public void requeue(long newQueueSeq, LocalDateTime now) {
         IntentStateMachine.assertCanMarkFailed(status);
         this.status = IntentStatus.QUEUING;
         this.queueSeq = newQueueSeq;
         this.processedAt = now;
-        this.tokenHash = null;
-        this.tokenLookup = null;
     }
 
     /** 商品售出，其余排队意向统一标记未成交 */

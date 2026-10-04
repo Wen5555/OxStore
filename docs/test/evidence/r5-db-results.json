@@ -1,0 +1,272 @@
+{
+  "run_at": "2026-10-04T20:47:04.826134+08:00",
+  "source_base": "8db4228",
+  "scope": "独立 MySQL / HTTP / 迁移 / 重启验证；不连接现有业务库",
+  "checks": [
+    {
+      "name": "DB-01 五表建库",
+      "status": "PASS",
+      "detail": "product, product_status_event, purchase_intent, seller, trade_attempt"
+    },
+    {
+      "name": "DB-02 第二件活跃商品",
+      "status": "PASS",
+      "detail": "MySQL 约束拒绝非法记录"
+    },
+    {
+      "name": "DB-02 非正价格",
+      "status": "PASS",
+      "detail": "MySQL 约束拒绝非法记录"
+    },
+    {
+      "name": "DB-02 第二条交易中意向",
+      "status": "PASS",
+      "detail": "MySQL 约束拒绝非法记录"
+    },
+    {
+      "name": "DB-02 重复队列序号",
+      "status": "PASS",
+      "detail": "MySQL 约束拒绝非法记录"
+    },
+    {
+      "name": "DB-02 不存在的商品外键",
+      "status": "PASS",
+      "detail": "MySQL 约束拒绝非法记录"
+    },
+    {
+      "name": "DB-02 重复未结束交易尝试",
+      "status": "PASS",
+      "detail": "MySQL 约束拒绝非法记录"
+    },
+    {
+      "name": "DB-02 结束交易缺少结果",
+      "status": "PASS",
+      "detail": "MySQL 约束拒绝非法记录"
+    },
+    {
+      "name": "DB-03 迁移前置拦截",
+      "status": "PASS",
+      "detail": "有交易中意向时拒绝迁移，表未变更"
+    },
+    {
+      "name": "DB-04 V2升级与数据保留",
+      "status": "PASS",
+      "detail": "两条旧意向、中文和原时间保留，序号按时间与ID回填"
+    },
+    {
+      "name": "DB-05 禁止重复迁移",
+      "status": "PASS",
+      "detail": "已存在queue_seq时拒绝重跑"
+    },
+    {
+      "name": "DB-06 V3不伪造旧结果",
+      "status": "PASS",
+      "detail": "不完整旧结果阻止约束升级"
+    },
+    {
+      "name": "DB-07 V3约束升级",
+      "status": "PASS",
+      "detail": "核实旧结果后升级，结束但无结果的记录被拒绝"
+    },
+    {
+      "name": "DB-08 JPA映射",
+      "status": "PASS",
+      "detail": "Java 17 应用以ddl-auto=validate成功启动并登录"
+    },
+    {
+      "name": "DB-09 中文商品",
+      "status": "PASS",
+      "detail": "HTTP写入/读取中文正确"
+    },
+    {
+      "name": "DB-10 失败递补与队尾",
+      "status": "PASS",
+      "detail": "乙交易中；丙第1位，甲第2位"
+    },
+    {
+      "name": "DB-11 重排保留时间及口令",
+      "status": "PASS",
+      "detail": "首次时间、BCrypt哈希与HMAC索引均保持"
+    },
+    {
+      "name": "DB-12 原口令查询修改",
+      "status": "PASS",
+      "detail": "重排后原码可用，修改姓名不改变位次"
+    },
+    {
+      "name": "DB-13 撤销使口令失效",
+      "status": "PASS",
+      "detail": "撤销退出队列，两项口令字段置NULL"
+    },
+    {
+      "name": "DB-14 作废使口令失效",
+      "status": "PASS",
+      "detail": "乙作废后原码返回403，丙自动进入交易"
+    },
+    {
+      "name": "DB-15 历史完整保留",
+      "status": "PASS",
+      "detail": "保留3条意向、2次失败+1次成功及7个状态事件"
+    },
+    {
+      "name": "DB-16 售出失效",
+      "status": "PASS",
+      "detail": "商品SOLD，全部旧码返回403"
+    },
+    {
+      "name": "DB-17 应用重启持久化",
+      "status": "PASS",
+      "detail": "商品、意向、交易尝试和事件记录保持一致"
+    },
+    {
+      "name": "DB-18 MySQL重启持久化",
+      "status": "PASS",
+      "detail": "保留容器数据卷重启后行数一致: 1\t3\t3\t7"
+    }
+  ],
+  "mysql_version": "8.0.46",
+  "columns_tsv": "product\tid\tbigint\tNO\tauto_increment\nproduct\tname\tvarchar(200)\tNO\t\nproduct\tdescription\ttext\tNO\t\nproduct\timage_path\tvarchar(500)\tNO\t\nproduct\tprice\tdecimal(10,2)\tNO\t\nproduct\tstatus\tvarchar(20)\tNO\t\nproduct\tfreeze_source\tvarchar(20)\tYES\t\nproduct\tpublished_at\tdatetime(6)\tNO\t\nproduct\tstatus_updated_at\tdatetime(6)\tYES\t\nproduct\tsold_at\tdatetime(6)\tYES\t\nproduct\tactive_flag\ttinyint\tYES\tSTORED GENERATED\nproduct_status_event\tid\tbigint\tNO\tauto_increment\nproduct_status_event\tproduct_id\tbigint\tNO\t\nproduct_status_event\ttrade_attempt_id\tbigint\tYES\t\nproduct_status_event\tevent_type\tvarchar(30)\tNO\t\nproduct_status_event\tfrom_status\tvarchar(20)\tYES\t\nproduct_status_event\tto_status\tvarchar(20)\tNO\t\nproduct_status_event\tfreeze_source\tvarchar(20)\tYES\t\nproduct_status_event\toccurred_at\tdatetime(6)\tNO\t\npurchase_intent\tid\tbigint\tNO\tauto_increment\npurchase_intent\tproduct_id\tbigint\tNO\t\npurchase_intent\tbuyer_name\tvarchar(100)\tNO\t\npurchase_intent\tbuyer_phone\tvarchar(20)\tNO\t\npurchase_intent\ttoken_hash\tvarchar(255)\tYES\t\npurchase_intent\ttoken_lookup\tvarchar(64)\tYES\t\npurchase_intent\tstatus\tvarchar(20)\tNO\t\npurchase_intent\tsubmitted_at\tdatetime(6)\tNO\t\npurchase_intent\tqueue_seq\tbigint\tNO\t\npurchase_intent\tupdated_at\tdatetime(6)\tYES\t\npurchase_intent\tprocessed_at\tdatetime(6)\tYES\t\npurchase_intent\ttrading_flag\ttinyint\tYES\tSTORED GENERATED\nseller\tid\tbigint\tNO\tauto_increment\nseller\tusername\tvarchar(50)\tNO\t\nseller\tpassword_hash\tvarchar(255)\tNO\t\nseller\tpassword_updated_at\tdatetime(6)\tYES\t\ntrade_attempt\tid\tbigint\tNO\tauto_increment\ntrade_attempt\tintent_id\tbigint\tNO\t\ntrade_attempt\tstarted_at\tdatetime(6)\tNO\t\ntrade_attempt\tfinished_at\tdatetime(6)\tYES\t\ntrade_attempt\tresult\tvarchar(10)\tYES\t\ntrade_attempt\tfail_action\tvarchar(10)\tYES\t\ntrade_attempt\topen_intent_id\tbigint\tYES\tSTORED GENERATED",
+  "sample_records": {
+    "product": {
+      "id": 1,
+      "name": "R5中文验证商品",
+      "description": "中文数据库验证：保留历史记录",
+      "imagePath": "/api/images/c132e11b-9fa0-436d-bf17-15366efbe4be.png",
+      "price": 19.9,
+      "status": "SOLD",
+      "freezeSource": null,
+      "publishedAt": "2026-10-04T20:47:37.430692",
+      "soldAt": "2026-10-04T20:47:39.15475",
+      "statusUpdatedAt": "2026-10-04T20:47:39.15475"
+    },
+    "intents": [
+      {
+        "id": 1,
+        "productId": 1,
+        "buyerName": "测试甲修改",
+        "buyerPhone": "13800000000",
+        "status": "CANCELLED",
+        "submittedAt": "2026-10-04T20:47:37.533036",
+        "position": null,
+        "processedAt": "2026-10-04T20:47:38.750493",
+        "currentTradeAttemptId": null
+      },
+      {
+        "id": 2,
+        "productId": 1,
+        "buyerName": "测试乙",
+        "buyerPhone": "13800000000",
+        "status": "FAILED",
+        "submittedAt": "2026-10-04T20:47:37.634065",
+        "position": null,
+        "processedAt": "2026-10-04T20:47:39.077531",
+        "currentTradeAttemptId": null
+      },
+      {
+        "id": 3,
+        "productId": 1,
+        "buyerName": "测试丙",
+        "buyerPhone": "13800000000",
+        "status": "SUCCESS",
+        "submittedAt": "2026-10-04T20:47:37.716202",
+        "position": null,
+        "processedAt": "2026-10-04T20:47:39.15475",
+        "currentTradeAttemptId": null
+      }
+    ],
+    "tradeAttempts": [
+      {
+        "id": 1,
+        "intentId": 1,
+        "startedAt": "2026-10-04T20:47:38.032951",
+        "finishedAt": "2026-10-04T20:47:38.125899",
+        "result": "FAILED",
+        "failAction": "REQUEUE"
+      },
+      {
+        "id": 2,
+        "intentId": 2,
+        "startedAt": "2026-10-04T20:47:38.125899",
+        "finishedAt": "2026-10-04T20:47:39.077531",
+        "result": "FAILED",
+        "failAction": "DISCARD"
+      },
+      {
+        "id": 3,
+        "intentId": 3,
+        "startedAt": "2026-10-04T20:47:39.077531",
+        "finishedAt": "2026-10-04T20:47:39.15475",
+        "result": "SUCCESS",
+        "failAction": null
+      }
+    ],
+    "statusEvents": [
+      {
+        "id": 1,
+        "tradeAttemptId": null,
+        "eventType": "PUBLISHED",
+        "fromStatus": null,
+        "toStatus": "ONLINE",
+        "freezeSource": null,
+        "occurredAt": "2026-10-04T20:47:37.430692"
+      },
+      {
+        "id": 2,
+        "tradeAttemptId": 1,
+        "eventType": "TRADE_STARTED",
+        "fromStatus": "ONLINE",
+        "toStatus": "FROZEN",
+        "freezeSource": "TRADE",
+        "occurredAt": "2026-10-04T20:47:38.032951"
+      },
+      {
+        "id": 3,
+        "tradeAttemptId": 1,
+        "eventType": "TRADE_FAILED",
+        "fromStatus": "FROZEN",
+        "toStatus": "RESTORED_ONLINE",
+        "freezeSource": null,
+        "occurredAt": "2026-10-04T20:47:38.125899"
+      },
+      {
+        "id": 4,
+        "tradeAttemptId": 2,
+        "eventType": "TRADE_STARTED",
+        "fromStatus": "RESTORED_ONLINE",
+        "toStatus": "FROZEN",
+        "freezeSource": "TRADE",
+        "occurredAt": "2026-10-04T20:47:38.125899"
+      },
+      {
+        "id": 5,
+        "tradeAttemptId": 2,
+        "eventType": "TRADE_FAILED",
+        "fromStatus": "FROZEN",
+        "toStatus": "RESTORED_ONLINE",
+        "freezeSource": null,
+        "occurredAt": "2026-10-04T20:47:39.077531"
+      },
+      {
+        "id": 6,
+        "tradeAttemptId": 3,
+        "eventType": "TRADE_STARTED",
+        "fromStatus": "RESTORED_ONLINE",
+        "toStatus": "FROZEN",
+        "freezeSource": "TRADE",
+        "occurredAt": "2026-10-04T20:47:39.077531"
+      },
+      {
+        "id": 7,
+        "tradeAttemptId": 3,
+        "eventType": "TRADE_SUCCEEDED",
+        "fromStatus": "FROZEN",
+        "toStatus": "SOLD",
+        "freezeSource": null,
+        "occurredAt": "2026-10-04T20:47:39.15475"
+      }
+    ],
+    "legacyRecordsMayBeIncomplete": false,
+    "historyCompleteSince": null
+  },
+  "status": "PASS"
+}

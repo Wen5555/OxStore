@@ -1,0 +1,9 @@
+{
+  "tests": 50,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "java": "Microsoft OpenJDK 17.0.16",
+  "command": "mvn -B -q -s .work/maven-settings.xml test package",
+  "note": "任务内临时使用阿里云central镜像，依赖版本未变更"
+}

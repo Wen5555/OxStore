@@ -30,10 +30,22 @@ Java 17 / Spring Boot 3.2 / JPA / MySQL 8，前端 React + TypeScript。买家�
 - 成功商品为 `SOLD`，`soldAt` 是成交时间；意向 `SUCCESS/FAILED/CANCELLED/UNSOLD` 为最终状态。一个意向可有多次尝试，早先的失败只在 `tradeAttempts` 列表中展示；未结束尝试的 `finishedAt/result/failAction` 为 `null`。事件按时间及 ID 排序，同一事务内失败恢复在售和再冻结分别记录。
 - 输入电话遵循 V1：**恰好 11 位数字**，不限定 1 开头。公开商品接口不返回买家数据；意向及尝试/事件记录仅后台可读；买家凭码仅可查本人。
 
-前端队列/历史页面目前仍为占位页面：此仓库同步了 TypeScript API 签名与数据类型，**不代表页面联调/需求验收完成**。
+前端已提交队列及历史页面实现；完整页面联调与UI验收仍需R3/R4核验。
+
+### 重排口令规则（2026-10-04对齐）
+
+按课程第11组9月28日澄清，口令跟随意向：失败后选择`REQUEUE`保留原口令，可继续查询，排队时可修改或撤销；`DISCARD`、主动撤销、成交和商品售出使对应口令失效。重排只改变`queue_seq`，首次`submitted_at`保持不变。
 
 ## 测试与注意事项
 
 后端：`cd backend && ./mvnw test`；前端：`cd frontend && npm run build`。本机曾在独立 MySQL 8 测试库跑锁等待并发、回滚、迁移及保留卷重启；真实目标部署环境仍须复验。接口仅能读取并不等于页面或全量性能达标。发布失败后尝试清理孤儿图片；已售商品的裸图片 URL 是否也要禁止买家访问属于待确认的需求解释问题，不能假定当前实现已经满足。
 
 业务状态变更以现有 Service 事务为边界，商品行锁作为卖家操作和提交意向的串行化点；参考 [Spring Data JPA 锁说明](https://docs.spring.io/spring-data/jpa/reference/jpa/locking.html)与[事务说明](https://docs.spring.io/spring-data/jpa/reference/jpa/transactions.html)。
+
+## R5数据库交付
+
+- [数据库设计、ER图与建库/迁移说明](docs/design/database.md)
+- [数据库验证报告与复现方法](docs/test/db-validation.md)
+- [R5个人成果说明](docs/personal/R5.md)
+
+在`backend`运行`mvn test package`后，在项目根目录执行`python scripts/verify_database.py`。脚本需要Docker和Java17，自动创建独立MySQL8容器，生成无凭据的验证记录，结束后清理本次专用容器。它不会连接现有业务库。
