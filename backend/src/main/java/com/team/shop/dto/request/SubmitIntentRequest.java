@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
  */
 public record SubmitIntentRequest(
         @NotBlank(message = "姓名不能为空")
-        @Size(max = 100, message = "姓名过长")
+        @Size(max = 20, message = "姓名过长（最多 20 字）")
         String buyerName,
 
         @NotBlank(message = "电话不能为空")
