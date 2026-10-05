@@ -318,7 +318,7 @@ export default function ProductPage() {
                     >
                       <Input
                         placeholder="请输入您的姓名"
-                        maxLength={50}
+                        maxLength={20}
                       />
                     </Form.Item>
 

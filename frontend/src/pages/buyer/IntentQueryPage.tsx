@@ -343,7 +343,7 @@ export default function IntentQueryPage() {
           >
             <Input
               placeholder="请输入姓名"
-              maxLength={50}
+              maxLength={20}
             />
           </Form.Item>
 
