@@ -109,6 +109,9 @@ export default function ProductPage() {
       >
         <Card style={{ maxWidth: 800, margin: '80px auto' }}>
           <Empty description="目前没有正在出售的商品" />
+          <div style={{ textAlign: 'center', marginTop: 16 }}>
+            <Button onClick={() => navigate('/intent')}>查询购买意向</Button>
+          </div>
         </Card>
       </div>
     )
@@ -149,6 +152,9 @@ export default function ProductPage() {
           <div style={{ color: '#666' }}>
             商品购买意向登记
           </div>
+          <Button style={{ marginTop: 12 }} onClick={() => navigate('/intent')}>
+            查询购买意向
+          </Button>
         </div>
 
         {/* 商品卡片 */}

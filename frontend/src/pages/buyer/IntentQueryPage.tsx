@@ -35,18 +35,21 @@ export default function IntentQueryPage() {
   const [saving, setSaving] = useState(false)
   const [canceling, setCanceling] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
+  const [codeInput, setCodeInput] = useState('')
 
   const [form] = Form.useForm<IntentFormValues>()
 
   // 查询购买意向
   const loadIntent = async () => {
     if (!code) {
+      setIntent(null)
       setLoading(false)
       return
     }
 
     try {
       setLoading(true)
+      setIntent(null)
 
       const data = await queryIntent(code)
 
@@ -116,13 +119,17 @@ export default function IntentQueryPage() {
       await cancelIntent(code)
 
       message.success('购买意向已撤销')
-
-      await loadIntent()
+      setIntent({ ...intent, status: 'CANCELLED', position: null })
     } catch (error) {
       console.error('撤销购买意向失败:', error)
     } finally {
       setCanceling(false)
     }
+  }
+
+  const handleQuery = () => {
+    const value = codeInput.trim()
+    if (value) navigate(`/intent/${encodeURIComponent(value)}`)
   }
 
   // 状态标签
@@ -164,8 +171,32 @@ export default function IntentQueryPage() {
     )
   }
 
+  if (!code) {
+    return (
+      <div style={{ minHeight: '100vh', padding: 40, background: '#f5f5f5' }}>
+        <Card title="查询购买意向" style={{ maxWidth: 560, margin: '80px auto' }}>
+          <Space.Compact style={{ width: '100%' }}>
+            <Input
+              aria-label="购买意向口令码"
+              placeholder="请输入购买意向口令码"
+              value={codeInput}
+              onChange={(event) => setCodeInput(event.target.value)}
+              onPressEnter={handleQuery}
+            />
+            <Button type="primary" onClick={handleQuery} disabled={!codeInput.trim()}>
+              查询
+            </Button>
+          </Space.Compact>
+          <div style={{ marginTop: 16, textAlign: 'center' }}>
+            <Button type="link" onClick={() => navigate('/')}>返回商品页面</Button>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
   // 没有找到购买意向
-  if (!code || !intent) {
+  if (!intent) {
     return (
       <div
         style={{
@@ -188,6 +219,9 @@ export default function IntentQueryPage() {
               marginTop: 20,
             }}
           >
+            <Button onClick={() => navigate('/intent')}>
+              重新输入口令码
+            </Button>
             <Button onClick={() => navigate('/')}>
               返回商品页面
             </Button>
@@ -280,8 +314,7 @@ export default function IntentQueryPage() {
           }}
         >
           <Space>
-            {(intent.status === 'QUEUING' ||
-              intent.status === 'IN_TRANSACTION') && (
+            {intent.status === 'QUEUING' && (
               <>
                 <Button onClick={openEdit}>
                   修改信息
