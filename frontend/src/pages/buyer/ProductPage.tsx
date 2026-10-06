@@ -109,9 +109,6 @@ export default function ProductPage() {
       >
         <Card style={{ maxWidth: 800, margin: '80px auto' }}>
           <Empty description="目前没有正在出售的商品" />
-          <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <Button onClick={() => navigate('/intent')}>查询购买意向</Button>
-          </div>
         </Card>
       </div>
     )
@@ -207,7 +204,7 @@ export default function ProductPage() {
                     padding: '4px 10px',
                   }}
                 >
-                  已冻结
+                  {product.freezeSource === 'TRADE' ? '商品交易中' : '已冻结'}
                 </Tag>
               ) : (
                 <Tag
@@ -271,7 +268,7 @@ export default function ProductPage() {
                       fontWeight: 'bold',
                     }}
                   >
-                    商品已冻结
+                    {product.freezeSource === 'TRADE' ? '商品交易中' : '商品已由卖家手动冻结'}
                   </div>
 
                   <div
@@ -281,7 +278,9 @@ export default function ProductPage() {
                       marginTop: 8,
                     }}
                   >
-                    当前暂时无法提交购买意向
+                    {product.freezeSource === 'TRADE'
+                      ? '正在与队首买家进行线下交易，暂时无法提交购买意向'
+                      : '卖家暂时停止接受购买意向'}
                   </div>
                 </Card>
               )}

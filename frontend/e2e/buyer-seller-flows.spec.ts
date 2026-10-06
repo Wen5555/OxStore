@@ -54,7 +54,9 @@ test('买家提交购买意向后可凭口令查询状态和排位', async ({ pa
 
   const confirmation = page.getByRole('dialog')
   await expect(confirmation.getByText('BUYER-CODE-123')).toBeVisible()
-  await confirmation.getByRole('button', { name: '查看排队进度' }).click()
+  await page.goto('/intent')
+  await page.getByLabel('购买意向口令码').fill('BUYER-CODE-123')
+  await page.getByRole('button', { name: /查\s*询/ }).click()
 
   await expect(page).toHaveURL(/\/intent\/BUYER-CODE-123$/)
   await expect(page.getByText('第 1 位')).toBeVisible()
@@ -107,6 +109,7 @@ test('卖家登录后开始队首交易并确认成功', async ({ page }) => {
   await page.getByRole('banner').getByRole('button', { name: /意向队列/ }).click()
 
   await expect(page.getByText('队首买家')).toBeVisible()
+  await expect(page.getByText(/提交时间：/)).toBeVisible()
   await page.getByRole('button', { name: '开始处理队首' }).click()
   await page.getByRole('button', { name: '确认成功' }).click()
 
@@ -114,4 +117,17 @@ test('卖家登录后开始队首交易并确认成功', async ({ page }) => {
   await expect(page.getByText('当前没有进行中的交易')).toBeVisible()
   expect(startedIntentId).toBe(701)
   expect(successRequest).toEqual({ tradeAttemptId: 9001 })
+})
+
+test('发布商品时要求填写非空描述', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('shop_token', 'mock-jwt-token'))
+  await page.goto('/admin/products/publish')
+  await page.getByLabel('商品名称').fill('测试商品')
+  await page.getByLabel('价格').fill('88')
+  await page.getByRole('button', { name: '发布商品', exact: true }).click()
+  await expect(page.getByText('请输入商品描述')).toBeVisible()
+
+  await page.getByLabel('商品描述').fill('   ')
+  await page.getByRole('button', { name: '发布商品', exact: true }).click()
+  await expect(page.getByText('商品描述不能全是空白')).toBeVisible()
 })

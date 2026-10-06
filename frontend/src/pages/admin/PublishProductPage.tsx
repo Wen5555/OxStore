@@ -86,7 +86,19 @@ export default function PublishProductPage() {
           >
             <Input maxLength={100} />
           </Form.Item>
-          <Form.Item label="商品描述" name="description">
+          <Form.Item
+            label="商品描述"
+            name="description"
+            rules={[
+              { required: true, message: '请输入商品描述' },
+              {
+                validator: (_, value: string | undefined) =>
+                  !value || value.trim().length > 0
+                    ? Promise.resolve()
+                    : Promise.reject(new Error('商品描述不能全是空白')),
+              },
+            ]}
+          >
             <Input.TextArea rows={4} maxLength={2000} />
           </Form.Item>
           <Form.Item

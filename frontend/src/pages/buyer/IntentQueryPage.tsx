@@ -150,6 +150,9 @@ export default function IntentQueryPage() {
       case 'CANCELLED':
         return <Tag>已撤销</Tag>
 
+      case 'UNSOLD':
+        return <Tag>未成交</Tag>
+
       default:
         return <Tag>{status}</Tag>
     }
