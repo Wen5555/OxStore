@@ -19,6 +19,11 @@
 | 前端生产构建 | 通过 | TypeScript 检查和 Vite 构建成功 |
 | 浏览器买家及卖家主要界面显示 | 通过 | 详细截图见R3第1次评审成果说明 |
 
+![Plawright测试结果](https://github.com/user-attachments/assets/2257378c-4de8-4401-ac63-7a8a233aeb00)
+![构建结果](https://github.com/user-attachments/assets/2a109836-a934-4abe-b42e-74ebf032d61b)
+
+
+
 自动化测试脚本：[buyer-seller-flows.spec.ts](../../frontend/e2e/buyer-seller-flows.spec.ts)。运行方式：在 `frontend/` 目录执行 `npm run test:e2e`；生产构建执行 `npm run build`。
 
 ## 3. 自动化用例清单
