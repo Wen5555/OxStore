@@ -28,3 +28,6 @@ Thumbs.db
 
 # 日志
 *.log
+__pycache__/
+.playwright-cli/
+output/playwright/
