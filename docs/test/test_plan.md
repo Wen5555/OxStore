@@ -62,9 +62,9 @@
 | 手机号含字母 | POST /api/intents | 400 Bad Request, "buyerPhone 联系电话须为 11 位数字" | ✅ 通过 | REQ-019 | api_error_phone_letters.png |
 | 姓名为空 | POST /api/intents | 400 Bad Request, "buyerName 姓名不能为空" | ✅ 通过 | REQ-019 | api_error_name_empty.png |
 | 姓名仅空格 | POST /api/intents | 400 Bad Request, "buyerName 姓名不能为空" | ✅ 通过 | REQ-019 | api_error_name_blank.png |
-| 姓名超长（几十字） | POST /api/intents | 200 OK，未拦截，成功创建意向 | ❌ **失败（BUG-006）** | REQ-019 | api_error_name_long_bug.png |
+| 姓名超长（几十字） | POST /api/intents | 200 OK，未拦截，成功创建意向 | ✅已修复 | REQ-019 | api_error_name_long_bug.png |
 | 无在售商品时提交意向 | POST /api/intents | 404 Not Found, "当前没有在售商品" | ✅ 通过 | REQ-024 | api_error_no_product_submit.png |
-| 错误 HTTP 方法（GET 打 POST） | GET /api/admin/products | 500 Internal Server Error | ❌ **失败（BUG-005）** | REQ-034 | api_error_method_not_allowed_500.png |
+| 错误 HTTP 方法（GET 打 POST） | GET /api/admin/products | 500 Internal Server Error | ✅已修复 | REQ-034 | api_error_method_not_allowed_500.png |
 
 ### 5.4 状态机非法流转测试 (2026-10-03)
 验证核心状态机的约束条件，确保业务逻辑不会因非法跳转而崩溃。
