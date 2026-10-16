@@ -149,6 +149,9 @@ export default function ProductPage() {
           <div style={{ color: '#666' }}>
             商品购买意向登记
           </div>
+          <Button style={{ marginTop: 12 }} onClick={() => navigate('/intent')}>
+            查询购买意向
+          </Button>
         </div>
 
         {/* 商品卡片 */}
@@ -201,7 +204,7 @@ export default function ProductPage() {
                     padding: '4px 10px',
                   }}
                 >
-                  已冻结
+                  {product.freezeSource === 'TRADE' ? '商品交易中' : '已冻结'}
                 </Tag>
               ) : (
                 <Tag
@@ -265,7 +268,7 @@ export default function ProductPage() {
                       fontWeight: 'bold',
                     }}
                   >
-                    商品已冻结
+                    {product.freezeSource === 'TRADE' ? '商品交易中' : '商品已由卖家手动冻结'}
                   </div>
 
                   <div
@@ -275,7 +278,9 @@ export default function ProductPage() {
                       marginTop: 8,
                     }}
                   >
-                    当前暂时无法提交购买意向
+                    {product.freezeSource === 'TRADE'
+                      ? '正在与队首买家进行线下交易，暂时无法提交购买意向'
+                      : '卖家暂时停止接受购买意向'}
                   </div>
                 </Card>
               )}
@@ -318,7 +323,7 @@ export default function ProductPage() {
                     >
                       <Input
                         placeholder="请输入您的姓名"
-                        maxLength={50}
+                        maxLength={20}
                       />
                     </Form.Item>
 

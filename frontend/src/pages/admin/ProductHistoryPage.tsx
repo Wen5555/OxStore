@@ -87,7 +87,21 @@ export default function ProductHistoryPage() {
   }, [isRecordsRoute, productId, page])
 
   const productColumns: ColumnsType<Product> = [
+    {
+      title: '主图',
+      dataIndex: 'imagePath',
+      key: 'imagePath',
+      render: (imagePath: string, product) => imagePath
+        ? <Image src={imagePath} alt={product.name} width={48} height={48} style={{ objectFit: 'cover' }} />
+        : <Text type="secondary">无图片</Text>,
+    },
     { title: '商品名称', dataIndex: 'name', key: 'name' },
+    {
+      title: '描述',
+      dataIndex: 'description',
+      key: 'description',
+      render: (description: string) => description || '-',
+    },
     {
       title: '价格',
       dataIndex: 'price',
@@ -95,12 +109,23 @@ export default function ProductHistoryPage() {
       render: (price: number) => `¥${Number(price).toFixed(2)}`,
     },
     {
-      title: '状态',
+      title: '交易结果',
       dataIndex: 'status',
       key: 'status',
-      render: (status: Product['status']) => <Tag>{status}</Tag>,
+      render: (status: Product['status']) => <Tag>{productStatusLabels[status]}</Tag>,
     },
-    { title: '发布时间', dataIndex: 'publishedAt', key: 'publishedAt' },
+    {
+      title: '发布时间',
+      dataIndex: 'publishedAt',
+      key: 'publishedAt',
+      render: (value: string) => formatDate(value),
+    },
+    {
+      title: '交易时间',
+      dataIndex: 'soldAt',
+      key: 'soldAt',
+      render: (value: string | null) => formatDate(value),
+    },
     {
       title: '操作',
       key: 'actions',

@@ -140,6 +140,11 @@ export default function CurrentProductPage() {
                   <Descriptions.Item label="商品编号">#{product.id}</Descriptions.Item>
                   <Descriptions.Item label="发布时间">{formatDate(product.publishedAt)}</Descriptions.Item>
                   <Descriptions.Item label="状态更新时间">{formatDate(product.statusUpdatedAt)}</Descriptions.Item>
+                  {product.status === 'FROZEN' && (
+                    <Descriptions.Item label="冻结来源">
+                      {product.freezeSource === 'TRADE' ? '交易冻结' : '卖家手动冻结'}
+                    </Descriptions.Item>
+                  )}
                   {product.status === 'SOLD' && (
                     <Descriptions.Item label="售出时间">{formatDate(product.soldAt)}</Descriptions.Item>
                   )}

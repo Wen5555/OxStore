@@ -23,6 +23,7 @@ export default function App() {
     <Routes>
       {/* 买家端 */}
       <Route path="/" element={<ProductPage />} />
+      <Route path="/intent" element={<IntentQueryPage />} />
       <Route path="/intent/:code" element={<IntentQueryPage />} />
 
       {/* 卖家端 */}

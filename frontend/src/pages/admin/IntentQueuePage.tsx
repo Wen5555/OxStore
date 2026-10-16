@@ -10,6 +10,11 @@ import type { Intent } from '../../types/intent'
 
 const { Text } = Typography
 
+function formatDate(value: string) {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString('zh-CN')
+}
+
 export default function IntentQueuePage() {
   const [intents, setIntents] = useState<Intent[]>([])
   const [loading, setLoading] = useState(true)
@@ -112,6 +117,7 @@ export default function IntentQueuePage() {
                 <Text strong>{currentIntent.buyerName}</Text>
                 <Text>{currentIntent.buyerPhone}</Text>
                 <Text type="secondary">意向编号 #{currentIntent.id}</Text>
+                <Text type="secondary">提交时间：{formatDate(currentIntent.submittedAt)}</Text>
               </Space>
               <Space wrap>
                 <Button
@@ -168,6 +174,7 @@ export default function IntentQueuePage() {
                     <Tag color="orange">第 {intent.position ?? '-'} 位</Tag>
                     <Text strong>{intent.buyerName}</Text>
                     <Text>{intent.buyerPhone}</Text>
+                    <Text type="secondary">提交时间：{formatDate(intent.submittedAt)}</Text>
                   </Space>
                   <Text type="secondary">#{intent.id}</Text>
                 </div>

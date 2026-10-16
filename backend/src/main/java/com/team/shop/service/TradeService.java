@@ -39,7 +39,7 @@ public interface TradeService {
      * 商品→RESTORED_ONLINE；若队列非空则自动递补队首并再次商品→FROZEN(TRADE)、新队首→IN_TRANSACTION。
      *
      * @param intentId 意向 id
-     * @param action   REQUEUE=该意向回到队尾（口令码失效）；DISCARD=该意向→FAILED
+     * @param action   REQUEUE=该意向回到队尾（原口令继续有效）；DISCARD=该意向→FAILED且口令失效
      * @return 递补后新的交易中意向（架构 7.4.2：data.nextIntent）；队列为空时为 null
      * @throws com.team.shop.exception.NotFoundException   意向或商品不存在（404）
      * @throws com.team.shop.exception.StateConflictException 该意向非交易中（409）

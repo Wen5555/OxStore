@@ -14,6 +14,14 @@ class PhoneAndTradeRequestTest {
         assertTrue(validator.validate(new ModifyIntentRequest(null, null)).isEmpty());
         assertFalse(validator.validate(new ModifyIntentRequest(null, "")).isEmpty());
     }
+
+    /** BUG-006：几十字超长姓名须被拦截，正常长度放行（提交与修改两个入口同限） */
+    @Test void overlongBuyerNameIsRejected() {
+        assertTrue(validator.validate(new SubmitIntentRequest("张三", "00000000000")).isEmpty());
+        String longName = "赵".repeat(30);
+        assertFalse(validator.validate(new SubmitIntentRequest(longName, "00000000000")).isEmpty());
+        assertFalse(validator.validate(new ModifyIntentRequest(longName, null)).isEmpty());
+    }
     @Test void tradeAttemptIdRequiredForConfirmations() {
         assertFalse(validator.validate(new SuccessTradeRequest(null)).isEmpty());
         assertFalse(validator.validate(new FailTradeRequest(FailAction.DISCARD, null)).isEmpty());

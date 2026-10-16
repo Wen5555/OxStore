@@ -58,7 +58,8 @@ class TradeServiceImplTest {
         assertEquals(IntentStatus.IN_TRANSACTION, intent.getStatus());
         assertEquals(2L, intent.getQueueSeq());
         assertEquals(TradeResult.FAILED, old.getResult());
-        assertNull(intent.getTokenHash());
+        assertEquals("hash", intent.getTokenHash());
+        assertEquals("lookup", intent.getTokenLookup());
         ArgumentCaptor<ProductStatusEvent> captor = ArgumentCaptor.forClass(ProductStatusEvent.class);
         verify(events, times(2)).save(captor.capture());
         assertEquals(ProductEventType.TRADE_FAILED, captor.getAllValues().get(0).getEventType());

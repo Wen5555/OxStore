@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -85,6 +86,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({HttpMessageNotReadableException.class, HttpMediaTypeNotSupportedException.class})
     public ResponseEntity<ApiResponse<Void>> handleInvalidBody(Exception e) {
         return build(HttpStatus.BAD_REQUEST, "请求体格式不正确或缺失");
+    }
+
+    /** BUG-005：错误 HTTP 方法此前落入兜底 500，改为明确的 405 */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+        return build(HttpStatus.METHOD_NOT_ALLOWED, "请求方法不支持：" + e.getMethod());
     }
 
     @ExceptionHandler(Exception.class)

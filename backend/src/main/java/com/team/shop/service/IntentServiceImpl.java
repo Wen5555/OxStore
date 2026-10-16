@@ -110,7 +110,7 @@ public class IntentServiceImpl implements IntentService {
         PurchaseIntent intent = intentRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ForbiddenException("口令码无效或已失效"));
         entityManager.refresh(intent, LockModeType.PESSIMISTIC_WRITE);
-        // 锁定期间意向可能已被重排/作废（口令码随之失效），锁内需再校验一次
+        // 锁定期间意向可能已被撤销、作废或成交，锁内需再校验一次
         if (!TokenGenerator.verify(rawToken, intent.getTokenHash())) {
             throw new ForbiddenException("口令码无效或已失效");
         }
