@@ -8,6 +8,7 @@
 - `compose.yml`、`.env.example`、`init-env.ps1`、`init-env.sh`：启动配置与本地初始化。
 - `database/`：新库 schema 和已有数据库升级脚本。首次启动只对空数据卷建表。
 - `build/`：本次镜像中实际运行的后端 JAR、前端静态文件压缩包。
+- `build-guide.md`：后续打包版本附带的完整构建手册，含工具安装、构建命令、产物与重新打包步骤。
 - `evidence/`：本次构建与容器验证结果。范围以验证报告为准。
 - `manifest.json`、`SHA256SUMS`：版本、镜像身份和文件校验值。
 
@@ -48,6 +49,8 @@ docker compose up --no-build --pull never --wait --wait-timeout 240
 更新程序镜像不自动执行数据库迁移。应用镜像回退和数据库恢复分别处理；DDL 隐式提交，不能假定换回旧镜像即可回退数据。
 
 ## 5. 构建复现与课程成果
+
+完整构建手册位于源码 `docs/build.md`；2026-10-18 起使用更新后打包脚本制作的离线包同时提供 `build-guide.md`。已发布的旧包保留原文件，使用本节简要步骤。
 
 从 GitHub Release 下载同版本源码 ZIP，安装 Docker 后，在源码根目录执行：
 
