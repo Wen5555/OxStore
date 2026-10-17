@@ -184,6 +184,7 @@ python scripts/verify_database.py
 - [数据库设计](docs/design/database.md)：ER 图、数据字典及约束
 - [交易与记录接口](docs/design/api.md)：接口约定和数据含义
 - [测试计划](docs/test/test_plan.md)与[缺陷记录](docs/test/defects.md)
+- [测试用例清单](docs/test/test_case_design_and_inventory.md)、[自动化执行手册](docs/test/automation_runbook.md)与[第二次评审前验收核对](docs/test/acceptance-2026-10-18.md)
 
 ## 参与协作
 

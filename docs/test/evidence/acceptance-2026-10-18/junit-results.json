@@ -1,0 +1,313 @@
+{
+  "tests": 50,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "date": "2026-10-18",
+  "java": "Microsoft OpenJDK 17.0.16",
+  "maven": "3.9.12",
+  "command": "mvn -B -ntp -s .work/maven-acceptance-settings.xml -f backend/pom.xml clean verify",
+  "dependency_source": "https://maven.aliyun.com/repository/public",
+  "result": "PASS",
+  "suites": [
+    {
+      "class": "com.team.shop.controller.admin.AdminProductControllerTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "multipleImagePartsAreRejectedBeforeSavingFilesOrProduct",
+          "status": "PASS"
+        },
+        {
+          "name": "singleImagePartKeepsExistingMultipartContract",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "class": "com.team.shop.domain.IntentStateMachineTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "cancel_rejectedFromOtherStatuses",
+          "status": "PASS"
+        },
+        {
+          "name": "modify_rejectedFromOtherStatuses",
+          "status": "PASS"
+        },
+        {
+          "name": "cancel_allowedFromQueuing",
+          "status": "PASS"
+        },
+        {
+          "name": "modify_allowedFromQueuing",
+          "status": "PASS"
+        },
+        {
+          "name": "markSuccess_rejectedFromOtherStatuses",
+          "status": "PASS"
+        },
+        {
+          "name": "enterTrade_allowedFromQueuing",
+          "status": "PASS"
+        },
+        {
+          "name": "enterTrade_rejectedFromOtherStatuses",
+          "status": "PASS"
+        },
+        {
+          "name": "markFailed_rejectedFromOtherStatuses",
+          "status": "PASS"
+        },
+        {
+          "name": "markFailed_allowedFromInTransaction",
+          "status": "PASS"
+        },
+        {
+          "name": "markSuccess_allowedFromInTransaction",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "class": "com.team.shop.domain.ProductStateMachineTest",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "markSuccess_allowedFromFrozenTrade",
+          "status": "PASS"
+        },
+        {
+          "name": "freezeManually_rejectedFromFrozen",
+          "status": "PASS"
+        },
+        {
+          "name": "isAcceptingIntent_trueForOnlineAndRestoredOnline",
+          "status": "PASS"
+        },
+        {
+          "name": "freezeManually_rejectedFromSold",
+          "status": "PASS"
+        },
+        {
+          "name": "unfreezeManually_rejectedFromSold",
+          "status": "PASS"
+        },
+        {
+          "name": "startTrade_allowedFromRestoredOnline",
+          "status": "PASS"
+        },
+        {
+          "name": "startTrade_rejectedFromSold",
+          "status": "PASS"
+        },
+        {
+          "name": "unfreezeManually_allowedFromFrozenManual",
+          "status": "PASS"
+        },
+        {
+          "name": "unfreezeManually_rejectedFromOnline",
+          "status": "PASS"
+        },
+        {
+          "name": "markFailed_allowedFromFrozenTrade",
+          "status": "PASS"
+        },
+        {
+          "name": "startTrade_allowedFromOnline",
+          "status": "PASS"
+        },
+        {
+          "name": "freezeManually_allowedFromOnline",
+          "status": "PASS"
+        },
+        {
+          "name": "startTrade_rejectedFromFrozen",
+          "status": "PASS"
+        },
+        {
+          "name": "markSuccess_rejectedFromOnline",
+          "status": "PASS"
+        },
+        {
+          "name": "isAcceptingIntent_falseForFrozenAndSold",
+          "status": "PASS"
+        },
+        {
+          "name": "unfreezeManually_rejectedFromFrozenTrade",
+          "status": "PASS"
+        },
+        {
+          "name": "markFailed_rejectedFromFrozenManual",
+          "status": "PASS"
+        },
+        {
+          "name": "markSuccess_rejectedFromFrozenManual",
+          "status": "PASS"
+        },
+        {
+          "name": "freezeManually_allowedFromRestoredOnline",
+          "status": "PASS"
+        },
+        {
+          "name": "markFailed_rejectedFromOnline",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "class": "com.team.shop.domain.TokenGeneratorTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "verify_rejectsNullInputs",
+          "status": "PASS"
+        },
+        {
+          "name": "hashAndVerify_roundTrip",
+          "status": "PASS"
+        },
+        {
+          "name": "generate_returnsEightCharsFromAlphabet",
+          "status": "PASS"
+        },
+        {
+          "name": "generate_returnsRandomDistinctTokens",
+          "status": "PASS"
+        },
+        {
+          "name": "verify_rejectsWrongToken",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "class": "com.team.shop.dto.PhoneAndTradeRequestTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "overlongBuyerNameIsRejected",
+          "status": "PASS"
+        },
+        {
+          "name": "acceptsAnyElevenDigitsButRejectsMalformedNumbers",
+          "status": "PASS"
+        },
+        {
+          "name": "tradeAttemptIdRequiredForConfirmations",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "class": "com.team.shop.entity.TradeHistoryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "finalIntentStatesInvalidateBothTokenFields",
+          "status": "PASS"
+        },
+        {
+          "name": "attemptsCannotOverwriteCompletedResult",
+          "status": "PASS"
+        },
+        {
+          "name": "requeuePreservesFirstSubmissionAndOriginalToken",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "class": "com.team.shop.exception.GlobalExceptionHandlerBugFixTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "methodNotSupportedMapsTo405",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "class": "com.team.shop.security.JwtUtilTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "rejectsOldAndPlaceholderSecrets",
+          "status": "PASS"
+        },
+        {
+          "name": "generatedTokensCanBeVerifiedOnlyWithSameKey",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "class": "com.team.shop.security.TokenLookupTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "keyedDigestIsStableAndSecretDependent",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "class": "com.team.shop.service.ImageStorageServiceTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "validPngStoredAndFakeOrMismatchedRejected",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "class": "com.team.shop.service.TradeServiceImplTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "requeueSingleBuyerClosesOldAttemptAndCreatesNewOneWithTwoEvents",
+          "status": "PASS"
+        },
+        {
+          "name": "oldAttemptCannotFinishNewTrade",
+          "status": "PASS"
+        }
+      ]
+    }
+  ]
+}

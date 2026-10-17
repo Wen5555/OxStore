@@ -1,0 +1,517 @@
+{
+  "run_at": "2026-10-18T01:59:09.773784+08:00",
+  "project": "oxstore-release-test-cdc69f876dbc",
+  "scope": "Real Compose / Nginx / Java17 / MySQL8 / persistent volumes",
+  "checks": [
+    {
+      "name": "D01",
+      "status": "PASS",
+      "detail": "three services healthy; no build or registry pull"
+    },
+    {
+      "name": "D02",
+      "status": "PASS",
+      "detail": "only frontend port is published"
+    },
+    {
+      "name": "D03_",
+      "status": "PASS",
+      "detail": "SPA route available through Nginx"
+    },
+    {
+      "name": "D03_admin_login",
+      "status": "PASS",
+      "detail": "SPA route available through Nginx"
+    },
+    {
+      "name": "D03_intent",
+      "status": "PASS",
+      "detail": "SPA route available through Nginx"
+    },
+    {
+      "name": "D04",
+      "status": "PASS",
+      "detail": "new empty database serves no current product"
+    },
+    {
+      "name": "D05",
+      "status": "PASS",
+      "detail": "unauthenticated admin request rejected through Nginx"
+    },
+    {
+      "name": "D06",
+      "status": "PASS",
+      "detail": "seller login succeeds with generated initial password"
+    },
+    {
+      "name": "D07",
+      "status": "PASS",
+      "detail": "image larger than 5 MiB rejected by application"
+    },
+    {
+      "name": "D08",
+      "status": "PASS",
+      "detail": "5 MiB image passes Nginx, application and non-root upload volume"
+    },
+    {
+      "name": "D22",
+      "status": "PASS",
+      "detail": "admin current-product endpoint returns published product"
+    },
+    {
+      "name": "D09",
+      "status": "PASS",
+      "detail": "second active product rejected"
+    },
+    {
+      "name": "D10",
+      "status": "PASS",
+      "detail": "manual freeze visible to buyer"
+    },
+    {
+      "name": "D11",
+      "status": "PASS",
+      "detail": "manual unfreeze restores product"
+    },
+    {
+      "name": "D12",
+      "status": "PASS",
+      "detail": "name and phone boundary validation through Nginx"
+    },
+    {
+      "name": "D13",
+      "status": "PASS",
+      "detail": "three anonymous buyers queue with private code lookup"
+    },
+    {
+      "name": "D14",
+      "status": "PASS",
+      "detail": "queued name/phone modification retains position; cancellation invalidates code"
+    },
+    {
+      "name": "D15",
+      "status": "PASS",
+      "detail": "current trade attempt present; trade freeze cannot be manually released"
+    },
+    {
+      "name": "D16",
+      "status": "PASS",
+      "detail": "failure requeues to waiting tail; original code/time preserved; next buyer trades"
+    },
+    {
+      "name": "D17",
+      "status": "PASS",
+      "detail": "stale trade confirmation rejected"
+    },
+    {
+      "name": "D18",
+      "status": "PASS",
+      "detail": "successful sale unlists product, invalidates codes and keeps failed/successful attempts"
+    },
+    {
+      "name": "D19",
+      "status": "PASS",
+      "detail": "history list and state-event records available"
+    },
+    {
+      "name": "D23",
+      "status": "PASS",
+      "detail": "sold-product detail retains all records; history pages start at one"
+    },
+    {
+      "name": "D20",
+      "status": "PASS",
+      "detail": "application restart retains changed password and complete records"
+    },
+    {
+      "name": "D21",
+      "status": "PASS",
+      "detail": "container recreation retains database, images, password and history"
+    },
+    {
+      "name": "D24",
+      "status": "PASS",
+      "detail": "lone buyer requeue keeps original code and starts a new trade attempt"
+    },
+    {
+      "name": "D25",
+      "status": "PASS",
+      "detail": "discard invalidates original code; empty queue restores sale and retains failed attempts"
+    },
+    {
+      "name": "D26",
+      "status": "PASS",
+      "detail": "restored-online product accepts new purchase intent"
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/products/current",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/intents",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/auth/login",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/auth/login",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products",
+      "status": 400
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/images/{filename}",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/products/current",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/products/history/{id}",
+      "status": 404
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products",
+      "status": 409
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products/current/freeze",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/products/current",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/intents",
+      "status": 409
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products/current/unfreeze",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/products/current",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/intents",
+      "status": 400
+    },
+    {
+      "method": "POST",
+      "path": "/api/intents",
+      "status": 400
+    },
+    {
+      "method": "POST",
+      "path": "/api/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/intents",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/intents/{code}",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/{id}/start",
+      "status": 409
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/intents",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/intents/{code}",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/intents/{code}",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/intents/{code}",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/intents",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/{id}/start",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/intents",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/intents/{code}",
+      "status": 409
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/intents/{code}",
+      "status": 409
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/{id}/success",
+      "status": 400
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products/current/unfreeze",
+      "status": 409
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/{id}/fail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/intents/{code}",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/{id}/success",
+      "status": 409
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/{id}/success",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/products/{id}/records",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/intents/{code}",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/api/intents/{code}",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/api/products/current",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/products/history",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/products/history/{id}",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/auth/password",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/auth/login",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/products/{id}/records",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/products/{id}/records",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/intents",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/{id}/start",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/{id}/fail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/intents",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/intents/{code}",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/{id}/fail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/intents/{code}",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/products/{id}/records",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/products/current",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/intents",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/intents/{code}",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/intents/{code}",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/intents/{code}",
+      "status": 403
+    }
+  ],
+  "result": "PASS",
+  "covered_endpoints": [
+    "DELETE /api/intents/{code}",
+    "GET /api/admin/intents",
+    "GET /api/admin/products/current",
+    "GET /api/admin/products/history",
+    "GET /api/admin/products/history/{id}",
+    "GET /api/admin/products/{id}/records",
+    "GET /api/images/{filename}",
+    "GET /api/intents/{code}",
+    "GET /api/products/current",
+    "POST /api/admin/auth/login",
+    "POST /api/admin/intents/{id}/fail",
+    "POST /api/admin/intents/{id}/start",
+    "POST /api/admin/intents/{id}/success",
+    "POST /api/admin/products",
+    "POST /api/admin/products/current/freeze",
+    "POST /api/admin/products/current/unfreeze",
+    "POST /api/intents",
+    "PUT /api/admin/auth/password",
+    "PUT /api/intents/{code}"
+  ],
+  "endpoint_count": 19
+}

@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-18",
+  "source_head": "d64398b7a464e89cb1852938c453b2411bd9ca11",
+  "deployed_source_commit": "192d8e4227f46cb323273fb376051e446f4ec199",
+  "business_sources_equal_to_head": true,
+  "images": [
+    {
+      "tag": "oxstore/backend:0.1.0-docker.1",
+      "id": "sha256:a9fd673e0cbef1adb1910ed3f4ecc6e648b32ca54895ff8a0ea0d2d9c6e79de3",
+      "platform": "linux/amd64"
+    },
+    {
+      "tag": "oxstore/frontend:0.1.0-docker.1",
+      "id": "sha256:797d1fdd76d8e80e1f62e52a131b30ee2ff0d872798fb5bb71f320f2cb59cb5d",
+      "platform": "linux/amd64"
+    },
+    {
+      "tag": "mysql:8.0.46",
+      "id": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+      "platform": "linux/amd64"
+    }
+  ],
+  "checks": 28,
+  "endpoints": 19,
+  "result": "PASS",
+  "cleanup_verified": true,
+  "recording": "PENDING_USER_MANUAL",
+  "script_sha256": "6e7e037e0ce4ebfb7d44e51eb7f54385afebb6975146df4daae05f3ba2daf04d",
+  "project": "oxstore-release-test-cdc69f876dbc"
+}
