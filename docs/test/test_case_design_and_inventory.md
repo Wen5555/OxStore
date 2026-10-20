@@ -1,12 +1,5 @@
 # OxStore 测试用例设计及清单文档
 
-> 文档版本：v1.0
-> 编写日期：2026-10-14
-> 对应系统版本：OxStore MVP
-> 适用范围：产品成功安装后，证明所有功能正常运行的测试依据
-
----
-
 ## 目录
 
 1. [文档说明](#1-文档说明)
@@ -34,11 +27,12 @@
 | API 接口测试 | 全部 RESTful 接口的正向/异常流 | Postman / REST Assured（待自动化） |
 | 状态机测试 | 商品/意向状态流转约束 | JUnit 自动执行 |
 | 集成测试 | 完整业务闭环（发布→意向→交易→售出） | 手动/API 测试（待自动化） |
+| UI 冒烟测试 | 浏览器端卖家登录、商品发布、买家提交/查询意向、卖家成交 | 独立 Maven 项目：Selenium + JUnit 5 |
 
 ### 1.3 测试环境要求
 - JDK 17+
-- Maven 3.8+
-- MySQL 8.0+（本地测试库 `shop`）
+- Maven 3.8+（独立 Selenium UI 工程要求 Maven 3.9+）
+- MySQL 8.0+；会写入数据的 UI 冒烟测试必须使用一次性隔离测试库
 - 环境变量：`JWT_SECRET`、`TOKEN_LOOKUP_KEY`、`ADMIN_INITIAL_PASSWORD`、`DB_PASSWORD`
 
 ---
@@ -116,6 +110,14 @@
 | API-017 | `/api/admin/intents/{id}/fail` | POST | 4 | REQ-016, REQ-028 |
 | API-018 | `/api/admin/auth/password` | PUT | 3 | REQ-003 |
 | API-019 | `/api/images/{filename}` | GET | 1 | REQ-009 |
+
+### 3.3 Selenium UI 冒烟测试清单
+
+| 用例编号 | 测试类/方法 | 覆盖流程 | 执行方式 | 状态 |
+|:---|:---|:---|:---|:---:|
+| UI-001 | `OxStoreUiSmokeTest.buyerCanSubmitIntentAndSellerCanCompleteTheTrade` | 错误密码拒绝登录；卖家登录；发布商品；买家提交并查询意向；卖家处理队首并确认成交；验证商品售罄 | `cd tests\ui-smoke; mvn test` | ✅ 已自动化并通过 |
+
+该用例运行真实 Chrome 浏览器并访问实际前后端，不模拟 API。用例会发布并售出测试商品，且不会清理生成的商品、意向和交易记录；必须使用一次性隔离测试数据库。完整准备、启动和执行步骤见 [`tests/ui-smoke/README.md`](../../tests/ui-smoke/README.md)。
 
 ---
 
@@ -407,7 +409,7 @@ IN_TRANSACTION --markSuccess--> SUCCESS IN_TRANSACTION --markFailed(REQUEUE)--> 
 
 ### 7.2 测试限制
 
-1. **自动化覆盖范围**：当前仅后端单元测试实现自动化（47 个用例）。API 接口测试、UI 测试、并发测试尚未自动化。
+1. **自动化覆盖范围**：后端单元测试已自动化（47 个用例）；Selenium 已覆盖一条真实浏览器端到端主流程及错误密码拒绝登录。完整 API 正反向自动化、其他 UI 失败路径和并发测试仍未全部自动化。
 2. **前端测试**：前端为 React + TypeScript，目前仅执行构建校验（`npm run build`），无单元测试覆盖。
 3. **性能测试**：并发唯一性、锁等待等场景仅在独立测试库手动验证，未纳入 CI。
 4. **环境依赖**：部分测试需要 MySQL 数据库，纯内存测试尚未完全覆盖。
@@ -419,7 +421,9 @@ IN_TRANSACTION --markSuccess--> SUCCESS IN_TRANSACTION --markFailed(REQUEUE)--> 
 | 第一阶段 | API 接口自动化 | REST Assured + JUnit | 覆盖全部 19 个接口的正向/异常流 |
 | 第二阶段 | 核心业务闭环自动化 | 集成测试 | 端到端发布→售出流程 |
 | 第三阶段 | 并发与性能自动化 | JMeter / Gatling | 验证单商品唯一性、锁等待 |
-| 第四阶段 | UI 自动化 | Selenium / Playwright | 验证前端页面交互 |
+| 第四阶段 | 扩展 UI 自动化覆盖 | Selenium + JUnit 5 | 在已通过的 UI-001 主流程基础上增加登录失败、未登录访问后台等独立失败路径 |
+
+> Selenium UI-001 已完成，不属于待办项；后续 UI 自动化工作是扩展失败路径和页面覆盖，不应与已完成的主流程混淆。
 
 ---
 
