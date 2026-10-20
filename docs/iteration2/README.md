@@ -2,8 +2,7 @@
 
 本目录是 **OxStore 迭代2** 的产品文档根，与迭代1（`docs/design`、`docs/test`、`docs/ai-log`、`docs/personal` 等）完全分开。
 
-产品负责人只维护产品待办，不负责任务拆分、指派或进度跟踪。请勿将本目录合并到上游 `Wen5555/OxStore`。
-
+产品负责人只维护产品待办，不负责任务拆分、指派或进度跟踪。
 ## 目录约定
 
 ```
@@ -11,7 +10,7 @@ docs/iteration2/
 ├── README.md                 # 本索引
 ├── product-backlog.md        # 迭代2 总产品待办（摘要 + Issue 链接）
 └── sprint1/                  # 当前 Sprint 子目录
-    ├── sprint1-backlog.md    # Sprint 1 产品待办最终版（含验收标准）
+    ├── sprint1-backlog.md    # Sprint 1 产品待办（含验收标准）
     └── sprint1-interview.md  # Sprint 1 需求访谈记录
 ```
 
