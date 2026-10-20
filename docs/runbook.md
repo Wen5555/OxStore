@@ -92,8 +92,9 @@ MySQL DDL会隐式提交。V2只有在前置检查拦截且未改表时，才能
 
 ## 构建与验证
 
-- 后端：在backend运行 `mvn test package`。
-- 前端：在frontend运行 `npm run build`。
+- 完整步骤见源码 `docs/build.md`（后续离线包为 `build-guide.md`），包含工具安装要求、源码版本、Docker与本机构建、产物位置及离线打包。
+- 后端：在项目根目录运行 `mvn -B -ntp -f backend/pom.xml clean verify`，生成 `backend/target/shop-0.1.0.jar`。
+- 前端：在项目根目录运行 `npm --prefix frontend ci --registry=https://registry.npmmirror.com --no-audit --no-fund`，成功后运行 `npm --prefix frontend run build`，生成 `frontend/dist/`。
 - 数据库集成验证：构建后端后，在根目录运行 `python scripts/verify_database.py`。
 
 脚本创建独立MySQL测试容器并自动清理本次容器。验证报告见[数据库验证](test/db-validation.md)，交易请求及响应含义见[接口说明](design/api.md)。

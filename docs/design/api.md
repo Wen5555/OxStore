@@ -8,7 +8,7 @@
 - 卖家接口除登录外需要`Authorization: Bearer <JWT>`。
 - 买家凭口令只可访问本人意向；公开商品接口不返回买家信息。
 - 图片通过`/api/images/{filename}`访问。发布商品使用multipart字段`name/description/price/image`，服务端生成imagePath。
-- 历史列表分页从`page=0`开始，默认`size=10`。
+- 历史列表分页从`page=1`开始，默认`size=10`；服务端将小于1的页码归一到1。
 
 ## 队列与交易确认
 

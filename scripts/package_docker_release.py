@@ -26,6 +26,7 @@ def prepare(folder: Path):
     folder.mkdir(parents=True, exist_ok=False)
     for name in ['compose.yml', '.env.example', 'init-env.ps1', 'init-env.sh', 'README.md']:
         shutil.copy2(ROOT / 'deploy/docker' / name, folder / name)
+    shutil.copy2(ROOT / 'docs/build.md', folder / 'build-guide.md')
     (folder / 'database').mkdir()
     db = ROOT / 'backend/src/main/resources/db'
     shutil.copy2(db / 'schema.sql', folder / 'database/schema.sql')
@@ -55,6 +56,7 @@ def export(folder: Path, save_images=True):
     # Refresh selected public files after final documentation changes.
     for name in ['compose.yml', '.env.example', 'init-env.ps1', 'init-env.sh', 'README.md']:
         shutil.copy2(ROOT / 'deploy/docker' / name, folder / name)
+    shutil.copy2(ROOT / 'docs/build.md', folder / 'build-guide.md')
     shutil.copy2(ROOT / 'scripts/verify_docker_release.py', folder / 'scripts/verify_docker_release.py')
     for name in ['docker_ui_smoke.js', 'verify_docker_ui.ps1']:
         shutil.copy2(ROOT / 'scripts' / name, folder / 'scripts' / name)

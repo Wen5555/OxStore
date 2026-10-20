@@ -179,10 +179,12 @@ python scripts/verify_database.py
 ## 文档
 
 - [项目 Wiki](https://github.com/Wen5555/OxStore/wiki)：需求、架构和协作资料
+- [构建手册](docs/build.md)：源码版本、工具安装、JAR/前端/镜像构建、产物与离线打包
 - [运行手册](docs/runbook.md)：环境配置、启动与数据升级
 - [数据库设计](docs/design/database.md)：ER 图、数据字典及约束
 - [交易与记录接口](docs/design/api.md)：接口约定和数据含义
 - [测试计划](docs/test/test_plan.md)与[缺陷记录](docs/test/defects.md)
+- [测试用例清单](docs/test/test_case_design_and_inventory.md)、[自动化执行手册](docs/test/automation_runbook.md)与[第二次评审前验收核对](docs/test/acceptance-2026-10-18.md)
 
 ## 参与协作
 

@@ -9,6 +9,7 @@ import base64
 import json
 import os
 from pathlib import Path
+import re
 import secrets
 import socket
 import subprocess
@@ -41,6 +42,14 @@ class Check:
         self.report = {'run_at': datetime.now().astimezone().isoformat(), 'project': self.project,
                        'scope': 'Real Compose / Nginx / Java17 / MySQL8 / persistent volumes', 'checks': []}
 
+    def record_request(self, method, path, status):
+        # Keep route templates only: buyer codes and image names are not public evidence.
+        path = path.split('?', 1)[0]
+        path = re.sub(r'^/api/intents/[^/]+', '/api/intents/{code}', path)
+        path = re.sub(r'^/api/images/[^/]+', '/api/images/{filename}', path)
+        path = re.sub(r'/\d+(?=/|$)', '/{id}', path)
+        self.report.setdefault('requests', []).append({'method': method, 'path': path, 'status': status})
+
     def compose(self, *args, check=True, timeout=300):
         result = subprocess.run(['docker', 'compose', '-f', str(self.bundle / 'compose.yml'),
                                  '-p', self.project, *args], cwd=self.bundle, env=self.env,
@@ -71,6 +80,7 @@ class Check:
             status, payload = e.code, e.read()
         if status != expected:
             raise AssertionError(f'{method} request HTTP {status}, expected {expected}')
+        self.record_request(method, path, status)
         value = json.loads(payload)
         if expected == 200 and value.get('code') != 0:
             raise AssertionError('Unexpected application response')
@@ -123,7 +133,11 @@ class Check:
         self.image_path = product['imagePath']
         with urlopen(self.base + self.image_path, timeout=20) as r:
             self.image_bytes = r.read()
+            self.record_request('GET', self.image_path, r.status)
         self.assert_check('D08', len(self.image_bytes) == 5 * 1024 * 1024, '5 MiB image passes Nginx, application and non-root upload volume')
+        current = self.api('GET', '/api/admin/products/current', admin=True)
+        self.assert_check('D22', current['id'] == self.product_id and current['status'] == 'ONLINE', 'admin current-product endpoint returns published product')
+        self.api('GET', f'/api/admin/products/history/{self.product_id}', admin=True, expected=404)
         self.publish(size=100, expected=409)
         self.assert_check('D09', True, 'second active product rejected')
         self.api('POST', '/api/admin/products/current/freeze', admin=True)
@@ -137,15 +151,21 @@ class Check:
         codes = [self.api('POST', '/api/intents', {'buyerName': name, 'buyerPhone': '1380000000' + str(i)})['code']
                  for i, name in enumerate(['甲', '乙', '丙'], 1)]
         a = self.api('GET', '/api/intents/' + codes[0])
+        queued = self.queue()
+        self.api('POST', f'/api/admin/intents/{queued[1]["id"]}/start', admin=True, expected=409)
         self.assert_check('D13', len(self.queue()) == 3 and a['position'] == 1, 'three anonymous buyers queue with private code lookup')
-        self.api('PUT', '/api/intents/' + codes[0], {'buyerName': '甲修改'})
+        modified = self.api('PUT', '/api/intents/' + codes[0], {'buyerName': '甲修改', 'buyerPhone': '13900000001'})
         self.api('DELETE', '/api/intents/' + codes[2])
         self.api('GET', '/api/intents/' + codes[2], expected=403)
-        self.assert_check('D14', len(self.queue()) == 2, 'queued modification and cancellation work; cancelled code invalid')
+        self.assert_check('D14', len(self.queue()) == 2 and modified['buyerName'] == '甲修改'
+                          and modified['buyerPhone'] == '13900000001' and modified['position'] == 1,
+                          'queued name/phone modification retains position; cancellation invalidates code')
         a = self.queue()[0]
         self.api('POST', f'/api/admin/intents/{a["id"]}/start', admin=True)
         active = next(i for i in self.queue() if i['status'] == 'IN_TRANSACTION')
         self.api('PUT', '/api/intents/' + codes[0], {'buyerName': '交易中修改'}, expected=409)
+        self.api('DELETE', '/api/intents/' + codes[0], expected=409)
+        self.api('POST', f'/api/admin/intents/{a["id"]}/success', {}, admin=True, expected=400)
         self.api('POST', '/api/admin/products/current/unfreeze', admin=True, expected=409)
         self.assert_check('D15', bool(active['currentTradeAttemptId']), 'current trade attempt present; trade freeze cannot be manually released')
         self.api('POST', f'/api/admin/intents/{a["id"]}/fail', {'action': 'REQUEUE', 'tradeAttemptId': active['currentTradeAttemptId']}, admin=True)
@@ -163,6 +183,9 @@ class Check:
                           'successful sale unlists product, invalidates codes and keeps failed/successful attempts')
         history = self.api('GET', '/api/admin/products/history', admin=True)
         self.assert_check('D19', history['total'] == 1 and len(records['statusEvents']) >= 5, 'history list and state-event records available')
+        detail = self.api('GET', f'/api/admin/products/history/{self.product_id}', admin=True)
+        self.assert_check('D23', detail == records and history['page'] == 1,
+                          'sold-product detail retains all records; history pages start at one')
         self.api('PUT', '/api/admin/auth/password', {'oldPassword': self.password, 'newPassword': self.new_password}, admin=True)
         self.compose('restart', 'backend')
         self.compose('up', '--no-build', '--pull', 'never', '--wait', '--wait-timeout', '240')
@@ -176,6 +199,32 @@ class Check:
             persisted_image = r.read()
         self.assert_check('D21', persisted_image == self.image_bytes and self.api('GET', f'/api/admin/products/{self.product_id}/records', admin=True) == records,
                           'container recreation retains database, images, password and history')
+        # Exercise both failure branches when there is no other waiting buyer.
+        second = self.publish(size=100)
+        code = self.api('POST', '/api/intents', {'buyerName': '单人重排', 'buyerPhone': '13800000004'})['code']
+        buyer = self.queue()[0]
+        self.api('POST', f'/api/admin/intents/{buyer["id"]}/start', admin=True)
+        before = self.queue()[0]
+        self.api('POST', f'/api/admin/intents/{buyer["id"]}/fail',
+                 {'action': 'REQUEUE', 'tradeAttemptId': before['currentTradeAttemptId']}, admin=True)
+        after = self.queue()[0]
+        self.assert_check('D24', after['id'] == before['id'] and after['status'] == 'IN_TRANSACTION'
+                          and after['currentTradeAttemptId'] != before['currentTradeAttemptId']
+                          and self.api('GET', '/api/intents/' + code)['status'] == 'IN_TRANSACTION',
+                          'lone buyer requeue keeps original code and starts a new trade attempt')
+        self.api('POST', f'/api/admin/intents/{buyer["id"]}/fail',
+                 {'action': 'DISCARD', 'tradeAttemptId': after['currentTradeAttemptId']}, admin=True)
+        self.api('GET', '/api/intents/' + code, expected=403)
+        second_records = self.api('GET', f'/api/admin/products/{second["id"]}/records', admin=True)
+        self.assert_check('D25', self.api('GET', '/api/products/current')['status'] == 'RESTORED_ONLINE'
+                          and not self.queue() and len(second_records['tradeAttempts']) == 2
+                          and second_records['tradeAttempts'][-1]['failAction'] == 'DISCARD',
+                          'discard invalidates original code; empty queue restores sale and retains failed attempts')
+        code = self.api('POST', '/api/intents', {'buyerName': '恢复后排队', 'buyerPhone': '13800000005'})['code']
+        self.assert_check('D26', self.api('GET', '/api/intents/' + code)['position'] == 1,
+                          'restored-online product accepts new purchase intent')
+        self.api('DELETE', '/api/intents/' + code)
+        self.api('GET', '/api/intents/invalid-code', expected=403)
 
     def run(self):
         try:
@@ -191,6 +240,9 @@ class Check:
             self.report['error'] = type(e).__name__ + ': ' + str(e)
             raise
         finally:
+            self.report['covered_endpoints'] = sorted({r['method'] + ' ' + r['path']
+                                                       for r in self.report.get('requests', [])})
+            self.report['endpoint_count'] = len(self.report['covered_endpoints'])
             (self.output / 'docker-results.json').write_text(json.dumps(self.report, ensure_ascii=False, indent=2), encoding='utf-8')
             if not self.keep:
                 # Dedicated random project only; no existing user's containers or volumes.
