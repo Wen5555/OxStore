@@ -197,6 +197,6 @@
 
 ## 七、关联产出
 
-- 最终版待办：`sprint1-product-backlog.md`
+- 最终版待办：`sprint1-backlog.md`
 - 追问底稿：`Sprint1_矛盾追问_发给机器人.md`
 - 矛盾清单（追问前）：`Sprint1_矛盾点清单.md`
