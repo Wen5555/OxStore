@@ -1,11 +1,14 @@
 # 后端
 backend/target/
+/tests/ui-smoke/target/
 *.class
 application-local.yml
 .env
 .env.*
 !.env.example
 .work/
+/outputs/jmeter-report-*/
+/outputs/jmeter-concurrency-report-*/
 
 # 前端
 frontend/node_modules/
