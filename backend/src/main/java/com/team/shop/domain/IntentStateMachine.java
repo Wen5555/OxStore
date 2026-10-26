@@ -11,20 +11,6 @@ public final class IntentStateMachine {
     private IntentStateMachine() {
     }
 
-    /** 买家撤销：仅排队中可撤销 */
-    public static void assertCanCancel(IntentStatus status) {
-        if (status != IntentStatus.QUEUING) {
-            throw new StateConflictException("仅排队中的意向可以撤销");
-        }
-    }
-
-    /** 买家修改信息：仅排队中可修改 */
-    public static void assertCanModify(IntentStatus status) {
-        if (status != IntentStatus.QUEUING) {
-            throw new StateConflictException("仅排队中的意向可以修改信息");
-        }
-    }
-
     /** 进入交易：仅排队中可进入交易（是否队首由服务层判定） */
     public static void assertCanEnterTrade(IntentStatus status) {
         if (status != IntentStatus.QUEUING) {

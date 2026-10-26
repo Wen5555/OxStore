@@ -12,6 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * 从 Authorization: Bearer <token> 解析卖家身份并注入安全上下文。
@@ -31,10 +32,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
-            String username = jwtUtil.parseUsername(token);
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserIdentity identity;
+            try {
+                identity = jwtUtil.parseIdentity(token);
+            } catch (RuntimeException ex) {
+                identity = null;
+            }
+            if (identity != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(username, null, List.of());
+                        new UsernamePasswordAuthenticationToken(identity, null,
+                                List.of(new SimpleGrantedAuthority("ROLE_" + identity.role())));
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }

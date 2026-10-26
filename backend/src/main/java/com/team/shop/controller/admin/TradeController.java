@@ -2,8 +2,6 @@ package com.team.shop.controller.admin;
 
 import com.team.shop.dto.ApiResponse;
 import com.team.shop.dto.request.FailTradeRequest;
-import com.team.shop.dto.request.SuccessTradeRequest;
-import com.team.shop.dto.response.IntentResponse;
 import com.team.shop.service.TradeService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,16 +27,15 @@ public class TradeController {
     }
 
     @PostMapping("/{id}/success")
-    public ApiResponse<Void> confirmSuccess(@PathVariable("id") Long id,
-                                            @Valid @RequestBody SuccessTradeRequest request) {
-        tradeService.confirmSuccess(id, request.tradeAttemptId());
+    public ApiResponse<Void> confirmSuccess(@PathVariable("id") Long id) {
+        tradeService.confirmSuccess(id);
         return ApiResponse.ok(null);
     }
 
-    /** data 为递补后的新交易中意向（nextIntent），队列为空时为 null（架构 7.4.2） */
     @PostMapping("/{id}/fail")
-    public ApiResponse<IntentResponse> confirmFail(@PathVariable("id") Long id,
-                                                   @Valid @RequestBody FailTradeRequest request) {
-        return ApiResponse.ok(tradeService.confirmFail(id, request.action(), request.tradeAttemptId()));
+    public ApiResponse<Void> confirmFail(@PathVariable("id") Long id,
+                                         @Valid @RequestBody FailTradeRequest request) {
+        tradeService.confirmFail(id, request.action());
+        return ApiResponse.ok(null);
     }
 }

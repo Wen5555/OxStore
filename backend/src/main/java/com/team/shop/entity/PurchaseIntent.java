@@ -1,8 +1,8 @@
 package com.team.shop.entity;
 
-import com.team.shop.domain.IntentStateMachine;
 import com.team.shop.domain.BusinessTime;
 import com.team.shop.domain.IntentStatus;
+import com.team.shop.domain.IntentStateMachine;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -34,17 +34,18 @@ public class PurchaseIntent {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
+    @Column(name = "product_name_snapshot", length = 200)
+    private String productNameSnapshot;
+
     @Column(name = "buyer_name", nullable = false, length = 100)
     private String buyerName;
 
     @Column(name = "buyer_phone", nullable = false, length = 20)
     private String buyerPhone;
-
-    @Column(name = "token_hash", length = 255)
-    private String tokenHash;
-
-    @Column(name = "token_lookup", length = 64)
-    private String tokenLookup;
 
     @Enumerated(EnumType.STRING) @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 20)
@@ -64,40 +65,18 @@ public class PurchaseIntent {
     protected PurchaseIntent() {
     }
 
-    /** 提交一条排队意向 */
-    public static PurchaseIntent submit(Product product, String buyerName, String buyerPhone,
-                                        String tokenHash, String tokenLookup, long queueSeq) {
+    /** Submit an authenticated customer's single-item purchase intent. */
+    public static PurchaseIntent submit(Product product, Customer customer, long queueSeq) {
         PurchaseIntent i = new PurchaseIntent();
         i.product = product;
-        i.buyerName = buyerName;
-        i.buyerPhone = buyerPhone;
-        i.tokenHash = tokenHash;
-        i.tokenLookup = tokenLookup;
+        i.customer = customer;
+        i.buyerName = customer.getUsername();
+        i.buyerPhone = customer.getPhone();
+        i.productNameSnapshot = product.getName();
         i.status = IntentStatus.QUEUING;
         i.submittedAt = BusinessTime.now();
         i.queueSeq = queueSeq;
         return i;
-    }
-
-    /** 买家凭口令码撤销 */
-    public void cancel(LocalDateTime now) {
-        IntentStateMachine.assertCanCancel(status);
-        this.status = IntentStatus.CANCELLED;
-        this.processedAt = now;
-        this.tokenHash = null;
-        this.tokenLookup = null;
-    }
-
-    /** 买家凭口令码修改姓名/电话（传 null 的字段保持原值） */
-    public void modifyInfo(String newName, String newPhone) {
-        IntentStateMachine.assertCanModify(status);
-        if (newName != null) {
-            this.buyerName = newName;
-        }
-        if (newPhone != null) {
-            this.buyerPhone = newPhone;
-        }
-        this.updatedAt = BusinessTime.now();
     }
 
     /** 进入交易 */
@@ -112,8 +91,6 @@ public class PurchaseIntent {
         IntentStateMachine.assertCanMarkSuccess(status);
         this.status = IntentStatus.SUCCESS;
         this.processedAt = now;
-        this.tokenHash = null;
-        this.tokenLookup = null;
     }
 
     /** 交易失败：作废 */
@@ -121,24 +98,22 @@ public class PurchaseIntent {
         IntentStateMachine.assertCanMarkFailed(status);
         this.status = IntentStatus.FAILED;
         this.processedAt = now;
-        this.tokenHash = null;
-        this.tokenLookup = null;
     }
 
-    /** 交易失败后重排：保留意向口令和首次提交时间，仅更新排序序号。 */
+    public void markQueuedIntentFailed(LocalDateTime now) {
+        if (status != IntentStatus.QUEUING) {
+            throw new com.team.shop.exception.StateConflictException("仅排队中的意向可以因下架作废");
+        }
+        this.status = IntentStatus.FAILED;
+        this.processedAt = now;
+    }
+
+    /** Return a failed attempt to the tail of its product queue. */
     public void requeue(long newQueueSeq, LocalDateTime now) {
         IntentStateMachine.assertCanMarkFailed(status);
         this.status = IntentStatus.QUEUING;
         this.queueSeq = newQueueSeq;
         this.processedAt = now;
-    }
-
-    /** 商品售出，其余排队意向统一标记未成交 */
-    public void markUnsold(LocalDateTime now) {
-        this.status = IntentStatus.UNSOLD;
-        this.processedAt = now;
-        this.tokenHash = null;
-        this.tokenLookup = null;
     }
 
     public Long getId() {
@@ -149,6 +124,9 @@ public class PurchaseIntent {
         return product;
     }
 
+    public Customer getCustomer() { return customer; }
+    public String getProductNameSnapshot() { return productNameSnapshot; }
+
     public String getBuyerName() {
         return buyerName;
     }
@@ -156,12 +134,6 @@ public class PurchaseIntent {
     public String getBuyerPhone() {
         return buyerPhone;
     }
-
-    public String getTokenHash() {
-        return tokenHash;
-    }
-
-    public String getTokenLookup() { return tokenLookup; }
 
     public IntentStatus getStatus() {
         return status;

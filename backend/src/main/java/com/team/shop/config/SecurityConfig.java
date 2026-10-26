@@ -6,10 +6,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -42,32 +44,34 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(eh -> eh
                         // 未认证/无权限时也返回统一 ApiResponse 结构，供前端按 401 跳转登录页
-                        .authenticationEntryPoint((request, response, ex) -> writeJson(response, 401, "未登录或登录已过期"))
-                        .accessDeniedHandler((request, response, ex) -> writeJson(response, 403, "没有权限访问")))
+                        .authenticationEntryPoint((request, response, ex) ->
+                                writeJson(response, 401, 40101, "未登录或登录已过期"))
+                        .accessDeniedHandler((request, response, ex) ->
+                                writeJson(response, 403, 40301, "角色无权访问")))
                 .authorizeHttpRequests(auth -> auth
-                        // 买家端接口与图片访问全部放行
-                        .requestMatchers("/api/products/**", "/api/intents/**", "/api/images/**").permitAll()
-                        // 卖家登录放行，其余后台接口需认证
+                        .requestMatchers("/api/auth/**", "/api/categories/**", "/api/images/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers("/api/admin/auth/login").permitAll()
-                        .requestMatchers("/api/admin/**").authenticated()
+                        .requestMatchers("/api/admin/**").hasRole("SELLER")
+                        .requestMatchers("/api/me/**", "/api/products/*/intents").hasRole("CUSTOMER")
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
-    private void writeJson(jakarta.servlet.http.HttpServletResponse response, int status, String message)
+    private void writeJson(jakarta.servlet.http.HttpServletResponse response, int status, int code, String message)
             throws java.io.IOException {
         response.setStatus(status);
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write("{\"code\":" + status + ",\"message\":\"" + message + "\",\"data\":null}");
+        new ObjectMapper().writeValue(response.getWriter(), com.team.shop.dto.ApiResponse.error(code, message));
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

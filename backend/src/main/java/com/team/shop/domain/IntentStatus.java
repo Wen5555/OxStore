@@ -14,6 +14,4 @@ public enum IntentStatus {
     FAILED,
     /** 已撤销（买家主动退出） */
     CANCELLED,
-    /** 未成交（商品已售出给他人） */
-    UNSOLD
 }

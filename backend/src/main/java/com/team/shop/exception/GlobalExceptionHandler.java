@@ -27,27 +27,52 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ApiResponse<Void>> handleUnauthorized(UnauthorizedException e) {
-        return build(HttpStatus.UNAUTHORIZED, e.getMessage());
+        return build(HttpStatus.UNAUTHORIZED, 40101, e.getMessage());
+    }
+
+    @ExceptionHandler(AuthenticationFailureException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthenticationFailure(AuthenticationFailureException e) {
+        return build(HttpStatus.UNAUTHORIZED, 40102, e.getMessage());
     }
 
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ApiResponse<Void>> handleForbidden(ForbiddenException e) {
-        return build(HttpStatus.FORBIDDEN, e.getMessage());
+        return build(HttpStatus.FORBIDDEN, 40302, e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNotFound(NotFoundException e) {
-        return build(HttpStatus.NOT_FOUND, e.getMessage());
+        return build(HttpStatus.NOT_FOUND, e.getCode(), e.getMessage());
     }
 
     @ExceptionHandler(StateConflictException.class)
     public ResponseEntity<ApiResponse<Void>> handleStateConflict(StateConflictException e) {
-        return build(HttpStatus.CONFLICT, e.getMessage());
+        return build(HttpStatus.CONFLICT, e.getCode(), e.getMessage());
+    }
+
+    @ExceptionHandler(PaginationException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePagination(PaginationException e) {
+        return build(HttpStatus.BAD_REQUEST, 40003, e.getMessage());
     }
 
     @ExceptionHandler(BizException.class)
     public ResponseEntity<ApiResponse<Void>> handleBiz(BizException e) {
-        return build(HttpStatus.BAD_REQUEST, e.getMessage());
+        return build(HttpStatus.BAD_REQUEST, 40001, e.getMessage());
+    }
+
+    @ExceptionHandler(ImageTooLargeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleImageTooLarge(ImageTooLargeException e) {
+        return build(HttpStatus.PAYLOAD_TOO_LARGE, 41301, e.getMessage());
+    }
+
+    @ExceptionHandler(UnsupportedImageException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnsupportedImage(UnsupportedImageException e) {
+        return build(HttpStatus.UNSUPPORTED_MEDIA_TYPE, 41501, e.getMessage());
+    }
+
+    @ExceptionHandler(UnsupportedRichTextException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnsupportedRichText(UnsupportedRichTextException e) {
+        return build(HttpStatus.UNPROCESSABLE_ENTITY, 42201, e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -56,7 +81,7 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .map(fe -> fe.getField() + " " + fe.getDefaultMessage())
                 .orElse("参数校验失败");
-        return build(HttpStatus.BAD_REQUEST, msg);
+        return build(HttpStatus.BAD_REQUEST, 40001, msg);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -65,42 +90,42 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .map(v -> v.getMessage())
                 .orElse("参数校验失败");
-        return build(HttpStatus.BAD_REQUEST, msg);
+        return build(HttpStatus.BAD_REQUEST, 40001, msg);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
-        return build(HttpStatus.BAD_REQUEST, "参数格式不正确：" + e.getName());
+        return build(HttpStatus.BAD_REQUEST, 40002, "参数格式不正确：" + e.getName());
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ApiResponse<Void>> handleUploadSize(MaxUploadSizeExceededException e) {
-        return build(HttpStatus.BAD_REQUEST, "上传文件过大（上限 5MB）");
+        return build(HttpStatus.PAYLOAD_TOO_LARGE, 41301, "单张图片不能超过 5MB");
     }
 
     @ExceptionHandler({MissingServletRequestPartException.class, MissingServletRequestParameterException.class})
     public ResponseEntity<ApiResponse<Void>> handleMissing(Exception e) {
-        return build(HttpStatus.BAD_REQUEST, "缺少必填请求字段");
+        return build(HttpStatus.BAD_REQUEST, 40001, "缺少必填请求字段");
     }
 
     @ExceptionHandler({HttpMessageNotReadableException.class, HttpMediaTypeNotSupportedException.class})
     public ResponseEntity<ApiResponse<Void>> handleInvalidBody(Exception e) {
-        return build(HttpStatus.BAD_REQUEST, "请求体格式不正确或缺失");
+        return build(HttpStatus.BAD_REQUEST, 40002, "请求体格式不正确或缺失");
     }
 
     /** BUG-005：错误 HTTP 方法此前落入兜底 500，改为明确的 405 */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
-        return build(HttpStatus.METHOD_NOT_ALLOWED, "请求方法不支持：" + e.getMethod());
+        return build(HttpStatus.METHOD_NOT_ALLOWED, 405, "请求方法不支持：" + e.getMethod());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleUnknown(Exception e) {
         log.error("未处理异常", e);
-        return build(HttpStatus.INTERNAL_SERVER_ERROR, "服务器内部错误");
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, 50000, "服务器内部错误");
     }
 
-    private ResponseEntity<ApiResponse<Void>> build(HttpStatus status, String message) {
-        return ResponseEntity.status(status).body(ApiResponse.error(status.value(), message));
+    private ResponseEntity<ApiResponse<Void>> build(HttpStatus status, int code, String message) {
+        return ResponseEntity.status(status).body(ApiResponse.error(code, message));
     }
 }
