@@ -1,19 +1,30 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import ProductPage from './pages/buyer/ProductPage'
-import IntentQueryPage from './pages/buyer/IntentQueryPage'
-import LoginPage from './pages/admin/LoginPage'
-import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import AdminLayout from './pages/admin/AdminLayout'
-import CurrentProductPage from './pages/admin/CurrentProductPage'
-import PublishProductPage from './pages/admin/PublishProductPage'
-import ProductHistoryPage from './pages/admin/ProductHistoryPage'
-import IntentQueuePage from './pages/admin/IntentQueuePage'
+import AdminProductsPage from './pages/admin/AdminProductsPage'
 import ChangePasswordPage from './pages/admin/ChangePasswordPage'
+import CustomerHistoryPage from './pages/admin/CustomerHistoryPage'
+import CustomersPage from './pages/admin/CustomersPage'
+import LoginPage from './pages/admin/LoginPage'
+import ProductEditPage from './pages/admin/ProductEditPage'
+import ProductIntentQueuePage from './pages/admin/ProductIntentQueuePage'
+import PublishProductPage from './pages/admin/PublishProductPage'
+import BuyerAuthPage from './pages/buyer/BuyerAuthPage'
+import BuyerHistoryPage from './pages/buyer/BuyerHistoryPage'
+import ProductDetailPage from './pages/buyer/ProductDetailPage'
+import ProductListPage from './pages/buyer/ProductListPage'
 
-function RequireAuth({ children }: { children: JSX.Element }) {
-  const token = localStorage.getItem('shop_token')
-  if (!token) {
-    return <Navigate to="/admin/login" replace />
+function RequireSeller({ children }: { children: JSX.Element }) {
+  const location = useLocation()
+  if (!localStorage.getItem('seller_token')) {
+    return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />
+  }
+  return children
+}
+
+function RequireCustomer({ children }: { children: JSX.Element }) {
+  const location = useLocation()
+  if (!localStorage.getItem('customer_token')) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />
   }
   return children
 }
@@ -21,24 +32,23 @@ function RequireAuth({ children }: { children: JSX.Element }) {
 export default function App() {
   return (
     <Routes>
-      {/* 买家端 */}
-      <Route path="/" element={<ProductPage />} />
-      <Route path="/intent" element={<IntentQueryPage />} />
-      <Route path="/intent/:code" element={<IntentQueryPage />} />
+      <Route path="/" element={<ProductListPage />} />
+      <Route path="/products/:id" element={<ProductDetailPage />} />
+      <Route path="/login" element={<BuyerAuthPage />} />
+      <Route path="/register" element={<BuyerAuthPage registration />} />
+      <Route path="/me/order-history" element={<RequireCustomer><BuyerHistoryPage /></RequireCustomer>} />
 
-      {/* 卖家端 */}
       <Route path="/admin/login" element={<LoginPage />} />
-      <Route path="/admin" element={<RequireAuth><AdminLayout /></RequireAuth>}>
-        <Route index element={<AdminDashboardPage />} />
-        <Route path="products/current" element={<CurrentProductPage />} />
+      <Route path="/admin" element={<RequireSeller><AdminLayout /></RequireSeller>}>
+        <Route index element={<Navigate to="products" replace />} />
+        <Route path="products" element={<AdminProductsPage />} />
         <Route path="products/publish" element={<PublishProductPage />} />
-        <Route path="products/history" element={<ProductHistoryPage />} />
-        <Route path="products/history/:id" element={<ProductHistoryPage />} />
-        <Route path="products/:id/records" element={<ProductHistoryPage />} />
-        <Route path="intents" element={<IntentQueuePage />} />
+        <Route path="products/:id/edit" element={<ProductEditPage />} />
+        <Route path="products/:id/intents" element={<ProductIntentQueuePage />} />
+        <Route path="customers" element={<CustomersPage />} />
+        <Route path="customers/:customerId/order-history" element={<CustomerHistoryPage />} />
         <Route path="password" element={<ChangePasswordPage />} />
       </Route>
-
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

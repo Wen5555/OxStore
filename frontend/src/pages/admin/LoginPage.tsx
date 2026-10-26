@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button, Card, Form, Input } from 'antd'
 import { useNavigate } from 'react-router-dom'
-import { login } from '../../api/auth'
+import { sellerLogin } from '../../api/auth'
 
 interface LoginFormValues {
   username: string
@@ -15,8 +15,8 @@ export default function LoginPage() {
   const handleLogin = async (values: LoginFormValues) => {
     try {
       setLoading(true)
-      const result = await login(values)
-      localStorage.setItem('shop_token', result.token)
+      const result = await sellerLogin(values)
+      localStorage.setItem('seller_token', result.token)
       navigate('/admin', { replace: true })
     } catch (error) {
       console.error('卖家登录失败:', error)

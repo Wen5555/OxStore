@@ -1,19 +1,11 @@
-export type IntentStatus =
-  | 'QUEUING'
-  | 'IN_TRANSACTION'
-  | 'SUCCESS'
-  | 'FAILED'
-  | 'CANCELLED'
-  | 'UNSOLD'
+export type IntentStatus = 'QUEUING' | 'IN_TRANSACTION'
 
 export interface Intent {
   id: number
   productId: number
-  buyerName: string
-  buyerPhone: string
+  customerId: number
+  customerUsername: string
   status: IntentStatus
   submittedAt: string
-  position: number | null
-  processedAt: string | null
-  currentTradeAttemptId: number | null
+  position: number
 }

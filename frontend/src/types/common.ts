@@ -3,12 +3,43 @@ export interface ApiResponse<T> {
   code: number
   message: string
   data: T
+  traceId?: string
 }
 
 // 分页数据
 export interface Page<T> {
-  list: T[]
+  items: T[]
   total: number
   page: number
   size: number
+  pages: number
+}
+
+export interface Category {
+  id: number
+  name: string
+  children: Category[]
+}
+
+export interface CategoryTreeItem {
+  id: number
+  name: string
+  children: Category[]
+}
+
+export interface Customer {
+  customerId: number
+  username: string
+  phone: string
+  location: string | null
+  registeredAt: string
+}
+
+export interface OrderHistoryItem {
+  id: number
+  productId: number
+  productName: string
+  submittedAt: string
+  status: 'SUCCESS' | 'FAILED'
+  transactionAt: string
 }

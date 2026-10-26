@@ -1,4 +1,4 @@
-import { AppstoreOutlined, HistoryOutlined, LockOutlined, OrderedListOutlined, ShopOutlined, UploadOutlined } from '@ant-design/icons'
+import { LockOutlined, ShopOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Layout, Space, Typography } from 'antd'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
@@ -6,21 +6,19 @@ const { Header, Content } = Layout
 const { Text } = Typography
 
 const navigation = [
-  { label: '功能首页', path: '/admin', icon: <AppstoreOutlined /> },
-  { label: '意向队列', path: '/admin/intents', icon: <OrderedListOutlined /> },
-  { label: '当前商品', path: '/admin/products/current', icon: <ShopOutlined /> },
+  { label: '商品管理', path: '/admin/products', icon: <ShopOutlined /> },
   { label: '发布商品', path: '/admin/products/publish', icon: <UploadOutlined /> },
-  { label: '商品历史', path: '/admin/products/history', icon: <HistoryOutlined /> },
+  { label: '全部顾客', path: '/admin/customers', icon: <UserOutlined /> },
   { label: '修改密码', path: '/admin/password', icon: <LockOutlined /> },
 ]
 
 export default function AdminLayout() {
   const location = useLocation()
   const navigate = useNavigate()
-  const selectedPath = location.pathname.endsWith('/records')
-    ? '/admin/products/history'
-    : location.pathname.startsWith('/admin/products/history/')
-      ? '/admin/products/history'
+  const selectedPath = location.pathname.startsWith('/admin/customers')
+    ? '/admin/customers'
+    : location.pathname.startsWith('/admin/products')
+      ? (location.pathname.endsWith('/publish') ? '/admin/products/publish' : '/admin/products')
       : location.pathname
 
   return (
