@@ -8,7 +8,7 @@
 | --- | --- | --- | --- |
 | Maven/JUnit | JDK 17、Maven 3.9+ | 后端状态机、DTO、安全、服务及 Controller 单元测试 | `backend/target/surefire-reports/` |
 | `scripts/verify_docker_release.py` | Docker Linux 引擎、Compose、Python 3.10+及所需服务镜像 | 真实 Nginx/API/MySQL、交易流程、历史及重启行为 | 指定输出目录中的 `docker-results.json`、操作日志 |
-| `scripts/verify_database.py` | 已构建 JAR、Java 17、Docker、Python 3.10+ | 表结构、约束、迁移、HTTP、交易数据及持久化 | 数据库验证报告/JSON |
+| `scripts/verify_database.py` | 旧版工具；不适用于迭代 2 | V1 schema、口令 API 的历史验证 | 仅历史结果 |
 | `frontend/e2e/buyer-seller-flows.spec.ts` | Node 20、前端依赖、Playwright 浏览器 | 使用模拟 API 的前端交互 | Playwright 报告 |
 | `tests/ui-smoke/` | JDK 17、Maven 3.9+、Chrome、运行中的 OxStore 前后端及隔离 MySQL | Selenium 真实浏览器 UI-001 主流程 | Surefire XML；失败时截图和浏览器日志 |
 | `tests/performance/` | JMeter 5.6.3、运行中的后端及专用测试数据库 | API 负载、响应时间与并发队列不变量 | JTL、HTML 报告及 SQL 检查结果 |
@@ -25,7 +25,7 @@ mvn -B -ntp -f backend/pom.xml clean verify
 Get-ChildItem backend/target/surefire-reports/TEST-*.xml
 ```
 
-判定条件：命令退出码为 0、Maven 输出 `BUILD SUCCESS`，且 Surefire XML 中失败、错误、跳过均为 0。当前源码清单为 50 个测试方法；测试增删后应同步更新[用例清单](test_case_design_and_inventory.md)。依赖下载失败时按[构建手册](../build.md)排查，不用 `-DskipTests` 替代验证。
+判定条件：命令退出码为 0、Maven 输出 `BUILD SUCCESS`，且 Surefire XML 中失败、错误、跳过均为 0。本次后端完整验证运行 21 个测试方法，全部通过；测试增删后应同步更新[用例清单](test_case_design_and_inventory.md)。依赖下载失败时按[构建手册](../build.md)排查，不用 `-DskipTests` 替代验证。
 
 ## 3. 真实容器/API 验证
 
@@ -63,13 +63,7 @@ Get-Content .work/acceptance-results/compose-operations.log
 
 ## 4. 数据库专项验证
 
-后端构建成功后，从项目根目录执行：
-
-```powershell
-python scripts/verify_database.py --java <JDK17目录>/bin/java.exe
-```
-
-脚本会创建专用 MySQL 实例及测试库，验证新库、异常写入、数据库迁移、排队/口令/历史与重启持久化。历史结果和限制见[数据库验证报告](db-validation.md)；归档时应记录本次实际源码版本与环境。
+迭代 2 的 H2 API 集成测试由 Maven `clean verify` 一并执行。旧版 `scripts/verify_database.py` 针对 V1 schema 和口令流程，当前不可用于数据库专项验收。V4 MySQL 迁移应在独立 MySQL 副本演练；本次尚未执行。历史验证报告仅供旧版参考，见[数据库验证报告](db-validation.md)。
 
 ## 5. 前端模拟 API 交互测试
 
@@ -88,6 +82,8 @@ Pop-Location
 ## 6. Selenium UI 冒烟测试
 
 ### 6.1 覆盖范围与已知结果
+
+> 此处记录的 UI-001 使用旧版口令流程，当前前端也尚未迁移到迭代 2 API；不能用于当前后端验收，需在前端迁移后更新并重跑。
 
 独立工程位于 `tests/ui-smoke/`，使用 Java 17、Selenium、JUnit 5 和真实 Chrome 浏览器访问运行中的 OxStore 前端及后端，不模拟 API。用例 UI-001 `buyerCanSubmitIntentAndSellerCanCompleteTheTrade` 覆盖：
 

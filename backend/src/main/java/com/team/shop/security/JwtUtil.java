@@ -10,6 +10,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * JWT 生成与解析。用于卖家后台认证。
@@ -34,20 +35,34 @@ public class JwtUtil {
     }
 
     public String generate(String username) {
+        return generate(0L, "SELLER", username);
+    }
+
+    public String generate(Long userId, String role, String username) {
         Date now = new Date();
         return Jwts.builder()
                 .subject(username)
+                .claims(Map.of("userId", userId, "role", role))
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + expireMs))
                 .signWith(key)
                 .compact();
     }
 
+    public UserIdentity parseIdentity(String token) {
+        Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
+        Object userId = claims.get("userId");
+        Object role = claims.get("role");
+        if (!(userId instanceof Number id) || !(role instanceof String roleName)) {
+            return null;
+        }
+        return new UserIdentity(id.longValue(), claims.getSubject(), roleName);
+    }
+
     /** 解析用户名，无效或过期返回 null */
     public String parseUsername(String token) {
         try {
-            Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
-            return claims.getSubject();
+            return parseIdentity(token).getName();
         } catch (Exception e) {
             return null;
         }

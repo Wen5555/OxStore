@@ -1,5 +1,7 @@
 # R5 数据库验证报告
 
+> **历史报告，已被迭代 2 后端实现取代。** 本文所述的五表 schema、口令接口和迁移测试属于旧版本；`scripts/verify_database.py` 也仍验证旧版 API/schema。它们不证明当前 V4 MySQL 迁移已经执行或通过。当前后端 H2/HTTP 集成验证请运行 `mvn -B -ntp -f backend/pom.xml clean verify`；MySQL V4 演练尚未完成。
+
 执行日期：2026-10-04（北京时间）
 基线：`8db4228`，包含本轮REQUEUE口令修正。
 执行方式：张耀文委托Codex辅助实现与实测；本人复核及课程答辩仍由张耀文完成。

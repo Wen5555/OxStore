@@ -1,7 +1,9 @@
 package com.team.shop.service;
 
 import com.team.shop.exception.BizException;
+import com.team.shop.exception.ImageTooLargeException;
 import com.team.shop.exception.NotFoundException;
+import com.team.shop.exception.UnsupportedImageException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,20 +27,28 @@ public class ImageStorageService {
     }
     public String store(MultipartFile file) {
         if (file == null || file.isEmpty()) throw new BizException("请上传商品图片");
-        if (file.getSize() > MAX_BYTES) throw new BizException("上传文件过大（上限 5MB）");
+        if (file.getSize() > MAX_BYTES) throw new ImageTooLargeException("单张图片不能超过 5MB");
         String extension = extensionOf(file.getOriginalFilename());
-        if (!EXTENSIONS.contains(extension)) throw new BizException("仅支持 JPG / PNG 格式的图片");
+        if (!EXTENSIONS.contains(extension)) throw new UnsupportedImageException("仅支持 JPG / PNG 格式的图片");
         String expected = extension.equals("png") ? "image/png" : "image/jpeg";
-        if (!expected.equalsIgnoreCase(file.getContentType())) throw new BizException("图片类型与扩展名不符");
+        if (!expected.equalsIgnoreCase(file.getContentType())) {
+            throw new UnsupportedImageException("图片类型与扩展名不符");
+        }
         byte[] bytes;
         try { bytes = file.getBytes(); }
         catch (IOException e) { throw new BizException("图片读取失败，请重试"); }
-        if (bytes.length > MAX_BYTES) throw new BizException("上传文件过大（上限 5MB）");
+        if (bytes.length > MAX_BYTES) throw new ImageTooLargeException("单张图片不能超过 5MB");
         boolean png = extension.equals("png");
-        if (png ? !isPng(bytes) : !isJpeg(bytes)) throw new BizException("图片内容与扩展名不符或图片不完整");
+        if (png ? !isPng(bytes) : !isJpeg(bytes)) {
+            throw new UnsupportedImageException("图片内容与扩展名不符或图片不完整");
+        }
         try {
-            if (ImageIO.read(new ByteArrayInputStream(bytes)) == null) throw new BizException("图片无法解码");
-        } catch (IOException e) { throw new BizException("图片无法解码"); }
+            if (ImageIO.read(new ByteArrayInputStream(bytes)) == null) {
+                throw new UnsupportedImageException("图片无法解码");
+            }
+        } catch (IOException e) {
+            throw new UnsupportedImageException("图片无法解码");
+        }
         String storedName = UUID.randomUUID() + "." + extension;
         try {
             Files.createDirectories(uploadDir);

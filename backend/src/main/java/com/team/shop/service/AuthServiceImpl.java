@@ -2,6 +2,7 @@ package com.team.shop.service;
 
 import com.team.shop.dto.response.LoginResult;
 import com.team.shop.entity.Seller;
+import com.team.shop.exception.AuthenticationFailureException;
 import com.team.shop.exception.UnauthorizedException;
 import com.team.shop.repository.SellerRepository;
 import com.team.shop.security.JwtUtil;
@@ -27,11 +28,12 @@ public class AuthServiceImpl implements AuthService {
     @Transactional(readOnly = true)
     public LoginResult login(String username, String password) {
         Seller seller = sellerRepository.findByUsername(username)
-                .orElseThrow(() -> new UnauthorizedException("用户名或密码错误"));
+                .orElseThrow(() -> new AuthenticationFailureException("用户名或密码错误"));
         if (!passwordEncoder.matches(password, seller.getPasswordHash())) {
-            throw new UnauthorizedException("用户名或密码错误");
+            throw new AuthenticationFailureException("用户名或密码错误");
         }
-        return new LoginResult(jwtUtil.generate(seller.getUsername()), seller.getUsername());
+        return new LoginResult(jwtUtil.generate(seller.getId(), "SELLER", seller.getUsername()),
+                seller.getId(), "SELLER", seller.getUsername());
     }
 
     @Override

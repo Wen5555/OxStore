@@ -27,7 +27,7 @@ public record ProductResponse(
                 p.getId(),
                 p.getName(),
                 p.getDescription(),
-                p.getImagePath(),
+                p.getImages().isEmpty() ? null : p.getImages().get(0).getImagePath(),
                 p.getPrice(),
                 p.getStatus(),
                 p.getFreezeSource(),
