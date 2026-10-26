@@ -41,14 +41,14 @@ export default function BuyerHistoryPage() {
             !result?.items.length ? <Empty description="暂无已完成的购买记录" /> : (
               <>
                 <Table<OrderHistoryItem>
-                  rowKey="id"
+                  rowKey="orderId"
                   dataSource={result.items}
                   pagination={false}
                   columns={[
                     { title: '商品', dataIndex: 'productName', key: 'productName' },
                     { title: '下单时间', dataIndex: 'submittedAt', key: 'submittedAt', render: formatDate },
                     { title: '结果', dataIndex: 'status', key: 'status', render: (status: OrderHistoryItem['status']) => <Tag color={status === 'SUCCESS' ? 'green' : 'red'}>{status === 'SUCCESS' ? '成功' : '失败'}</Tag> },
-                    { title: '交易时间', dataIndex: 'transactionAt', key: 'transactionAt', render: formatDate },
+                    { title: '交易时间', dataIndex: 'transactedAt', key: 'transactedAt', render: formatDate },
                   ]}
                 />
                 <Pagination style={{ marginTop: 20 }} current={page} pageSize={PAGE_SIZE} total={result.total} onChange={setPage} />

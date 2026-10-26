@@ -13,14 +13,12 @@ test('匿名买家可浏览商品，但提交意向时必须登录且没有口�
   await page.route('**/api/products?**', (route) =>
     route.fulfill(apiResponse({
       items: [{
-        id: 42,
+        productId: 42,
         name: '测试商品',
         price: 88,
-        stock: 2,
-        status: 'ONLINE',
+        mainImagePath: null,
         category2Id: 2,
-        categoryName: '上衣',
-        images: [{ url: '/test-product.jpg', position: 0 }],
+        category2Name: '上衣',
       }],
       page: 1,
       size: 10,
@@ -30,15 +28,19 @@ test('匿名买家可浏览商品，但提交意向时必须登录且没有口�
   )
   await page.route('**/api/products/42', (route) =>
     route.fulfill(apiResponse({
-      id: 42,
+      productId: 42,
       name: '测试商品',
       descriptionHtml: '<p>商品描述</p>',
       price: 88,
       stock: 2,
       status: 'ONLINE',
+      canPurchase: true,
       category2Id: 2,
-      categoryName: '上衣',
-      images: [{ url: '/test-product.jpg', position: 0 }],
+      category2Name: '上衣',
+      images: [],
+      mainImagePath: null,
+      publishedAt: '2026-10-25T09:00:00',
+      statusUpdatedAt: '2026-10-25T09:00:00',
     })),
   )
 
@@ -48,6 +50,31 @@ test('匿名买家可浏览商品，但提交意向时必须登录且没有口�
   await page.getByRole('button', { name: '提交购买意向' }).click()
   await expect(page).toHaveURL(/\/login$/)
   await expect(page.getByText(/口令/)).toHaveCount(0)
+})
+
+test('下架商品详情即使 API 返回成功也不展示商品信息', async ({ page }) => {
+  await page.route('**/api/products/99', (route) =>
+    route.fulfill(apiResponse({
+      productId: 99,
+      name: '已下架商品',
+      descriptionHtml: '<p>不可见描述</p>',
+      price: 88,
+      stock: 0,
+      status: 'OFFLINE',
+      canPurchase: false,
+      category2Id: 2,
+      category2Name: '上衣',
+      images: [],
+      mainImagePath: null,
+      publishedAt: '2026-10-25T09:00:00',
+      statusUpdatedAt: '2026-10-25T09:00:00',
+    })),
+  )
+
+  await page.goto('/products/99')
+  await expect(page.getByText('商品当前不可查看')).toBeVisible()
+  await expect(page.getByText('已下架商品')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: '提交购买意向' })).toHaveCount(0)
 })
 
 test('卖家按商品队列开始交易，确认成功请求不带请求体', async ({ page }) => {
@@ -60,7 +87,21 @@ test('卖家按商品队列开始交易，确认成功请求不带请求体', as
   )
   await page.route('**/api/admin/products?**', (route) =>
     route.fulfill(apiResponse({
-      items: [{ id: 42, name: '测试商品', price: 88, stock: 2, categoryName: '上衣', status: 'ONLINE' }],
+      items: [{
+        productId: 42,
+        name: '测试商品',
+        price: 88,
+        stock: 2,
+        category2Id: 2,
+        category2Name: '上衣',
+        status: 'ONLINE',
+        canPurchase: true,
+        descriptionHtml: '',
+        images: [],
+        mainImagePath: null,
+        publishedAt: '2026-10-25T09:00:00',
+        statusUpdatedAt: '2026-10-25T09:00:00',
+      }],
       page: 1,
       size: 10,
       total: 1,
@@ -87,10 +128,11 @@ test('卖家按商品队列开始交易，确认成功请求不带请求体', as
       return
     }
     const items = queueStatus === 'DONE' ? [] : [{
-      id: 701,
+      intentId: 701,
       productId: 42,
       customerId: 17,
-      customerUsername: '队首买家',
+      username: '队首买家',
+      phone: '13800000000',
       status: queueStatus,
       submittedAt: '2026-10-25T10:00:00',
       position: queueStatus === 'QUEUING' ? 1 : 0,
@@ -118,4 +160,39 @@ test('卖家按商品队列开始交易，确认成功请求不带请求体', as
   await page.getByRole('button', { name: '重新排队', exact: true }).click()
   await expect(page.getByText('当前没有进行中的交易')).toBeVisible()
   expect(JSON.parse(failBody ?? 'null')).toEqual({ action: 'REQUEUE' })
+})
+
+test('买家购买历史按后端订单字段展示成功和失败终态', async ({ page }) => {
+  await page.route('**/api/categories/tree', (route) =>
+    route.fulfill(apiResponse([])),
+  )
+  await page.route('**/api/products?**', (route) =>
+    route.fulfill(apiResponse({ items: [], page: 1, size: 10, total: 0, pages: 0 })),
+  )
+  await page.route('**/api/auth/login', (route) =>
+    route.fulfill(apiResponse({ token: 'customer-token', userId: 17, role: 'CUSTOMER', username: 'buyer' })),
+  )
+  await page.route('**/api/me/order-history?**', (route) =>
+    route.fulfill(apiResponse({
+      items: [{
+        orderId: 904,
+        productName: '历史商品',
+        submittedAt: '2026-10-25T10:00:00',
+        status: 'FAILED',
+        transactedAt: '2026-10-25T10:30:00',
+      }],
+      page: 1,
+      size: 10,
+      total: 1,
+      pages: 1,
+    })),
+  )
+
+  await page.goto('/login')
+  await page.getByLabel('用户名').fill('buyer')
+  await page.getByLabel('密码').fill('password')
+  await page.getByRole('button', { name: /登\s*录/ }).click()
+  await page.getByRole('button', { name: '我的购买历史' }).click()
+  await expect(page.getByRole('cell', { name: '历史商品' })).toBeVisible()
+  await expect(page.getByRole('cell', { name: '失败' })).toBeVisible()
 })

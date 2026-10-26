@@ -1,9 +1,10 @@
 import { request } from './request'
 import type { Customer, OrderHistoryItem, Page } from '../types/common'
-import type { Product } from '../types/product'
+import { mapProductDetail, type ProductDetailResponse } from '../types/product'
 
-export function getAdminProducts(page: number, size: number) {
-  return request<Page<Product>>({ url: '/admin/products', method: 'GET', params: { page, size } })
+export async function getAdminProducts(page: number, size: number) {
+  const result = await request<Page<ProductDetailResponse>>({ url: '/admin/products', method: 'GET', params: { page, size } })
+  return { ...result, items: result.items.map(mapProductDetail) }
 }
 
 export async function getAdminProduct(productId: number) {
@@ -19,19 +20,19 @@ export async function getAdminProduct(productId: number) {
 }
 
 export function createProduct(data: FormData) {
-  return request<Product>({ url: '/admin/products', method: 'POST', data })
+  return request<ProductDetailResponse>({ url: '/admin/products', method: 'POST', data }).then(mapProductDetail)
 }
 
 export function updateProduct(productId: number, data: { stock?: number; category2Id?: number }) {
-  return request<Product>({ url: `/admin/products/${productId}`, method: 'PATCH', data })
+  return request<ProductDetailResponse>({ url: `/admin/products/${productId}`, method: 'PATCH', data }).then(mapProductDetail)
 }
 
 export function setProductOffline(productId: number) {
-  return request<Product>({ url: `/admin/products/${productId}/offline`, method: 'POST' })
+  return request<ProductDetailResponse>({ url: `/admin/products/${productId}/offline`, method: 'POST' }).then(mapProductDetail)
 }
 
 export function setProductOnline(productId: number) {
-  return request<Product>({ url: `/admin/products/${productId}/online`, method: 'POST' })
+  return request<ProductDetailResponse>({ url: `/admin/products/${productId}/online`, method: 'POST' }).then(mapProductDetail)
 }
 
 export function getAdminCustomers(page: number, size: number) {

@@ -39,7 +39,7 @@ export default function ProductDetailPage() {
       navigate('/login', { state: { from: `/products/${id}` } })
       return
     }
-    if (!product || product.status !== 'ONLINE') return
+    if (!product || product.status !== 'ONLINE' || !product.canPurchase) return
     try {
       setSubmitting(true)
       await submitPurchaseIntent(product.id)
@@ -52,7 +52,7 @@ export default function ProductDetailPage() {
   }
 
   if (loading) return <div style={{ padding: 64, textAlign: 'center' }}><Spin size="large" /></div>
-  if (unavailable || !product) return <main style={{ maxWidth: 900, margin: '40px auto', padding: 24 }}><Card><Empty description="商品当前不可查看"><Link to="/">返回商品列表</Link></Empty></Card></main>
+  if (unavailable || !product || product.status === 'OFFLINE') return <main style={{ maxWidth: 900, margin: '40px auto', padding: 24 }}><Card><Empty description="商品当前不可查看"><Link to="/">返回商品列表</Link></Empty></Card></main>
 
   const images = [...(product.images ?? [])].sort((a, b) => a.position - b.position).map((image) => image.url)
   if (images.length === 0 && product.mainImageUrl) images.push(product.mainImageUrl)
@@ -79,10 +79,10 @@ export default function ProductDetailPage() {
                 <Descriptions.Item label="类目">{product.categoryName || '-'}</Descriptions.Item>
                 <Descriptions.Item label="库存">{product.stock ?? '-'}</Descriptions.Item>
               </Descriptions>
-              {product.status === 'ONLINE' ? (
+              {product.status === 'ONLINE' && product.canPurchase ? (
                 <Button type="primary" onClick={submitIntent} loading={submitting}>提交购买意向</Button>
               ) : <Typography.Text type="secondary">当前不可提交购买意向</Typography.Text>}
-              {!loggedIn && product.status === 'ONLINE' && <Typography.Text type="secondary">提交意向前需要登录。</Typography.Text>}
+              {!loggedIn && product.status === 'ONLINE' && product.canPurchase && <Typography.Text type="secondary">提交意向前需要登录。</Typography.Text>}
             </Space>
           </div>
           {hasReadableContent(description) && (

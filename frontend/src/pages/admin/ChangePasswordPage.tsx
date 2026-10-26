@@ -38,6 +38,8 @@ export default function ChangePasswordPage() {
             rules={[
               { required: true, message: '请输入新密码' },
               { min: 8, message: '新密码至少 8 位' },
+              { max: 64, message: '新密码不能超过 64 位' },
+              { pattern: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/, message: '新密码须同时包含字母、数字和特殊符号' },
             ]}
           >
             <Input.Password autoComplete="new-password" />

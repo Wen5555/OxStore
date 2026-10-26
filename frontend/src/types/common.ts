@@ -36,10 +36,9 @@ export interface Customer {
 }
 
 export interface OrderHistoryItem {
-  id: number
-  productId: number
+  orderId: number
   productName: string
   submittedAt: string
   status: 'SUCCESS' | 'FAILED'
-  transactionAt: string
+  transactedAt: string
 }

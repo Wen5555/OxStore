@@ -1,10 +1,11 @@
 export type IntentStatus = 'QUEUING' | 'IN_TRANSACTION'
 
 export interface Intent {
-  id: number
+  intentId: number
   productId: number
-  customerId: number
-  customerUsername: string
+  customerId: number | null
+  username: string
+  phone: string
   status: IntentStatus
   submittedAt: string
   position: number

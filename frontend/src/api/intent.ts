@@ -19,5 +19,5 @@ export function confirmSuccess(intentId: number) {
 }
 
 export function confirmFail(intentId: number, action: 'REQUEUE' | 'DISCARD') {
-  return request<Intent | null>({ url: `/admin/intents/${intentId}/fail`, method: 'POST', data: { action } })
+  return request<void>({ url: `/admin/intents/${intentId}/fail`, method: 'POST', data: { action } })
 }

@@ -3,17 +3,17 @@ import { Alert, Button, Card, Empty, Input, Pagination, Select, Space, Spin, Typ
 import { Link, useNavigate } from 'react-router-dom'
 import { getCategoryTree, getProducts } from '../../api/catalog'
 import type { CategoryTreeItem, Page } from '../../types/common'
-import type { Product } from '../../types/product'
+import type { ProductSummary } from '../../types/product'
 
 const PAGE_SIZE = 10
 
-function productImage(product: Product) {
-  return product.images?.[0]?.url || product.mainImageUrl || '/placeholder-product.svg'
+function productImage(product: ProductSummary) {
+  return product.mainImageUrl || '/placeholder-product.svg'
 }
 
 export default function ProductListPage() {
   const [categories, setCategories] = useState<CategoryTreeItem[]>([])
-  const [result, setResult] = useState<Page<Product>>()
+  const [result, setResult] = useState<Page<ProductSummary>>()
   const [category2Id, setCategory2Id] = useState<number>()
   const [keyword, setKeyword] = useState('')
   const [page, setPage] = useState(1)

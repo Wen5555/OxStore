@@ -45,7 +45,7 @@ export default function BuyerAuthPage({ registration = false }: { registration?:
     <main style={{ maxWidth: 480, margin: '48px auto', padding: 24 }}>
       <Card title={registration ? '顾客注册' : '顾客登录'}>
         <Form layout="vertical" onFinish={onFinish}>
-          <Form.Item label="用户名" name="username" rules={[{ required: true, whitespace: true, message: '请输入用户名' }]}>
+          <Form.Item label="用户名" name="username" rules={[{ required: true, whitespace: true, message: '请输入用户名' }, { max: 50, message: '用户名不能超过 50 个字符' }]}>
             <Input autoComplete="username" />
           </Form.Item>
           <Form.Item
@@ -54,16 +54,17 @@ export default function BuyerAuthPage({ registration = false }: { registration?:
             rules={[
               { required: true, message: '请输入密码' },
               ...(registration ? [{ min: 8, message: '密码不少于 8 位' }] : []),
+              ...(registration ? [{ max: 64, message: '密码不能超过 64 位' }] : []),
             ]}
           >
             <Input.Password autoComplete={registration ? 'new-password' : 'current-password'} />
           </Form.Item>
           {registration && (
             <>
-              <Form.Item label="手机号" name="phone" rules={[{ required: true, whitespace: true, message: '请输入手机号' }]}>
+              <Form.Item label="手机号" name="phone" rules={[{ required: true, whitespace: true, message: '请输入手机号' }, { max: 20, message: '手机号不能超过 20 个字符' }]}>
                 <Input autoComplete="tel" />
               </Form.Item>
-              <Form.Item label="默认交易地点（选填）" name="location">
+              <Form.Item label="默认交易地点（选填）" name="location" rules={[{ max: 200, message: '默认交易地点不能超过 200 个字符' }]}>
                 <Input />
               </Form.Item>
             </>

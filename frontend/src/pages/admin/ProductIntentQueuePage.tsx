@@ -11,6 +11,7 @@ export default function ProductIntentQueuePage() {
   const { id } = useParams()
   const productId = Number(id)
   const [items, setItems] = useState<Intent[]>([])
+  const [currentIntent, setCurrentIntent] = useState<Intent>()
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
@@ -27,9 +28,13 @@ export default function ProductIntentQueuePage() {
     try {
       setLoading(true)
       setLoadError(false)
-      const result = await getProductIntentQueue(productId, page, PAGE_SIZE)
+      const [result, firstPage] = await Promise.all([
+        getProductIntentQueue(productId, page, PAGE_SIZE),
+        page === 1 ? Promise.resolve(null) : getProductIntentQueue(productId, 1, PAGE_SIZE),
+      ])
       setItems(result.items)
       setTotal(result.total)
+      setCurrentIntent((firstPage?.items ?? result.items).find((intent) => intent.status === 'IN_TRANSACTION'))
     } catch (error) {
       console.error('获取商品意向队列失败:', error)
       setLoadError(true)
@@ -40,20 +45,19 @@ export default function ProductIntentQueuePage() {
 
   useEffect(() => { void load() }, [productId, page, retryCount])
 
-  const currentIntent = items.find((intent) => intent.status === 'IN_TRANSACTION' || intent.position === 0)
   const queue = items.filter((intent) => intent.status === 'QUEUING')
 
   const perform = async (operation: 'start' | 'success' | 'REQUEUE' | 'DISCARD') => {
     try {
       setAction(operation)
       if (operation === 'start' && queue[0]) {
-        await startTrade(queue[0].id)
+        await startTrade(queue[0].intentId)
         message.success('已开始处理队首意向')
       } else if (operation === 'success' && currentIntent) {
-        await confirmSuccess(currentIntent.id)
+        await confirmSuccess(currentIntent.intentId)
         message.success('已确认交易成功')
       } else if ((operation === 'REQUEUE' || operation === 'DISCARD') && currentIntent) {
-        await confirmFail(currentIntent.id, operation)
+        await confirmFail(currentIntent.intentId, operation)
         message.success(operation === 'REQUEUE' ? '已记录失败并重新排队' : '已记录失败并作废意向')
       }
       await load()
@@ -78,7 +82,7 @@ export default function ProductIntentQueuePage() {
             <Card title="交易中">
               {currentIntent ? (
                 <Space direction="vertical">
-                  <Space wrap><Tag color="blue">交易中</Tag><Typography.Text strong>{currentIntent.customerUsername}</Typography.Text></Space>
+                  <Space wrap><Tag color="blue">交易中</Tag><Typography.Text strong>{currentIntent.username}</Typography.Text></Space>
                   <Space wrap>
                     <Button type="primary" loading={action === 'success'} onClick={() => void perform('success')}>确认成功</Button>
                     <Popconfirm title="将该意向重新排到队尾？" onConfirm={() => void perform('REQUEUE')} okText="重新排队" cancelText="取消">
@@ -91,10 +95,10 @@ export default function ProductIntentQueuePage() {
                 </Space>
               ) : <Empty description="当前没有进行中的交易" />}
             </Card>
-            <Card title={`排队意向（${total}）`} extra={queue.length > 0 && !currentIntent ? <Button type="primary" loading={action === 'start'} onClick={() => void perform('start')}>开始处理队首</Button> : undefined}>
+            <Card title={`排队及交易意向（${total}）`} extra={page === 1 && queue.length > 0 && !currentIntent ? <Button type="primary" loading={action === 'start'} onClick={() => void perform('start')}>开始处理队首</Button> : undefined}>
               {!queue.length ? <Empty description="暂无排队意向" /> : (
                 <Space direction="vertical" style={{ width: '100%' }}>
-                  {queue.map((intent) => <div key={intent.id}><Tag color="orange">第 {intent.position} 位</Tag><Typography.Text strong>{intent.customerUsername}</Typography.Text></div>)}
+                  {queue.map((intent) => <div key={intent.intentId}><Tag color="orange">第 {intent.position} 位</Tag><Typography.Text strong>{intent.username}</Typography.Text></div>)}
                 </Space>
               )}
               {total > PAGE_SIZE && <Pagination style={{ marginTop: 20 }} current={page} pageSize={PAGE_SIZE} total={total} onChange={setPage} />}
