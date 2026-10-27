@@ -37,11 +37,11 @@
 
 | 编号 | 检查项 | 结果 | 核验说明 |
 | :---: | :--- | :---: | :--- |
-| **E1** | 后端服务已启动并响应健康请求 | ☑ 通过 | `http://127.0.0.1:8080/api/categories/tree` 返回 `HTTP 200 (code=0)` |
-| **E2** | 前端开发服务已启动并代理 `/api` | ☑ 通过 | `http://127.0.0.1:5173/` 页面渲染正常，接口代理无跨域异常 |
-| **E3** | 数据库含 `customer` 表且支持客户端查表 | ☑ 通过 | 支持 SQL 直接查询 `customer` 表核验 `password_hash`、`location` 字段 |
-| **E4** | 已准备至少 1 件 `ONLINE` 在售商品供拦截对照 | ☑ 通过 | 在售商品 `蓝牙耳机A`（`productId=1`，状态 `ONLINE`，价格 `¥199.00`，库存 `5`） |
-| **E5** | 卖家后台（`admin`）可正常登录并准备测试商品 | ☑ 通过 | 预置卖家 `admin` 登录成功并完成测试商品上架 |
+| **E1** | 后端服务已启动并响应健康请求 |  通过 | `http://127.0.0.1:8080/api/categories/tree` 返回 `HTTP 200 (code=0)` |
+| **E2** | 前端开发服务已启动并代理 `/api` |  通过 | `http://127.0.0.1:5173/` 页面渲染正常，接口代理无跨域异常 |
+| **E3** | 数据库含 `customer` 表且支持客户端查表 |  通过 | 支持 SQL 直接查询 `customer` 表核验 `password_hash`、`location` 字段 |
+| **E4** | 已准备至少 1 件 `ONLINE` 在售商品供拦截对照 |  通过 | 在售商品 `蓝牙耳机A`（`productId=1`，状态 `ONLINE`，价格 `¥199.00`，库存 `5`） |
+| **E5** | 卖家后台（`admin`）可正常登录并准备测试商品 |  通过 | 预置卖家 `admin` 登录成功并完成测试商品上架 |
 
 ### 2.3 测试数据集设计
 
@@ -91,17 +91,17 @@
 
 | 用例编号 | 类别 | 用例名称 | 对应验收点 | 实测结果 | 截图证据链接（点击查看） |
 | :---: | :---: | :--- | :--- | :---: | :--- |
-| **C-005-01** | 主路径 | 注册成功（必填齐、密码≥8、地点空） | PB-04 AC1/AC2/AC3；SRS B-001 | ☑ **通过** | [📷 注册表单填写](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_01a_register_form.png) · [📷 注册成功跳转](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_01b_register_success.png) |
-| **C-005-02** | 主路径 | 注册成功（地点选填有值） | PB-04 AC1（地点选填） | ☑ **通过** | [📷 含选填地点注册](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_02_register_with_location.png) |
-| **C-005-03** | 主路径 | 用户名 + 密码登录成功（禁手机号当账号） | PB-04 AC3；SRS B-002 | ☑ **通过** | [📷 登录页表单](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_03a_login_form.png) · [📷 登录成功前台态](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_03b_login_success.png) |
-| **C-005-04** | 主路径 | 密码哈希入库（BCrypt 非明文） | PB-04 AC5；SRS §6.2 | ☑ **通过** | [📷 数据库 customer 表哈希核验](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_04_db_password_hash.png) |
-| **C-005-05** | 主路径 | 登录后可对在售商品提交意向（拦截解除） | PB-04 AC4 正向；SRS B-009 | ☑ **通过** | [📷 登录后成功提交购买意向](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_05_logged_in_submit_intent.png) |
-| **C-005-06** | 负面/边界 | 密码长度 `< 8` 拒绝注册 | PB-04 AC2 | ☑ **通过** | [📷 短密码拦截提示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_06_short_password_rejected.png) |
-| **C-005-07** | 负面/边界 | 重复用户名拒绝注册 | PB-04 AC2 | ☑ **通过** | [📷 重复用户名拒绝提示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_07_duplicate_username_rejected.png) |
-| **C-005-08** | 负面/边界 | 缺必填字段拒绝（用户名 / 密码 / 电话） | PB-04 AC1 | ☑ **通过** | [📷 缺必填项红字校验提示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_08_missing_required_fields.png) |
-| **C-005-09** | 负面/边界 | 错误密码 / 不存在用户登录失败 | PB-04 AC3 | ☑ **通过** | [📷 错误凭据登录失败提示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_09_login_wrong_credentials.png) |
-| **C-005-10** | 负面/边界 | 未登录可浏览，但无法提交购买意向 | PB-04 AC4；SRS §5.1.1 | ☑ **通过** | [📷 未登录详情提示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_10a_unauth_detail_prompt.png) · [📷 点提交跳转登录页](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_10b_unauth_redirect_login.png) |
-| **C-005-11** | 负面/边界 | 界面无口令码入口（注册/登录/详情页） | PB-04 AC4；DoD 无口令码 | ☑ **通过** | [📷 详情页无口令码全貌](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_11_no_passphrase_ui.png) |
+| **C-005-01** | 主路径 | 注册成功（必填齐、密码≥8、地点空） | PB-04 AC1/AC2/AC3；SRS B-001 |  **通过** | [📷 注册表单填写](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_01a_register_form.png) · [📷 注册成功跳转](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_01b_register_success.png) |
+| **C-005-02** | 主路径 | 注册成功（地点选填有值） | PB-04 AC1（地点选填） |  **通过** | [📷 含选填地点注册](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_02_register_with_location.png) |
+| **C-005-03** | 主路径 | 用户名 + 密码登录成功（禁手机号当账号） | PB-04 AC3；SRS B-002 |  **通过** | [📷 登录页表单](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_03a_login_form.png) · [📷 登录成功前台态](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_03b_login_success.png) |
+| **C-005-04** | 主路径 | 密码哈希入库（BCrypt 非明文） | PB-04 AC5；SRS §6.2 |  **通过** | [📷 数据库 customer 表哈希核验](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_04_db_password_hash.png) |
+| **C-005-05** | 主路径 | 登录后可对在售商品提交意向（拦截解除） | PB-04 AC4 正向；SRS B-009 |  **通过** | [📷 登录后成功提交购买意向](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_05_logged_in_submit_intent.png) |
+| **C-005-06** | 负面/边界 | 密码长度 `< 8` 拒绝注册 | PB-04 AC2 |  **通过** | [📷 短密码拦截提示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_06_short_password_rejected.png) |
+| **C-005-07** | 负面/边界 | 重复用户名拒绝注册 | PB-04 AC2 |  **通过** | [📷 重复用户名拒绝提示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_07_duplicate_username_rejected.png) |
+| **C-005-08** | 负面/边界 | 缺必填字段拒绝（用户名 / 密码 / 电话） | PB-04 AC1 |  **通过** | [📷 缺必填项红字校验提示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_08_missing_required_fields.png) |
+| **C-005-09** | 负面/边界 | 错误密码 / 不存在用户登录失败 | PB-04 AC3 |  **通过** | [📷 错误凭据登录失败提示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_09_login_wrong_credentials.png) |
+| **C-005-10** | 负面/边界 | 未登录可浏览，但无法提交购买意向 | PB-04 AC4；SRS §5.1.1 |  **通过** | [📷 未登录详情提示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_10a_unauth_detail_prompt.png) · [📷 点提交跳转登录页](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_10b_unauth_redirect_login.png) |
+| **C-005-11** | 负面/边界 | 界面无口令码入口（注册/登录/详情页） | PB-04 AC4；DoD 无口令码 |  **通过** | [📷 详情页无口令码全貌](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_11_no_passphrase_ui.png) |
 
 ---
 
@@ -206,30 +206,7 @@
 
 ---
 
-## 六、证据文件汇总索引
-
-| 序号 | 证据类型 | 关联用例 | 文件链接（点击打开） |
-| :---: | :--- | :---: | :--- |
-| 1 | 后端 JUnit 测试终端截图 | JUnit 基线 | [t005_00_junit_test_pass.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_00_junit_test_pass.png) |
-| 2 | 注册页填写态截图 | C-005-01 | [t005_01a_register_form.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_01a_register_form.png) |
-| 3 | 注册成功跳转登录页截图 | C-005-01 | [t005_01b_register_success.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_01b_register_success.png) |
-| 4 | 含选填交易地点注册截图 | C-005-02 | [t005_02_register_with_location.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_02_register_with_location.png) |
-| 5 | 登录页表单截图 | C-005-03 | [t005_03a_login_form.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_03a_login_form.png) |
-| 6 | 登录成功后首页会话态截图 | C-005-03 | [t005_03b_login_success.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_03b_login_success.png) |
-| 7 | 数据库 `customer` 表 BCrypt 哈希核验截图 | C-005-04 | [t005_04_db_password_hash.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_04_db_password_hash.png) |
-| 8 | 登录后成功提交购买意向截图 | C-005-05 | [t005_05_logged_in_submit_intent.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_05_logged_in_submit_intent.png) |
-| 9 | 密码长度 `< 8` 拦截提示截图 | C-005-06 | [t005_06_short_password_rejected.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_06_short_password_rejected.png) |
-| 10 | 重复用户名拒绝注册截图 | C-005-07 | [t005_07_duplicate_username_rejected.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_07_duplicate_username_rejected.png) |
-| 11 | 缺必填字段校验提示截图 | C-005-08 | [t005_08_missing_required_fields.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_08_missing_required_fields.png) |
-| 12 | 错误密码/不存在用户登录失败截图 | C-005-09 | [t005_09_login_wrong_credentials.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_09_login_wrong_credentials.png) |
-| 13 | 未登录浏览商品详情提示截图 | C-005-10 | [t005_10a_unauth_detail_prompt.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_10a_unauth_detail_prompt.png) |
-| 14 | 未登录点提交意向跳转登录页截图 | C-005-10 | [t005_10b_unauth_redirect_login.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_10b_unauth_redirect_login.png) |
-| 15 | 详情页无口令码入口全貌截图 | C-005-11 | [t005_11_no_passphrase_ui.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_11_no_passphrase_ui.png) |
-| 16 | 结构化测试执行数据 JSON | 全部用例 | [t005-t009-acceptance-results.json](https://github.com/Wen5555/OxStore/blob/main/docs/test/evidence/t005-t009-acceptance-results.json) |
-
----
-
-## 七、Sprint Review 汇报一行汇总与禅道回写
+## 六、Sprint Review 汇报一行汇总与禅道回写
 
 | Task | PB | 禅道子需求 | 执行日期 | 验收结果 | 通过/总数 | 发现缺陷数 | 证据位置 |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
