@@ -52,14 +52,17 @@ public class ProductServiceImpl implements ProductService {
     private final IntentRepository intents;
     private final OrderHistoryRepository orderHistory;
     private final ProductStatusEventRepository events;
+    private final ImageStorageService imageStorage;
 
     public ProductServiceImpl(ProductRepository products, CategoryRepository categories, IntentRepository intents,
-                              OrderHistoryRepository orderHistory, ProductStatusEventRepository events) {
+                              OrderHistoryRepository orderHistory, ProductStatusEventRepository events,
+                              ImageStorageService imageStorage) {
         this.products = products;
         this.categories = categories;
         this.intents = intents;
         this.orderHistory = orderHistory;
         this.events = events;
+        this.imageStorage = imageStorage;
     }
 
     @Override
@@ -108,7 +111,9 @@ public class ProductServiceImpl implements ProductService {
         String sanitizedDescription = sanitizeDescription(descriptionHtml);
         Product product = Product.create(name.trim(), sanitizedDescription, price, stock, category);
         for (int index = 0; index < imagePaths.size(); index++) {
-            product.addImage(imagePaths.get(index), index);
+            String imagePath = imagePaths.get(index);
+            var metadata = imageStorage.metadata(imagePath);
+            product.addImage(imagePath, index, metadata.contentType(), metadata.sizeBytes());
         }
         products.saveAndFlush(product);
         events.save(new ProductStatusEvent(product, null, ProductEventType.PUBLISHED, null, product.getPublishedAt()));

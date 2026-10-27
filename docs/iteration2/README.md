@@ -8,6 +8,8 @@
 | --- | --- |
 | [product-backlog.md](./product-backlog.md) | 迭代2 Sprint 产品待办（PB-01～08，含验收标准与待确认边界） |
 | [requirements-specification.md](./requirements-specification.md) | 迭代2 需求规格说明书（与 Wiki「需求规格说明书V2」同步） |
+| [r5-database-handoff.md](./r5-database-handoff.md) | R5九项数据库任务、交接对象、成果边界与讲述提纲 |
+| [数据库验证报告](../test/iteration2-database-validation.md) | 独立MySQL、真实HTTP/JPA、V4/V5、备份恢复及重启证据 |
 
 ## 外部链接
 

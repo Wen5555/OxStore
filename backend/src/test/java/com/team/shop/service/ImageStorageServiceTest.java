@@ -17,6 +17,8 @@ class ImageStorageServiceTest {
         var bytes = out.toByteArray();
         String stored = service.store(new MockMultipartFile("image", "valid.png", "image/png", bytes));
         assertTrue(service.resolve(stored.substring("/api/images/".length())).toFile().exists());
+        assertEquals("image/png", service.metadata(stored).contentType());
+        assertEquals(bytes.length, service.metadata(stored).sizeBytes());
         service.deleteStored(stored);
         assertThrows(com.team.shop.exception.NotFoundException.class, () -> service.resolve(stored.substring("/api/images/".length())));
         assertThrows(BizException.class, () -> service.store(new MockMultipartFile("image", "wrong.jpg", "image/jpeg", bytes)));

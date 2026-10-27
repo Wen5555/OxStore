@@ -91,8 +91,8 @@ public class Product {
         return p;
     }
 
-    public void addImage(String imagePath, int sortOrder) {
-        images.add(new ProductImage(this, imagePath, sortOrder));
+    public void addImage(String imagePath, int sortOrder, String contentType, long sizeBytes) {
+        images.add(new ProductImage(this, imagePath, sortOrder, contentType, sizeBytes));
     }
 
     public void updateInventoryAndCategory(int stock, Category category, LocalDateTime now) {

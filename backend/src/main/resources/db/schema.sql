@@ -43,6 +43,7 @@ CREATE TABLE product (
     sold_at DATETIME(6) NULL,
     PRIMARY KEY (id),
     KEY idx_product_category_status (category2_id, status, published_at, id),
+    KEY idx_product_status_time (status, published_at, id),
     CONSTRAINT fk_product_category2 FOREIGN KEY (category2_id) REFERENCES category (id),
     CONSTRAINT chk_product_price CHECK (price > 0),
     CONSTRAINT chk_product_stock CHECK (stock >= 0),
@@ -54,9 +55,17 @@ CREATE TABLE product_image (
     product_id BIGINT NOT NULL,
     image_path VARCHAR(500) NOT NULL,
     sort_order INT NOT NULL,
+    content_type VARCHAR(20) NULL,
+    size_bytes BIGINT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uk_product_image_order (product_id, sort_order),
-    CONSTRAINT fk_product_image_product FOREIGN KEY (product_id) REFERENCES product (id)
+    CONSTRAINT fk_product_image_product FOREIGN KEY (product_id) REFERENCES product (id),
+    CONSTRAINT chk_product_image_order CHECK (sort_order BETWEEN 0 AND 8),
+    CONSTRAINT chk_product_image_metadata CHECK (
+        (content_type IS NULL AND size_bytes IS NULL) OR
+        (content_type IS NOT NULL AND size_bytes IS NOT NULL AND
+         content_type IN ('image/jpeg', 'image/png') AND size_bytes BETWEEN 1 AND 5242880)
+    )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE purchase_intent (

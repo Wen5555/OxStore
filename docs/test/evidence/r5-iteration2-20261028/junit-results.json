@@ -1,0 +1,107 @@
+[
+  {
+    "class": "com.team.shop.controller.admin.AdminProductControllerTest",
+    "name": "publishesWithoutImages",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.controller.admin.AdminProductControllerTest",
+    "name": "acceptsMultipleImagesAndPassesTheirOrderToTheService",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.controller.admin.AdminProductControllerTest",
+    "name": "rejectsMoreThanNineImagesBeforeWritingAnyFiles",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.domain.IntentStateMachineTest",
+    "name": "onlyQueuedIntentsCanStartAndOnlyTradingIntentsCanFinish",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.domain.ProductStateMachineTest",
+    "name": "onlyOnlineProductsAcceptIntentsAndStartTrades",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.domain.ProductStateMachineTest",
+    "name": "refillingAnOfflineProductDoesNotAutomaticallyPublishIt",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.domain.ProductStateMachineTest",
+    "name": "tradeResultsRequireTradeFreeze",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.dto.PhoneAndTradeRequestTest",
+    "name": "tradeFailureRequiresAnActionButNoLegacyAttemptToken",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.dto.PhoneAndTradeRequestTest",
+    "name": "customerRegistrationRequiresUsernamePasswordAndPhone",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.entity.TradeHistoryTest",
+    "name": "attemptsCannotOverwriteCompletedResult",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.entity.TradeHistoryTest",
+    "name": "inventoryDeterminesWhetherSuccessfulTradeLeavesItemOnline",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.entity.TradeHistoryTest",
+    "name": "requeuePreservesFirstSubmissionWithoutTokenState",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.exception.GlobalExceptionHandlerBugFixTest",
+    "name": "methodNotSupportedMapsTo405",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.Iteration2ApiIntegrationTest",
+    "name": "buyerSellerCatalogQueueInventoryAndHistoryFlow",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.security.JwtUtilTest",
+    "name": "rejectsOldAndPlaceholderSecrets",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.security.JwtUtilTest",
+    "name": "generatedTokensCanBeVerifiedOnlyWithSameKey",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.service.ImageStorageServiceTest",
+    "name": "validPngStoredAndFakeOrMismatchedRejected",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.service.TradeServiceImplTest",
+    "name": "alreadyFinishedTradeCannotBeConfirmedAgain",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.service.TradeServiceImplTest",
+    "name": "successDeductsOneAndReturnsProductOnlineWithoutAdvancingQueue",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.service.TradeServiceImplTest",
+    "name": "finalUnitOfflinesProductAndFailsEveryQueuedIntentAtomically",
+    "status": "PASS"
+  },
+  {
+    "class": "com.team.shop.service.TradeServiceImplTest",
+    "name": "discardRecordsFailureWhileRequeueLeavesNextIntentQueued",
+    "status": "PASS"
+  }
+]

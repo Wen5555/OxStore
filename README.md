@@ -173,7 +173,7 @@ npm run build
 mvn -B -ntp -f backend/pom.xml clean verify
 ```
 
-真实 MySQL 上的 V4 迁移尚未在本环境验证。现有 `scripts/verify_database.py` 仍针对旧版 schema 和口令 API，不应作为迭代 2 验证入口。
+迭代 2 的真实 MySQL 验证入口为 `python -X utf8 scripts/verify_iteration2_database.py`（先完成后端打包，需本机已有 `mysql:8.0.46` 镜像）。空库、V4/V5 升级、备份恢复、约束、HTTP/JPA 和重启结果见[数据库验证报告](docs/test/iteration2-database-validation.md)。已有 V4 数据库须先升级 V5；步骤见[数据库说明](docs/design/database.md#6-已有库升级)。旧版 `scripts/verify_database.py` 保留作基线历史入口。
 
 ## 文档
 
