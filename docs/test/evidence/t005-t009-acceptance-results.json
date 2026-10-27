@@ -1,0 +1,242 @@
+{
+  "executedAt": "2026-10-27T12:05:00+08:00",
+  "timezone": "Asia/Shanghai (UTC+8)",
+  "gitHead": "fdd9b6a9e15fcf8c7dbebf6b7e24cad43fd87cfa",
+  "junit": {
+    "total": 21,
+    "passed": 21,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "playwrightE2e": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0
+  },
+  "t005": {
+    "taskId": "T-005",
+    "pb": "PB-04",
+    "zentaoId": "13928",
+    "totalCases": 11,
+    "passedCases": 11,
+    "cases": [
+      {
+        "id": "C-005-01",
+        "name": "注册成功（必填齐、密码≥8、地点空）",
+        "status": "PASS",
+        "detail": "注册表单无验证码字段(hasCaptcha=false)，提交后返回 201 Created 并跳转 /login",
+        "screenshots": [
+          "t005_01a_register_form.png",
+          "t005_01b_register_success.png"
+        ]
+      },
+      {
+        "id": "C-005-02",
+        "name": "注册成功（地点选填有值）",
+        "status": "PASS",
+        "detail": "选填默认交易地点「一食堂门口」注册成功并跳转 /login，后续商家顾客列表可见该地点",
+        "screenshots": [
+          "t005_02_register_with_location.png"
+        ]
+      },
+      {
+        "id": "C-005-03",
+        "name": "用户名 + 密码登录成功",
+        "status": "PASS",
+        "detail": "使用 acc_t005_a 登录成功并签发 CUSTOMER JWT；尝试用手机号 13800000001 当用户名登录返回 HTTP 401 被拒",
+        "screenshots": [
+          "t005_03a_login_form.png",
+          "t005_03b_login_success.png"
+        ]
+      },
+      {
+        "id": "C-005-04",
+        "name": "密码哈希入库（非明文）",
+        "status": "PASS",
+        "detail": "查库 customer 表确认 password_hash 为 $2a$10$... BCrypt 哈希值（60 字符），无明文密码存储",
+        "screenshots": [
+          "t005_04_db_password_hash.png"
+        ],
+        "dbOutput": "ID | USERNAME   | PHONE       | LOCATION | REGISTERED_AT              | PASSWORD_HASH\n1  | acc_t005_a | 13800000001 | <NULL>   | 2026-10-27 12:07:34.604042 | $2a$10$IZ98a6vbb0jNeHXoBEKq8.frXIinKXHqdjnDCcrHpMVaHzAV3gse6\n2  | acc_t005_b | 13800000002 | 一食堂门口    | 2026-10-27 12:07:35.374338 | $2a$10$9klWx1VRC3bOExHADhIR5OQaK.GqqI5zm2csLDk03Xw2jcOys9WQO\n(2 rows, 5 ms)"
+      },
+      {
+        "id": "C-005-05",
+        "name": "登录后可对在售商品提交意向（对照：拦截已解除）",
+        "status": "PASS",
+        "detail": "已登录状态下点击「提交购买意向」返回 HTTP 200 (status=QUEUING)，页面提示「购买意向已提交」，无口令码、数量固定为 1",
+        "screenshots": [
+          "t005_05_logged_in_submit_intent.png"
+        ]
+      },
+      {
+        "id": "C-005-06",
+        "name": "密码长度 < 8 拒绝注册",
+        "status": "PASS",
+        "detail": "前端校验提示「密码不少于 8 位」；后端接口对 7 位密码返回 HTTP 400 (code=40001, message=\"password size must be between 8 and 64\")",
+        "screenshots": [
+          "t005_06_short_password_rejected.png"
+        ]
+      },
+      {
+        "id": "C-005-07",
+        "name": "重复用户名拒绝注册",
+        "status": "PASS",
+        "detail": "前端弹出错误提示「用户名已存在，请更换用户名。」；后端返回 HTTP 409 (code=40901)",
+        "screenshots": [
+          "t005_07_duplicate_username_rejected.png"
+        ]
+      },
+      {
+        "id": "C-005-08",
+        "name": "缺必填字段拒绝（用户名 / 密码 / 电话）",
+        "status": "PASS",
+        "detail": "缺手机号/用户名/密码均触发前端红字必填提示，后端接口返回 HTTP 400 (code=40001)",
+        "screenshots": [
+          "t005_08_missing_required_fields.png"
+        ]
+      },
+      {
+        "id": "C-005-09",
+        "name": "错误密码 / 不存在用户登录失败",
+        "status": "PASS",
+        "detail": "错误密码与不存在用户名均返回 HTTP 401 (code=40102)，页面提示「用户名或密码错误。」，未写入 customer_token",
+        "screenshots": [
+          "t005_09_login_wrong_credentials.png"
+        ]
+      },
+      {
+        "id": "C-005-10",
+        "name": "未登录可浏览，但无法提交购买意向",
+        "status": "PASS",
+        "detail": "未登录可正常浏览列表与详情；点「提交购买意向」跳 /login；不带 Token 直调 POST /api/products/1/intents 返回 HTTP 401 (code=40101)",
+        "screenshots": [
+          "t005_10a_unauth_detail_prompt.png",
+          "t005_10b_unauth_redirect_login.png"
+        ]
+      },
+      {
+        "id": "C-005-11",
+        "name": "界面无口令码入口（注册/登录/详情相关页）",
+        "status": "PASS",
+        "detail": "巡检 /register、/login、/、/products/{id} 页面 DOM，均无口令码输入框、查询口令或凭口令提交入口",
+        "screenshots": [
+          "t005_11_no_passphrase_ui.png"
+        ]
+      }
+    ]
+  },
+  "t009": {
+    "taskId": "T-009",
+    "pb": "PB-03",
+    "zentaoId": "13924",
+    "totalCases": 11,
+    "passedCases": 11,
+    "cases": [
+      {
+        "id": "C-009-01",
+        "name": "存在可用二级类目树；发布必须选到二级",
+        "status": "PASS",
+        "detail": "GET /api/categories/tree 返回 5 个一级类目及对应二级类目；未选二级类目时前端拦截提示「请选择二级类目」，直传一级类目 ID (id=1) 后端返回 HTTP 400 (商品必须选择二级类目)",
+        "screenshots": [
+          "t009_01a_category_tree_cascader.png",
+          "t009_01b_publish_require_level2.png"
+        ]
+      },
+      {
+        "id": "C-009-02",
+        "name": "未登录可浏览在售列表",
+        "status": "PASS",
+        "detail": "匿名访问首页可见 P-ON-A/B/C 共 3 件在售商品；P-FZ(FROZEN) 与 P-OFF(OFFLINE) 均不出现；卡片仅含名称、价格、主图、二级类目，不含描述摘要与库存",
+        "screenshots": [
+          "t009_02_anonymous_browse_list.png"
+        ]
+      },
+      {
+        "id": "C-009-03",
+        "name": "按二级类目筛选",
+        "status": "PASS",
+        "detail": "选「手机数码」返回 [极简数据线C（无图样例）, 蓝牙耳机A]；选「家具家装」返回 [桌面支架B]，二级类目互斥筛选准确",
+        "screenshots": [
+          "t009_03a_filter_cat2_a.png",
+          "t009_03b_filter_cat2_b.png"
+        ]
+      },
+      {
+        "id": "C-009-04",
+        "name": "关键词搜索：先剥标签再匹配名称+描述纯文本",
+        "status": "PASS",
+        "detail": "搜 SearchPhrase 命中 [蓝牙耳机A]（P-FZ/P-OFF 被过滤）；搜 HTML 标签名 strong 返回 0 条（证明先剥标签）；搜类目名「家具家装」返回 0 条（不匹配类目）",
+        "screenshots": [
+          "t009_04a_search_stripped_html.png",
+          "t009_04b_search_by_name.png",
+          "t009_04c_search_category_name_no_match.png"
+        ]
+      },
+      {
+        "id": "C-009-05",
+        "name": "列表字段与主图规则",
+        "status": "PASS",
+        "detail": "有图商品 P-ON-A 主图为第一张上传图 (/api/images/ce574588-e5b8-4fba-82fe-48fa13ebf036.png)；无商品图但描述含 <img> 的 P-ON-C 主图为统一占位图 (/placeholder-product.svg)，描述内插图未充当主图",
+        "screenshots": [
+          "t009_05_main_image_and_placeholder.png"
+        ]
+      },
+      {
+        "id": "C-009-06",
+        "name": "ONLINE 详情可打开",
+        "status": "PASS",
+        "detail": "从列表打开 /products/1 成功，完整显示名称、价格 ¥199.00、类目「手机数码」、库存「5」、富文本描述与提交意向入口",
+        "screenshots": [
+          "t009_06_online_product_detail.png"
+        ]
+      },
+      {
+        "id": "C-009-07",
+        "name": "FROZEN 不出现在列表/搜索；直链只读",
+        "status": "PASS",
+        "detail": "P-FZ (id=4) 不出现在首页列表与 SearchPhrase 搜索结果中；直链打开显示黄色只读横幅且无提交按钮；携带 Token 调提交意向接口返回 HTTP 409 (code=40901)",
+        "screenshots": [
+          "t009_07_frozen_direct_link_readonly.png"
+        ]
+      },
+      {
+        "id": "C-009-08",
+        "name": "OFFLINE 不可打开详情、不可提交意向",
+        "status": "PASS",
+        "detail": "P-OFF (id=5) 不在列表/搜索中；访问 /products/5 接口返回 HTTP 404 (code=40401)，页面展示「商品当前不可查看」空态且无法提交意向 (POST 返回 HTTP 409)",
+        "screenshots": [
+          "t009_08_offline_detail_blocked.png"
+        ]
+      },
+      {
+        "id": "C-009-09",
+        "name": "分页与空态（最简可运行）",
+        "status": "PASS",
+        "detail": "构造 12 件在售商品，第 1 页显示 10 件、翻到第 2 页显示 2 件；搜索无匹配关键词「NoSuchProductKeyword999」显示「暂无在售商品」空态",
+        "screenshots": [
+          "t009_09a_pagination_page2.png",
+          "t009_09b_empty_search_state.png"
+        ]
+      },
+      {
+        "id": "C-009-10",
+        "name": "列表/搜索不含 FROZEN、OFFLINE（综合抽查）",
+        "status": "PASS",
+        "detail": "抽查首页列表、搜索结果及 GET /api/products?page=1&size=100，仅返回 ONLINE 商品 (ID=3,2,1)，严格不含 P-FZ(4) 与 P-OFF(5)",
+        "screenshots": [
+          "t009_10_list_excludes_frozen_offline.png"
+        ]
+      },
+      {
+        "id": "C-009-11",
+        "name": "搜索结果卡片不展示描述摘要、不展示库存",
+        "status": "PASS",
+        "detail": "搜索结果卡片 DOM 与 GET /api/products?q=SearchPhrase 返回字段严格为 [productId, name, price, mainImagePath, category2Id, category2Name]，不含 descriptionHtml 與 stock；库存仅在详情页展示",
+        "screenshots": [
+          "t009_11_card_fields_no_desc_no_stock.png"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,112 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------------< com.team:shop >----------------------------
+[INFO] Building online-shop-mvp 0.1.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ shop ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 4 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ shop ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ shop ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ shop ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- surefire:3.1.2:test (default-test) @ shop ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.team.shop.dto.PhoneAndTradeRequestTest
+12:02:04.821 [main] INFO org.hibernate.validator.internal.util.Version -- HV000001: Hibernate Validator 8.0.1.Final
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.225 s -- in com.team.shop.dto.PhoneAndTradeRequestTest
+[INFO] Running com.team.shop.exception.GlobalExceptionHandlerBugFixTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in com.team.shop.exception.GlobalExceptionHandlerBugFixTest
+[INFO] Running com.team.shop.controller.admin.AdminProductControllerTest
+12:02:05.686 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+12:02:05.686 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+12:02:05.688 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 2 ms
+12:02:05.773 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+12:02:05.773 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+12:02:05.773 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+12:02:05.796 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+12:02:05.796 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+12:02:05.796 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.815 s -- in com.team.shop.controller.admin.AdminProductControllerTest
+[INFO] Running com.team.shop.Iteration2ApiIntegrationTest
+12:02:05.826 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.team.shop.Iteration2ApiIntegrationTest]: Iteration2ApiIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+12:02:05.879 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.team.shop.ShopApplication for test class com.team.shop.Iteration2ApiIntegrationTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2026-10-27T12:02:06.081+08:00  INFO 311942 --- [online-shop-mvp] [           main] c.t.shop.Iteration2ApiIntegrationTest    : Starting Iteration2ApiIntegrationTest using Java 17.0.21 with PID 311942 (started by box in /workspace/OxStore-run/backend)
+2026-10-27T12:02:06.082+08:00 DEBUG 311942 --- [online-shop-mvp] [           main] c.t.shop.Iteration2ApiIntegrationTest    : Running with Spring Boot v3.2.5, Spring v6.1.6
+2026-10-27T12:02:06.083+08:00  INFO 311942 --- [online-shop-mvp] [           main] c.t.shop.Iteration2ApiIntegrationTest    : No active profile set, falling back to 1 default profile: "default"
+2026-10-27T12:02:06.431+08:00  INFO 311942 --- [online-shop-mvp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-27T12:02:06.483+08:00  INFO 311942 --- [online-shop-mvp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 47 ms. Found 8 JPA repository interfaces.
+2026-10-27T12:02:06.788+08:00  INFO 311942 --- [online-shop-mvp] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 0 (http)
+2026-10-27T12:02:06.795+08:00  INFO 311942 --- [online-shop-mvp] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-10-27T12:02:06.795+08:00  INFO 311942 --- [online-shop-mvp] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-10-27T12:02:06.821+08:00  INFO 311942 --- [online-shop-mvp] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-10-27T12:02:06.821+08:00  INFO 311942 --- [online-shop-mvp] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 724 ms
+2026-10-27T12:02:06.858+08:00 DEBUG 311942 --- [online-shop-mvp] [           main] com.team.shop.security.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2026-10-27T12:02:06.909+08:00  INFO 311942 --- [online-shop-mvp] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-10-27T12:02:06.935+08:00  INFO 311942 --- [online-shop-mvp] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-10-27T12:02:06.951+08:00  INFO 311942 --- [online-shop-mvp] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-10-27T12:02:07.005+08:00  INFO 311942 --- [online-shop-mvp] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-27T12:02:07.020+08:00  INFO 311942 --- [online-shop-mvp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-10-27T12:02:07.135+08:00  INFO 311942 --- [online-shop-mvp] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:oxstore_it user=SA
+2026-10-27T12:02:07.136+08:00  INFO 311942 --- [online-shop-mvp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-10-27T12:02:07.729+08:00  INFO 311942 --- [online-shop-mvp] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-27T12:02:07.776+08:00  INFO 311942 --- [online-shop-mvp] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-27T12:02:08.025+08:00  INFO 311942 --- [online-shop-mvp] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-10-27T12:02:08.358+08:00  WARN 311942 --- [online-shop-mvp] [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: fdbdf17a-3832-4cb3-b6d4-c62650e6faf6
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-27T12:02:08.498+08:00  INFO 311942 --- [online-shop-mvp] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@521a3128, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@45220c67, org.springframework.security.web.context.SecurityContextHolderFilter@5e7967a, org.springframework.security.web.header.HeaderWriterFilter@1741e4a6, org.springframework.web.filter.CorsFilter@272185e8, org.springframework.security.web.authentication.logout.LogoutFilter@27d3a440, com.team.shop.security.JwtAuthFilter@3117ac8d, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@7807e2bb, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@68e7f7c4, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@64ee4b14, org.springframework.security.web.session.SessionManagementFilter@5f638200, org.springframework.security.web.access.ExceptionTranslationFilter@34195ce5, org.springframework.security.web.access.intercept.AuthorizationFilter@4e6b3894]
+2026-10-27T12:02:08.602+08:00  INFO 311942 --- [online-shop-mvp] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 46027 (http) with context path ''
+2026-10-27T12:02:08.608+08:00  INFO 311942 --- [online-shop-mvp] [           main] c.t.shop.Iteration2ApiIntegrationTest    : Started Iteration2ApiIntegrationTest in 2.686 seconds (process running for 4.168)
+2026-10-27T12:02:08.814+08:00  INFO 311942 --- [online-shop-mvp] [           main] com.team.shop.config.DataInitializer     : 已初始化卖家账号：admin
+2026-10-27T12:02:08.870+08:00  INFO 311942 --- [online-shop-mvp] [o-auto-1-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-27T12:02:08.870+08:00  INFO 311942 --- [online-shop-mvp] [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-10-27T12:02:08.871+08:00  INFO 311942 --- [online-shop-mvp] [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.774 s -- in com.team.shop.Iteration2ApiIntegrationTest
+[INFO] Running com.team.shop.security.JwtUtilTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in com.team.shop.security.JwtUtilTest
+[INFO] Running com.team.shop.domain.IntentStateMachineTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in com.team.shop.domain.IntentStateMachineTest
+[INFO] Running com.team.shop.domain.ProductStateMachineTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in com.team.shop.domain.ProductStateMachineTest
+[INFO] Running com.team.shop.service.TradeServiceImplTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.113 s -- in com.team.shop.service.TradeServiceImplTest
+[INFO] Running com.team.shop.service.ImageStorageServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.053 s -- in com.team.shop.service.ImageStorageServiceTest
+[INFO] Running com.team.shop.entity.TradeHistoryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in com.team.shop.entity.TradeHistoryTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  6.154 s
+[INFO] Finished at: 2026-10-27T12:02:09+08:00
+[INFO] ------------------------------------------------------------------------

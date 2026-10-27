@@ -1,0 +1,9 @@
+
+Running 4 tests using 4 workers
+
+  ✓  3 [chromium] › e2e/buyer-seller-flows.spec.ts:55:1 › 下架商品详情即使 API 返回成功也不展示商品信息 (1.2s)
+  ✓  2 [chromium] › e2e/buyer-seller-flows.spec.ts:9:1 › 匿名买家可浏览商品，但提交意向时必须登录且没有口令入口 (1.6s)
+  ✓  1 [chromium] › e2e/buyer-seller-flows.spec.ts:165:1 › 买家购买历史按后端订单字段展示成功和失败终态 (1.6s)
+  ✓  4 [chromium] › e2e/buyer-seller-flows.spec.ts:80:1 › 卖家按商品队列开始交易，确认成功请求不带请求体 (2.5s)
+
+  4 passed (4.9s)
