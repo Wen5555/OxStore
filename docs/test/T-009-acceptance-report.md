@@ -27,11 +27,11 @@
 
 | 编号 | 检查项 | 结果 | 核验说明 |
 | :---: | :--- | :---: | :--- |
-| **E1** | 后端服务已启动（`http://127.0.0.1:8080`） | ☑ 通过 | Spring Boot `3.2.5` 正常运行，类目与商品查询接口正常响应 |
-| **E2** | 前端服务已启动（`http://127.0.0.1:5173/`） | ☑ 通过 | Vite + React 前端渲染正常，`/api` 代理转发正常 |
-| **E3** | `GET /api/categories/tree` 返回两级类目树 | ☑ 通过 | 自动初始化 5 个一级类目（数码电器、家居生活、服饰鞋包、食品饮料、其他）及 9 个二级子类目 |
-| **E4** | 卖家后台可发布商品（必选二级类目、富文本与多图） | ☑ 通过 | `/admin/products/publish` 级联选择器、富文本编辑器与图片上传组件正常可用 |
-| **E5** | 已构造 `FROZEN` 与 `OFFLINE` 状态商品并获取详情直链 ID | ☑ 通过 | 成功构造 `P-FZ`（`/products/4`，状态 `FROZEN`）与 `P-OFF`（`/products/5`，状态 `OFFLINE`） |
+| **E1** | 后端服务已启动（`http://127.0.0.1:8080`） |  通过 | Spring Boot `3.2.5` 正常运行，类目与商品查询接口正常响应 |
+| **E2** | 前端服务已启动（`http://127.0.0.1:5173/`） |  通过 | Vite + React 前端渲染正常，`/api` 代理转发正常 |
+| **E3** | `GET /api/categories/tree` 返回两级类目树 |  通过 | 自动初始化 5 个一级类目（数码电器、家居生活、服饰鞋包、食品饮料、其他）及 9 个二级子类目 |
+| **E4** | 卖家后台可发布商品（必选二级类目、富文本与多图） |  通过 | `/admin/products/publish` 级联选择器、富文本编辑器与图片上传组件正常可用 |
+| **E5** | 已构造 `FROZEN` 与 `OFFLINE` 状态商品并获取详情直链 ID |  通过 | 成功构造 `P-FZ`（`/products/4`，状态 `FROZEN`）与 `P-OFF`（`/products/5`，状态 `OFFLINE`） |
 
 ### 2.2 测前准备演示数据矩阵（P-ON-A/B/C、P-FZ、P-OFF）
 
@@ -75,17 +75,17 @@
 
 | 用例编号 | 类别 | 用例名称 | 对应验收点 | 实测结果 | 截图证据链接（点击查看） |
 | :---: | :---: | :--- | :--- | :---: | :--- |
-| **C-009-01** | 主路径 | 存在可用二级类目树；发布必须选到二级 | PB-03 AC1；SRS S-003 | ☑ **通过** | [📷 二级类目级联树](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_01a_category_tree_cascader.png) · [📷 未选二级类目拒绝发布](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_01b_publish_require_level2.png) |
-| **C-009-02** | 主路径 | 未登录可浏览在售列表 | PB-03 AC3；SRS B-003 | ☑ **通过** | [📷 未登录浏览首页在售列表](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_02_anonymous_browse_list.png) |
-| **C-009-03** | 主路径 | 按二级类目筛选（Cat2-A / Cat2-B 互斥） | PB-03 AC2 | ☑ **通过** | [📷 筛选二级类目 Cat2-A](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_03a_filter_cat2_a.png) · [📷 筛选二级类目 Cat2-B](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_03b_filter_cat2_b.png) |
-| **C-009-04** | 主路径 | 关键词搜索：先剥标签再匹配名称+描述纯文本 | PB-03 AC4；SRS B-005 | ☑ **通过** | [📷 搜 SearchPhrase 剥标签命中](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_04a_search_stripped_html.png) · [📷 搜商品名片段](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_04b_search_by_name.png) · [📷 搜类目名不命中](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_04c_search_category_name_no_match.png) |
-| **C-009-05** | 主路径 | 列表字段与主图规则（首图为主图 / 无图占位图） | PB-03 AC5、AC6 | ☑ **通过** | [📷 有图主图与无图占位图对比](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_05_main_image_and_placeholder.png) |
-| **C-009-06** | 主路径 | `ONLINE` 商品详情可正常打开且显示库存 | PB-03；SRS B-006 | ☑ **通过** | [📷 ONLINE 商品详情页展示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_06_online_product_detail.png) |
-| **C-009-07** | 负面/边界 | `FROZEN` 不出现在列表/搜索；直链只读不可买 | PB-03 AC7；SRS B-007 | ☑ **通过** | [📷 FROZEN 商品直链只读页](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_07_frozen_direct_link_readonly.png) |
-| **C-009-08** | 负面/边界 | `OFFLINE` 不可打开详情、不可提交意向 | PB-03 AC8；SRS B-008 | ☑ **通过** | [📷 OFFLINE 商品直链拦截页](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_08_offline_detail_blocked.png) |
-| **C-009-09** | 负面/边界 | 分页与无结果空态（最简可运行） | PB-03 分页与空态 | ☑ **通过** | [📷 第 2 页分页展示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_09a_pagination_page2.png) · [📷 搜索无结果空态](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_09b_empty_search_state.png) |
-| **C-009-10** | 负面/边界 | 列表/搜索不含 `FROZEN`、`OFFLINE`（综合抽查） | PB-03 AC3、AC7、AC8 | ☑ **通过** | [📷 列表与接口排除非在售商品](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_10_list_excludes_frozen_offline.png) |
-| **C-009-11** | 负面/边界 | 搜索结果卡片不展示描述摘要、不展示库存 | PB-03 AC5 | ☑ **通过** | [📷 搜索结果卡片字段核验](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_11_card_fields_no_desc_no_stock.png) |
+| **C-009-01** | 主路径 | 存在可用二级类目树；发布必须选到二级 | PB-03 AC1；SRS S-003 |  **通过** | [📷 二级类目级联树](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_01a_category_tree_cascader.png) · [📷 未选二级类目拒绝发布](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_01b_publish_require_level2.png) |
+| **C-009-02** | 主路径 | 未登录可浏览在售列表 | PB-03 AC3；SRS B-003 |  **通过** | [📷 未登录浏览首页在售列表](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_02_anonymous_browse_list.png) |
+| **C-009-03** | 主路径 | 按二级类目筛选（Cat2-A / Cat2-B 互斥） | PB-03 AC2 |  **通过** | [📷 筛选二级类目 Cat2-A](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_03a_filter_cat2_a.png) · [📷 筛选二级类目 Cat2-B](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_03b_filter_cat2_b.png) |
+| **C-009-04** | 主路径 | 关键词搜索：先剥标签再匹配名称+描述纯文本 | PB-03 AC4；SRS B-005 |  **通过** | [📷 搜 SearchPhrase 剥标签命中](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_04a_search_stripped_html.png) · [📷 搜商品名片段](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_04b_search_by_name.png) · [📷 搜类目名不命中](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_04c_search_category_name_no_match.png) |
+| **C-009-05** | 主路径 | 列表字段与主图规则（首图为主图 / 无图占位图） | PB-03 AC5、AC6 |  **通过** | [📷 有图主图与无图占位图对比](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_05_main_image_and_placeholder.png) |
+| **C-009-06** | 主路径 | `ONLINE` 商品详情可正常打开且显示库存 | PB-03；SRS B-006 |  **通过** | [📷 ONLINE 商品详情页展示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_06_online_product_detail.png) |
+| **C-009-07** | 负面/边界 | `FROZEN` 不出现在列表/搜索；直链只读不可买 | PB-03 AC7；SRS B-007 |  **通过** | [📷 FROZEN 商品直链只读页](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_07_frozen_direct_link_readonly.png) |
+| **C-009-08** | 负面/边界 | `OFFLINE` 不可打开详情、不可提交意向 | PB-03 AC8；SRS B-008 |  **通过** | [📷 OFFLINE 商品直链拦截页](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_08_offline_detail_blocked.png) |
+| **C-009-09** | 负面/边界 | 分页与无结果空态（最简可运行） | PB-03 分页与空态 |  **通过** | [📷 第 2 页分页展示](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_09a_pagination_page2.png) · [📷 搜索无结果空态](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_09b_empty_search_state.png) |
+| **C-009-10** | 负面/边界 | 列表/搜索不含 `FROZEN`、`OFFLINE`（综合抽查） | PB-03 AC3、AC7、AC8 |  **通过** | [📷 列表与接口排除非在售商品](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_10_list_excludes_frozen_offline.png) |
+| **C-009-11** | 负面/边界 | 搜索结果卡片不展示描述摘要、不展示库存 | PB-03 AC5 |  **通过** | [📷 搜索结果卡片字段核验](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_11_card_fields_no_desc_no_stock.png) |
 
 ---
 
@@ -197,32 +197,7 @@
 
 ---
 
-## 六、证据文件汇总索引
-
-| 序号 | 证据类型 | 关联用例 | 文件链接（点击打开） |
-| :---: | :--- | :---: | :--- |
-| 1 | 后端 JUnit 测试终端截图 | JUnit 基线 | [t009_00_junit_test_pass.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_00_junit_test_pass.png) |
-| 2 | 卖家发布页二级类目级联树截图 | C-009-01 | [t009_01a_category_tree_cascader.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_01a_category_tree_cascader.png) |
-| 3 | 未选择二级类目拒绝发布校验截图 | C-009-01 | [t009_01b_publish_require_level2.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_01b_publish_require_level2.png) |
-| 4 | 未登录浏览首页在售列表截图 | C-009-02 | [t009_02_anonymous_browse_list.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_02_anonymous_browse_list.png) |
-| 5 | 按二级类目 Cat2-A（手机数码）筛选截图 | C-009-03 | [t009_03a_filter_cat2_a.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_03a_filter_cat2_a.png) |
-| 6 | 按二级类目 Cat2-B（家具家装）筛选截图 | C-009-03 | [t009_03b_filter_cat2_b.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_03b_filter_cat2_b.png) |
-| 7 | 搜索 `SearchPhrase` 剥离 HTML 标签命中截图 | C-009-04 | [t009_04a_search_stripped_html.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_04a_search_stripped_html.png) |
-| 8 | 按商品名称片段「蓝牙」搜索命中截图 | C-009-04 | [t009_04b_search_by_name.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_04b_search_by_name.png) |
-| 9 | 搜索二级类目名「家具家装」不命中截图 | C-009-04 | [t009_04c_search_category_name_no_match.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_04c_search_category_name_no_match.png) |
-| 10 | 有图商品首图与无图商品占位图对比截图 | C-009-05 | [t009_05_main_image_and_placeholder.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_05_main_image_and_placeholder.png) |
-| 11 | `ONLINE` 商品详情页完整展示（含库存）截图 | C-009-06 | [t009_06_online_product_detail.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_06_online_product_detail.png) |
-| 12 | `FROZEN` 商品直链只读展示与警告横幅截图 | C-009-07 | [t009_07_frozen_direct_link_readonly.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_07_frozen_direct_link_readonly.png) |
-| 13 | `OFFLINE` 商品直链拒绝访问空态页截图 | C-009-08 | [t009_08_offline_detail_blocked.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_08_offline_detail_blocked.png) |
-| 14 | 在售商品列表第 2 页分页展示截图 | C-009-09 | [t009_09a_pagination_page2.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_09a_pagination_page2.png) |
-| 15 | 搜索无匹配结果空态展示截图 | C-009-09 | [t009_09b_empty_search_state.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_09b_empty_search_state.png) |
-| 16 | 列表与接口综合抽查排除 `FROZEN`/`OFFLINE` 截图 | C-009-10 | [t009_10_list_excludes_frozen_offline.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_10_list_excludes_frozen_offline.png) |
-| 17 | 搜索结果卡片无描述摘要、无库存核验截图 | C-009-11 | [t009_11_card_fields_no_desc_no_stock.png](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t009/t009_11_card_fields_no_desc_no_stock.png) |
-| 18 | 结构化测试执行数据 JSON | 全部用例 | [t005-t009-acceptance-results.json](https://github.com/Wen5555/OxStore/blob/main/docs/test/evidence/t005-t009-acceptance-results.json) |
-
----
-
-## 七、Sprint Review 汇报一行汇总与禅道回写
+## 六、Sprint Review 汇报一行汇总与禅道回写
 
 | Task | PB | 禅道子需求 | 执行日期 | 验收结果 | 通过/总数 | 发现缺陷数 | 证据位置 |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
