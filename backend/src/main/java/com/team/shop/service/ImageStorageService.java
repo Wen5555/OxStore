@@ -69,6 +69,24 @@ public class ImageStorageService {
         if (!path.startsWith(uploadDir) || !Files.isRegularFile(path)) throw new NotFoundException("图片不存在");
         return path;
     }
+    /** 从已校验并落盘的商品图读取元数据；不把客户端声明直接作为持久化结果。 */
+    public StoredImageMetadata metadata(String imagePath) {
+        String prefix = "/api/images/";
+        if (imagePath == null || !imagePath.startsWith(prefix)) {
+            throw new BizException("商品图片路径无效");
+        }
+        String filename = imagePath.substring(prefix.length());
+        Path path = resolve(filename);
+        if (!path.getParent().equals(uploadDir)) throw new BizException("商品图片路径无效");
+        String extension = extensionOf(filename);
+        if (!EXTENSIONS.contains(extension)) throw new UnsupportedImageException("商品图片类型无效");
+        try {
+            return new StoredImageMetadata(extension.equals("png") ? "image/png" : "image/jpeg", Files.size(path));
+        } catch (IOException e) {
+            throw new BizException("商品图片元数据读取失败");
+        }
+    }
+    public record StoredImageMetadata(String contentType, long sizeBytes) { }
     private boolean isJpeg(byte[] b) {
         return b.length >= 4 && (b[0] & 255) == 255 && (b[1] & 255) == 216
                 && (b[2] & 255) == 255 && (b[b.length - 2] & 255) == 255 && (b[b.length - 1] & 255) == 217;

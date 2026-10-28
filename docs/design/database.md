@@ -53,6 +53,8 @@ erDiagram
         BIGINT product_id FK
         VARCHAR image_path
         INT sort_order
+        VARCHAR content_type
+        BIGINT size_bytes
     }
     purchase_intent {
         BIGINT id PK
@@ -99,7 +101,7 @@ erDiagram
 ## 3. 主要字段和状态
 
 - `product.stock` 为非负库存；`category2_id` 必须指向二级分类。`product.status` 为 `ONLINE`、`FROZEN` 或 `OFFLINE`。卖家只能对正库存商品执行上架；补充库存本身不会自动上架。
-- `product_image` 按 `sort_order` 保存最多 9 张图片；没有图片时 `mainImagePath` 为空。
+- `product_image` 按 `sort_order`（0～8）保存最多 9 张商品图；`content_type`、`size_bytes` 保存已校验文件的类型和实际字节数。新上传图从落盘文件读取元数据；旧图无法从 SQL 推断大小，迁移后这两列均保留 NULL。元数据必须同时为空，或同时满足 JPG/PNG、1～5242880 字节；商品图与描述中的插图分别存储。没有商品图时 `mainImagePath` 为空。
 - `purchase_intent.customer_id` 对新意向必填业务关联；数据库字段允许为空，以兼容迁移前的旧数据。新 API 必须经顾客认证才能创建意向。`product_name_snapshot` 保存提交时商品名。
 - 意向状态为 `QUEUING`、`IN_TRANSACTION`、`SUCCESS`、`FAILED`、`CANCELLED`。`queue_seq` 在同一商品内唯一；重排分配新序号，首次提交时间不变。
 - `trade_attempt` 记录一次交易过程，未结束时 `finished_at/result/fail_action` 均为空；成功结果没有失败动作，失败结果必须包含 `REQUEUE` 或 `DISCARD`。
@@ -132,7 +134,8 @@ Compose 的空 MySQL 数据卷会导入同一份 schema；已存在的数据卷�
 1. 旧三表数据库先结束所有 `IN_TRANSACTION` 交易，再执行 [V2 队列与历史迁移](../../backend/src/main/resources/db/migrations/V2__queue_history.sql)。
 2. 已执行旧版 V2 的数据库按需执行 [V3 交易结果约束迁移](../../backend/src/main/resources/db/migrations/V3__trade_attempt_completion_check.sql)；新建库及修订版 V2 无需额外运行 V3。
 3. 在任何交易中意向均已结束的前提下执行 [V4 迭代 2 迁移](../../backend/src/main/resources/db/migrations/V4__iteration2_customer_inventory_catalog.sql)。
-4. 核对数据行数、商品/意向状态、中文内容和队列序号；由卖家核实每件旧商品的实际库存，按需补库存并手动上架。
+4. 执行 [V5 数据库契约补齐](../../backend/src/main/resources/db/migrations/V5__iteration2_database_contract.sql)：增加商品图元数据、图片顺序/大小约束、意向状态约束，以及不带类目筛选时的商品状态/时间索引。已执行 V4 的库也须执行 V5 后再使用本版程序。
+5. 核对数据行数、商品/意向状态、中文内容和队列序号；由卖家核实每件旧商品的实际库存，按需补库存并手动上架。
 
 旧版没有保存库存，因此 V4 将原有商品安全地设为 `stock=0`、`OFFLINE`，不会猜测库存；原有排队意向转为失败，不会伪装成已登录顾客的历史。迁移前商品图像路径会保留。迁移不会自动创建顾客账号，也不会把旧口令记录显示为新顾客购买历史。
 
@@ -146,6 +149,26 @@ mysqldump -uroot -p --single-transaction --routines --triggers --default-charact
 
 备份文件含账号和个人信息，存放于受控位置，不应提交到 Git。
 
+### Docker MySQL 的重复升级入口
+
+先暂停应用写入，再明确指定目标容器和数据库。容器内须提供 `MYSQL_ROOT_PASSWORD`；以下容器名为示例，按实际目标替换：
+
+```powershell
+python -X utf8 scripts/migrate_iteration2.py --container oxstore-mysql --database shop
+```
+
+该入口先检查五表基线或完整的迭代 2 结构、确认没有交易中意向，再备份到被 Git 忽略的 `.work/db-backups/`，保存 SHA-256 后才执行 SQL。五表基线执行 V4→V5；已升级库跳过 V4，仅执行可重复的 V5。V4 部分结构或关键关系缺失时拒绝继续；V5 已新增一列后中断，可以在检查数据后再次执行。它不自动迁移旧三表库，也不自动回滚 MySQL DDL。备份目录须位于受控本机磁盘；升级后先在独立空库导入备份确认可恢复，回退时须停写并恢复整个旧库。
+
+直接重复执行 V4 SQL 仍会被其保护检查拒绝；“可重复升级”指上述升级入口和 V5，不是重复执行所有历史 SQL。新建库直接执行当前 `schema.sql`，不再重放 V4。
+
 ## 7. 验证
 
-运行 `mvn -B -ntp -f backend/pom.xml clean verify` 可执行当前后端测试，包括基于 H2 的 HTTP 集成测试。V4 迁移使用 MySQL 特定 DDL，尚未在真实 MySQL 副本验证；应在部署前按第 6 节备份并演练。旧版 [verify_database.py](../../scripts/verify_database.py) 面向 V1 schema/API，不适用于迭代 2。旧结果见[历史数据库验证报告](../test/db-validation.md)，不代表本次 V4 已通过 MySQL 验证。
+运行 `mvn -B -ntp -f backend/pom.xml clean verify` 执行后端测试并打包。然后执行：
+
+```powershell
+python -X utf8 scripts/verify_iteration2_database.py --java java
+```
+
+验证脚本使用本机已有的 `mysql:8.0.46` 镜像，自行创建仅绑定回环地址的专用容器；分别验证空库和五表旧库，保存 SQL 约束、真实 HTTP/JPA、迁移与备份恢复、数据库/后端重启结果。旧库夹具来自主仓库 `4fc3dea` 的五表 schema，仅包含人工构造的测试记录。脚本结束后停止自己的 Java 进程并清理自己创建的容器及匿名卷，不连接业务库。
+
+2026-10-28 的实际结果见[迭代 2 数据库验证报告](../test/iteration2-database-validation.md)。旧版 [verify_database.py](../../scripts/verify_database.py) 和[历史数据库报告](../test/db-validation.md)继续作为基线历史资料。此次独立容器测试不代表现有业务库已经升级，也不代表完整前端或压力测试通过。

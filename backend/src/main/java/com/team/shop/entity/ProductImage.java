@@ -27,16 +27,26 @@ public class ProductImage {
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
 
+    @Column(name = "content_type", length = 20)
+    private String contentType;
+
+    @Column(name = "size_bytes")
+    private Long sizeBytes;
+
     protected ProductImage() {
     }
 
-    public ProductImage(Product product, String imagePath, int sortOrder) {
+    public ProductImage(Product product, String imagePath, int sortOrder, String contentType, Long sizeBytes) {
         this.product = product;
         this.imagePath = imagePath;
         this.sortOrder = sortOrder;
+        this.contentType = contentType;
+        this.sizeBytes = sizeBytes;
     }
 
     public Long getId() { return id; }
     public String getImagePath() { return imagePath; }
     public int getSortOrder() { return sortOrder; }
+    public String getContentType() { return contentType; }
+    public Long getSizeBytes() { return sizeBytes; }
 }
