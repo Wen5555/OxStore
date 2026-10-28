@@ -82,7 +82,7 @@
         "id": "C-005-07",
         "name": "重复用户名拒绝注册",
         "status": "PASS",
-        "detail": "前端弹出错误提示「用户名已存在，请更换用户名。」；后端返回 HTTP 409 (code=40901)",
+        "detail": "前端弹出错误提示「用户名已存在，请更换用户名。」；后端返回 HTTP 409 (code=40903)",
         "screenshots": [
           "t005_07_duplicate_username_rejected.png"
         ]

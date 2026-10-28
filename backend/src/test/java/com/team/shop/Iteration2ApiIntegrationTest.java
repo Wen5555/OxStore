@@ -93,8 +93,15 @@ class Iteration2ApiIntegrationTest {
         assertNotNull(queuedAtZero);
 
         JsonNode customers = get("/api/admin/customers?page=1&size=10", sellerToken).path("data");
-        assertEquals(1, customers.path("total").asInt());
-        JsonNode firstCustomer = customers.path("items").get(0);
+        assertTrue(customers.path("total").asInt() >= 1);
+        JsonNode firstCustomer = null;
+        for (JsonNode item : customers.path("items")) {
+            if ("buyer1".equals(item.path("username").asText())) {
+                firstCustomer = item;
+                break;
+            }
+        }
+        assertNotNull(firstCustomer);
         assertEquals("未设置", firstCustomer.path("location").asText());
         long customerId = firstCustomer.path("customerId").asLong();
         JsonNode sellerHistory = get(
@@ -111,6 +118,66 @@ class Iteration2ApiIntegrationTest {
         post("/api/admin/products/" + manualProductId + "/online", null, sellerToken, 200);
         assertEquals("ONLINE", http.getForObject("/api/products/" + manualProductId,
                 JsonNode.class).path("data").path("status").asText());
+    }
+
+    @Test
+    void customerAuthUsesContractCodeAndRoleGuards() {
+        String suffix = Long.toString(System.nanoTime());
+        String username = "r1-auth-" + suffix;
+        ResponseEntity<JsonNode> first = http.postForEntity("/api/auth/register",
+                Map.of("username", username, "password", "customer-pass-8", "phone", "13800000001"),
+                JsonNode.class);
+        assertEquals(201, first.getStatusCode().value());
+
+        ResponseEntity<JsonNode> duplicate = http.postForEntity("/api/auth/register",
+                Map.of("username", username, "password", "customer-pass-8", "phone", "13800000001"),
+                JsonNode.class);
+        assertEquals(409, duplicate.getStatusCode().value());
+        assertEquals(40903, duplicate.getBody().path("code").asInt());
+
+        String customerToken = login("/api/auth/login",
+                Map.of("username", username, "password", "customer-pass-8"));
+        assertEquals(403, http.exchange("/api/admin/products", HttpMethod.GET,
+                new HttpEntity<>(headers(customerToken)), JsonNode.class).getStatusCode().value());
+        assertEquals(401, http.getForEntity("/api/me/order-history", JsonNode.class)
+                .getStatusCode().value());
+    }
+
+    @Test
+    void independentProductQueuesCanEnterTradeAtTheSameTime() {
+        String suffix = Long.toString(System.nanoTime());
+        String customerA = "r1-queue-a-" + suffix;
+        String customerB = "r1-queue-b-" + suffix;
+        register(customerA, "13800000002");
+        register(customerB, "13800000003");
+        String buyerTokenA = login("/api/auth/login",
+                Map.of("username", customerA, "password", "customer-pass-8"));
+        String buyerTokenB = login("/api/auth/login",
+                Map.of("username", customerB, "password", "customer-pass-8"));
+        String sellerToken = login("/api/admin/auth/login",
+                Map.of("username", "admin", "password", "Test-Pass-9931!"));
+        JsonNode categories = http.getForObject("/api/categories/tree", JsonNode.class).path("data");
+        long category2Id = categories.get(0).path("children").get(0).path("id").asLong();
+
+        long productA = publish(sellerToken, "R1独立队列A-" + suffix, 2, category2Id, "")
+                .path("productId").asLong();
+        long productB = publish(sellerToken, "R1独立队列B-" + suffix, 2, category2Id, "")
+                .path("productId").asLong();
+        long intentA = submitIntent(productA, buyerTokenA);
+        long intentB = submitIntent(productB, buyerTokenB);
+
+        startTrade(intentA, sellerToken);
+        startTrade(intentB, sellerToken);
+
+        JsonNode queueA = get("/api/admin/intents?productId=" + productA, sellerToken)
+                .path("data").path("items");
+        JsonNode queueB = get("/api/admin/intents?productId=" + productB, sellerToken)
+                .path("data").path("items");
+        assertEquals("IN_TRANSACTION", queueA.get(0).path("status").asText());
+        assertEquals("IN_TRANSACTION", queueB.get(0).path("status").asText());
+
+        post("/api/admin/intents/" + intentA + "/fail", Map.of("action", "DISCARD"), sellerToken, 200);
+        post("/api/admin/intents/" + intentB + "/fail", Map.of("action", "DISCARD"), sellerToken, 200);
     }
 
     private JsonNode publish(String sellerToken, String name, int stock, long category2Id,
@@ -147,6 +214,13 @@ class Iteration2ApiIntegrationTest {
         ResponseEntity<JsonNode> response = http.postForEntity(path, credentials, JsonNode.class);
         assertEquals(200, response.getStatusCode().value());
         return response.getBody().path("data").path("token").asText();
+    }
+
+    private void register(String username, String phone) {
+        ResponseEntity<JsonNode> response = http.postForEntity("/api/auth/register",
+                Map.of("username", username, "password", "customer-pass-8", "phone", phone),
+                JsonNode.class);
+        assertEquals(201, response.getStatusCode().value());
     }
 
     private long submitIntent(long productId, String buyerToken) {

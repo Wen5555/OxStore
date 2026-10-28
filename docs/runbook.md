@@ -68,7 +68,7 @@ npm install
 npm run dev
 ```
 
-开发前台运行在 `http://localhost:5173/`，Vite 将 `/api` 代理到 `http://localhost:8080`。当前更新范围为后端 API 与上传代理限制；现有前端尚未迁移到顾客登录和迭代 2 API，不能视为前后端端到端已联调。
+开发前台运行在 `http://localhost:5173/`，Vite 将 `/api` 代理到 `http://localhost:8080`。当前前端已包含顾客注册/登录、商品浏览搜索、购买历史和卖家迭代 2 管理页面；完整浏览器联调仍需先安装前端依赖并执行 Playwright 流程。
 
 ## 已有数据库升级
 
