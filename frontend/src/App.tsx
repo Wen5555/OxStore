@@ -8,6 +8,7 @@ import LoginPage from './pages/admin/LoginPage'
 import ProductEditPage from './pages/admin/ProductEditPage'
 import ProductIntentQueuePage from './pages/admin/ProductIntentQueuePage'
 import PublishProductPage from './pages/admin/PublishProductPage'
+import BuyerAccountPage from './pages/buyer/BuyerAccountPage'
 import BuyerAuthPage from './pages/buyer/BuyerAuthPage'
 import BuyerHistoryPage from './pages/buyer/BuyerHistoryPage'
 import ProductDetailPage from './pages/buyer/ProductDetailPage'
@@ -36,6 +37,7 @@ export default function App() {
       <Route path="/products/:id" element={<ProductDetailPage />} />
       <Route path="/login" element={<BuyerAuthPage />} />
       <Route path="/register" element={<BuyerAuthPage registration />} />
+      <Route path="/me/account" element={<RequireCustomer><BuyerAccountPage /></RequireCustomer>} />
       <Route path="/me/order-history" element={<RequireCustomer><BuyerHistoryPage /></RequireCustomer>} />
 
       <Route path="/admin/login" element={<LoginPage />} />

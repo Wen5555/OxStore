@@ -59,8 +59,14 @@ export default function ProductListPage() {
           <Space>
             {loggedIn ? (
               <>
+                <Button onClick={() => navigate('/me/account')}>我的账户</Button>
                 <Button onClick={() => navigate('/me/order-history')}>我的购买历史</Button>
-                <Button onClick={() => { localStorage.removeItem('customer_token'); window.location.reload() }}>退出登录</Button>
+                <Button onClick={() => {
+                  localStorage.removeItem('customer_token')
+                  localStorage.removeItem('customer_username')
+                  localStorage.removeItem('customer_user_id')
+                  window.location.reload()
+                }}>退出登录</Button>
               </>
             ) : <><Button onClick={() => navigate('/login')}>登录</Button><Button type="primary" onClick={() => navigate('/register')}>注册</Button></>}
           </Space>

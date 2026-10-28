@@ -31,6 +31,8 @@ export default function BuyerAuthPage({ registration = false }: { registration?:
       } else {
         const result = await login({ username: values.username.trim(), password: values.password })
         localStorage.setItem('customer_token', result.token)
+        localStorage.setItem('customer_username', result.username)
+        localStorage.setItem('customer_user_id', String(result.userId))
         message.success('登录成功')
         navigate(returnTo, { replace: true })
       }

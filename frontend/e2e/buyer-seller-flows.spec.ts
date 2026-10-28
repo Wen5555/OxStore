@@ -196,3 +196,35 @@ test('买家购买历史按后端订单字段展示成功和失败终态', async
   await expect(page.getByRole('cell', { name: '历史商品' })).toBeVisible()
   await expect(page.getByRole('cell', { name: '失败' })).toBeVisible()
 })
+
+test('买家可查看账户概览、进入购买历史并退出登录', async ({ page }) => {
+  await page.route('**/api/auth/login', (route) =>
+    route.fulfill(apiResponse({ token: 'customer-token', userId: 17, role: 'CUSTOMER', username: 'buyer' })),
+  )
+  await page.route('**/api/categories/tree', (route) =>
+    route.fulfill(apiResponse([])),
+  )
+  await page.route('**/api/products?**', (route) =>
+    route.fulfill(apiResponse({ items: [], page: 1, size: 10, total: 0, pages: 0 })),
+  )
+  await page.route('**/api/me/order-history?**', (route) =>
+    route.fulfill(apiResponse({ items: [], page: 1, size: 10, total: 0, pages: 0 })),
+  )
+
+  await page.goto('/login')
+  await page.getByLabel('用户名').fill('buyer')
+  await page.getByLabel('密码').fill('password')
+  await page.getByRole('button', { name: /登\s*录/ }).click()
+  await page.getByRole('button', { name: '我的账户' }).click()
+
+  await expect(page.getByRole('heading', { name: '买家账户' })).toBeVisible()
+  await expect(page.getByText('buyer', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText('17', { exact: true })).toBeVisible()
+
+  await page.getByRole('button', { name: '查看购买历史' }).click()
+  await expect(page.getByRole('heading', { name: '我的购买历史' })).toBeVisible()
+  await page.goto('/me/account')
+  await page.getByRole('button', { name: '退出登录' }).click()
+  await expect(page).toHaveURL('/')
+  await expect(page.getByRole('button', { name: /登\s*录/ })).toBeVisible()
+})
