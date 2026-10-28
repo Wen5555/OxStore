@@ -1,0 +1,424 @@
+{
+  "startedAt": "2026-10-28T14:18:12.907Z",
+  "baseline": "57cb5d317d2549cdfbce4f4f1957e7a7ed662286",
+  "tasks": {
+    "T-013": {
+      "cases": [
+        {
+          "id": "C-013-01",
+          "name": "同时多件在售",
+          "result": "通过",
+          "shots": [
+            "t013_01_multi_online_list.png"
+          ]
+        },
+        {
+          "id": "C-013-02",
+          "name": "登录后提交意向数量=1无口令",
+          "result": "通过",
+          "shots": [
+            "t013_02a_detail_before_intent.png",
+            "t013_02b_intent_submitted.png"
+          ]
+        },
+        {
+          "id": "C-013-03",
+          "name": "每件商品独立意向队列",
+          "result": "通过",
+          "shots": [
+            "t013_03a_queue_product_a.png",
+            "t013_03b_queue_product_b.png"
+          ]
+        },
+        {
+          "id": "C-013-04",
+          "name": "对队首发起交易才冻结",
+          "result": "通过",
+          "shots": [
+            "t013_04_start_trade_frozen.png"
+          ],
+          "note": "status=FROZEN"
+        },
+        {
+          "id": "C-013-05",
+          "name": "冻结A不影响B浏览与提交",
+          "result": "通过",
+          "shots": [
+            "t013_05a_list_excludes_frozen_a.png",
+            "t013_05b_submit_intent_on_b.png"
+          ],
+          "note": "aHidden=true bVisible=true intent=200"
+        },
+        {
+          "id": "C-013-06",
+          "name": "仅无交易中时可对队首发起交易",
+          "result": "通过",
+          "shots": [
+            "t013_06_no_second_trade.png"
+          ]
+        },
+        {
+          "id": "C-013-07",
+          "name": "未登录无法提交意向",
+          "result": "通过",
+          "shots": [
+            "t013_07a_unauth_detail.png",
+            "t013_07b_unauth_redirect_login.png"
+          ]
+        },
+        {
+          "id": "C-013-08",
+          "name": "冻结商品详情只读不可提交",
+          "result": "通过",
+          "shots": [
+            "t013_08_frozen_readonly.png"
+          ]
+        },
+        {
+          "id": "C-013-09",
+          "name": "发布必填字段校验",
+          "result": "通过",
+          "shots": [
+            "t013_09_publish_require_fields.png"
+          ]
+        }
+      ],
+      "products": {
+        "pA": 67,
+        "pB": 68
+      }
+    },
+    "T-017": {
+      "cases": [
+        {
+          "id": "C-017-01",
+          "name": "仅交易成功扣减库存1",
+          "result": "通过",
+          "shots": [
+            "t017_01a_before_success_stock_unchanged.png",
+            "t017_01b_after_success_deducted.png"
+          ],
+          "note": "2->2->1"
+        },
+        {
+          "id": "C-017-02",
+          "name": "扣减后库存>0回在售且新队首不自动冻结",
+          "result": "通过",
+          "shots": [
+            "t017_02_remain_online_new_head_queuing.png"
+          ]
+        },
+        {
+          "id": "C-017-03",
+          "name": "扣减后库存=0自动下架且不可见",
+          "result": "通过",
+          "shots": [
+            "t017_03a_list_excludes_zero_stock.png",
+            "t017_03b_offline_detail_blocked.png"
+          ]
+        },
+        {
+          "id": "C-017-04",
+          "name": "库存从0改为正数不自动上架",
+          "result": "通过",
+          "shots": [
+            "t017_04_restock_still_offline.png"
+          ]
+        },
+        {
+          "id": "C-017-05",
+          "name": "手动上架后重新在售",
+          "result": "通过",
+          "shots": [
+            "t017_05_manual_online_visible.png"
+          ]
+        },
+        {
+          "id": "C-017-06",
+          "name": "发布库存0立即下架不可见",
+          "result": "通过",
+          "shots": [
+            "t017_06_publish_stock0_offline.png"
+          ]
+        },
+        {
+          "id": "C-017-07",
+          "name": "交易失败不扣库存",
+          "result": "通过",
+          "shots": [
+            "t017_07_fail_no_deduct.png"
+          ]
+        }
+      ]
+    },
+    "T-021": {
+      "cases": [
+        {
+          "id": "C-021-01",
+          "name": "未登录访问历史引导登录",
+          "result": "通过",
+          "shots": [
+            "t021_01_unauth_redirect_login.png"
+          ]
+        },
+        {
+          "id": "C-021-02",
+          "name": "仅展示本人成功/失败终态",
+          "result": "通过",
+          "shots": [
+            "t021_02_history_success_fail_only.png"
+          ],
+          "note": "count=20"
+        },
+        {
+          "id": "C-021-03",
+          "name": "含商品快照名/下单时间/结果/交易时间",
+          "result": "通过",
+          "shots": [
+            "t021_03_history_fields.png"
+          ]
+        },
+        {
+          "id": "C-021-04",
+          "name": "按时间倒序支持分页",
+          "result": "通过",
+          "shots": [
+            "t021_04_history_desc_order.png"
+          ]
+        },
+        {
+          "id": "C-021-05",
+          "name": "商品下架后历史快照名仍保留",
+          "result": "通过",
+          "shots": [
+            "t021_05_snapshot_after_offline.png"
+          ]
+        },
+        {
+          "id": "C-021-06",
+          "name": "历史仅本人可见（权限隔离）",
+          "result": "通过",
+          "shots": [
+            "t021_06_other_user_isolation.png"
+          ]
+        },
+        {
+          "id": "C-021-07",
+          "name": "账户页可进入购买历史",
+          "result": "通过",
+          "shots": [
+            "t021_07_account_entry.png"
+          ]
+        }
+      ]
+    },
+    "T-027": {
+      "cases": [
+        {
+          "id": "C-027-01",
+          "name": "在售且无交易中可手动下架",
+          "result": "通过",
+          "shots": [
+            "t027_01a_edit_page_before_offline.png",
+            "t027_01b_admin_shows_offline.png"
+          ],
+          "note": "buyer=404 admin=OFFLINE"
+        },
+        {
+          "id": "C-027-02",
+          "name": "手动下架后买家不可见不可开详情",
+          "result": "通过",
+          "shots": [
+            "t027_02a_list_hides_offline.png",
+            "t027_02b_detail_blocked.png"
+          ],
+          "note": "hidden=true"
+        },
+        {
+          "id": "C-027-03",
+          "name": "库存>0可手动上架回在售",
+          "result": "通过",
+          "shots": [
+            "t027_03_manual_online.png"
+          ]
+        },
+        {
+          "id": "C-027-04",
+          "name": "发布后仅可编辑库存与二级类目",
+          "result": "通过",
+          "shots": [
+            "t027_04_edit_scope_stock_category_only.png"
+          ]
+        },
+        {
+          "id": "C-027-05",
+          "name": "库存0改正数仍保持下架",
+          "result": "通过",
+          "shots": [
+            "t027_05_restock_keeps_offline.png"
+          ]
+        },
+        {
+          "id": "C-027-06",
+          "name": "手动下架队内未成交意向置FAILED",
+          "result": "通过",
+          "shots": [
+            "t027_06_offline_queue_failed.png"
+          ]
+        },
+        {
+          "id": "C-027-07",
+          "name": "交易中不可手动下架",
+          "result": "通过",
+          "shots": [
+            "t027_07_cannot_offline_in_transaction.png"
+          ],
+          "note": "status=409 code=40901"
+        }
+      ]
+    },
+    "T-031": {
+      "cases": [
+        {
+          "id": "C-031-01",
+          "name": "详情可按序查看多张商品图与富文本",
+          "result": "通过",
+          "shots": [
+            "t031_01_detail_multi_images_richtext.png"
+          ],
+          "note": "images=3"
+        },
+        {
+          "id": "C-031-02",
+          "name": "主图为第一张商品图",
+          "result": "通过",
+          "shots": [
+            "t031_02_list_main_image.png"
+          ]
+        },
+        {
+          "id": "C-031-03",
+          "name": "无商品图时统一占位图",
+          "result": "通过",
+          "shots": [
+            "t031_03_placeholder_no_product_image.png"
+          ]
+        },
+        {
+          "id": "C-031-04",
+          "name": "图片格式/大小校验拒绝不合规文件",
+          "result": "通过",
+          "shots": [
+            "t031_04_publish_image_validation_ui.png"
+          ],
+          "note": "gif=415/41501 big=413/41301"
+        },
+        {
+          "id": "C-031-05",
+          "name": "搜索先剥标签匹配名称+描述纯文本",
+          "result": "通过",
+          "shots": [
+            "t031_05a_search_stripped_richtext.png",
+            "t031_05b_search_category_name.png"
+          ]
+        },
+        {
+          "id": "C-031-06",
+          "name": "空描述不展示描述区",
+          "result": "通过",
+          "shots": [
+            "t031_06_empty_description_hidden.png"
+          ]
+        },
+        {
+          "id": "C-031-07",
+          "name": "富文本禁止脚本/危险内容",
+          "result": "通过",
+          "shots": [
+            "t031_07_unsafe_richtext_rejected.png"
+          ],
+          "note": "422/42201"
+        },
+        {
+          "id": "C-031-08",
+          "name": "商品图最多9张",
+          "result": "通过",
+          "shots": [
+            "t031_08_nine_images_ok.png"
+          ],
+          "note": "nine=9 tenStatus=400"
+        }
+      ]
+    },
+    "T-035": {
+      "cases": [
+        {
+          "id": "C-035-01",
+          "name": "顾客列表含从未下单注册用户",
+          "result": "通过",
+          "shots": [
+            "t035_01_all_customers_include_never_ordered.png"
+          ]
+        },
+        {
+          "id": "C-035-02",
+          "name": "列表含用户名/电话/地点/注册时间",
+          "result": "通过",
+          "shots": [
+            "t035_02_customer_list_fields.png"
+          ]
+        },
+        {
+          "id": "C-035-03",
+          "name": "地点未填显示「未设置」",
+          "result": "通过",
+          "shots": [
+            "t035_03_location_unset.png"
+          ]
+        },
+        {
+          "id": "C-035-04",
+          "name": "按注册时间倒序并支持分页",
+          "result": "通过",
+          "shots": [
+            "t035_04_customers_desc_pagination.png"
+          ]
+        },
+        {
+          "id": "C-035-05",
+          "name": "顾客购买历史仅终态且只读",
+          "result": "通过",
+          "shots": [
+            "t035_05_customer_history_readonly.png"
+          ],
+          "note": "count=20"
+        },
+        {
+          "id": "C-035-06",
+          "name": "历史含快照商品名与时间结果字段",
+          "result": "通过",
+          "shots": [
+            "t035_06_history_snapshot_fields.png"
+          ]
+        },
+        {
+          "id": "C-035-07",
+          "name": "历史页无可交易操作（只读）",
+          "result": "通过",
+          "shots": [
+            "t035_07_history_no_trade_actions.png"
+          ]
+        },
+        {
+          "id": "C-035-08",
+          "name": "未登录卖家不可查看顾客列表",
+          "result": "通过",
+          "shots": [
+            "t035_08_seller_auth_required.png"
+          ]
+        }
+      ]
+    }
+  },
+  "finishedAt": "2026-10-28T14:18:48.081Z"
+}

@@ -1,0 +1,14 @@
+
+> shop-frontend@0.1.0 test:e2e
+> playwright test
+
+
+Running 5 tests using 4 workers
+
+  ✓  3 [chromium] › e2e/buyer-seller-flows.spec.ts:55:1 › 下架商品详情即使 API 返回成功也不展示商品信息 (1.1s)
+  ✓  2 [chromium] › e2e/buyer-seller-flows.spec.ts:9:1 › 匿名买家可浏览商品，但提交意向时必须登录且没有口令入口 (1.6s)
+  ✓  4 [chromium] › e2e/buyer-seller-flows.spec.ts:165:1 › 买家购买历史按后端订单字段展示成功和失败终态 (1.6s)
+  ✓  1 [chromium] › e2e/buyer-seller-flows.spec.ts:80:1 › 卖家按商品队列开始交易，确认成功请求不带请求体 (2.5s)
+  ✓  5 [chromium] › e2e/buyer-seller-flows.spec.ts:200:1 › 买家可查看账户概览、进入购买历史并退出登录 (1.4s)
+
+  5 passed (4.5s)
