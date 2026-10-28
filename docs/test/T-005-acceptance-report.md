@@ -169,7 +169,7 @@
 #### C-005-07 · 重复用户名拒绝注册
 - **操作步骤**：在 `/register` 使用已注册的用户名 `acc_t005_a` 再次提交注册。
 - **期望结果**：拒绝注册并提示用户名已存在。
-- **实际结果**：后端返回 `HTTP 409 Conflict`（`code=40901, message="用户名已存在"`），前端弹出错误提示 `用户名已存在，请更换用户名。`。
+- **实际结果**：后端返回 `HTTP 409 Conflict`（`code=40903, message="用户名已存在"`），前端弹出错误提示 `用户名已存在，请更换用户名。`。
 - **结论**：☑ **通过（PASS）**
 - **证据链接**：[📷 查看截图：重复用户名注册被拒提示 (t005_07_duplicate_username_rejected.png)](https://github.com/Wen5555/OxStore/blob/main/docs/test/screenshots/t005/t005_07_duplicate_username_rejected.png)
 

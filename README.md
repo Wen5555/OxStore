@@ -178,6 +178,7 @@ mvn -B -ntp -f backend/pom.xml clean verify
 ## 文档
 
 - [项目 Wiki](https://github.com/Wen5555/OxStore/wiki)：需求、架构和协作资料
+- [迭代 2 公共开发约定](docs/iteration2/T-000-公共开发约定.md)：模块边界、接口、状态、错误码和 PR 规则
 - [构建手册](docs/build.md)：源码版本、工具安装、JAR/前端/镜像构建、产物与离线打包
 - [运行手册](docs/runbook.md)：环境配置、启动与数据升级
 - [数据库设计](docs/design/database.md)：ER 图、数据字典及约束

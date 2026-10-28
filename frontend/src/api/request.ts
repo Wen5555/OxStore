@@ -10,7 +10,7 @@ export class ApiError extends Error {
 }
 
 function apiErrorMessage(code: number | undefined, fallback: string, url?: string) {
-  if (code === 40901 && url === '/auth/register') return '用户名已存在，请更换用户名。'
+  if (code === 40903 && url === '/auth/register') return '用户名已存在，请更换用户名。'
   switch (code) {
     case 40001: return '请检查必填字段和输入格式。'
     case 40002: return '请求格式无效，请检查输入后重试。'
@@ -24,6 +24,7 @@ function apiErrorMessage(code: number | undefined, fallback: string, url?: strin
     case 40404: return '请求的商品、类目、意向或顾客不存在。'
     case 40901: return '请求与当前数据状态冲突，请刷新后重试。'
     case 40902: return '该意向已不是队首或已有交易处理中，请刷新队列。'
+    case 40903: return '用户名已存在，请更换用户名。'
     case 41301: return '图片不能超过 5MB。'
     case 41501: return '图片格式仅支持 JPG、PNG。'
     case 42201: return '商品描述包含不支持的内容，请修改后重试。'
