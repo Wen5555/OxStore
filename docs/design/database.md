@@ -15,6 +15,9 @@
 | `trade_attempt` | 每次开始交易及其最终结果 |
 | `order_history` | 顾客可见的成功/失败终态快照 |
 | `product_status_event` | 商品发布、上下架及交易状态事件 |
+| `auction_session` | 拍卖场次（与拍卖商品一对一）、当前价、领先者、结拍结果和中标意向 |
+| `auction_bid` | 拍卖有效出价记录 |
+| `auction_notification` | 结拍站内提醒 |
 
 空库基线为 [schema.sql](../../backend/src/main/resources/db/schema.sql)；实体映射位于 [entity](../../backend/src/main/java/com/team/shop/entity)，数据查询位于 [repository](../../backend/src/main/java/com/team/shop/repository)。`DataInitializer` 在启动时填充默认分类和初始卖家账号。
 
@@ -94,7 +97,16 @@ erDiagram
     purchase_intent ||--o{ trade_attempt : attempts
     customer ||--o{ order_history : owns
     product ||--o{ product_status_event : records
+    product ||--o| auction_session : auctions
+    customer ||--o{ auction_session : leads
+    purchase_intent ||--o| auction_session : fulfils
+    auction_session ||--o{ auction_bid : receives
+    customer ||--o{ auction_bid : places
+    auction_session ||--o{ auction_notification : notifies
+    customer ||--o{ auction_notification : receives
 ```
+
+拍卖三表的字段级说明与约束见[拍卖数据字典](../auction/database-dictionary.md)。
 
 所有业务实体使用主键关联；删除采用受外键保护的限制策略，不级联清除购买或交易历史。
 
@@ -106,7 +118,8 @@ erDiagram
 - 意向状态为 `QUEUING`、`IN_TRANSACTION`、`SUCCESS`、`FAILED`、`CANCELLED`。`queue_seq` 在同一商品内唯一；重排分配新序号，首次提交时间不变。
 - `trade_attempt` 记录一次交易过程，未结束时 `finished_at/result/fail_action` 均为空；成功结果没有失败动作，失败结果必须包含 `REQUEUE` 或 `DISCARD`。
 - `order_history` 仅保存 `SUCCESS` / `FAILED` 终态快照，每个意向至多一条。`REQUEUE` 不是终态，不生成历史；旧口令时代的顾客身份和意向不转换成顾客购买历史。
-- `product_status_event` 记录发布、手动上下架、库存归零下架和交易状态变更；可选关联交易尝试。
+- `product_status_event` 记录发布、手动上下架、库存归零下架、拍卖流拍下架和交易状态变更；可选关联交易尝试。
+- `product.selling_mode` 为 `FIXED_PRICE`（默认）或 `AUCTION`，发布后由触发器禁止修改；拍卖商品库存只能为 0 或 1。拍卖中标后创建普通 `IN_TRANSACTION` 意向并由 `auction_session.winner_intent_id` 关联，沿用既有成功/失败收尾。
 
 ## 4. 约束与事务
 
@@ -135,7 +148,8 @@ Compose 的空 MySQL 数据卷会导入同一份 schema；已存在的数据卷�
 2. 已执行旧版 V2 的数据库按需执行 [V3 交易结果约束迁移](../../backend/src/main/resources/db/migrations/V3__trade_attempt_completion_check.sql)；新建库及修订版 V2 无需额外运行 V3。
 3. 在任何交易中意向均已结束的前提下执行 [V4 迭代 2 迁移](../../backend/src/main/resources/db/migrations/V4__iteration2_customer_inventory_catalog.sql)。
 4. 执行 [V5 数据库契约补齐](../../backend/src/main/resources/db/migrations/V5__iteration2_database_contract.sql)：增加商品图元数据、图片顺序/大小约束、意向状态约束，以及不带类目筛选时的商品状态/时间索引。已执行 V4 的库也须执行 V5 后再使用本版程序。
-5. 核对数据行数、商品/意向状态、中文内容和队列序号；由卖家核实每件旧商品的实际库存，按需补库存并手动上架。
+5. 执行 [V6 拍卖模式](../../backend/src/main/resources/db/migrations/V6__auction_mode.sql)：增加售卖模式及拍卖三表，旧商品全部为 `FIXED_PRICE`。V6 可重复执行，要求 V5 已完成。
+6. 核对数据行数、商品/意向状态、中文内容和队列序号；由卖家核实每件旧商品的实际库存，按需补库存并手动上架。
 
 旧版没有保存库存，因此 V4 将原有商品安全地设为 `stock=0`、`OFFLINE`，不会猜测库存；原有排队意向转为失败，不会伪装成已登录顾客的历史。迁移前商品图像路径会保留。迁移不会自动创建顾客账号，也不会把旧口令记录显示为新顾客购买历史。
 
@@ -157,7 +171,7 @@ mysqldump -uroot -p --single-transaction --routines --triggers --default-charact
 python -X utf8 scripts/migrate_iteration2.py --container oxstore-mysql --database shop
 ```
 
-该入口先检查五表基线或完整的迭代 2 结构、确认没有交易中意向，再备份到被 Git 忽略的 `.work/db-backups/`，保存 SHA-256 后才执行 SQL。五表基线执行 V4→V5；已升级库跳过 V4，仅执行可重复的 V5。V4 部分结构或关键关系缺失时拒绝继续；V5 已新增一列后中断，可以在检查数据后再次执行。它不自动迁移旧三表库，也不自动回滚 MySQL DDL。备份目录须位于受控本机磁盘；升级后先在独立空库导入备份确认可恢复，回退时须停写并恢复整个旧库。
+该入口先检查五表基线或完整的迭代 2 结构、确认没有交易中意向，再备份到被 Git 忽略的 `.work/db-backups/`，保存 SHA-256 后才执行 SQL。五表基线执行 V4→V5→V6；迭代 2 九表库与已含拍卖的十二表库跳过 V4，仅执行可重复的 V5→V6。V4 部分结构或关键关系缺失时拒绝继续；V5 已新增一列后中断，可以在检查数据后再次执行。它不自动迁移旧三表库，也不自动回滚 MySQL DDL。备份目录须位于受控本机磁盘；升级后先在独立空库导入备份确认可恢复，回退时须停写并恢复整个旧库。
 
 直接重复执行 V4 SQL 仍会被其保护检查拒绝；“可重复升级”指上述升级入口和 V5，不是重复执行所有历史 SQL。新建库直接执行当前 `schema.sql`，不再重放 V4。
 
@@ -171,4 +185,4 @@ python -X utf8 scripts/verify_iteration2_database.py --java java
 
 验证脚本使用本机已有的 `mysql:8.0.46` 镜像，自行创建仅绑定回环地址的专用容器；分别验证空库和五表旧库，保存 SQL 约束、真实 HTTP/JPA、迁移与备份恢复、数据库/后端重启结果。旧库夹具来自主仓库 `4fc3dea` 的五表 schema，仅包含人工构造的测试记录。脚本结束后停止自己的 Java 进程并清理自己创建的容器及匿名卷，不连接业务库。
 
-2026-10-28 的实际结果见[迭代 2 数据库验证报告](../test/iteration2-database-validation.md)。旧版 [verify_database.py](../../scripts/verify_database.py) 和[历史数据库报告](../test/db-validation.md)继续作为基线历史资料。此次独立容器测试不代表现有业务库已经升级，也不代表完整前端或压力测试通过。
+2026-10-28 的实际结果见[迭代 2 数据库验证报告](../test/iteration2-database-validation.md)。拍卖模式数据库由 `python -X utf8 scripts/verify_auction_database.py --java java` 验证，结果见[拍卖数据库验证报告](../test/auction-database-validation.md)。旧版 [verify_database.py](../../scripts/verify_database.py) 和[历史数据库报告](../test/db-validation.md)继续作为基线历史资料。此次独立容器测试不代表现有业务库已经升级，也不代表完整前端或压力测试通过。

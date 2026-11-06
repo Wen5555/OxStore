@@ -36,6 +36,7 @@ CREATE TABLE product (
     price DECIMAL(10,2) NOT NULL,
     stock INT NOT NULL,
     category2_id BIGINT NOT NULL,
+    selling_mode VARCHAR(20) NOT NULL DEFAULT 'FIXED_PRICE',
     status VARCHAR(20) NOT NULL,
     freeze_source VARCHAR(20) NULL,
     published_at DATETIME(6) NOT NULL,
@@ -44,11 +45,25 @@ CREATE TABLE product (
     PRIMARY KEY (id),
     KEY idx_product_category_status (category2_id, status, published_at, id),
     KEY idx_product_status_time (status, published_at, id),
+    KEY idx_product_mode_status_time (selling_mode, status, published_at, id),
     CONSTRAINT fk_product_category2 FOREIGN KEY (category2_id) REFERENCES category (id),
     CONSTRAINT chk_product_price CHECK (price > 0),
     CONSTRAINT chk_product_stock CHECK (stock >= 0),
-    CONSTRAINT chk_product_status CHECK (status IN ('ONLINE', 'FROZEN', 'OFFLINE'))
+    CONSTRAINT chk_product_status CHECK (status IN ('ONLINE', 'FROZEN', 'OFFLINE')),
+    CONSTRAINT chk_product_selling_mode CHECK (selling_mode IN ('FIXED_PRICE', 'AUCTION')),
+    CONSTRAINT chk_product_auction_stock CHECK (selling_mode <> 'AUCTION' OR stock BETWEEN 0 AND 1)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- A product never switches between fixed-price and auction after it is published.
+DELIMITER //
+CREATE TRIGGER trg_product_selling_mode_immutable BEFORE UPDATE ON product
+FOR EACH ROW
+BEGIN
+  IF NEW.selling_mode <> OLD.selling_mode THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'selling_mode cannot change after publish';
+  END IF;
+END//
+DELIMITER ;
 
 CREATE TABLE product_image (
     id BIGINT NOT NULL AUTO_INCREMENT,
@@ -147,6 +162,89 @@ CREATE TABLE product_status_event (
     CONSTRAINT fk_event_attempt FOREIGN KEY (trade_attempt_id) REFERENCES trade_attempt (id),
     CONSTRAINT chk_event_type CHECK (event_type IN
         ('PUBLISHED', 'MANUAL_FREEZE', 'MANUAL_UNFREEZE', 'MANUAL_OFFLINE', 'MANUAL_ONLINE',
-         'INVENTORY_OFFLINE', 'TRADE_STARTED', 'TRADE_FAILED', 'TRADE_SUCCEEDED')),
+         'INVENTORY_OFFLINE', 'TRADE_STARTED', 'TRADE_FAILED', 'TRADE_SUCCEEDED', 'AUCTION_UNSOLD')),
     CONSTRAINT chk_event_publish CHECK (event_type <> 'PUBLISHED' OR from_status IS NULL)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Auction mode (PB-A01～A04). One session per AUCTION product; the winner is fulfilled
+-- through an ordinary IN_TRANSACTION purchase_intent and the existing SUCCESS/FAILED flow.
+CREATE TABLE auction_session (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    product_id BIGINT NOT NULL,
+    start_price DECIMAL(10,2) NOT NULL,
+    min_increment DECIMAL(10,2) NOT NULL,
+    current_price DECIMAL(10,2) NULL,
+    leader_customer_id BIGINT NULL,
+    bid_count INT NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL,
+    starts_at DATETIME(6) NOT NULL,
+    ends_at DATETIME(6) NOT NULL,
+    settled_at DATETIME(6) NULL,
+    winner_intent_id BIGINT NULL,
+    version BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_auction_product (product_id),
+    UNIQUE KEY uk_auction_winner_intent (winner_intent_id),
+    KEY idx_auction_status_ends (status, ends_at, id),
+    KEY idx_auction_leader (leader_customer_id),
+    CONSTRAINT fk_auction_product FOREIGN KEY (product_id) REFERENCES product (id),
+    CONSTRAINT fk_auction_leader FOREIGN KEY (leader_customer_id) REFERENCES customer (id),
+    CONSTRAINT fk_auction_winner_intent FOREIGN KEY (winner_intent_id) REFERENCES purchase_intent (id),
+    CONSTRAINT chk_auction_prices CHECK (start_price > 0 AND min_increment > 0),
+    CONSTRAINT chk_auction_window CHECK (ends_at > starts_at),
+    CONSTRAINT chk_auction_status CHECK (status IN ('LIVE', 'ENDED_SOLD', 'ENDED_UNSOLD')),
+    CONSTRAINT chk_auction_leading CHECK (
+        (bid_count = 0 AND current_price IS NULL AND leader_customer_id IS NULL) OR
+        (bid_count > 0 AND current_price IS NOT NULL AND current_price >= start_price AND
+         leader_customer_id IS NOT NULL)),
+    CONSTRAINT chk_auction_settlement CHECK (
+        (status = 'LIVE' AND settled_at IS NULL AND winner_intent_id IS NULL) OR
+        (status = 'ENDED_SOLD' AND settled_at IS NOT NULL AND bid_count > 0 AND winner_intent_id IS NOT NULL) OR
+        (status = 'ENDED_UNSOLD' AND settled_at IS NOT NULL AND bid_count = 0 AND winner_intent_id IS NULL))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Only accepted bids are stored. bid_seq equals the session bid_count after acceptance.
+CREATE TABLE auction_bid (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    auction_id BIGINT NOT NULL,
+    bid_seq INT NOT NULL,
+    customer_id BIGINT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    bid_at DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_bid_auction_seq (auction_id, bid_seq),
+    UNIQUE KEY uk_bid_auction_amount (auction_id, amount),
+    KEY idx_bid_customer_time (customer_id, bid_at, id),
+    CONSTRAINT fk_bid_auction FOREIGN KEY (auction_id) REFERENCES auction_session (id),
+    CONSTRAINT fk_bid_customer FOREIGN KEY (customer_id) REFERENCES customer (id),
+    CONSTRAINT chk_bid_seq CHECK (bid_seq > 0),
+    CONSTRAINT chk_bid_amount CHECK (amount > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- In-app settlement reminders. The type fixes the recipient, so (auction, type) is the idempotency key.
+CREATE TABLE auction_notification (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    auction_id BIGINT NOT NULL,
+    notification_type VARCHAR(30) NOT NULL,
+    recipient_role VARCHAR(10) NOT NULL,
+    recipient_customer_id BIGINT NULL,
+    product_name_snapshot VARCHAR(200) NOT NULL,
+    final_price DECIMAL(10,2) NULL,
+    created_at DATETIME(6) NOT NULL,
+    read_at DATETIME(6) NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_notification_auction_type (auction_id, notification_type),
+    KEY idx_notification_customer_time (recipient_customer_id, created_at, id),
+    KEY idx_notification_role_time (recipient_role, created_at, id),
+    CONSTRAINT fk_notification_auction FOREIGN KEY (auction_id) REFERENCES auction_session (id),
+    CONSTRAINT fk_notification_customer FOREIGN KEY (recipient_customer_id) REFERENCES customer (id),
+    CONSTRAINT chk_notification_type CHECK (notification_type IN ('AUCTION_SOLD', 'AUCTION_UNSOLD', 'AUCTION_WON')),
+    CONSTRAINT chk_notification_recipient CHECK (
+        (recipient_role = 'SELLER' AND recipient_customer_id IS NULL AND
+         notification_type IN ('AUCTION_SOLD', 'AUCTION_UNSOLD')) OR
+        (recipient_role = 'CUSTOMER' AND recipient_customer_id IS NOT NULL AND notification_type = 'AUCTION_WON')),
+    CONSTRAINT chk_notification_price CHECK (
+        (notification_type = 'AUCTION_UNSOLD' AND final_price IS NULL) OR
+        (notification_type <> 'AUCTION_UNSOLD' AND final_price IS NOT NULL AND final_price > 0)),
+    CONSTRAINT chk_notification_read CHECK (read_at IS NULL OR read_at >= created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
