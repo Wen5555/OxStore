@@ -4,6 +4,7 @@ import com.team.shop.dto.ApiResponse;
 import com.team.shop.dto.response.PageResponse;
 import com.team.shop.dto.response.ProductDetailResponse;
 import com.team.shop.dto.response.ProductSummaryResponse;
+import com.team.shop.domain.SellingMode;
 import com.team.shop.service.ProductService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,9 +25,10 @@ public class ProductController {
     public ApiResponse<PageResponse<ProductSummaryResponse>> browse(
             @RequestParam(required = false) Long category2Id,
             @RequestParam(required = false, name = "q") String query,
+            @RequestParam(required = false) SellingMode sellingMode,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return ApiResponse.ok(products.browse(category2Id, query, page, size));
+        return ApiResponse.ok(products.browse(category2Id, query, sellingMode, page, size));
     }
 
     @GetMapping("/{productId}")

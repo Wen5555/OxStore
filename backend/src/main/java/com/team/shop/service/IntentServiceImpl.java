@@ -41,6 +41,9 @@ public class IntentServiceImpl implements IntentService {
     public IntentCreatedResponse submit(Long productId, Long customerId) {
         Product product = products.findByIdForUpdate(productId)
                 .orElseThrow(() -> new NotFoundException("商品不存在"));
+        if (product.isAuction()) {
+            throw new StateConflictException("拍卖商品不能提交购买意向", 40908);
+        }
         if (!ProductStateMachine.isAcceptingIntent(product.getStatus())) {
             throw new StateConflictException("商品当前不可提交购买意向");
         }
