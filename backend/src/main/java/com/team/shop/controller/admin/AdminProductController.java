@@ -4,6 +4,7 @@ import com.team.shop.dto.ApiResponse;
 import com.team.shop.dto.request.ProductUpdateRequest;
 import com.team.shop.dto.response.PageResponse;
 import com.team.shop.dto.response.ProductDetailResponse;
+import com.team.shop.domain.SellingMode;
 import com.team.shop.exception.BizException;
 import com.team.shop.service.ImageStorageService;
 import com.team.shop.service.ProductService;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/admin/products")
@@ -57,9 +59,13 @@ public class AdminProductController {
     @PostMapping
     public ResponseEntity<ApiResponse<ProductDetailResponse>> publish(
             @RequestParam("name") @NotBlank @Size(max = 200) String name,
-            @RequestParam("price") @NotNull @Positive BigDecimal price,
+            @RequestParam(value = "price", required = false) @Positive BigDecimal price,
             @RequestParam("category2Id") @NotNull Long category2Id,
             @RequestParam("stock") @PositiveOrZero int stock,
+            @RequestParam(value = "sellingMode", defaultValue = "FIXED_PRICE") SellingMode sellingMode,
+            @RequestParam(value = "startPrice", required = false) BigDecimal startPrice,
+            @RequestParam(value = "minIncrement", required = false) BigDecimal minIncrement,
+            @RequestParam(value = "endsAt", required = false) LocalDateTime endsAt,
             @RequestParam(value = "descriptionHtml", required = false) String descriptionHtml,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
             @RequestPart(value = "images[]", required = false) List<MultipartFile> bracketImages) {
@@ -74,8 +80,10 @@ public class AdminProductController {
             for (MultipartFile image : suppliedImages) {
                 storedPaths.add(imageStorage.store(image));
             }
-            ProductDetailResponse created = products.publish(name, price, category2Id, stock,
-                    descriptionHtml, storedPaths);
+            ProductDetailResponse created = sellingMode == SellingMode.AUCTION
+                    ? products.publish(name, price, category2Id, stock, descriptionHtml, storedPaths,
+                    sellingMode, startPrice, minIncrement, endsAt)
+                    : products.publish(name, price, category2Id, stock, descriptionHtml, storedPaths);
             return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(created));
         } catch (RuntimeException e) {
             cleanupStoredImages(storedPaths);

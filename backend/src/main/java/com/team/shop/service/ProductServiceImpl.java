@@ -4,6 +4,7 @@ import com.team.shop.domain.BusinessTime;
 import com.team.shop.domain.IntentStatus;
 import com.team.shop.domain.ProductEventType;
 import com.team.shop.domain.ProductStatus;
+import com.team.shop.domain.SellingMode;
 import com.team.shop.dto.response.PageResponse;
 import com.team.shop.dto.response.ProductDetailResponse;
 import com.team.shop.dto.response.ProductSummaryResponse;
@@ -21,6 +22,7 @@ import com.team.shop.repository.IntentRepository;
 import com.team.shop.repository.OrderHistoryRepository;
 import com.team.shop.repository.ProductRepository;
 import com.team.shop.repository.ProductStatusEventRepository;
+import com.team.shop.repository.AuctionSessionRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -34,6 +36,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 @Service
@@ -53,21 +59,30 @@ public class ProductServiceImpl implements ProductService {
     private final OrderHistoryRepository orderHistory;
     private final ProductStatusEventRepository events;
     private final ImageStorageService imageStorage;
+    private final AuctionSessionRepository auctions;
 
     public ProductServiceImpl(ProductRepository products, CategoryRepository categories, IntentRepository intents,
                               OrderHistoryRepository orderHistory, ProductStatusEventRepository events,
-                              ImageStorageService imageStorage) {
+                              ImageStorageService imageStorage, AuctionSessionRepository auctions) {
         this.products = products;
         this.categories = categories;
         this.intents = intents;
         this.orderHistory = orderHistory;
         this.events = events;
         this.imageStorage = imageStorage;
+        this.auctions = auctions;
     }
 
     @Override
     @Transactional(readOnly = true)
     public PageResponse<ProductSummaryResponse> browse(Long category2Id, String query, int page, int size) {
+        return browse(category2Id, query, null, page, size);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<ProductSummaryResponse> browse(Long category2Id, String query, SellingMode sellingMode,
+                                                      int page, int size) {
         Pageable pageable = pageable(page, size);
         if (category2Id != null) {
             requireSecondLevelCategory(category2Id);
@@ -75,11 +90,16 @@ public class ProductServiceImpl implements ProductService {
         List<Product> matches = products.findAllByStatusOrderByPublishedAtDescIdDesc(ProductStatus.ONLINE)
                 .stream()
                 .filter(product -> category2Id == null || category2Id.equals(product.getCategory().getId()))
+                .filter(product -> sellingMode == null || sellingMode == product.getSellingMode())
                 .filter(product -> matchesQuery(product, query))
                 .toList();
         int start = (int) Math.min((long) (pageable.getPageNumber()) * size, matches.size());
         int end = Math.min(start + size, matches.size());
-        return new PageResponse<>(matches.subList(start, end).stream().map(ProductSummaryResponse::from).toList(),
+        Map<Long, com.team.shop.entity.AuctionSession> auctionMap = auctions.findAllByProductIdIn(matches.stream()
+                        .map(Product::getId).toList()).stream()
+                .collect(Collectors.toMap(a -> a.getProduct().getId(), Function.identity()));
+        return new PageResponse<>(matches.subList(start, end).stream()
+                .map(product -> ProductSummaryResponse.from(product, auctionMap.get(product.getId()))).toList(),
                 page, size, matches.size(), size == 0 ? 0 : (int) Math.ceil((double) matches.size() / size));
     }
 
@@ -91,14 +111,18 @@ public class ProductServiceImpl implements ProductService {
         if (product.getStatus() == ProductStatus.OFFLINE) {
             throw new NotFoundException("商品已下架");
         }
-        return ProductDetailResponse.from(product);
+        return ProductDetailResponse.from(product, auctions.findByProductId(productId).orElse(null));
     }
 
     @Override
     @Transactional(readOnly = true)
     public PageResponse<ProductDetailResponse> getSellerProducts(int page, int size) {
         Page<Product> result = products.findAllByOrderByPublishedAtDescIdDesc(pageable(page, size));
-        return new PageResponse<>(result.getContent().stream().map(ProductDetailResponse::from).toList(),
+        Map<Long, com.team.shop.entity.AuctionSession> auctionMap = auctions.findAllByProductIdIn(result.getContent().stream()
+                        .map(Product::getId).toList()).stream()
+                .collect(Collectors.toMap(a -> a.getProduct().getId(), Function.identity()));
+        return new PageResponse<>(result.getContent().stream()
+                .map(product -> ProductDetailResponse.from(product, auctionMap.get(product.getId()))).toList(),
                 result.getNumber() + 1, result.getSize(), result.getTotalElements(), result.getTotalPages());
     }
 
@@ -106,18 +130,51 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductDetailResponse publish(String name, BigDecimal price, Long category2Id, int stock,
                                          String descriptionHtml, List<String> imagePaths) {
-        validateProduct(name, price, stock, imagePaths);
+        return publish(name, price, category2Id, stock, descriptionHtml, imagePaths,
+                SellingMode.FIXED_PRICE, null, null, null);
+    }
+
+    @Override
+    @Transactional
+    public ProductDetailResponse publish(String name, BigDecimal price, Long category2Id, int stock,
+                                         String descriptionHtml, List<String> imagePaths, SellingMode sellingMode,
+                                         BigDecimal startPrice, BigDecimal minIncrement, LocalDateTime endsAt) {
+        SellingMode mode = sellingMode == null ? SellingMode.FIXED_PRICE : sellingMode;
+        validateProduct(name, mode == SellingMode.AUCTION ? startPrice : price, stock, imagePaths);
         Category category = requireSecondLevelCategory(category2Id);
         String sanitizedDescription = sanitizeDescription(descriptionHtml);
-        Product product = Product.create(name.trim(), sanitizedDescription, price, stock, category);
+        Product product;
+        if (mode == SellingMode.AUCTION) {
+            if (startPrice == null || minIncrement == null || endsAt == null) {
+                throw new BizException("拍卖必须填写起拍价、最小加价和截止时间");
+            }
+            if (stock != 1) {
+                throw new BizException("拍卖商品库存必须为 1");
+            }
+            LocalDateTime now = BusinessTime.now();
+            if (endsAt.isBefore(now.plusSeconds(60)) || endsAt.isAfter(now.plusDays(30))) {
+                throw new BizException("拍卖截止时间须在当前时间 60 秒至 30 天内");
+            }
+            product = Product.createAuction(name.trim(), sanitizedDescription, startPrice, category);
+        } else {
+            if (startPrice != null || minIncrement != null || endsAt != null) {
+                throw new BizException("普通在售不能填写拍卖参数");
+            }
+            product = Product.create(name.trim(), sanitizedDescription, price, stock, category);
+        }
         for (int index = 0; index < imagePaths.size(); index++) {
             String imagePath = imagePaths.get(index);
             var metadata = imageStorage.metadata(imagePath);
             product.addImage(imagePath, index, metadata.contentType(), metadata.sizeBytes());
         }
         products.saveAndFlush(product);
+        if (mode == SellingMode.AUCTION) {
+            auctions.saveAndFlush(com.team.shop.entity.AuctionSession.open(product, startPrice, minIncrement,
+                    product.getPublishedAt(), endsAt));
+        }
         events.save(new ProductStatusEvent(product, null, ProductEventType.PUBLISHED, null, product.getPublishedAt()));
-        return ProductDetailResponse.from(product);
+        return ProductDetailResponse.from(product, mode == SellingMode.AUCTION
+                ? auctions.findByProductId(product.getId()).orElse(null) : null);
     }
 
     @Override
@@ -130,6 +187,9 @@ public class ProductServiceImpl implements ProductService {
             throw new BizException("库存不能为负数");
         }
         Product product = lockProduct(productId);
+        if (product.isAuction() && stock != null) {
+            throw new StateConflictException("拍卖商品不能修改库存", 40908);
+        }
         if (product.getStatus() == ProductStatus.FROZEN) {
             throw new StateConflictException("交易中的商品不可编辑");
         }
@@ -149,6 +209,9 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductDetailResponse takeOffline(Long productId) {
         Product product = lockProduct(productId);
+        if (product.isAuction()) {
+            throw new StateConflictException("拍卖商品不能手动下架", 40901);
+        }
         if (intents.findByProductIdAndStatus(productId, IntentStatus.IN_TRANSACTION).isPresent()) {
             throw new StateConflictException("交易中的商品不可下架");
         }
@@ -164,6 +227,9 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductDetailResponse putOnline(Long productId) {
         Product product = lockProduct(productId);
+        if (product.isAuction()) {
+            throw new StateConflictException("拍卖商品不能手动上架", 40908);
+        }
         ProductStatus before = product.getStatus();
         product.putOnline(BusinessTime.now());
         events.save(new ProductStatusEvent(product, null, ProductEventType.MANUAL_ONLINE, before,
