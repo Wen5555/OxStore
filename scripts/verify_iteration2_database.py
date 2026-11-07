@@ -53,7 +53,7 @@ class Verification:
         self.customer_password = "Buyer!" + secrets.token_hex(10)
         self.jwt_secret = secrets.token_hex(32)
         self.report = {"run_at": datetime.now().astimezone().isoformat(), "scope":
-                       "Disposable MySQL: fresh schema, constraints, HTTP/JPA, V4/V5, backup restore, restart",
+                       "Disposable MySQL: fresh schema, constraints, HTTP/JPA, V4/V5/V6, backup restore, restart",
                        "base_commit": self.command(["git", "rev-parse", "HEAD"]).stdout.decode().strip(),
                        "checks": [], "http_requests": [], "source_sha256": {}}
 
@@ -75,7 +75,7 @@ class Verification:
                              'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot --default-character-set=utf8mb4'],
                             payload=text.encode("utf-8"))
 
-    def setup_database(self):
+    def setup_database(self, names=("fresh", "legacy", "restored", "guarded", "partial", "staged", "incomplete")):
         env = os.environ.copy()
         env["MYSQL_ROOT_PASSWORD"] = self.root_password
         self.command(["docker", "run", "-d", "--pull=never", "--name", self.container,
@@ -85,13 +85,13 @@ class Verification:
         self.created = True
         self.wait_mysql()
         self.admin_sql(";".join(f"CREATE DATABASE {name} CHARACTER SET utf8mb4" for name in
-                                 ("fresh", "legacy", "restored", "guarded", "partial", "staged", "incomplete")) + ";")
+                                 names) + ";")
         self.fresh = DockerMySQL(self.container, "fresh")
         self.fresh.sql((DB_DIR / "schema.sql").read_text(encoding="utf-8"))
         self.report["mysql_version"] = self.fresh.query("SELECT VERSION()")
         self.report["image_id"] = self.command(["docker", "inspect", "--format", "{{.Image}}", self.container]).stdout.decode().strip()
         self.report["docker_version"] = self.command(["docker", "version", "--format", "{{.Server.Version}}"] ).stdout.decode().strip()
-        self.verify("D01", "T-001", "Fresh schema creates the nine expected tables on real MySQL", self.fresh.tables() == TABLES)
+        self.verify("D01", "T-001", "Fresh schema creates the nine iteration-2 tables plus three auction tables on real MySQL", self.fresh.tables() == TABLES)
         self.verify("D02", "T-001", "MySQL 8.0 server is used", self.report["mysql_version"].startswith("8.0."))
 
     def wait_mysql(self):
@@ -361,8 +361,8 @@ INSERT INTO product_status_event(product_id,event_type,from_status,to_status,occ
         legacy.sql(fixture + seed)
         before = self.fingerprint(legacy)
         upgraded = legacy.upgrade(scratch / "backups")
-        self.verify("M01", "T-001", "Upgrade saves a nonempty backup before applying V4/V5",
-                    upgraded["applied"] == ["V4", "V5"] and Path(upgraded["backup"]).stat().st_size > 0)
+        self.verify("M01", "T-001", "Upgrade saves a nonempty backup before applying V4/V5/V6",
+                    upgraded["applied"] == ["V4", "V5", "V6"] and Path(upgraded["backup"]).stat().st_size > 0)
         self.verify("M02", "T-001,T-014", "Unknown legacy inventory becomes zero/offline without invented customers",
                     legacy.query("SELECT COUNT(*) FROM product WHERE stock=0 AND status='OFFLINE'") == "2" and
                     legacy.query("SELECT COUNT(*) FROM customer") == "0")
@@ -378,7 +378,7 @@ INSERT INTO product_status_event(product_id,event_type,from_status,to_status,occ
         after = self.fingerprint(legacy)
         repeat = legacy.upgrade(scratch / "backups")
         self.verify("M05", "T-001", "Repeated upgrade skips V4 and keeps all application data unchanged",
-                    repeat["applied"] == ["V5"] and self.fingerprint(legacy) == after)
+                    repeat["applied"] == ["V5", "V6"] and self.fingerprint(legacy) == after)
         self.failed_sql(legacy, "M06", "T-010", "Upgraded schema also rejects unknown intent statuses",
                         "UPDATE purchase_intent SET status='UNKNOWN' WHERE id=2", 3819)
         restored = DockerMySQL(self.container, "restored")
@@ -427,7 +427,7 @@ INSERT INTO product_status_event(product_id,event_type,from_status,to_status,occ
             refused = True
         else:
             refused = False
-        self.verify("M12", "T-001,T-010", "A nine-table layout missing an essential V4 relation is also refused",
+        self.verify("M12", "T-001,T-010", "A current-schema layout missing an essential V4 relation is also refused",
                     refused and "customer_id" not in incomplete.columns("purchase_intent"))
         self.report["backup_restore"] = {"backup_sha256": upgraded["backup_sha256"],
                                          "before_data_sha256": before, "after_data_sha256": after,

@@ -4,6 +4,7 @@ import com.team.shop.domain.FreezeSource;
 import com.team.shop.domain.BusinessTime;
 import com.team.shop.domain.ProductStateMachine;
 import com.team.shop.domain.ProductStatus;
+import com.team.shop.domain.SellingMode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -57,6 +58,11 @@ public class Product {
     @OrderBy("sortOrder ASC")
     private List<ProductImage> images = new ArrayList<>();
 
+    /** 发布后不可切换；数据库触发器同样拒绝修改。 */
+    @Enumerated(EnumType.STRING) @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "selling_mode", nullable = false, updatable = false, length = 20)
+    private SellingMode sellingMode = SellingMode.FIXED_PRICE;
+
     @Enumerated(EnumType.STRING) @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 20)
     private ProductStatus status;
@@ -88,6 +94,13 @@ public class Product {
         p.status = stock > 0 ? ProductStatus.ONLINE : ProductStatus.OFFLINE;
         p.publishedAt = BusinessTime.now();
         p.statusUpdatedAt = p.publishedAt;
+        return p;
+    }
+
+    /** Create an auction item: the start price is the listed price and inventory is fixed at 1. */
+    public static Product createAuction(String name, String description, BigDecimal startPrice, Category category) {
+        Product p = create(name, description, startPrice, 1, category);
+        p.sellingMode = SellingMode.AUCTION;
         return p;
     }
 
@@ -178,6 +191,10 @@ public class Product {
     public Category getCategory() { return category; }
 
     public List<ProductImage> getImages() { return images; }
+
+    public SellingMode getSellingMode() { return sellingMode; }
+
+    public boolean isAuction() { return sellingMode == SellingMode.AUCTION; }
 
     public ProductStatus getStatus() {
         return status;

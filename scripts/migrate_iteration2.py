@@ -1,9 +1,10 @@
-"""Backup-first V4/V5 upgrade for an explicitly selected Docker MySQL database.
+"""Backup-first V4/V5/V6 upgrade for an explicitly selected Docker MySQL database.
 
 Stop application writes first. The container must expose MYSQL_ROOT_PASSWORD to
 its mysql client. Backups contain private data and default to the ignored .work/.
 V4 is run only for the recognized five-table legacy layout; partial upgrades
-are refused. A second invocation skips V4 and safely reapplies idempotent V5.
+are refused. A complete iteration-2 database receives V5/V6 (auction mode). A
+second invocation skips V4 and safely reapplies the idempotent V5/V6.
 """
 from __future__ import annotations
 
@@ -18,8 +19,10 @@ import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATIONS = ROOT / "backend/src/main/resources/db/migrations"
-TABLES = {"seller", "customer", "category", "product", "product_image",
-          "purchase_intent", "trade_attempt", "order_history", "product_status_event"}
+ITERATION2_TABLES = {"seller", "customer", "category", "product", "product_image",
+                     "purchase_intent", "trade_attempt", "order_history", "product_status_event"}
+AUCTION_TABLES = {"auction_session", "auction_bid", "auction_notification"}
+TABLES = ITERATION2_TABLES | AUCTION_TABLES
 LEGACY_TABLES = {"seller", "product", "purchase_intent", "trade_attempt", "product_status_event"}
 ITERATION2_COLUMNS = {
     "product": {"stock", "category2_id"},
@@ -28,6 +31,18 @@ ITERATION2_COLUMNS = {
     "product_image": {"product_id", "image_path", "sort_order"},
     "purchase_intent": {"customer_id", "product_name_snapshot", "queue_seq", "trading_product_id"},
     "order_history": {"intent_id", "customer_id", "product_name_snapshot", "submitted_at", "status", "transacted_at"},
+}
+AUCTION_COLUMNS = {
+    "product": {"selling_mode"},
+    "auction_session": {"product_id", "start_price", "min_increment", "current_price", "leader_customer_id",
+                        "bid_count", "status", "ends_at", "settled_at", "winner_intent_id"},
+    "auction_bid": {"auction_id", "bid_seq", "customer_id", "amount", "bid_at"},
+    "auction_notification": {"auction_id", "notification_type", "recipient_role", "recipient_customer_id"},
+}
+MIGRATION_FILES = {
+    "V4": "V4__iteration2_customer_inventory_catalog.sql",
+    "V5": "V5__iteration2_database_contract.sql",
+    "V6": "V6__auction_mode.sql",
 }
 
 
@@ -72,14 +87,19 @@ class DockerMySQL:
         return self.client("mysqldump", ("--single-transaction", "--routines", "--triggers",
                            "--no-tablespaces", "--set-gtid-purged=OFF", "--hex-blob")).stdout
 
+    def has_columns(self, expected):
+        return all(required <= self.columns(table) for table, required in expected.items())
+
     def upgrade(self, backup_dir: Path):
         tables = self.tables()
         columns = self.columns("product")
         if tables == LEGACY_TABLES and {"active_flag", "image_path"} <= columns:
             phase = "legacy"
-        elif tables == TABLES and all(required <= self.columns(table)
-                                     for table, required in ITERATION2_COLUMNS.items()):
+        elif tables == ITERATION2_TABLES and self.has_columns(ITERATION2_COLUMNS):
             phase = "iteration2"
+        elif (tables == TABLES and self.has_columns(ITERATION2_COLUMNS)
+              and self.has_columns(AUCTION_COLUMNS)):
+            phase = "auction"
         else:
             raise RuntimeError("Unrecognized/partial schema; inspect it and restore the verified backup before retrying")
         if self.query("SELECT COUNT(*) FROM purchase_intent WHERE status='IN_TRANSACTION'") != "0":
@@ -94,14 +114,11 @@ class DockerMySQL:
             stream.write(data)
         result = {"database": self.database, "phase_before": phase, "backup": str(backup),
                   "backup_sha256": hashlib.sha256(data).hexdigest(), "applied": []}
-        if phase == "legacy":
-            name = "V4__iteration2_customer_inventory_catalog.sql"
-            self.sql((MIGRATIONS / name).read_text(encoding="utf-8"))
-            result["applied"].append("V4")
-        name = "V5__iteration2_database_contract.sql"
-        self.sql((MIGRATIONS / name).read_text(encoding="utf-8"))
-        result["applied"].append("V5")
-        if self.tables() != TABLES or not {"content_type", "size_bytes"} <= self.columns("product_image"):
+        for version in (["V4"] if phase == "legacy" else []) + ["V5", "V6"]:
+            self.sql((MIGRATIONS / MIGRATION_FILES[version]).read_text(encoding="utf-8"))
+            result["applied"].append(version)
+        if (self.tables() != TABLES or not {"content_type", "size_bytes"} <= self.columns("product_image")
+                or not self.has_columns(AUCTION_COLUMNS)):
             raise RuntimeError("Post-upgrade schema is incomplete; keep the backup and inspect before restarting")
         return result
 

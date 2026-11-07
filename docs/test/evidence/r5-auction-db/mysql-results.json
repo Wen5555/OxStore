@@ -1,0 +1,502 @@
+{
+  "run_at": "2026-11-06T21:46:20.941039+08:00",
+  "scope": "Disposable MySQL: auction schema constraints, JPA validate, winner fulfilment via existing trade API, V6 upgrade/repeat/resume/restore, restart",
+  "base_commit": "6b84b68dd0ac0dac7a89f95fc0169db63fb4f23f",
+  "checks": [
+    {
+      "id": "D01",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "Fresh schema creates the nine iteration-2 tables plus three auction tables on real MySQL",
+      "status": "PASS"
+    },
+    {
+      "id": "D02",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "MySQL 8.0 server is used",
+      "status": "PASS"
+    },
+    {
+      "id": "S01",
+      "tasks": [
+        "P-A01",
+        "P-A02"
+      ],
+      "description": "Fresh schema has 9 iteration-2 tables plus 3 auction tables",
+      "status": "PASS"
+    },
+    {
+      "id": "S02",
+      "tasks": [
+        "P-A01",
+        "P-A02"
+      ],
+      "description": "All money columns are DECIMAL(10,2)",
+      "status": "PASS"
+    },
+    {
+      "id": "S03",
+      "tasks": [
+        "P-A01",
+        "P-A02"
+      ],
+      "description": "Auction lookup, due-scan, bid history and reminder indexes exist",
+      "status": "PASS"
+    },
+    {
+      "id": "S04",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Mode-immutability trigger is installed",
+      "status": "PASS"
+    },
+    {
+      "id": "D03",
+      "tasks": [
+        "P-A01",
+        "P-A02"
+      ],
+      "description": "Backend validates the auction tables with Hibernate ddl-auto=validate",
+      "status": "PASS"
+    },
+    {
+      "id": "F01",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Products published by the existing API default to FIXED_PRICE and keep the intent flow",
+      "status": "PASS"
+    },
+    {
+      "id": "F02",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Trigger refuses switching a published product to AUCTION",
+      "status": "PASS"
+    },
+    {
+      "id": "F03",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Unknown selling modes are rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "F04",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "An auction product cannot hold more than one item",
+      "status": "PASS"
+    },
+    {
+      "id": "B01",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "A live session starts without bids, price or leader",
+      "status": "PASS"
+    },
+    {
+      "id": "B02",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "A second session for the same product is rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "B03",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Non-positive start price is rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "B04",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Deadline not after start is rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "B05",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Unknown session status is rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "B06",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Price without a recorded bid/leader is rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "B07",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "A counted bid without a current price is rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "B08",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "ENDED_SOLD without a winner intent is rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "G01",
+      "tasks": [
+        "P-A02"
+      ],
+      "description": "Each accepted bid is traceable by sequence, buyer, amount and time",
+      "status": "PASS"
+    },
+    {
+      "id": "G02",
+      "tasks": [
+        "P-A02"
+      ],
+      "description": "A concurrent writer reusing a bid sequence is rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "G03",
+      "tasks": [
+        "P-A02"
+      ],
+      "description": "Two accepted bids with the same amount are rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "G04",
+      "tasks": [
+        "P-A02"
+      ],
+      "description": "Bids must reference an existing customer",
+      "status": "PASS"
+    },
+    {
+      "id": "N01",
+      "tasks": [
+        "P-A02"
+      ],
+      "description": "Repeated settlement reminders for the same session/type are rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "N02",
+      "tasks": [
+        "P-A02"
+      ],
+      "description": "Seller reminders cannot carry a customer recipient",
+      "status": "PASS"
+    },
+    {
+      "id": "N03",
+      "tasks": [
+        "P-A02"
+      ],
+      "description": "A sold reminder must carry the final price",
+      "status": "PASS"
+    },
+    {
+      "id": "W01",
+      "tasks": [
+        "P-A01",
+        "P-A04"
+      ],
+      "description": "Winner intent completes through the existing success API: stock 0, offline, SUCCESS history",
+      "status": "PASS"
+    },
+    {
+      "id": "W02",
+      "tasks": [
+        "P-A02"
+      ],
+      "description": "Reminders are listable per winner and for sellers",
+      "status": "PASS"
+    },
+    {
+      "id": "U01",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Due scan returns the expired LIVE session only",
+      "status": "PASS"
+    },
+    {
+      "id": "U02",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Conditional settlement applies once; a repeated scan changes nothing",
+      "status": "PASS"
+    },
+    {
+      "id": "U03",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "An unsold session cannot link a winner intent",
+      "status": "PASS"
+    },
+    {
+      "id": "Q01",
+      "tasks": [
+        "P-A01",
+        "P-A02"
+      ],
+      "description": "Handoff query samples run and the snapshot masks the leader",
+      "status": "PASS"
+    },
+    {
+      "id": "Q02",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Due scan can use idx_auction_status_ends",
+      "status": "PASS"
+    },
+    {
+      "id": "M01",
+      "tasks": [
+        "P-A01",
+        "P-A02"
+      ],
+      "description": "Iteration-2 database is backed up, then receives V5/V6",
+      "status": "PASS"
+    },
+    {
+      "id": "M02",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Every existing product becomes FIXED_PRICE and existing data is unchanged",
+      "status": "PASS"
+    },
+    {
+      "id": "M03",
+      "tasks": [
+        "P-A01",
+        "P-A02"
+      ],
+      "description": "Upgraded and fresh schemas agree on columns, constraints and indexes",
+      "status": "PASS"
+    },
+    {
+      "id": "M04",
+      "tasks": [
+        "P-A01",
+        "P-A02"
+      ],
+      "description": "Repeated upgrade is recognized as auction phase and changes no data",
+      "status": "PASS"
+    },
+    {
+      "id": "M05",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Backup restores the pre-V6 iteration-2 database exactly",
+      "status": "PASS"
+    },
+    {
+      "id": "M06",
+      "tasks": [
+        "P-A01",
+        "P-A02"
+      ],
+      "description": "V6 resumes after an interrupted run (procedure and session table done) and matches the fresh schema",
+      "status": "PASS"
+    },
+    {
+      "id": "M07",
+      "tasks": [
+        "P-A01"
+      ],
+      "description": "Direct V6 on a pre-V5 database stops before any change",
+      "status": "PASS"
+    },
+    {
+      "id": "M08",
+      "tasks": [
+        "P-A02"
+      ],
+      "description": "A twelve-table layout missing an auction column is refused",
+      "status": "PASS"
+    },
+    {
+      "id": "R01",
+      "tasks": [
+        "P-A01",
+        "P-A02"
+      ],
+      "description": "MySQL restart preserves sessions, bids, reminders and the fulfilment link",
+      "status": "PASS"
+    },
+    {
+      "id": "R02",
+      "tasks": [
+        "P-A01",
+        "P-A02"
+      ],
+      "description": "Backend starts with ddl-auto=validate on the V6-upgraded database",
+      "status": "PASS"
+    }
+  ],
+  "http_requests": [
+    {
+      "method": "POST",
+      "path": "/api/admin/auth/login",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/categories/tree",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/products/1/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/1/start",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/1/success",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/2/success",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/auth/login",
+      "status": 200
+    }
+  ],
+  "source_sha256": {
+    "backend/src/main/resources/db/migrations/V2__queue_history.sql": "b2f07643d2a7cb387643957da75c18b208a5886fd9d1af0353cca6b384c63c5e",
+    "backend/src/main/resources/db/migrations/V3__trade_attempt_completion_check.sql": "b932e6586480fd4780ff57ce75b5d79acd8c5a8628612a91cb0f81e109f17939",
+    "backend/src/main/resources/db/migrations/V4__iteration2_customer_inventory_catalog.sql": "9378791f9cbd8d35661ec783285c07590117946aa8c416b19e4895f5677a18b1",
+    "backend/src/main/resources/db/migrations/V5__iteration2_database_contract.sql": "97134eedca0a3c2241f94af52a8233f1f584cdbb85e5d28f1c7520f3e6530f0b",
+    "backend/src/main/resources/db/migrations/V6__auction_mode.sql": "c91f300a12cf41445004adc887987394717dba84b3a26953a91036caf351b4ac",
+    "backend/src/main/resources/db/schema.sql": "60e9fb7a8dce3422de3e6085b491d6276650789f4901c78603bfa957384b3e7f",
+    "backend/src/main/java/com/team/shop/domain/AuctionNotificationType.java": "ce1b4321b114604d3150e1d7a6d399a2521e4415f95bedc7857b126ba78f8f1c",
+    "backend/src/main/java/com/team/shop/domain/AuctionStatus.java": "e54cf1ec9738c99813b24ea43e5c3ac3dff60d687313265076f3e06f51e545c5",
+    "backend/src/main/java/com/team/shop/entity/AuctionBid.java": "5cb070e18f1874451c365f0d177c2409d5e9a594be12614f58244fa603478764",
+    "backend/src/main/java/com/team/shop/entity/AuctionNotification.java": "5dd0765b1b7dbfd8275bb2453577a2eb0634bc0b6a58243c015d6ee00c6e33a8",
+    "backend/src/main/java/com/team/shop/entity/AuctionSession.java": "899f34cb2f23fc416218f9323b721f7c57b72108eb260525b11e5a68b615c46f",
+    "backend/src/main/java/com/team/shop/repository/AuctionBidRepository.java": "19a8c79262b14c0732ebd9989f92d0560afac53e87c1c326b745c48d19fc0717",
+    "backend/src/main/java/com/team/shop/repository/AuctionNotificationRepository.java": "7d6e5eade95ce3385aeec7a591c345a56c7f035425f994135cd441e1fa971313",
+    "backend/src/main/java/com/team/shop/repository/AuctionSessionRepository.java": "4630be3a75e441406fd4706d84cde37341c565b4802f661ba1c8a749f7560bc4",
+    "backend/src/main/java/com/team/shop/entity/Product.java": "03b3aeeed35807101762ab80213363ce478414f27d8fd9b961a585c3aded80b3",
+    "scripts/verify_auction_database.py": "c50dac9a7145f896ac3739b5b77f49034c5a966cf29478c537c9178d50e5e386",
+    "scripts/migrate_iteration2.py": "2bf3f35b7fed47bebb1c22d550462f750aa453ce50c61855b5f7a470eff7e202",
+    "scripts/verify_iteration2_database.py": "cc4a8851994fdbb9b95ff6658263687f41527a7035009583066c87df49a3db12",
+    "backend/target/shop-0.1.0.jar": "7d0bfb2bf27645397f80ab07e89a94d3aa649073f088e922a56b9f7b20e7702a"
+  },
+  "query_samples": {
+    "public_snapshot": {
+      "sql": "SELECT p.id product_id, p.name, p.selling_mode, a.status, a.start_price, a.min_increment,\n  a.current_price, a.bid_count, a.ends_at,\n  CASE WHEN a.bid_count = 0 THEN a.start_price ELSE a.current_price + a.min_increment END next_min_bid,\n  CONCAT(LEFT(c.username, 1), '***', RIGHT(c.username, 1)) leader_alias\nFROM auction_session a JOIN product p ON p.id = a.product_id\nLEFT JOIN customer c ON c.id = a.leader_customer_id WHERE p.id = 2",
+      "rows": [
+        "2\t拍卖专项商品\tAUCTION\tENDED_SOLD\t10.00\t1.50\t11.50\t2\t2026-11-06 13:46:51.435100\t13.00\ta***b"
+      ]
+    },
+    "lock_for_bid": {
+      "sql": "SELECT id, bid_count, current_price FROM auction_session WHERE product_id = 2 FOR UPDATE",
+      "rows": [
+        "1\t2\t11.50"
+      ]
+    },
+    "due_scan": {
+      "sql": "SELECT id FROM auction_session WHERE status = 'LIVE' AND ends_at <= '2026-11-06 13:46:56.162740' ORDER BY ends_at, id LIMIT 50",
+      "rows": []
+    },
+    "recent_bids": {
+      "sql": "SELECT bid_seq, amount, bid_at FROM auction_bid WHERE auction_id = 1 ORDER BY bid_seq DESC LIMIT 10",
+      "rows": [
+        "2\t11.50\t2026-11-06 13:46:52.732653",
+        "1\t10.00\t2026-11-06 13:46:52.710548"
+      ]
+    },
+    "customer_notifications": {
+      "sql": "SELECT id, notification_type, product_name_snapshot, final_price, read_at\nFROM auction_notification WHERE recipient_customer_id = 2 ORDER BY created_at DESC, id DESC LIMIT 20",
+      "rows": [
+        "2\tAUCTION_WON\t拍卖专项商品\t11.50\tNULL"
+      ]
+    },
+    "seller_notifications": {
+      "sql": "SELECT id, notification_type, product_name_snapshot, final_price, read_at\nFROM auction_notification WHERE recipient_role = 'SELLER' ORDER BY created_at DESC, id DESC LIMIT 20",
+      "rows": [
+        "1\tAUCTION_SOLD\t拍卖专项商品\t11.50\tNULL"
+      ]
+    },
+    "winner_fulfilment": {
+      "sql": "SELECT a.id auction_id, a.status, a.current_price final_price, i.id intent_id, i.status intent_status,\n  h.status history_status FROM auction_session a JOIN purchase_intent i ON i.id = a.winner_intent_id\nLEFT JOIN order_history h ON h.intent_id = i.id WHERE a.id = 1",
+      "rows": [
+        "1\tENDED_SOLD\t11.50\t2\tSUCCESS\tSUCCESS"
+      ]
+    }
+  },
+  "java_version": "java version \"21.0.8\" 2025-07-15 LTS\r\nJava(TM) SE Runtime Environment (build 21.0.8+12-LTS-250)\r\nJava HotSpot(TM) 64-Bit Server VM (build 21.0.8+12-LTS-250, mixed mode, sharing)",
+  "mysql_version": "8.0.46",
+  "image_id": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+  "docker_version": "29.8.2",
+  "due_scan_explain": "1\tSIMPLE\tauction_session\tNULL\trange\tidx_auction_status_ends\tidx_auction_status_ends\t90\tNULL\t1\t100.00\tUsing where; Using index",
+  "backup_restore": {
+    "backup_sha256": "478cb56dbf9887419ec526c27e431b09a7399768b9ec6197f77c5582d92c2b96",
+    "before_data_sha256": "d2eb1b661cfc070bf7a69791351c93e8e1e62a0abdb2d9efb64393edf22eeb1e",
+    "restored_data_sha256": "d2eb1b661cfc070bf7a69791351c93e8e1e62a0abdb2d9efb64393edf22eeb1e"
+  },
+  "cleanup": "owned container and its anonymous volume removed; apps stopped",
+  "success": true,
+  "finished_at": "2026-11-06T21:48:03.688419+08:00"
+}
