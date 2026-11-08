@@ -1,4 +1,4 @@
-import { LockOutlined, ShopOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons'
+import { BellOutlined, LockOutlined, ShopOutlined, TrophyOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Layout, Space, Typography } from 'antd'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
@@ -7,9 +7,11 @@ const { Text } = Typography
 
 const navigation = [
   { label: '商品管理', path: '/admin/products', icon: <ShopOutlined /> },
+  { label: '拍卖管理', path: '/admin/auctions', icon: <TrophyOutlined /> },
   { label: '发布商品', path: '/admin/products/publish', icon: <UploadOutlined /> },
   { label: '全部顾客', path: '/admin/customers', icon: <UserOutlined /> },
   { label: '修改密码', path: '/admin/password', icon: <LockOutlined /> },
+  { label: '拍卖提醒', path: '/admin/auction-notifications', icon: <BellOutlined /> },
 ]
 
 export default function AdminLayout() {
@@ -17,6 +19,8 @@ export default function AdminLayout() {
   const navigate = useNavigate()
   const selectedPath = location.pathname.startsWith('/admin/customers')
     ? '/admin/customers'
+    : location.pathname.startsWith('/admin/auctions')
+      ? '/admin/auctions'
     : location.pathname.startsWith('/admin/products')
       ? (location.pathname.endsWith('/publish') ? '/admin/products/publish' : '/admin/products')
       : location.pathname

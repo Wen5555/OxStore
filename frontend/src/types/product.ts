@@ -1,4 +1,14 @@
 export type ProductStatus = 'ONLINE' | 'FROZEN' | 'OFFLINE'
+export type SellingMode = 'FIXED_PRICE' | 'AUCTION'
+export type AuctionStatus = 'LIVE' | 'ENDED_SOLD' | 'ENDED_UNSOLD'
+
+export interface AuctionSummary {
+  auctionStatus: AuctionStatus
+  currentPrice: number
+  nextMinBid: number
+  endsAt: string
+  bidCount: number
+}
 
 export interface ProductImage {
   url: string
@@ -12,6 +22,8 @@ export interface ProductSummary {
   category2Id: number
   categoryName: string
   mainImageUrl: string | null
+  sellingMode: SellingMode
+  auction?: AuctionSummary
 }
 
 export interface Product {
@@ -26,6 +38,8 @@ export interface Product {
   descriptionHtml?: string
   images: ProductImage[]
   mainImageUrl: string | null
+  sellingMode: SellingMode
+  auction?: AuctionSummary
 }
 
 export interface ProductSummaryResponse {
@@ -35,6 +49,8 @@ export interface ProductSummaryResponse {
   mainImagePath: string | null
   category2Id: number
   category2Name: string
+  sellingMode?: SellingMode
+  auction?: AuctionSummary
 }
 
 export interface ProductDetailResponse {
@@ -51,6 +67,8 @@ export interface ProductDetailResponse {
   canPurchase: boolean
   publishedAt: string
   statusUpdatedAt: string
+  sellingMode?: SellingMode
+  auction?: AuctionSummary
 }
 
 export function mapProductSummary(response: ProductSummaryResponse): ProductSummary {
@@ -61,6 +79,8 @@ export function mapProductSummary(response: ProductSummaryResponse): ProductSumm
     category2Id: response.category2Id,
     categoryName: response.category2Name,
     mainImageUrl: response.mainImagePath,
+    sellingMode: response.sellingMode ?? 'FIXED_PRICE',
+    auction: response.auction,
   }
 }
 
@@ -77,5 +97,7 @@ export function mapProductDetail(response: ProductDetailResponse): Product {
     descriptionHtml: response.descriptionHtml,
     images: response.images.map((url, position) => ({ url, position })),
     mainImageUrl: response.mainImagePath,
+    sellingMode: response.sellingMode ?? 'FIXED_PRICE',
+    auction: response.auction,
   }
 }

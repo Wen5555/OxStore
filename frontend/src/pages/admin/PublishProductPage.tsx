@@ -1,16 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
-import { Alert, Button, Card, Cascader, Form, Input, InputNumber, Modal, Space, Upload, message } from 'antd'
+import { Alert, Button, Card, Cascader, DatePicker, Form, Input, InputNumber, Modal, Radio, Space, Upload, message } from 'antd'
 import type { UploadFile, UploadProps } from 'antd'
 import { createProduct } from '../../api/admin'
 import { getCategoryTree } from '../../api/catalog'
 import { ApiError } from '../../api/request'
 import type { CategoryTreeItem } from '../../types/common'
+import type { SellingMode } from '../../types/product'
+import type { Dayjs } from 'dayjs'
 
 interface PublishValues {
   name: string
   price: number
   stock: number
   category: number[]
+  sellingMode: SellingMode
+  minIncrement?: number
+  endsAt?: Dayjs
 }
 
 const imageValidationError = (file: File) => {
@@ -105,7 +110,13 @@ export default function PublishProductPage() {
     data.append('name', values.name.trim())
     data.append('price', String(values.price))
     data.append('category2Id', String(values.category[1]))
-    data.append('stock', String(values.stock))
+    data.append('stock', String(values.sellingMode === 'AUCTION' ? 1 : values.stock))
+    data.append('sellingMode', values.sellingMode)
+    if (values.sellingMode === 'AUCTION') {
+      data.append('startPrice', String(values.price))
+      data.append('minIncrement', String(values.minIncrement))
+      data.append('endsAt', values.endsAt?.format('YYYY-MM-DDTHH:mm:ss') ?? '')
+    }
     if (descriptionHtml.trim()) data.append('descriptionHtml', descriptionHtml)
     files.forEach((file) => {
       if (file.originFileObj) data.append('images[]', file.originFileObj)
@@ -139,7 +150,7 @@ export default function PublishProductPage() {
     <main style={{ maxWidth: 800, margin: '0 auto', padding: 24 }}>
       <Card title="发布商品">
         {categoryError && <Alert style={{ marginBottom: 16 }} type="error" showIcon message="类目加载失败，暂时无法发布商品。" />}
-        <Form form={form} layout="vertical" onFinish={onFinish} initialValues={{ stock: 0 }}>
+        <Form form={form} layout="vertical" onFinish={onFinish} initialValues={{ stock: 0, sellingMode: 'FIXED_PRICE' }}>
           <Form.Item label="商品名称" name="name" rules={[{ required: true, whitespace: true, message: '请输入商品名称' }]}>
             <Input />
           </Form.Item>
@@ -151,6 +162,33 @@ export default function PublishProductPage() {
           </Form.Item>
           <Form.Item label="库存数量" name="stock" rules={[{ required: true, message: '请输入库存' }, { type: 'number', min: 0, message: '库存必须为非负整数' }]}>
             <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item label="售卖模式" name="sellingMode">
+            <Radio.Group options={[{ label: '普通在售', value: 'FIXED_PRICE' }, { label: '拍卖', value: 'AUCTION' }]} />
+          </Form.Item>
+          <Form.Item noStyle shouldUpdate={(previous, current) => previous.sellingMode !== current.sellingMode}>
+            {({ getFieldValue }) => getFieldValue('sellingMode') === 'AUCTION' ? (
+              <>
+                <Form.Item label="最低加价幅度" name="minIncrement" rules={[{ required: true, message: '请输入最低加价幅度' }, { type: 'number', min: 0.01, message: '最低加价幅度必须大于 0' }]}>
+                  <InputNumber min={0.01} precision={2} prefix="¥" style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item label="竞价截止时间" name="endsAt" rules={[
+                  { required: true, message: '请选择竞价截止时间' },
+                  {
+                    validator: (_, value: Dayjs | undefined) => {
+                      if (!value) return Promise.resolve()
+                      const now = Date.now()
+                      const time = value.valueOf()
+                      if (time < now + 60 * 1000) return Promise.reject(new Error('截止时间至少要晚于当前时间 60 秒'))
+                      if (time > now + 30 * 24 * 60 * 60 * 1000) return Promise.reject(new Error('截止时间不能超过 30 天'))
+                      return Promise.resolve()
+                    },
+                  },
+                ]}>
+                  <DatePicker showTime style={{ width: '100%' }} />
+                </Form.Item>
+              </>
+            ) : null}
           </Form.Item>
           <Form.Item label="商品描述（选填）">
             <RichTextEditor key={editorKey} onChange={setDescriptionHtml} />

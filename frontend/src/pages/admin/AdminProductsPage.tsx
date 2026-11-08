@@ -51,10 +51,11 @@ export default function AdminProductsPage() {
               pagination={false}
               columns={[
                 { title: '商品', dataIndex: 'name', key: 'name' },
-                { title: '价格', dataIndex: 'price', key: 'price', render: (value: number) => `¥${Number(value).toFixed(2)}` },
+                { title: '当前价格', key: 'price', render: (_, product) => `¥${Number(product.auction?.currentPrice ?? product.price).toFixed(2)}` },
                 { title: '库存', dataIndex: 'stock', key: 'stock' },
                 { title: '二级类目', dataIndex: 'categoryName', key: 'categoryName' },
                 { title: '状态', dataIndex: 'status', key: 'status', render: (status: Product['status']) => <Tag>{labels[status]}</Tag> },
+                { title: '模式', key: 'sellingMode', render: (_, product) => product.sellingMode === 'AUCTION' ? <Tag color="blue">拍卖</Tag> : <Tag>普通在售</Tag> },
                 {
                   title: '操作',
                   key: 'actions',

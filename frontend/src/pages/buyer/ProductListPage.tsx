@@ -107,8 +107,9 @@ export default function ProductListPage() {
                   >
                     <Card.Meta title={<Link to={`/products/${product.id}`}>{product.name}</Link>} description={product.categoryName} />
                     <Typography.Title level={4} style={{ color: '#cf1322', marginBottom: 0 }}>
-                      ¥{Number(product.price).toFixed(2)}
+                      ¥{Number(product.auction?.currentPrice ?? product.price).toFixed(2)}
                     </Typography.Title>
+                    {product.sellingMode === 'AUCTION' && product.auction && <Typography.Text type="secondary">当前最低出价：¥{Number(product.auction.nextMinBid).toFixed(2)}</Typography.Text>}
                   </Card>
                 ))}
               </div>

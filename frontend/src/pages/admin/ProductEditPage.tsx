@@ -7,7 +7,7 @@ import type { CategoryTreeItem } from '../../types/common'
 import type { Product } from '../../types/product'
 
 interface EditValues {
-  stock: number
+  stock?: number
   category: number[]
 }
 
@@ -46,7 +46,10 @@ export default function ProductEditPage() {
     if (!product || values.category?.length !== 2) return
     try {
       setSaving(true)
-      await updateProduct(product.id, { stock: values.stock, category2Id: values.category[1] })
+      await updateProduct(product.id, {
+        ...(product.sellingMode === 'FIXED_PRICE' ? { stock: values.stock } : {}),
+        category2Id: values.category[1],
+      })
       message.success('商品信息已更新')
       navigate('/admin/products')
     } catch (error) {
@@ -83,22 +86,28 @@ export default function ProductEditPage() {
   return (
     <main style={{ maxWidth: 720, margin: '0 auto', padding: 24 }}>
       <Card title={`维护商品：${product.name}`}>
-        <Typography.Paragraph>只能修改库存和二级类目。名称、价格、描述和图片不可原地修改；需要变更时请下架后重新发布。</Typography.Paragraph>
+        <Typography.Paragraph>
+          {product.sellingMode === 'AUCTION'
+            ? '拍卖商品只能修改二级类目，不能修改库存或上下架。名称、价格、描述和图片不可原地修改。'
+            : '只能修改库存和二级类目。名称、价格、描述和图片不可原地修改；需要变更时请下架后重新发布。'}
+        </Typography.Paragraph>
         <Form form={form} layout="vertical" onFinish={save}>
-          <Form.Item label="库存数量" name="stock" rules={[{ required: true, message: '请输入库存' }]}>
-            <InputNumber min={0} precision={0} style={{ width: '100%' }} />
-          </Form.Item>
+          {product.sellingMode === 'FIXED_PRICE' && (
+            <Form.Item label="库存数量" name="stock" rules={[{ required: true, message: '请输入库存' }]}>
+              <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+            </Form.Item>
+          )}
           <Form.Item label="二级类目" name="category" rules={[{ required: true, message: '请选择二级类目' }]}>
             <Cascader options={categoryOptions} placeholder="请选择一级及二级类目" />
           </Form.Item>
           <Space wrap>
             <Button type="primary" htmlType="submit" loading={saving}>保存库存和类目</Button>
-            {product.status === 'ONLINE' && (
+            {product.sellingMode === 'FIXED_PRICE' && product.status === 'ONLINE' && (
               <Popconfirm title="下架该商品？未完成意向将按规则作废。" onConfirm={() => changeListing(false)} okText="下架" cancelText="取消">
                 <Button danger loading={saving}>手动下架</Button>
               </Popconfirm>
             )}
-            {product.status === 'OFFLINE' && (
+            {product.sellingMode === 'FIXED_PRICE' && product.status === 'OFFLINE' && (
               <Popconfirm
                 title="上架该商品？"
                 description={(product.stock ?? 0) <= 0 ? '库存必须大于 0 才能上架。' : undefined}

@@ -1,4 +1,4 @@
-import { IdcardOutlined, LogoutOutlined, ShoppingOutlined, UnorderedListOutlined, UserOutlined } from '@ant-design/icons'
+import { BellOutlined, IdcardOutlined, LogoutOutlined, ShoppingOutlined, UnorderedListOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Card, Descriptions, Space, Tag, Typography } from 'antd'
 import { useNavigate } from 'react-router-dom'
 
@@ -41,6 +41,9 @@ export default function BuyerAccountPage() {
           <Space wrap>
             <Button type="primary" icon={<UnorderedListOutlined />} onClick={() => navigate('/me/order-history')}>
               查看购买历史
+            </Button>
+            <Button icon={<BellOutlined />} onClick={() => navigate('/me/auction-notifications')}>
+              拍卖提醒
             </Button>
             <Button icon={<ShoppingOutlined />} onClick={() => navigate('/')}>
               继续购物
