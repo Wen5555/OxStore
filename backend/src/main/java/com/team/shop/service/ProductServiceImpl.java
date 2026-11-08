@@ -271,7 +271,8 @@ public class ProductServiceImpl implements ProductService {
         if (name == null || name.isBlank() || name.length() > 200) {
             throw new BizException("商品名称必填且不能超过 200 个字符");
         }
-        if (price == null || price.signum() <= 0 || price.scale() > 2) {
+        if (price == null || price.signum() <= 0 || price.scale() > 2
+                || price.compareTo(new BigDecimal("99999999.99")) > 0) {
             throw new BizException("价格必须为正数且最多两位小数");
         }
         if (stock < 0) {

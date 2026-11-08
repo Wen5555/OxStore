@@ -61,7 +61,7 @@ public class AdminProductController {
             @RequestParam("name") @NotBlank @Size(max = 200) String name,
             @RequestParam(value = "price", required = false) @Positive BigDecimal price,
             @RequestParam("category2Id") @NotNull Long category2Id,
-            @RequestParam("stock") @PositiveOrZero int stock,
+            @RequestParam(value = "stock", required = false) @PositiveOrZero Integer stock,
             @RequestParam(value = "sellingMode", defaultValue = "FIXED_PRICE") SellingMode sellingMode,
             @RequestParam(value = "startPrice", required = false) BigDecimal startPrice,
             @RequestParam(value = "minIncrement", required = false) BigDecimal minIncrement,
@@ -80,10 +80,14 @@ public class AdminProductController {
             for (MultipartFile image : suppliedImages) {
                 storedPaths.add(imageStorage.store(image));
             }
+            if (sellingMode == SellingMode.FIXED_PRICE && stock == null) {
+                throw new BizException("普通商品必须填写库存");
+            }
+            int requestedStock = stock == null ? 1 : stock;
             ProductDetailResponse created = sellingMode == SellingMode.AUCTION
-                    ? products.publish(name, price, category2Id, stock, descriptionHtml, storedPaths,
+                    ? products.publish(name, price, category2Id, requestedStock, descriptionHtml, storedPaths,
                     sellingMode, startPrice, minIncrement, endsAt)
-                    : products.publish(name, price, category2Id, stock, descriptionHtml, storedPaths);
+                    : products.publish(name, price, category2Id, requestedStock, descriptionHtml, storedPaths);
             return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(created));
         } catch (RuntimeException e) {
             cleanupStoredImages(storedPaths);

@@ -36,10 +36,10 @@ public interface AuctionSessionRepository extends JpaRepository<AuctionSession, 
     List<Long> findDueIds(@Param("status") AuctionStatus status, @Param("now") LocalDateTime now, Pageable pageable);
 
     /** 卖家拍卖管理列表 */
-    @EntityGraph(attributePaths = {"product", "leader"})
+    @EntityGraph(attributePaths = {"product", "leader", "winnerIntent"})
     Page<AuctionSession> findAllByOrderByEndsAtDescIdDesc(Pageable pageable);
 
-    @EntityGraph(attributePaths = {"product", "leader"})
+    @EntityGraph(attributePaths = {"product", "leader", "winnerIntent"})
     Page<AuctionSession> findAllByStatusOrderByEndsAtDescIdDesc(AuctionStatus status, Pageable pageable);
 
     /** 列表页批量补充拍卖摘要 */

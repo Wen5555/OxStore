@@ -6,15 +6,18 @@ import com.team.shop.entity.AuctionNotification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import java.util.Optional;
 
 public interface AuctionNotificationRepository extends JpaRepository<AuctionNotification, Long> {
 
     /** 顾客本人的提醒，最新在前 */
+    @EntityGraph(attributePaths = {"auction", "auction.product"})
     Page<AuctionNotification> findByRecipientCustomerIdOrderByCreatedAtDescIdDesc(Long customerId, Pageable pageable);
 
     /** 卖家后台提醒，最新在前 */
+    @EntityGraph(attributePaths = {"auction", "auction.product"})
     Page<AuctionNotification> findByRecipientRoleOrderByCreatedAtDescIdDesc(NotificationRecipientRole role, Pageable pageable);
 
     long countByRecipientCustomerIdAndReadAtIsNull(Long customerId);
@@ -24,5 +27,9 @@ public interface AuctionNotificationRepository extends JpaRepository<AuctionNoti
     /** 结拍重入时先查再插；并发插入由 uk_notification_auction_type 兜底 */
     boolean existsByAuctionIdAndType(Long auctionId, AuctionNotificationType type);
 
+    Optional<AuctionNotification> findByAuctionIdAndType(Long auctionId, AuctionNotificationType type);
+
     Optional<AuctionNotification> findByIdAndRecipientCustomerId(Long id, Long customerId);
+
+    Optional<AuctionNotification> findByIdAndRecipientRole(Long id, NotificationRecipientRole role);
 }
