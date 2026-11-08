@@ -170,6 +170,17 @@ public class Product {
         this.statusUpdatedAt = now;
     }
 
+    /** Auction fulfillment failure leaves the item offline for the seller to republish. */
+    public void markAuctionTradeFailed(LocalDateTime now) {
+        if (!isAuction()) {
+            throw new com.team.shop.exception.StateConflictException("只有拍卖商品使用该失败收尾");
+        }
+        ProductStateMachine.assertCanMarkFailed(status, freezeSource);
+        this.status = ProductStatus.OFFLINE;
+        this.freezeSource = null;
+        this.statusUpdatedAt = now;
+    }
+
     public Long getId() {
         return id;
     }

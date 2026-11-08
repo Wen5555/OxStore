@@ -9,6 +9,8 @@ import com.team.shop.service.AuctionEventHub;
 import com.team.shop.service.AuctionService;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,16 +33,18 @@ public class AuctionController {
     }
 
     @PostMapping("/bids")
-    public ApiResponse<AuctionBidResponse> bid(@PathVariable Long productId,
-                                               @AuthenticationPrincipal UserIdentity identity,
-                                               @Valid @RequestBody AuctionBidRequest request) {
-        return ApiResponse.ok(auctions.placeBid(productId, identity.userId(), request.amount()));
+    public ResponseEntity<ApiResponse<AuctionBidResponse>> bid(@PathVariable Long productId,
+                                                               @AuthenticationPrincipal UserIdentity identity,
+                                                               @Valid @RequestBody AuctionBidRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(auctions.placeBid(productId, identity.userId(), request.amount())));
     }
 
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@PathVariable Long productId,
                              @AuthenticationPrincipal UserIdentity identity) {
-        SseEmitter emitter = events.subscribe(productId);
+        Long customerId = identity != null && "CUSTOMER".equals(identity.role()) ? identity.userId() : null;
+        SseEmitter emitter = events.subscribeProduct(productId, customerId);
         try {
             emitter.send(SseEmitter.event().name("snapshot").data(auctions.snapshot(productId, identity)));
         } catch (Exception ex) {

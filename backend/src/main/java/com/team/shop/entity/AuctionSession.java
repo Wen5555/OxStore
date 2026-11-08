@@ -164,6 +164,9 @@ public class AuctionSession {
     }
 
     private static BigDecimal money(BigDecimal value) {
+        if (value == null || value.signum() <= 0 || value.compareTo(new BigDecimal("99999999.99")) > 0) {
+            throw new IllegalArgumentException("金额必须在 0.01 至 99999999.99 之间");
+        }
         try {
             return value.setScale(2, RoundingMode.UNNECESSARY);
         } catch (ArithmeticException e) {

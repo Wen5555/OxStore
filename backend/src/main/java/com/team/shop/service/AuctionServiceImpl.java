@@ -17,6 +17,7 @@ import com.team.shop.repository.ProductRepository;
 import com.team.shop.security.UserIdentity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,21 +28,26 @@ public class AuctionServiceImpl implements AuctionService {
     private final AuctionSessionRepository auctions;
     private final AuctionBidRepository bids;
     private final CustomerRepository customers;
-    private final AuctionEventHub events;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AuctionServiceImpl(ProductRepository products, AuctionSessionRepository auctions,
                                AuctionBidRepository bids, CustomerRepository customers,
-                               AuctionEventHub events) {
+                               ApplicationEventPublisher eventPublisher) {
         this.products = products;
         this.auctions = auctions;
         this.bids = bids;
         this.customers = customers;
-        this.events = events;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
     @Transactional(readOnly = true)
     public AuctionSnapshotResponse snapshot(Long productId, UserIdentity identity) {
+        var product = products.findById(productId)
+                .orElseThrow(() -> new NotFoundException("商品不存在", 40401));
+        if (product.getSellingMode() != SellingMode.AUCTION) {
+            throw new StateConflictException("普通商品不支持拍卖快照", 40908);
+        }
         AuctionSession auction = auctions.findByProductId(productId)
                 .orElseThrow(() -> new NotFoundException("拍卖不存在", 40401));
         Customer customer = customer(identity);
@@ -51,8 +57,13 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     @Transactional
     public AuctionBidResponse placeBid(Long productId, Long customerId, BigDecimal amount) {
-        AuctionSession auction = auctions.findByProductIdForUpdate(productId)
-                .orElseThrow(() -> new NotFoundException("拍卖不存在", 40401));
+        AuctionSession auction = auctions.findByProductIdForUpdate(productId).orElse(null);
+        if (auction == null) {
+            if (products.findById(productId).isPresent()) {
+                throw new StateConflictException("普通商品不能出价", 40908);
+            }
+            throw new NotFoundException("商品不存在", 40401);
+        }
         if (auction.getProduct().getSellingMode() != SellingMode.AUCTION) {
             throw new StateConflictException("普通商品不能出价", 40908);
         }
@@ -61,7 +72,10 @@ public class AuctionServiceImpl implements AuctionService {
         AuctionBid bid = auction.acceptBid(customer, amount, BusinessTime.now());
         bids.saveAndFlush(bid);
         AuctionBidResponse response = AuctionBidResponse.from(bid);
-        events.publishBid(auction, bid);
+        eventPublisher.publishEvent(new AuctionEventHub.BidCommittedEvent(
+                auction.getProduct().getId(), bid.getBidSeq(), bid.getAmount(), auction.getCurrentPrice(),
+                auction.nextMinimumBid(), auction.getBidCount(), alias(customer.getUsername()),
+                customer.getId(), bid.getBidAt()));
         return response;
     }
 

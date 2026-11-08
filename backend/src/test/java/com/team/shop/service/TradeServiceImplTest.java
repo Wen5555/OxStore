@@ -123,4 +123,27 @@ class TradeServiceImplTest {
         when(attempts.findOpen(2L)).thenReturn(Optional.empty());
         assertThrows(StateConflictException.class, () -> service.confirmSuccess(2L));
     }
+
+    @Test
+    void auctionFailureRejectsRequeueAndKeepsProductOffline() {
+        var auctionProduct = Product.createAuction("auction", "", BigDecimal.ONE, product.getCategory());
+        ReflectionTestUtils.setField(auctionProduct, "id", 11L);
+        var now = BusinessTime.now();
+        var auctionIntent = PurchaseIntent.createAuctionWinner(auctionProduct, intent.getCustomer(), now);
+        ReflectionTestUtils.setField(auctionIntent, "id", 12L);
+        auctionProduct.startTrade(now);
+        var auctionAttempt = new TradeAttempt(auctionIntent, now);
+        when(products.findByIdForUpdate(11L)).thenReturn(Optional.of(auctionProduct));
+        when(intents.findById(12L)).thenReturn(Optional.of(auctionIntent));
+        when(intents.findByIdForUpdate(12L)).thenReturn(Optional.of(auctionIntent));
+        when(attempts.findOpen(12L)).thenReturn(Optional.of(auctionAttempt));
+
+        assertThrows(StateConflictException.class, () -> service.confirmFail(12L, FailAction.REQUEUE));
+        assertEquals(ProductStatus.FROZEN, auctionProduct.getStatus());
+
+        service.confirmFail(12L, FailAction.DISCARD);
+        assertEquals(ProductStatus.OFFLINE, auctionProduct.getStatus());
+        assertEquals(IntentStatus.FAILED, auctionIntent.getStatus());
+        assertEquals(TradeResult.FAILED, auctionAttempt.getResult());
+    }
 }

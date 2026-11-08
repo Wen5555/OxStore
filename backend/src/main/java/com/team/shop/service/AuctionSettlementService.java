@@ -3,7 +3,6 @@ package com.team.shop.service;
 import com.team.shop.domain.BusinessTime;
 import com.team.shop.domain.ProductEventType;
 import com.team.shop.domain.AuctionStatus;
-import com.team.shop.dto.request.FailAction;
 import com.team.shop.entity.AuctionNotification;
 import com.team.shop.entity.AuctionSession;
 import com.team.shop.entity.ProductStatusEvent;
@@ -16,9 +15,12 @@ import com.team.shop.repository.IntentRepository;
 import com.team.shop.repository.ProductStatusEventRepository;
 import com.team.shop.repository.TradeAttemptRepository;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDateTime;
 
@@ -29,22 +31,28 @@ public class AuctionSettlementService {
     private final TradeAttemptRepository attempts;
     private final AuctionNotificationRepository notifications;
     private final ProductStatusEventRepository events;
+    private final ApplicationEventPublisher eventPublisher;
+    private final TransactionTemplate transactionTemplate;
 
     public AuctionSettlementService(AuctionSessionRepository auctions, IntentRepository intents,
                                     TradeAttemptRepository attempts, AuctionNotificationRepository notifications,
-                                    ProductStatusEventRepository events) {
+                                    ProductStatusEventRepository events,
+                                    ApplicationEventPublisher eventPublisher,
+                                    PlatformTransactionManager transactionManager) {
         this.auctions = auctions;
         this.intents = intents;
         this.attempts = attempts;
         this.notifications = notifications;
         this.events = events;
+        this.eventPublisher = eventPublisher;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
     @Scheduled(fixedDelay = 5000)
     public void scanDueAuctions() {
         LocalDateTime now = BusinessTime.now();
         for (Long id : auctions.findDueIds(AuctionStatus.LIVE, now, PageRequest.of(0, 50))) {
-            settleOne(id, now);
+            transactionTemplate.executeWithoutResult(status -> settleOne(id, now));
         }
     }
 
@@ -59,7 +67,10 @@ public class AuctionSettlementService {
             auction.markUnsold(now);
             product.takeOffline(now);
             events.save(new ProductStatusEvent(product, null, ProductEventType.AUCTION_UNSOLD, before, now));
-            saveNotification(auction, com.team.shop.domain.AuctionNotificationType.AUCTION_UNSOLD, now);
+            var notification = saveNotification(auction, com.team.shop.domain.AuctionNotificationType.AUCTION_UNSOLD, now);
+            eventPublisher.publishEvent(new AuctionEventHub.AuctionSettledEvent(
+                    product.getId(), auction.getStatus(), null, null, null, now,
+                    java.util.List.of(notification)));
             return;
         }
         var product = auction.getProduct();
@@ -70,15 +81,26 @@ public class AuctionSettlementService {
         TradeAttempt attempt = attempts.save(new TradeAttempt(intent, now));
         auction.markSold(intent, now);
         events.save(new ProductStatusEvent(product, attempt, ProductEventType.TRADE_STARTED, before, now));
-        saveNotification(auction, com.team.shop.domain.AuctionNotificationType.AUCTION_SOLD, now);
-        saveNotification(auction, com.team.shop.domain.AuctionNotificationType.AUCTION_WON, now);
+        var sellerNotification = saveNotification(auction,
+                com.team.shop.domain.AuctionNotificationType.AUCTION_SOLD, now);
+        var winnerNotification = saveNotification(auction,
+                com.team.shop.domain.AuctionNotificationType.AUCTION_WON, now);
+        eventPublisher.publishEvent(new AuctionEventHub.AuctionSettledEvent(
+                product.getId(), auction.getStatus(), auction.getCurrentPrice(),
+                alias(auction.getLeader().getUsername()), auction.getLeader().getId(), now,
+                java.util.List.of(sellerNotification, winnerNotification)));
     }
 
-    private void saveNotification(AuctionSession auction,
-                                  com.team.shop.domain.AuctionNotificationType type,
-                                  LocalDateTime now) {
-        if (!notifications.existsByAuctionIdAndType(auction.getId(), type)) {
-            notifications.save(AuctionNotification.forSettlement(auction, type, now));
-        }
+    private com.team.shop.dto.response.AuctionNotificationResponse saveNotification(
+            AuctionSession auction, com.team.shop.domain.AuctionNotificationType type, LocalDateTime now) {
+        AuctionNotification notification = notifications.findByAuctionIdAndType(auction.getId(), type)
+                .orElseGet(() -> notifications.saveAndFlush(
+                        AuctionNotification.forSettlement(auction, type, now)));
+        return com.team.shop.dto.response.AuctionNotificationResponse.from(notification);
+    }
+
+    private static String alias(String username) {
+        if (username == null || username.length() <= 1) return "*";
+        return username.charAt(0) + "***" + username.charAt(username.length() - 1);
     }
 }

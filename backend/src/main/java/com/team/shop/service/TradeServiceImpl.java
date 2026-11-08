@@ -95,7 +95,14 @@ public class TradeServiceImpl implements TradeService {
         TradeAttempt attempt = requireOpenAttempt(intent);
         LocalDateTime now = BusinessTime.now();
         ProductStatus before = product.getStatus();
-        product.markTradeFailed(now);
+        if (product.isAuction() && action == FailAction.REQUEUE) {
+            throw new StateConflictException("拍卖履约失败不允许重新排队", 40908);
+        }
+        if (product.isAuction()) {
+            product.markAuctionTradeFailed(now);
+        } else {
+            product.markTradeFailed(now);
+        }
         if (action == FailAction.REQUEUE) {
             intent.requeue(intents.maxQueueSeq(product.getId()) + 1, now);
         } else {

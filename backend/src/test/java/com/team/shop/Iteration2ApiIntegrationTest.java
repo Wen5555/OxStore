@@ -1,6 +1,7 @@
 package com.team.shop;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.team.shop.domain.BusinessTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -178,6 +179,38 @@ class Iteration2ApiIntegrationTest {
 
         post("/api/admin/intents/" + intentA + "/fail", Map.of("action", "DISCARD"), sellerToken, 200);
         post("/api/admin/intents/" + intentB + "/fail", Map.of("action", "DISCARD"), sellerToken, 200);
+    }
+
+    @Test
+    void sellerCanListLiveAuctionsAndCustomerIsDenied() {
+        String suffix = Long.toString(System.nanoTime());
+        String sellerToken = login("/api/admin/auth/login",
+                Map.of("username", "admin", "password", "Test-Pass-9931!"));
+        String buyerName = "auction-list-buyer-" + suffix;
+        register(buyerName, "13800000004");
+        String buyerToken = login("/api/auth/login",
+                Map.of("username", buyerName, "password", "customer-pass-8"));
+        long category2Id = http.getForObject("/api/categories/tree", JsonNode.class)
+                .path("data").get(0).path("children").get(0).path("id").asLong();
+
+        MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
+        form.add("name", "管理列表拍卖-" + suffix);
+        form.add("category2Id", Long.toString(category2Id));
+        form.add("sellingMode", "AUCTION");
+        form.add("startPrice", "10.00");
+        form.add("minIncrement", "1.00");
+        form.add("endsAt", BusinessTime.now().plusMinutes(2).withNano(0).toString());
+        HttpHeaders headers = headers(sellerToken);
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        ResponseEntity<JsonNode> created = http.postForEntity("/api/admin/products",
+                new HttpEntity<>(form, headers), JsonNode.class);
+        assertEquals(201, created.getStatusCode().value());
+        long productId = created.getBody().path("data").path("productId").asLong();
+
+        JsonNode auctions = get("/api/admin/auctions?status=LIVE&page=1&size=10", sellerToken).path("data");
+        assertTrue(auctions.path("items").toString().contains(Long.toString(productId)));
+        assertEquals(403, http.exchange("/api/admin/auctions", HttpMethod.GET,
+                new HttpEntity<>(headers(buyerToken)), JsonNode.class).getStatusCode().value());
     }
 
     private JsonNode publish(String sellerToken, String name, int stock, long category2Id,
