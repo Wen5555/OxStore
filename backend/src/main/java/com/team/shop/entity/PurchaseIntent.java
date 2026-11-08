@@ -79,6 +79,15 @@ public class PurchaseIntent {
         return i;
     }
 
+    /** Creates the direct IN_TRANSACTION fulfillment intent for an auction winner. */
+    public static PurchaseIntent createAuctionWinner(Product product, Customer customer,
+                                                      LocalDateTime now) {
+        PurchaseIntent i = submit(product, customer, 1);
+        i.status = IntentStatus.IN_TRANSACTION;
+        i.processedAt = now;
+        return i;
+    }
+
     /** 进入交易 */
     public void enterTrade(LocalDateTime now) {
         IntentStateMachine.assertCanEnterTrade(status);
