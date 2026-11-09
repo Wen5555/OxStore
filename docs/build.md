@@ -8,7 +8,7 @@
 
 进入同时包含 `backend/`、`frontend/`、`scripts/` 的项目根目录。下文各节均从该目录开始，命令使用 PowerShell 7；未使用 PowerShell 专用语法的 Docker 命令也可在 Linux shell 中执行。
 
-后端应用版本由 `backend/pom.xml` 定义，前端应用版本由 `frontend/package.json` 定义，当前均为 `0.1.0`。下文镜像标签采用打包脚本中配置的 `0.1.0-docker.1`，目标平台为 `linux/amd64`。调整版本时，应同步更新构建命令、打包脚本的 `VERSION` 和部署配置中的 `OXSTORE_VERSION`。
+后端应用版本由 `backend/pom.xml` 定义，前端应用版本由 `frontend/package.json` 定义，当前均为 `0.1.0`。下文镜像标签采用打包脚本中配置的 `0.1.0-iteration2-docker.1`，目标平台为 `linux/amd64`。调整版本时，应同步更新构建命令、打包脚本的 `VERSION` 和部署配置中的 `OXSTORE_VERSION`。
 
 ## 2. 工具与安装要求
 
@@ -65,8 +65,8 @@ npm --version
 在源码根目录逐条执行，上一条失败时先排查，不继续导出：
 
 ```powershell
-docker build --platform linux/amd64 --progress plain -t oxstore/backend:0.1.0-docker.1 backend
-docker build --platform linux/amd64 --progress plain -t oxstore/frontend:0.1.0-docker.1 frontend
+docker build --platform linux/amd64 --progress plain -t oxstore/backend:0.1.0-iteration2-docker.1 backend
+docker build --platform linux/amd64 --progress plain -t oxstore/frontend:0.1.0-iteration2-docker.1 frontend
 docker pull --platform linux/amd64 mysql:8.0.46
 ```
 
@@ -77,7 +77,7 @@ docker pull --platform linux/amd64 mysql:8.0.46
 前端默认依赖源为 `https://registry.npmmirror.com`。如该源无法访问或不满足版本要求，可通过构建参数切换，例如：
 
 ```powershell
-docker build --platform linux/amd64 --progress plain --build-arg NPM_REGISTRY=https://registry.npmjs.org -t oxstore/frontend:0.1.0-docker.1 frontend
+docker build --platform linux/amd64 --progress plain --build-arg NPM_REGISTRY=https://registry.npmjs.org -t oxstore/frontend:0.1.0-iteration2-docker.1 frontend
 ```
 
 基础镜像标签可能更新，重新构建得到的镜像 ID 可能不同。打包生成的 `manifest.json` 用于记录实际镜像身份与构建环境。
@@ -85,7 +85,7 @@ docker build --platform linux/amd64 --progress plain --build-arg NPM_REGISTRY=ht
 ### 4.2 检查构建结果
 
 ```powershell
-docker image inspect --format '{{.RepoTags}} {{.Os}}/{{.Architecture}} {{.Id}}' oxstore/backend:0.1.0-docker.1 oxstore/frontend:0.1.0-docker.1 mysql:8.0.46
+docker image inspect --format '{{.RepoTags}} {{.Os}}/{{.Architecture}} {{.Id}}' oxstore/backend:0.1.0-iteration2-docker.1 oxstore/frontend:0.1.0-iteration2-docker.1 mysql:8.0.46
 ```
 
 三张镜像都应存在且平台为 `linux/amd64`。后端日志应包含 `BUILD SUCCESS`，测试汇总的 `Failures`、`Errors`、`Skipped` 均应为 0；前端日志应包含 TypeScript/Vite 构建完成信息。构建日志与测试结果应随产物保存。
@@ -121,10 +121,10 @@ Get-ChildItem frontend/dist/assets
 
 ## 6. 打包镜像与构建产物
 
-当前打包脚本固定使用 `0.1.0-docker.1` 与 `mysql:8.0.46`。三张镜像构建或拉取成功后，在源码根目录选择一个尚不存在的输出目录：
+当前打包脚本固定使用 `0.1.0-iteration2-docker.1` 与 `mysql:8.0.46`。三张镜像构建或拉取成功后，在源码根目录选择一个尚不存在的输出目录：
 
 ```powershell
-$releaseDirectory = Join-Path $PWD ('outputs/build-delivery/OxStore-0.1.0-docker.1-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+$releaseDirectory = Join-Path $PWD ('outputs/build-delivery/OxStore-0.1.0-iteration2-docker.1-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
 python scripts/package_docker_release.py prepare --output $releaseDirectory
 ```
 
@@ -155,7 +155,7 @@ Get-FileHash -Algorithm SHA256 ($releaseDirectory + '.zip')
 | --- | --- | --- |
 | 后端 JAR | 本机：`backend/target/shop-0.1.0.jar`；离线包：`build/shop-0.1.0.jar` | Spring Boot 后端产物 |
 | 前端静态文件 | 本机：`frontend/dist/`；离线包：`build/frontend-dist.zip` | Nginx 托管的完整前端产物 |
-| 运行镜像 | `oxstore/backend:0.1.0-docker.1`、`oxstore/frontend:0.1.0-docker.1`、`mysql:8.0.46` | 容器运行；统一保存在 `images.tar.gz` |
+| 运行镜像 | `oxstore/backend:0.1.0-iteration2-docker.1`、`oxstore/frontend:0.1.0-iteration2-docker.1`、`mysql:8.0.46` | 容器运行；统一保存在 `images.tar.gz` |
 | 版本与校验 | `manifest.json`、`SHA256SUMS` | 源码版本、镜像 ID、平台、文件哈希 |
 | 构建与测试结果 | `evidence/` 中的构建日志、JUnit XML 和容器结果 | 检查构建与测试状态 |
 | 安装资料 | `README.md`、`compose.yml`、初始化脚本和 `database/` | 导入镜像、配置与启动 |
