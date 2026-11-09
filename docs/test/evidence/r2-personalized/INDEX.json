@@ -1,0 +1,461 @@
+{
+  "runAt": "2026-11-09T23:42:18.603185+08:00",
+  "testedSha": "c477a64b879a3c819038417106c0075e739a4f8a",
+  "branch": "cursor/r2-personalized-auction-tests-4a0b",
+  "environment": {
+    "os": "Linux cursor 6.12.113+ #1 SMP PREEMPT_DYNAMIC Thu Nov  5 16:04:51 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux",
+    "java": "openjdk version \"17.0.20.1\" 2026-08-18\nOpenJDK Runtime Environment (build 17.0.20.1+1-1-24.04-Ubuntu)\nOpenJDK 64-Bit Server VM (build 17.0.20.1+1-1-24.04-Ubuntu, mixed mode, sharing)",
+    "maven": "Apache Maven 3.9.9 (8e8579a9e76f7d015ee5ec7bfcdc97d260186937)\nMaven home: /opt/apache-maven-3.9.9\nJava version: 17.0.20.1, vendor: Ubuntu, runtime: /usr/lib/jvm/java-17-openjdk-amd64\nDefault locale: en_US, platform encoding: UTF-8\nOS name: \"linux\", version: \"6.12.113+\", arch: \"amd64\", family: \"unix\"",
+    "python": "Python 3.12.3",
+    "node": "v22.23.4",
+    "npm": "10.9.9",
+    "dockerClient": "29.1.3",
+    "dockerServer": "available",
+    "javaHome": "/usr/lib/jvm/java-17-openjdk-amd64",
+    "tz": "Asia/Shanghai"
+  },
+  "prerequisites": {
+    "sha": "c477a64b879a3c819038417106c0075e739a4f8a",
+    "files": {
+      "P-A01/P-A02": {
+        "backend/src/main/resources/db/migrations/V6__auction_mode.sql": "c91f300a12cf41445004adc887987394717dba84b3a26953a91036caf351b4ac",
+        "scripts/verify_auction_database.py": "8076df1fbdab1294259246d1a369c662d9709cece90e6769d18974708c97955b",
+        "backend/src/main/java/com/team/shop/entity/AuctionSession.java": "4bf7fc8cc6d1ec556032120c3f28c9d5e80a5505ea339b64be30994ca07d1f75"
+      },
+      "P-A03-P-A07": {
+        "backend/src/main/java/com/team/shop/service/AuctionServiceImpl.java": "4fbee05178ee5ae3e8bab7523d4933ed33347f41b3e274de7d459d20145f9562",
+        "backend/src/main/java/com/team/shop/service/AuctionSettlementService.java": "16b23f37f8b736c1bd26114e292cf8480b1c0093bf71d73966763eaf3b692742",
+        "backend/src/main/java/com/team/shop/controller/buyer/AuctionController.java": "cc147b1cb77cd1764dd66b8ba2923ae4e79d4e2266d9ea028871f7f378d89fab",
+        "backend/src/main/java/com/team/shop/service/AuctionEventHub.java": "d14ca60071960704237eb8c12acfddcb0dd5d1e95ba1e82b5f144a3a680eec49"
+      },
+      "P-A08-P-A11": {
+        "frontend/src/pages/admin/PublishProductPage.tsx": "355daced3a173d1c8d3f937dee21feb3fffcdecb3cab7a77e900ba640f36d826",
+        "frontend/src/pages/buyer/ProductDetailPage.tsx": "dc62374ef7273d48e6f306130eada7ea794b191b75d56cb84af2d5d5847538c5",
+        "frontend/src/hooks/useAuctionEvents.ts": "7bf0db9fa3755eccb7ed20283adc42ef166dacf59cfba42ddcc0f065dbe9e6ec",
+        "frontend/src/pages/admin/AdminAuctionsPage.tsx": "9805c3e2acf4a9ebd8ce8311c38ca2133277ef3150367f99f699947e7ecff111",
+        "frontend/src/pages/admin/SellerAuctionNotificationsPage.tsx": "3cf766ef014cd18ce0f72f9f3fa4ae4b13a3ffd45e569342bbbbd00b3d0588eb"
+      }
+    },
+    "missing": [],
+    "complete": true
+  },
+  "steps": [
+    {
+      "name": "mvn-clean-verify",
+      "command": [
+        "/opt/apache-maven-3.9.9/bin/mvn",
+        "-B",
+        "-ntp",
+        "-f",
+        "backend/pom.xml",
+        "clean",
+        "verify"
+      ],
+      "cwd": "/workspace",
+      "exitCode": 1,
+      "startedAt": "2026-11-09T23:42:18.824459+08:00",
+      "finishedAt": "2026-11-09T23:42:32.215141+08:00",
+      "log": "docs/test/evidence/r2-personalized/logs/mvn-clean-verify.txt",
+      "status": "FAIL"
+    },
+    {
+      "name": "mvn-package-skip-tests-for-isolated-db",
+      "command": [
+        "/opt/apache-maven-3.9.9/bin/mvn",
+        "-B",
+        "-ntp",
+        "-f",
+        "backend/pom.xml",
+        "package",
+        "-DskipTests"
+      ],
+      "cwd": "/workspace",
+      "exitCode": 0,
+      "startedAt": "2026-11-09T23:42:32.216366+08:00",
+      "finishedAt": "2026-11-09T23:42:33.839890+08:00",
+      "log": "docs/test/evidence/r2-personalized/logs/mvn-package-skip-tests-for-isolated-db.txt",
+      "status": "PASS",
+      "note": "Only used to obtain a JAR for isolated MySQL scripts after verify failed; this is not a test pass."
+    },
+    {
+      "name": "verify-auction-database",
+      "command": [
+        "/usr/bin/python3",
+        "-X",
+        "utf8",
+        "scripts/verify_auction_database.py",
+        "--java",
+        "/usr/lib/jvm/java-17-openjdk-amd64/bin/java",
+        "--jar",
+        "/workspace/backend/target/shop-0.1.0.jar",
+        "--output",
+        "/workspace/docs/test/evidence/r2-personalized/p-a12/auction-mysql-results.json"
+      ],
+      "cwd": "/workspace",
+      "exitCode": 0,
+      "startedAt": "2026-11-09T23:42:45.882330+08:00",
+      "finishedAt": "2026-11-09T23:43:21.473212+08:00",
+      "log": "docs/test/evidence/r2-personalized/logs/verify-auction-database.txt",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-iteration2-database",
+      "command": [
+        "/usr/bin/python3",
+        "-X",
+        "utf8",
+        "scripts/verify_iteration2_database.py",
+        "--java",
+        "/usr/lib/jvm/java-17-openjdk-amd64/bin/java",
+        "--jar",
+        "/workspace/backend/target/shop-0.1.0.jar",
+        "--output",
+        "/workspace/docs/test/evidence/r2-personalized/p-a12/iteration2-mysql-results.json"
+      ],
+      "cwd": "/workspace",
+      "exitCode": 0,
+      "startedAt": "2026-11-09T23:43:21.473593+08:00",
+      "finishedAt": "2026-11-09T23:43:59.287675+08:00",
+      "log": "docs/test/evidence/r2-personalized/logs/verify-iteration2-database.txt",
+      "status": "PASS"
+    },
+    {
+      "name": "frontend-npm-ci",
+      "command": [
+        "npm",
+        "ci",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "/workspace/frontend",
+      "exitCode": 0,
+      "startedAt": "2026-11-09T23:43:59.288033+08:00",
+      "finishedAt": "2026-11-09T23:44:02.415710+08:00",
+      "log": "docs/test/evidence/r2-personalized/logs/frontend-npm-ci.txt",
+      "status": "PASS"
+    },
+    {
+      "name": "playwright-install-chrome",
+      "command": [
+        "/workspace/frontend/node_modules/.bin/playwright",
+        "install",
+        "chrome"
+      ],
+      "cwd": "/workspace/frontend",
+      "exitCode": 0,
+      "startedAt": "2026-11-09T23:44:02.416140+08:00",
+      "finishedAt": "2026-11-09T23:44:02.759243+08:00",
+      "log": "docs/test/evidence/r2-personalized/logs/playwright-install-chrome.txt",
+      "status": "PASS"
+    },
+    {
+      "name": "frontend-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "/workspace/frontend",
+      "exitCode": 0,
+      "startedAt": "2026-11-09T23:44:02.759602+08:00",
+      "finishedAt": "2026-11-09T23:44:08.501639+08:00",
+      "log": "docs/test/evidence/r2-personalized/logs/frontend-build.txt",
+      "status": "PASS"
+    },
+    {
+      "name": "playwright-mock-e2e",
+      "command": [
+        "./node_modules/.bin/playwright",
+        "test"
+      ],
+      "cwd": "/workspace/frontend",
+      "exitCode": 0,
+      "startedAt": "2026-11-09T23:53:34+08:00",
+      "finishedAt": "2026-11-09T23:53:48+08:00",
+      "log": "docs/test/evidence/r2-personalized/logs/playwright-mock-e2e.txt",
+      "status": "PASS",
+      "note": "Selector-fixed re-run: 16 passed / 0 failed. Mock API only; not full-chain."
+    },
+    {
+      "name": "playwright-fullstack-e2e",
+      "kind": "real-stack",
+      "note": "Isolated Docker MySQL 8.0.46 + JAR :8080 + Vite :4174. Bid/SSE price+leader+count, settlement, seller fulfillment and winner notification were observed. Test failed because buyer A tag stayed 当前领先 after being outbid (P-A15). Mock pass is not full-chain pass.",
+      "command": [
+        "/usr/bin/python3",
+        "-X",
+        "utf8",
+        "scripts/run_auction_fullstack_e2e.py",
+        "--java",
+        "/usr/lib/jvm/java-17-openjdk-amd64/bin/java",
+        "--jar",
+        "/workspace/backend/target/shop-0.1.0.jar"
+      ],
+      "cwd": "/workspace",
+      "exitCode": 1,
+      "startedAt": "2026-11-09T23:59:37+08:00",
+      "finishedAt": "2026-11-10T00:01:20+08:00",
+      "log": "docs/test/evidence/r2-personalized/logs/playwright-fullstack-e2e.txt",
+      "status": "FAIL"
+    }
+  ],
+  "note": "Fresh execution. Previous evidence directories are reference only.",
+  "junit": {
+    "total": 44,
+    "passed": 43,
+    "failed": 1,
+    "skipped": 0,
+    "tests": [
+      {
+        "class": "com.team.shop.Iteration2ApiIntegrationTest",
+        "name": "fixedPriceProductsKeepTheIntentFlowAndRejectAuctionOperations",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.Iteration2ApiIntegrationTest",
+        "name": "failedAuctionFulfillmentCannotBeRequeuedAndLeavesFailedHistory",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.Iteration2ApiIntegrationTest",
+        "name": "snapshotReportsOutbidAndSseReconnectReplaysSnapshot",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.Iteration2ApiIntegrationTest",
+        "name": "auctionPublishValidatesModeExclusiveFields",
+        "status": "FAIL"
+      },
+      {
+        "class": "com.team.shop.Iteration2ApiIntegrationTest",
+        "name": "auctionApiRejectsUnauthorizedSellerSelfBidAmountScaleAndLowBid",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.Iteration2ApiIntegrationTest",
+        "name": "independentProductQueuesCanEnterTradeAtTheSameTime",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.Iteration2ApiIntegrationTest",
+        "name": "concurrentOpeningBidsAcceptExactlyOne",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.Iteration2ApiIntegrationTest",
+        "name": "buyerSellerCatalogQueueInventoryAndHistoryFlow",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.Iteration2ApiIntegrationTest",
+        "name": "auctionBidsSettleThroughExistingTradeAndPublishSseNotifications",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.Iteration2ApiIntegrationTest",
+        "name": "customerAuthUsesContractCodeAndRoleGuards",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.Iteration2ApiIntegrationTest",
+        "name": "sellerCanListLiveAuctionsAndCustomerIsDenied",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.Iteration2ApiIntegrationTest",
+        "name": "expiredLiveAuctionRejectsBidAndDueScanSettlesUnsoldOnce",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.controller.admin.AdminProductControllerTest",
+        "name": "publishesWithoutImages",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.controller.admin.AdminProductControllerTest",
+        "name": "acceptsMultipleImagesAndPassesTheirOrderToTheService",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.controller.admin.AdminProductControllerTest",
+        "name": "rejectsMoreThanNineImagesBeforeWritingAnyFiles",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.domain.IntentStateMachineTest",
+        "name": "onlyQueuedIntentsCanStartAndOnlyTradingIntentsCanFinish",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.domain.ProductStateMachineTest",
+        "name": "onlyOnlineProductsAcceptIntentsAndStartTrades",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.domain.ProductStateMachineTest",
+        "name": "refillingAnOfflineProductDoesNotAutomaticallyPublishIt",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.domain.ProductStateMachineTest",
+        "name": "tradeResultsRequireTradeFreeze",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.dto.PhoneAndTradeRequestTest",
+        "name": "tradeFailureRequiresAnActionButNoLegacyAttemptToken",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.dto.PhoneAndTradeRequestTest",
+        "name": "customerRegistrationRequiresUsernamePasswordAndPhone",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.entity.AuctionSessionTest",
+        "name": "bidsAtOrAfterTheDeadlineAreRejected",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.entity.AuctionSessionTest",
+        "name": "englishIncrementsUpdateLeaderAndSequence",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.entity.AuctionSessionTest",
+        "name": "settlementHappensOnceAndMatchesBids",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.entity.AuctionSessionTest",
+        "name": "ordinaryProductsStayFixedPriceAndAuctionsHoldOneItem",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.entity.AuctionSessionTest",
+        "name": "openRejectsInvalidParameters",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.entity.AuctionSessionTest",
+        "name": "notificationsFollowSettlementResult",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.entity.TradeHistoryTest",
+        "name": "attemptsCannotOverwriteCompletedResult",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.entity.TradeHistoryTest",
+        "name": "inventoryDeterminesWhetherSuccessfulTradeLeavesItemOnline",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.entity.TradeHistoryTest",
+        "name": "requeuePreservesFirstSubmissionWithoutTokenState",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.exception.GlobalExceptionHandlerBugFixTest",
+        "name": "methodNotSupportedMapsTo405",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.repository.AuctionRepositoryTest",
+        "name": "secondSessionForSameProductIsRejected",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.repository.AuctionRepositoryTest",
+        "name": "sessionAndBidsPersistAndReloadByProduct",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.repository.AuctionRepositoryTest",
+        "name": "duplicateBidSequenceOrSessionPerProductIsRejected",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.repository.AuctionRepositoryTest",
+        "name": "dueScanFindsOnlyExpiredLiveSessionsInDeadlineOrder",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.repository.AuctionRepositoryTest",
+        "name": "settlementLinksWinnerIntentAndNotificationsAreIdempotent",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.security.JwtUtilTest",
+        "name": "rejectsOldAndPlaceholderSecrets",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.security.JwtUtilTest",
+        "name": "generatedTokensCanBeVerifiedOnlyWithSameKey",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.service.ImageStorageServiceTest",
+        "name": "validPngStoredAndFakeOrMismatchedRejected",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.service.TradeServiceImplTest",
+        "name": "alreadyFinishedTradeCannotBeConfirmedAgain",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.service.TradeServiceImplTest",
+        "name": "auctionFailureRejectsRequeueAndKeepsProductOffline",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.service.TradeServiceImplTest",
+        "name": "successDeductsOneAndReturnsProductOnlineWithoutAdvancingQueue",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.service.TradeServiceImplTest",
+        "name": "finalUnitOfflinesProductAndFailsEveryQueuedIntentAtomically",
+        "status": "PASS"
+      },
+      {
+        "class": "com.team.shop.service.TradeServiceImplTest",
+        "name": "discardRecordsFailureWhileRequeueLeavesNextIntentQueued",
+        "status": "PASS"
+      }
+    ],
+    "screenshot": "docs/test/evidence/r2-personalized/shared/surefire-summary.png"
+  },
+  "finishedAt": "2026-11-10T00:02:41.801731+08:00",
+  "success": false,
+  "productBaselineSha": "c477a64b879a3c819038417106c0075e739a4f8a",
+  "dockerMysql": {
+    "image": "mysql:8.0.46",
+    "used": true,
+    "deviation": null,
+    "note": "Disposable containers only. No user/production database was touched."
+  },
+  "failures": [
+    {
+      "id": "P-A13-mixed-publish",
+      "task": "P-A13",
+      "case": "Iteration2ApiIntegrationTest.auctionPublishValidatesModeExclusiveFields",
+      "expected": "FIXED_PRICE 携带 startPrice/minIncrement/endsAt 返回 HTTP 400 / code 40001",
+      "actual": "HTTP 201 sellingMode=FIXED_PRICE auction=null",
+      "reproduce": "mvn -B -f backend/pom.xml test -Dtest=Iteration2ApiIntegrationTest#auctionPublishValidatesModeExclusiveFields",
+      "productFix": false
+    },
+    {
+      "id": "P-A15-fullstack-outbid-tag",
+      "task": "P-A15",
+      "case": "frontend/e2e/auction-r2-fullstack.spec.ts 真实全栈 OUTBID 标签",
+      "expected": "买家A在买家B加价成功后，SSE 将 myStatus 更新为 OUTBID，页面显示「已被超越」",
+      "actual": "价格/次数/领先者已 SSE 更新为 ¥12 / 2 / r***b，绿色标签仍为「当前领先」；最近出价列表未追加 B 的记录",
+      "reproduce": "python -X utf8 scripts/run_auction_fullstack_e2e.py --java $JAVA_HOME/bin/java --jar backend/target/shop-0.1.0.jar",
+      "evidence": "docs/test/evidence/r2-personalized/p-a15/screenshots/fullstack_buyer_a_outbid_sse.png",
+      "productFix": false
+    }
+  ]
+}

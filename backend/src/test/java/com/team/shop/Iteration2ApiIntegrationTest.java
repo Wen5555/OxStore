@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,8 +30,12 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -59,6 +65,9 @@ class Iteration2ApiIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private JdbcTemplate jdbc;
 
     @Test
     void buyerSellerCatalogQueueInventoryAndHistoryFlow() throws Exception {
@@ -418,6 +427,232 @@ class Iteration2ApiIntegrationTest {
         throw new AssertionError("Failed auction product was not present in the seller product list");
     }
 
+    @Test
+    void auctionApiRejectsUnauthorizedSellerSelfBidAmountScaleAndLowBid() throws Exception {
+        String suffix = Long.toString(System.nanoTime());
+        String buyerName = "r2-bid-guard-" + suffix;
+        register(buyerName, "13800000011");
+        String buyerToken = login("/api/auth/login",
+                Map.of("username", buyerName, "password", "customer-pass-8"));
+        String sellerToken = login("/api/admin/auth/login",
+                Map.of("username", "admin", "password", "Test-Pass-9931!"));
+        long category2Id = http.getForObject("/api/categories/tree", JsonNode.class)
+                .path("data").get(0).path("children").get(0).path("id").asLong();
+        long productId = publishAuction(sellerToken, "R2出价边界-" + suffix, category2Id,
+                BusinessTime.now().plusMinutes(2).withNano(0));
+
+        HttpResponse<String> anonymous = HttpClient.newHttpClient().send(
+                HttpRequest.newBuilder(URI.create(http.getRootUri() + "/api/products/" + productId + "/auction/bids"))
+                        .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .POST(HttpRequest.BodyPublishers.ofString("{\"amount\":10.00}"))
+                        .build(),
+                HttpResponse.BodyHandlers.ofString());
+        assertEquals(401, anonymous.statusCode());
+        assertEquals(40101, objectMapper.readTree(anonymous.body()).path("code").asInt());
+
+        ResponseEntity<JsonNode> sellerBid = placeBid(productId, sellerToken, 10.00);
+        assertEquals(403, sellerBid.getStatusCode().value());
+        assertEquals(40301, sellerBid.getBody().path("code").asInt());
+
+        ResponseEntity<JsonNode> scale = postJson("/api/products/" + productId + "/auction/bids",
+                "{\"amount\":10.001}", buyerToken);
+        assertEquals(400, scale.getStatusCode().value());
+        assertEquals(40001, scale.getBody().path("code").asInt());
+
+        ResponseEntity<JsonNode> tooLow = placeBid(productId, buyerToken, 9.99);
+        assertEquals(409, tooLow.getStatusCode().value());
+        assertEquals(40907, tooLow.getBody().path("code").asInt());
+
+        JsonNode publicSnapshot = http.getForObject("/api/products/" + productId + "/auction", JsonNode.class)
+                .path("data");
+        assertEquals("LIVE", publicSnapshot.path("auctionStatus").asText());
+        assertFalse(publicSnapshot.path("canBid").asBoolean());
+        assertTrue(publicSnapshot.path("myStatus").isNull() || publicSnapshot.path("myStatus").isMissingNode());
+
+        assertEquals(403, http.exchange("/api/admin/auction-notifications", HttpMethod.GET,
+                new HttpEntity<>(headers(buyerToken)), JsonNode.class).getStatusCode().value());
+        assertEquals(401, http.getForEntity("/api/me/auction-notifications", JsonNode.class)
+                .getStatusCode().value());
+    }
+
+    @Test
+    void concurrentOpeningBidsAcceptExactlyOne() throws Exception {
+        String suffix = Long.toString(System.nanoTime());
+        String first = "r2-race-a-" + suffix;
+        String second = "r2-race-b-" + suffix;
+        register(first, "13800000012");
+        register(second, "13800000013");
+        String firstToken = login("/api/auth/login", Map.of("username", first, "password", "customer-pass-8"));
+        String secondToken = login("/api/auth/login", Map.of("username", second, "password", "customer-pass-8"));
+        String sellerToken = login("/api/admin/auth/login",
+                Map.of("username", "admin", "password", "Test-Pass-9931!"));
+        long category2Id = http.getForObject("/api/categories/tree", JsonNode.class)
+                .path("data").get(0).path("children").get(0).path("id").asLong();
+        long productId = publishAuction(sellerToken, "R2并发出价-" + suffix, category2Id,
+                BusinessTime.now().plusMinutes(2).withNano(0));
+
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        try {
+            Future<ResponseEntity<JsonNode>> left = pool.submit(() -> placeBid(productId, firstToken, 10.00));
+            Future<ResponseEntity<JsonNode>> right = pool.submit(() -> placeBid(productId, secondToken, 10.00));
+            int firstStatus = left.get(10, TimeUnit.SECONDS).getStatusCode().value();
+            int secondStatus = right.get(10, TimeUnit.SECONDS).getStatusCode().value();
+            assertTrue(List.of(firstStatus, secondStatus).contains(201),
+                    "one concurrent opening bid must be accepted, got " + firstStatus + "/" + secondStatus);
+            assertTrue(List.of(firstStatus, secondStatus).contains(409),
+                    "the colliding opening bid must be rejected, got " + firstStatus + "/" + secondStatus);
+        } finally {
+            pool.shutdownNow();
+        }
+
+        JsonNode snapshot = get("/api/products/" + productId + "/auction", firstToken).path("data");
+        assertEquals(1, snapshot.path("bidCount").asInt());
+        assertEquals(10.00, snapshot.path("currentPrice").asDouble(), 0.001);
+    }
+
+    @Test
+    void expiredLiveAuctionRejectsBidAndDueScanSettlesUnsoldOnce() {
+        String suffix = Long.toString(System.nanoTime());
+        String buyerName = "r2-unsold-" + suffix;
+        register(buyerName, "13800000014");
+        String buyerToken = login("/api/auth/login",
+                Map.of("username", buyerName, "password", "customer-pass-8"));
+        String sellerToken = login("/api/admin/auth/login",
+                Map.of("username", "admin", "password", "Test-Pass-9931!"));
+        long category2Id = http.getForObject("/api/categories/tree", JsonNode.class)
+                .path("data").get(0).path("children").get(0).path("id").asLong();
+        long productId = publishAuction(sellerToken, "R2流拍扫描-" + suffix, category2Id,
+                BusinessTime.now().plusMinutes(2).withNano(0));
+        expireAuction(productId);
+
+        ResponseEntity<JsonNode> lateBid = placeBid(productId, buyerToken, 10.00);
+        assertEquals(409, lateBid.getStatusCode().value());
+        assertEquals(40906, lateBid.getBody().path("code").asInt());
+
+        AuctionSession auction = auctions.findByProductId(productId).orElseThrow();
+        auctionSettlement.scanDueAuctions();
+        JsonNode snapshot = get("/api/products/" + productId + "/auction", buyerToken).path("data");
+        assertEquals("ENDED_UNSOLD", snapshot.path("auctionStatus").asText());
+        assertFalse(snapshot.path("canBid").asBoolean());
+
+        JsonNode sellerAlerts = get("/api/admin/auction-notifications?page=1&size=100", sellerToken).path("data");
+        JsonNode buyerAlerts = get("/api/me/auction-notifications?page=1&size=10", buyerToken).path("data");
+        int unsoldReminders = countNotifications(sellerAlerts, "AUCTION_UNSOLD", productId);
+        assertEquals(1, unsoldReminders);
+        assertEquals(0, countNotifications(buyerAlerts, "AUCTION_UNSOLD", productId));
+        assertEquals(0, countNotifications(buyerAlerts, "AUCTION_WON", productId));
+
+        JsonNode ended = get("/api/admin/auctions?status=ENDED_UNSOLD&page=1&size=100", sellerToken)
+                .path("data").path("items");
+        JsonNode listed = findByProductId(ended, productId);
+        assertNotNull(listed);
+        assertTrue(listed.path("winnerIntentId").isNull()
+                || listed.path("winnerIntentId").isMissingNode()
+                || listed.path("winnerIntentId").asLong() == 0);
+
+        auctionSettlement.settleOne(auction.getId(), BusinessTime.now());
+        JsonNode afterRepeat = get("/api/admin/auction-notifications?page=1&size=100", sellerToken).path("data");
+        assertEquals(1, countNotifications(afterRepeat, "AUCTION_UNSOLD", productId));
+    }
+
+    @Test
+    void snapshotReportsOutbidAndSseReconnectReplaysSnapshot() throws Exception {
+        String suffix = Long.toString(System.nanoTime());
+        String firstBuyer = "r2-outbid-a-" + suffix;
+        String secondBuyer = "r2-outbid-b-" + suffix;
+        register(firstBuyer, "13800000015");
+        register(secondBuyer, "13800000016");
+        String firstToken = login("/api/auth/login",
+                Map.of("username", firstBuyer, "password", "customer-pass-8"));
+        String secondToken = login("/api/auth/login",
+                Map.of("username", secondBuyer, "password", "customer-pass-8"));
+        String sellerToken = login("/api/admin/auth/login",
+                Map.of("username", "admin", "password", "Test-Pass-9931!"));
+        long category2Id = http.getForObject("/api/categories/tree", JsonNode.class)
+                .path("data").get(0).path("children").get(0).path("id").asLong();
+        long productId = publishAuction(sellerToken, "R2领先出局-" + suffix, category2Id,
+                BusinessTime.now().plusMinutes(2).withNano(0));
+
+        assertEquals(201, placeBid(productId, firstToken, 10.00).getStatusCode().value());
+        assertEquals(201, placeBid(productId, secondToken, 12.00).getStatusCode().value());
+        assertEquals("OUTBID", get("/api/products/" + productId + "/auction", firstToken)
+                .path("data").path("myStatus").asText());
+        assertEquals("LEADING", get("/api/products/" + productId + "/auction", secondToken)
+                .path("data").path("myStatus").asText());
+
+        HttpResponse<InputStream> firstStream = openSse("/api/products/" + productId + "/auction/stream", firstToken);
+        try {
+            assertEquals(200, firstStream.statusCode());
+            assertTrue(readSseEvent(reader(firstStream.body()), "snapshot").contains("\"lastBidSeq\":2"));
+        } finally {
+            firstStream.body().close();
+        }
+
+        HttpResponse<InputStream> reconnect = openSse("/api/products/" + productId + "/auction/stream", firstToken);
+        try {
+            String snapshot = readSseEvent(reader(reconnect.body()), "snapshot");
+            assertTrue(snapshot.contains("\"lastBidSeq\":2"));
+            assertTrue(snapshot.contains("\"myStatus\":\"OUTBID\""));
+        } finally {
+            reconnect.body().close();
+        }
+
+        AuctionSession auction = auctions.findByProductId(productId).orElseThrow();
+        auctionSettlement.settleOne(auction.getId(), BusinessTime.now().plusMinutes(3));
+        assertEquals("WON", get("/api/products/" + productId + "/auction", secondToken)
+                .path("data").path("myStatus").asText());
+        assertEquals("LOST", get("/api/products/" + productId + "/auction", firstToken)
+                .path("data").path("myStatus").asText());
+        auctionSettlement.settleOne(auction.getId(), BusinessTime.now().plusMinutes(4));
+        JsonNode sellerAlerts = get("/api/admin/auction-notifications?page=1&size=100", sellerToken).path("data");
+        JsonNode winnerAlerts = get("/api/me/auction-notifications?page=1&size=10", secondToken).path("data");
+        assertEquals(1, countNotifications(sellerAlerts, "AUCTION_SOLD", productId));
+        assertEquals(1, countNotifications(winnerAlerts, "AUCTION_WON", productId));
+        assertEquals(0, countNotifications(
+                get("/api/me/auction-notifications?page=1&size=10", firstToken).path("data"),
+                "AUCTION_WON", productId));
+    }
+
+    @Test
+    void auctionPublishValidatesModeExclusiveFields() {
+        String suffix = Long.toString(System.nanoTime());
+        String sellerToken = login("/api/admin/auth/login",
+                Map.of("username", "admin", "password", "Test-Pass-9931!"));
+        long category2Id = http.getForObject("/api/categories/tree", JsonNode.class)
+                .path("data").get(0).path("children").get(0).path("id").asLong();
+
+        MultiValueMap<String, Object> missing = auctionForm("缺截止-" + suffix, category2Id);
+        missing.remove("endsAt");
+        assertEquals(400, postMultipart("/api/admin/products", missing, sellerToken).getStatusCode().value());
+
+        MultiValueMap<String, Object> soon = auctionForm("截止过近-" + suffix, category2Id);
+        soon.set("endsAt", BusinessTime.now().plusSeconds(30).withNano(0).toString());
+        ResponseEntity<JsonNode> soonResponse = postMultipart("/api/admin/products", soon, sellerToken);
+        assertEquals(400, soonResponse.getStatusCode().value());
+        assertEquals(40001, soonResponse.getBody().path("code").asInt());
+
+        MultiValueMap<String, Object> stock = auctionForm("拍卖库存-" + suffix, category2Id);
+        stock.add("stock", "2");
+        ResponseEntity<JsonNode> stockResponse = postMultipart("/api/admin/products", stock, sellerToken);
+        assertEquals(400, stockResponse.getStatusCode().value());
+        assertEquals(40001, stockResponse.getBody().path("code").asInt());
+
+        MultiValueMap<String, Object> mixed = new LinkedMultiValueMap<>();
+        mixed.add("name", "一口价带拍卖字段-" + suffix);
+        mixed.add("price", "12.50");
+        mixed.add("category2Id", Long.toString(category2Id));
+        mixed.add("stock", "1");
+        mixed.add("sellingMode", "FIXED_PRICE");
+        mixed.add("startPrice", "10.00");
+        mixed.add("minIncrement", "1.00");
+        mixed.add("endsAt", BusinessTime.now().plusMinutes(2).withNano(0).toString());
+        ResponseEntity<JsonNode> mixedResponse = postMultipart("/api/admin/products", mixed, sellerToken);
+        assertEquals(400, mixedResponse.getStatusCode().value(),
+                "P-A13/P-A00: FIXED_PRICE 发布携带拍卖字段应返回 40001，实际 HTTP "
+                        + mixedResponse.getStatusCode().value() + " body=" + mixedResponse.getBody());
+        assertEquals(40001, mixedResponse.getBody().path("code").asInt());
+    }
+
     private long publishAuction(String sellerToken, String name, long category2Id, LocalDateTime endsAt) {
         MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
         form.add("name", name);
@@ -437,6 +672,53 @@ class Iteration2ApiIntegrationTest {
     private ResponseEntity<JsonNode> placeBid(long productId, String buyerToken, double amount) {
         return http.exchange("/api/products/" + productId + "/auction/bids", HttpMethod.POST,
                 new HttpEntity<>(Map.of("amount", amount), headers(buyerToken)), JsonNode.class);
+    }
+
+    private ResponseEntity<JsonNode> postJson(String path, String json, String token) {
+        HttpHeaders headers = token == null ? new HttpHeaders() : headers(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return http.exchange(path, HttpMethod.POST, new HttpEntity<>(json, headers), JsonNode.class);
+    }
+
+    private ResponseEntity<JsonNode> postMultipart(String path, MultiValueMap<String, Object> form, String token) {
+        HttpHeaders headers = headers(token);
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        return http.postForEntity(path, new HttpEntity<>(form, headers), JsonNode.class);
+    }
+
+    private MultiValueMap<String, Object> auctionForm(String name, long category2Id) {
+        MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
+        form.add("name", name);
+        form.add("category2Id", Long.toString(category2Id));
+        form.add("sellingMode", "AUCTION");
+        form.add("startPrice", "10.00");
+        form.add("minIncrement", "2.00");
+        form.add("endsAt", BusinessTime.now().plusMinutes(2).withNano(0).toString());
+        return form;
+    }
+
+    private void expireAuction(long productId) {
+        jdbc.update("UPDATE auction_session SET ends_at = ? WHERE product_id = ?",
+                java.sql.Timestamp.valueOf("2020-01-01 00:00:00"), productId);
+    }
+
+    private int countNotifications(JsonNode page, String type, long productId) {
+        int count = 0;
+        for (JsonNode item : page.path("items")) {
+            if (type.equals(item.path("type").asText()) && item.path("productId").asLong() == productId) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private JsonNode findByProductId(JsonNode items, long productId) {
+        for (JsonNode item : items) {
+            if (item.path("productId").asLong() == productId) {
+                return item;
+            }
+        }
+        return null;
     }
 
     private HttpResponse<InputStream> openSse(String path, String token) throws Exception {

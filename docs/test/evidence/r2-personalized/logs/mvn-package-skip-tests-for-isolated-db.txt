@@ -1,0 +1,42 @@
+$ /opt/apache-maven-3.9.9/bin/mvn -B -ntp -f backend/pom.xml package -DskipTests
+cwd=/workspace
+exit=0
+started=2026-11-09T23:42:32.216366+08:00
+finished=2026-11-09T23:42:33.839890+08:00
+
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------------< com.team:shop >----------------------------
+[INFO] Building online-shop-mvp 0.1.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ shop ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 6 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ shop ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ shop ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ shop ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- surefire:3.1.2:test (default-test) @ shop ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.3.0:jar (default-jar) @ shop ---
+[INFO] Building jar: /workspace/backend/target/shop-0.1.0.jar
+[INFO] 
+[INFO] --- spring-boot:3.2.5:repackage (repackage) @ shop ---
+[INFO] Replacing main artifact /workspace/backend/target/shop-0.1.0.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to /workspace/backend/target/shop-0.1.0.jar.original
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.993 s
+[INFO] Finished at: 2026-11-09T23:42:33+08:00
+[INFO] ------------------------------------------------------------------------
+

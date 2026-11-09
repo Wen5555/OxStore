@@ -93,6 +93,17 @@ Pop-Location
 
 真实数据库升级和完整容器部署需要 Docker Engine，并须使用脚本新建的隔离数据库/数据卷；不可用 H2 或模拟 API 结果替代。
 
+## 6.1 R2 个性化拍卖验收（P-A12～P-A16）
+
+在仓库根目录、JDK 17 下执行一次采集：
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+python -X utf8 scripts/run_r2_personalized_verification.py
+```
+
+该入口会依次：`mvn clean verify`、隔离 Docker MySQL 的 `verify_auction_database.py` / `verify_iteration2_database.py`、前端 `npm ci` + `build` + 无头 Playwright（模拟 API），以及在 Docker 可用时启动一次性 MySQL+JAR+Vite 跑全栈 Playwright。证据写入 `docs/test/evidence/r2-personalized/`，索引为 `INDEX.json`。模拟 API 通过不能记为全链路通过；Docker 不可用时 MySQL/全栈标记为阻塞。不得把连接改到已有业务库。
+
 ## 7. Selenium UI 冒烟测试
 
 ### 7.1 覆盖范围与已知结果

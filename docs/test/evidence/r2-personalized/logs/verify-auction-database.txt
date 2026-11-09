@@ -1,0 +1,52 @@
+$ /usr/bin/python3 -X utf8 scripts/verify_auction_database.py --java /usr/lib/jvm/java-17-openjdk-amd64/bin/java --jar /workspace/backend/target/shop-0.1.0.jar --output /workspace/docs/test/evidence/r2-personalized/p-a12/auction-mysql-results.json
+cwd=/workspace
+exit=0
+started=2026-11-09T23:42:45.882330+08:00
+finished=2026-11-09T23:43:21.473212+08:00
+
+PASS D01: Fresh schema creates the nine iteration-2 tables plus three auction tables on real MySQL
+PASS D02: MySQL 8.0 server is used
+PASS S01: Fresh schema has 9 iteration-2 tables plus 3 auction tables
+PASS S02: All money columns are DECIMAL(10,2)
+PASS S03: Auction lookup, due-scan, bid history and reminder indexes exist
+PASS S04: Mode-immutability trigger is installed
+PASS D03: Backend validates the auction tables with Hibernate ddl-auto=validate
+PASS F01: Products published by the existing API default to FIXED_PRICE and keep the intent flow
+PASS F02: Trigger refuses switching a published product to AUCTION
+PASS F03: Unknown selling modes are rejected
+PASS F04: An auction product cannot hold more than one item
+PASS B01: A live session starts without bids, price or leader
+PASS B02: A second session for the same product is rejected
+PASS B03: Non-positive start price is rejected
+PASS B04: Deadline not after start is rejected
+PASS B05: Unknown session status is rejected
+PASS B06: Price without a recorded bid/leader is rejected
+PASS B07: A counted bid without a current price is rejected
+PASS B08: ENDED_SOLD without a winner intent is rejected
+PASS G01: Each accepted bid is traceable by sequence, buyer, amount and time
+PASS G02: A concurrent writer reusing a bid sequence is rejected
+PASS G03: Two accepted bids with the same amount are rejected
+PASS G04: Bids must reference an existing customer
+PASS N01: Repeated settlement reminders for the same session/type are rejected
+PASS N02: Seller reminders cannot carry a customer recipient
+PASS N03: A sold reminder must carry the final price
+PASS W01: Winner intent completes through the existing success API: stock 0, offline, SUCCESS history
+PASS W02: Reminders are listable per winner and for sellers
+PASS W03: REQUEUE is rejected for a sold auction without changing the open fulfillment
+PASS W04: DISCARD closes failed auction fulfillment, preserves stock, takes product offline and records history
+PASS U01: Due scan returns the expired LIVE session only
+PASS U02: Conditional settlement applies once; a repeated scan changes nothing
+PASS U03: An unsold session cannot link a winner intent
+PASS Q01: Handoff query samples run and the snapshot masks the leader
+PASS Q02: Due scan can use idx_auction_status_ends
+PASS M01: Iteration-2 database is backed up, then receives V5/V6
+PASS M02: Every existing product becomes FIXED_PRICE and existing data is unchanged
+PASS M03: Upgraded and fresh schemas agree on columns, constraints and indexes
+PASS M04: Repeated upgrade is recognized as auction phase and changes no data
+PASS M05: Backup restores the pre-V6 iteration-2 database exactly
+PASS M06: V6 resumes after an interrupted run (procedure and session table done) and matches the fresh schema
+PASS M07: Direct V6 on a pre-V5 database stops before any change
+PASS M08: A twelve-table layout missing an auction column is refused
+PASS R01: MySQL restart preserves sessions, bids, reminders and the fulfilment link
+PASS R02: Backend starts with ddl-auto=validate on the V6-upgraded database
+

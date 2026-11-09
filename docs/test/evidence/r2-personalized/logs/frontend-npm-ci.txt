@@ -1,0 +1,9 @@
+$ npm ci --no-audit --no-fund
+cwd=/workspace/frontend
+exit=0
+started=2026-11-09T23:43:59.288033+08:00
+finished=2026-11-09T23:44:02.415710+08:00
+
+
+added 165 packages in 3s
+

@@ -316,11 +316,23 @@ VALUES(LAST_INSERT_ID(),5.00,1.00,'LIVE',DATE_SUB(NOW(6), INTERVAL 2 MINUTE),DAT
         self.stop_app()
         self.command(["docker", "restart", self.container])
         self.wait_mysql()
+        # W01 sold session + W04 failed-fulfilment session + U02 unsold session remain after restart.
+        observed = {
+            "fingerprint_before": before,
+            "fingerprint_after": self.fingerprint(self.fresh),
+            "sessions": self.fresh.query("SELECT COUNT(*) FROM auction_session"),
+            "sessions_with_winner": self.fresh.query(
+                "SELECT COUNT(*) FROM auction_session WHERE winner_intent_id IS NOT NULL"),
+            "bids": self.fresh.query("SELECT COUNT(*) FROM auction_bid"),
+            "notifications": self.fresh.query("SELECT COUNT(*) FROM auction_notification"),
+        }
+        self.report["restart"] = observed
         self.check("R01", "P-A01,P-A02", "MySQL restart preserves sessions, bids, reminders and the fulfilment link",
-                   self.fingerprint(self.fresh) == before and
-                   self.fresh.query("SELECT COUNT(*) FROM auction_session WHERE winner_intent_id IS NOT NULL") == "1" and
-                   self.fresh.query("SELECT COUNT(*) FROM auction_bid") == "2" and
-                   self.fresh.query("SELECT COUNT(*) FROM auction_notification") == "2")
+                   observed["fingerprint_after"] == before and
+                   observed["sessions"] == "3" and
+                   observed["sessions_with_winner"] == "2" and
+                   observed["bids"] == "3" and
+                   observed["notifications"] == "2")
         self.start_app("iteration2", scratch)
         self.check("R02", "P-A01,P-A02", "Backend starts with ddl-auto=validate on the V6-upgraded database",
                    bool(self.login("admin", seller=True)))
