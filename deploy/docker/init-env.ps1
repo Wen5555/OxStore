@@ -2,12 +2,15 @@
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 if (Test-Path -LiteralPath '.env') { Write-Host '.env 已存在，保留原配置。'; exit 0 }
-function New-OxSecret { [Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(32)) }
+function New-OxSecret {
+    param([int]$ByteCount = 32)
+    [Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes($ByteCount))
+}
 $oxLines = @(
-    'OXSTORE_VERSION=0.1.0-docker.1', 'COMPOSE_PROJECT_NAME=oxstore',
+    'OXSTORE_VERSION=0.1.0-iteration2-docker.1', 'COMPOSE_PROJECT_NAME=oxstore',
     'APP_BIND_ADDRESS=127.0.0.1', 'APP_PORT=8088',
     ('DB_PASSWORD=' + (New-OxSecret)), ('JWT_SECRET=' + (New-OxSecret)),
-    ('TOKEN_LOOKUP_KEY=' + (New-OxSecret)), ('ADMIN_INITIAL_PASSWORD=Ox!' + (New-OxSecret)),
+    ('TOKEN_LOOKUP_KEY=' + (New-OxSecret)), ('ADMIN_INITIAL_PASSWORD=Ox!' + (New-OxSecret -ByteCount 24)),
     'HISTORY_COMPLETE_SINCE='
 )
 [IO.File]::WriteAllLines((Join-Path $PSScriptRoot '.env'), $oxLines, [Text.UTF8Encoding]::new($false))

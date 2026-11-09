@@ -13,7 +13,7 @@ import uuid
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '0.1.0-docker.1'
+VERSION = '0.1.0-iteration2-docker.1'
 IMAGES = ['oxstore/backend:' + VERSION, 'oxstore/frontend:' + VERSION, 'mysql:8.0.46']
 
 
