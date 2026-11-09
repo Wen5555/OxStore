@@ -1,5 +1,11 @@
 # OxStore 测试计划与报告
 
+## R4 拍卖回归（2026-11-09）
+
+- R4 验收矩阵、执行结果和环境限制见[拍卖 R4 验收报告](auction-r4-validation.md)。
+- 新增一口价/拍卖后端集成测试和前端 SSE 回归测试，自动化执行方法见[自动化测试执行手册](automation_runbook.md)。
+- Docker Engine 未启动的环境不得将 Compose 配置校验误报为部署验证通过；V6 MySQL 迁移须在独立数据库实测。
+
 ## 当前测试基线（2026-10-18）
 
 - 现行需求与接口映射：[测试用例设计及清单](test_case_design_and_inventory.md)。

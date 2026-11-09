@@ -44,7 +44,7 @@ docker compose up --no-build --pull never --wait --wait-timeout 240
 
 ## 4. 备份、升级与恢复
 
-已有数据库不能直接用新库 schema 覆盖。升级前停止业务写入，备份数据库、图片和 `.env`，并在副本验证恢复。`TOKEN_LOOKUP_KEY` 随有效买家口令保持稳定。V2/V3 的适用条件和回退边界参见随包 `database/database-guide.md` 与 `database/runbook.md`。
+已有数据库不能直接用新库 schema 覆盖。升级前停止业务写入，备份数据库、图片和 `.env`，并在副本验证恢复。`TOKEN_LOOKUP_KEY` 随有效买家口令保持稳定。旧版数据库需按适用条件依次完成 V2/V3/V4/V5/V6；V6 将既有商品设为一口价并新增拍卖表，不会把旧商品转换为拍卖。迁移与回退边界参见随包 `database/database-guide.md` 与 `database/runbook.md`。
 
 更新程序镜像不自动执行数据库迁移。应用镜像回退和数据库恢复分别处理；DDL 隐式提交，不能假定换回旧镜像即可回退数据。
 

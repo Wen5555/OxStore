@@ -34,6 +34,9 @@ export default function ProductDetailPage() {
         auctionStatus: event.auctionStatus,
         currentPrice: event.finalPrice ?? current.currentPrice,
         settledAt: event.settledAt ?? current.settledAt,
+        canBid: false,
+        myStatus: event.youWon == null ? current.myStatus : event.youWon ? 'WON' : 'LOST',
+        leaderAlias: event.winnerAlias ?? current.leaderAlias,
       })
     } else if ('currentPrice' in event) setAuction((current) => current && {
         ...current,

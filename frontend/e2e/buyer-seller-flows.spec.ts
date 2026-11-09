@@ -52,6 +52,179 @@ test('匿名买家可浏览商品，但提交意向时必须登录且没有口�
   await expect(page.getByText(/口令/)).toHaveCount(0)
 })
 
+test('一口价商品仍走购买意向流程且不请求拍卖快照', async ({ page }) => {
+  let auctionSnapshotRequests = 0
+  let intentRequests = 0
+  await page.addInitScript(() => localStorage.setItem('customer_token', 'customer-token'))
+  await page.route('**/api/categories/tree', (route) =>
+    route.fulfill(apiResponse([{ id: 1, name: '家居', children: [{ id: 2, name: '灯具', children: [] }] }])),
+  )
+  await page.route('**/api/products?**', (route) =>
+    route.fulfill(apiResponse({
+      items: [{
+        productId: 42,
+        name: '普通商品回归',
+        price: 88,
+        mainImagePath: null,
+        category2Id: 2,
+        category2Name: '灯具',
+        sellingMode: 'FIXED_PRICE',
+        auction: null,
+      }],
+      page: 1,
+      size: 10,
+      total: 1,
+      pages: 1,
+    })),
+  )
+  await page.route('**/api/products/42', (route) =>
+    route.fulfill(apiResponse({
+      productId: 42,
+      name: '普通商品回归',
+      descriptionHtml: '<p>一口价商品描述</p>',
+      price: 88,
+      stock: 2,
+      status: 'ONLINE',
+      canPurchase: true,
+      category2Id: 2,
+      category2Name: '灯具',
+      images: [],
+      mainImagePath: null,
+      publishedAt: '2026-11-09T10:00:00',
+      statusUpdatedAt: '2026-11-09T10:00:00',
+      sellingMode: 'FIXED_PRICE',
+      auction: null,
+    })),
+  )
+  await page.route('**/api/products/42/auction', async (route) => {
+    auctionSnapshotRequests += 1
+    await route.fulfill(apiResponse({}))
+  })
+  await page.route('**/api/products/42/intents', async (route) => {
+    intentRequests += 1
+    await route.fulfill(apiResponse({ intentId: 701, productId: 42, status: 'QUEUING' }))
+  })
+
+  await page.goto('/')
+  await page.getByText('普通商品回归').first().click()
+  await expect(page.getByRole('button', { name: '提交购买意向' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '出价' })).toHaveCount(0)
+  await page.getByRole('button', { name: '提交购买意向' }).click()
+  await expect.poll(() => intentRequests).toBe(1)
+  expect(auctionSnapshotRequests).toBe(0)
+})
+
+test('拍卖 SSE 更新领先状态并在结拍后禁用出价', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('customer_token', 'customer-token'))
+  const snapshot = {
+    productId: 88,
+    productName: '实时拍卖商品',
+    sellingMode: 'AUCTION',
+    auctionStatus: 'LIVE',
+    startPrice: 10,
+    minIncrement: 2,
+    currentPrice: 10,
+    nextMinBid: 12,
+    bidCount: 1,
+    endsAt: '2026-11-09T12:00:00',
+    settledAt: null,
+    serverTime: '2026-11-09T11:00:00',
+    leaderAlias: 'b***r',
+    lastBidSeq: 1,
+    recentBids: [],
+    canBid: true,
+    myStatus: 'LEADING',
+  }
+  const bid = {
+    productId: 88,
+    bidSeq: 2,
+    amount: 12,
+    currentPrice: 12,
+    nextMinBid: 14,
+    bidCount: 2,
+    leaderAlias: 'b***r',
+    bidAt: '2026-11-09T11:30:00',
+    youAreLeading: true,
+  }
+  const settled = {
+    productId: 88,
+    auctionStatus: 'ENDED_SOLD',
+    finalPrice: 12,
+    winnerAlias: 'b***r',
+    settledAt: '2026-11-09T12:00:00',
+    youWon: true,
+  }
+  await page.route('**/api/products/88', (route) =>
+    route.fulfill(apiResponse({
+      productId: 88,
+      name: '实时拍卖商品',
+      descriptionHtml: '',
+      price: 10,
+      stock: 1,
+      status: 'ONLINE',
+      canPurchase: false,
+      category2Id: 2,
+      category2Name: '灯具',
+      images: [],
+      mainImagePath: null,
+      publishedAt: '2026-11-09T10:00:00',
+      statusUpdatedAt: '2026-11-09T10:00:00',
+      sellingMode: 'AUCTION',
+    })),
+  )
+  await page.route('**/api/products/88/auction', (route) =>
+    route.fulfill(apiResponse(snapshot)),
+  )
+  await page.route('**/api/products/88/auction/stream', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'text/event-stream',
+      body: [
+        `event: snapshot\ndata: ${JSON.stringify(snapshot)}\n\n`,
+        `event: bid\nid: 2\ndata: ${JSON.stringify(bid)}\n\n`,
+        `event: settled\nid: settled\ndata: ${JSON.stringify(settled)}\n\n`,
+      ].join(''),
+    }),
+  )
+
+  await page.goto('/products/88')
+  await expect(page.getByText('出价次数：2')).toBeVisible()
+  await expect(page.getByText('当前领先者：b***r')).toBeVisible()
+  await expect(page.getByRole('alert')).toContainText('恭喜你中标')
+  await expect(page.getByRole('button', { name: /出\s*价/ })).toBeDisabled()
+  await expect(page.getByRole('button', { name: '提交购买意向' })).toHaveCount(0)
+})
+
+test('买家拍卖提醒页通过通知 SSE 显示结拍提醒', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('customer_token', 'customer-token'))
+  const notification = {
+    notificationId: 903,
+    auctionId: 88,
+    productId: 88,
+    type: 'AUCTION_WON',
+    productName: 'R4结拍提醒商品',
+    finalPrice: 12,
+    createdAt: '2026-11-09T12:00:00',
+    readAt: null,
+  }
+  await page.route('**/api/me/auction-notifications?**', (route) =>
+    route.fulfill(apiResponse({ items: [], page: 1, size: 10, total: 0, pages: 0, unread: 0 })),
+  )
+  await page.route('**/api/me/auction-notifications/stream', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 200))
+    await route.fulfill({
+      status: 200,
+      contentType: 'text/event-stream',
+      body: `event: notification\nid: 903\ndata: ${JSON.stringify(notification)}\n\n`,
+    })
+  })
+
+  await page.goto('/me/auction-notifications')
+  await expect(page.getByText('R4结拍提醒商品')).toBeVisible()
+  await expect(page.getByText('恭喜你中标，成交价 ¥12.00')).toBeVisible()
+  await expect(page.getByText('暂无拍卖中标提醒')).toHaveCount(0)
+})
+
 test('下架商品详情即使 API 返回成功也不展示商品信息', async ({ page }) => {
   await page.route('**/api/products/99', (route) =>
     route.fulfill(apiResponse({
