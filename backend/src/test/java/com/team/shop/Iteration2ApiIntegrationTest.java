@@ -1,6 +1,7 @@
 package com.team.shop;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.shop.domain.BusinessTime;
 import com.team.shop.entity.AuctionSession;
 import com.team.shop.repository.AuctionSessionRepository;
@@ -56,8 +57,11 @@ class Iteration2ApiIntegrationTest {
     @Autowired
     private AuctionSettlementService auctionSettlement;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Test
-    void buyerSellerCatalogQueueInventoryAndHistoryFlow() {
+    void buyerSellerCatalogQueueInventoryAndHistoryFlow() throws Exception {
         ResponseEntity<JsonNode> registration = http.postForEntity("/api/auth/register",
                 Map.of("username", "buyer1", "password", "customer-pass-8",
                         "phone", "13800000000"), JsonNode.class);
@@ -87,14 +91,20 @@ class Iteration2ApiIntegrationTest {
         assertTrue(detail.path("descriptionHtml").asText().contains("<strong>"));
 
         long firstIntent = submitIntent(productId, buyerToken);
+        long waitingIntent = submitIntent(productId, buyerToken);
         assertEquals(firstIntent, queueHead(productId, sellerToken));
         startTrade(firstIntent, sellerToken);
         confirmSuccess(firstIntent, sellerToken);
-        assertEquals(1, http.getForObject("/api/products/" + productId, JsonNode.class)
-                .path("data").path("stock").asInt());
+        JsonNode afterFirstSuccess = http.getForObject("/api/products/" + productId, JsonNode.class).path("data");
+        assertEquals(1, afterFirstSuccess.path("stock").asInt());
+        assertEquals("ONLINE", afterFirstSuccess.path("status").asText());
+        JsonNode waitingQueue = get("/api/admin/intents?productId=" + productId, sellerToken).path("data");
+        assertEquals(1, waitingQueue.path("total").asInt());
+        assertEquals(waitingIntent, waitingQueue.path("items").get(0).path("intentId").asLong());
+        assertEquals("QUEUING", waitingQueue.path("items").get(0).path("status").asText());
 
-        long discardedIntent = submitIntent(productId, buyerToken);
-        startTrade(discardedIntent, sellerToken);
+        startTrade(waitingIntent, sellerToken);
+        long discardedIntent = waitingIntent;
         post("/api/admin/intents/" + discardedIntent + "/fail",
                 Map.of("action", "DISCARD"), sellerToken, 200);
 
@@ -134,9 +144,25 @@ class Iteration2ApiIntegrationTest {
 
         JsonNode manuallyManaged = publish(sellerToken, "手动上下架商品", 1, category2Id, "");
         long manualProductId = manuallyManaged.path("productId").asLong();
+        submitIntent(manualProductId, buyerToken);
         post("/api/admin/products/" + manualProductId + "/offline", null, sellerToken, 200);
         assertEquals(404, http.getForEntity("/api/products/" + manualProductId, JsonNode.class)
                 .getStatusCode().value());
+        assertEquals(0, get("/api/admin/intents?productId=" + manualProductId, sellerToken)
+                .path("data").path("total").asInt());
+        JsonNode historyAfterManualOffline = get("/api/me/order-history?page=1&size=10", buyerToken).path("data");
+        assertEquals(5, historyAfterManualOffline.path("total").asInt());
+        HttpRequest inventoryRequest = HttpRequest.newBuilder(URI.create(
+                        http.getRootUri() + "/api/admin/products/" + manualProductId))
+                .header("Authorization", "Bearer " + sellerToken)
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .method("PATCH", HttpRequest.BodyPublishers.ofString(
+                        objectMapper.writeValueAsString(Map.of("stock", 2, "category2Id", category2Id))))
+                .build();
+        HttpResponse<String> inventoryResponse = HttpClient.newHttpClient().send(inventoryRequest,
+                HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, inventoryResponse.statusCode());
+        assertEquals(2, objectMapper.readTree(inventoryResponse.body()).path("data").path("stock").asInt());
         post("/api/admin/products/" + manualProductId + "/online", null, sellerToken, 200);
         assertEquals("ONLINE", http.getForObject("/api/products/" + manualProductId,
                 JsonNode.class).path("data").path("status").asText());
@@ -335,6 +361,61 @@ class Iteration2ApiIntegrationTest {
         } finally {
             productStream.body().close();
         }
+    }
+
+    @Test
+    void failedAuctionFulfillmentCannotBeRequeuedAndLeavesFailedHistory() {
+        String suffix = Long.toString(System.nanoTime());
+        String buyerName = "r4-auction-failed-" + suffix;
+        register(buyerName, "13800000008");
+        String buyerToken = login("/api/auth/login",
+                Map.of("username", buyerName, "password", "customer-pass-8"));
+        String sellerToken = login("/api/admin/auth/login",
+                Map.of("username", "admin", "password", "Test-Pass-9931!"));
+        long category2Id = http.getForObject("/api/categories/tree", JsonNode.class)
+                .path("data").get(0).path("children").get(0).path("id").asLong();
+        LocalDateTime endsAt = BusinessTime.now().plusMinutes(2).withNano(0);
+        long productId = publishAuction(sellerToken, "R4拍卖失败履约-" + suffix, category2Id, endsAt);
+
+        assertEquals(201, placeBid(productId, buyerToken, 10.00).getStatusCode().value());
+        AuctionSession auction = auctions.findByProductId(productId).orElseThrow();
+        auctionSettlement.settleOne(auction.getId(), endsAt.plusSeconds(1));
+
+        JsonNode endedAuctions = get("/api/admin/auctions?status=ENDED_SOLD&page=1&size=100", sellerToken)
+                .path("data").path("items");
+        long winnerIntentId = 0;
+        for (JsonNode item : endedAuctions) {
+            if (item.path("productId").asLong() == productId) {
+                winnerIntentId = item.path("winnerIntentId").asLong();
+                break;
+            }
+        }
+        assertTrue(winnerIntentId > 0);
+
+        ResponseEntity<JsonNode> requeue = http.exchange("/api/admin/intents/" + winnerIntentId + "/fail",
+                HttpMethod.POST, new HttpEntity<>(Map.of("action", "REQUEUE"), headers(sellerToken)), JsonNode.class);
+        assertEquals(409, requeue.getStatusCode().value());
+        assertEquals(40908, requeue.getBody().path("code").asInt());
+
+        post("/api/admin/intents/" + winnerIntentId + "/fail",
+                Map.of("action", "DISCARD"), sellerToken, 200);
+
+        JsonNode history = get("/api/me/order-history?page=1&size=10", buyerToken).path("data");
+        assertEquals(1, history.path("total").asInt());
+        assertEquals("FAILED", history.path("items").get(0).path("status").asText());
+        assertEquals(404, http.getForEntity("/api/products/" + productId, JsonNode.class)
+                .getStatusCode().value());
+
+        JsonNode sellerProducts = get("/api/admin/products?page=1&size=100", sellerToken).path("data").path("items");
+        for (JsonNode item : sellerProducts) {
+            if (item.path("productId").asLong() == productId) {
+                assertEquals(1, item.path("stock").asInt());
+                assertEquals("OFFLINE", item.path("status").asText());
+                assertEquals("AUCTION", item.path("sellingMode").asText());
+                return;
+            }
+        }
+        throw new AssertionError("Failed auction product was not present in the seller product list");
     }
 
     private long publishAuction(String sellerToken, String name, long category2Id, LocalDateTime endsAt) {

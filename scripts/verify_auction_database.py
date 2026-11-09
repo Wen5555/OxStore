@@ -3,8 +3,8 @@
 Reuses the iteration-2 harness: only the container created by this run is touched,
 credentials and dumps stay out of the JSON, and the backend JAR runs with
 ddl-auto=validate. Checks cover the fresh schema, V6 upgrade of an iteration-2
-database, repeat/interrupted upgrades, backup restore, the winner fulfilment
-link through the existing trade API, and restart persistence.
+database, repeat/interrupted upgrades, backup restore, successful and failed
+winner fulfilment through the existing trade API, and restart persistence.
 """
 from __future__ import annotations
 
@@ -182,6 +182,53 @@ COMMIT;""")
         self.check("W02", "P-A02", "Reminders are listable per winner and for sellers",
                    db.query(f"SELECT COUNT(*) FROM auction_notification WHERE recipient_customer_id={cb}") == "1" and
                    db.query("SELECT COUNT(*) FROM auction_notification WHERE recipient_role='SELLER'") == "1")
+
+        db.sql(f"""START TRANSACTION;
+INSERT INTO product(name,description,price,stock,category2_id,selling_mode,status,published_at,status_updated_at)
+VALUES('失败履约专项商品','',12.50,1,{self.leaf},'AUCTION','ONLINE',NOW(6),NOW(6));
+SET @failed_product = LAST_INSERT_ID();
+INSERT INTO auction_session(product_id,start_price,min_increment,current_price,leader_customer_id,bid_count,
+  status,starts_at,ends_at)
+VALUES(@failed_product,10.00,1.00,10.00,{ca},1,'LIVE',DATE_SUB(NOW(6), INTERVAL 1 MINUTE),
+  DATE_ADD(NOW(6), INTERVAL 1 DAY));
+SET @failed_auction = LAST_INSERT_ID();
+INSERT INTO auction_bid(auction_id,bid_seq,customer_id,amount,bid_at)
+VALUES(@failed_auction,1,{ca},10.00,NOW(6));
+UPDATE product SET status='FROZEN',freeze_source='TRADE',status_updated_at=NOW(6)
+WHERE id=@failed_product;
+INSERT INTO purchase_intent(product_id,customer_id,product_name_snapshot,buyer_name,buyer_phone,status,
+  submitted_at,queue_seq,processed_at)
+SELECT @failed_product,id,'失败履约专项商品',username,phone,'IN_TRANSACTION',NOW(6),1,NOW(6)
+FROM customer WHERE id={ca};
+SET @failed_intent = LAST_INSERT_ID();
+INSERT INTO trade_attempt(intent_id,started_at) VALUES(@failed_intent,NOW(6));
+SET @failed_attempt = LAST_INSERT_ID();
+INSERT INTO product_status_event(product_id,trade_attempt_id,event_type,from_status,to_status,freeze_source,occurred_at)
+VALUES(@failed_product,@failed_attempt,'TRADE_STARTED','ONLINE','FROZEN','TRADE',NOW(6));
+UPDATE auction_session SET status='ENDED_SOLD',settled_at=NOW(6),winner_intent_id=@failed_intent,version=version+1
+WHERE id=@failed_auction;
+COMMIT;""")
+        failed_product = db.query("SELECT id FROM product WHERE name='失败履约专项商品'")
+        failed_intent = db.query(f"SELECT id FROM purchase_intent WHERE product_id={failed_product}")
+        self.request("POST", f"/api/admin/intents/{failed_intent}/fail",
+                     {"action": "REQUEUE"}, token=self.seller, expected=409)
+        unchanged = db.query(f"""SELECT CONCAT(i.status,':',p.status,':',COALESCE(t.finished_at,'-'),':',
+  (SELECT COUNT(*) FROM order_history h WHERE h.intent_id=i.id))
+FROM purchase_intent i JOIN product p ON p.id=i.product_id
+JOIN trade_attempt t ON t.intent_id=i.id AND t.finished_at IS NULL WHERE i.id={failed_intent}""")
+        self.check("W03", "P-A04", "REQUEUE is rejected for a sold auction without changing the open fulfillment",
+                   unchanged == "IN_TRANSACTION:FROZEN:-:0")
+        self.request("POST", f"/api/admin/intents/{failed_intent}/fail",
+                     {"action": "DISCARD"}, token=self.seller)
+        failed_state = db.query(f"""SELECT CONCAT(p.stock,':',p.status,':',p.selling_mode,':',i.status,':',
+  t.result,':',t.fail_action,':',h.status,':',a.status)
+FROM product p JOIN purchase_intent i ON i.product_id=p.id
+JOIN trade_attempt t ON t.intent_id=i.id JOIN order_history h ON h.intent_id=i.id
+JOIN auction_session a ON a.product_id=p.id WHERE p.id={failed_product}""")
+        self.check("W04", "P-A04", "DISCARD closes failed auction fulfillment, preserves stock, takes product offline and records history",
+                   failed_state == "1:OFFLINE:AUCTION:FAILED:FAILED:DISCARD:FAILED:ENDED_SOLD" and
+                   db.query(f"SELECT COUNT(*) FROM product_status_event WHERE product_id={failed_product} "
+                            "AND event_type='TRADE_FAILED'") == "1")
 
         db.sql(f"""INSERT INTO product(name,description,price,stock,category2_id,selling_mode,status,published_at,status_updated_at)
 VALUES('流拍专项商品','',5.00,1,{self.leaf},'AUCTION','ONLINE',NOW(6),NOW(6));

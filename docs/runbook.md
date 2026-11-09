@@ -64,8 +64,8 @@ mvn spring-boot:run
 
 ```powershell
 cd frontend
-npm install
-npm run dev
+npm.cmd install
+npm.cmd run dev
 ```
 
 开发前台运行在 `http://localhost:5173/`，Vite 将 `/api` 代理到 `http://localhost:8080`。前端支持一口价购买意向与拍卖出价、实时竞价/结拍提醒、购买历史及卖家拍卖管理。执行 `npm --prefix frontend run test:e2e` 可运行模拟 API 的 Playwright 流程；该测试不替代真实部署环境联调。
