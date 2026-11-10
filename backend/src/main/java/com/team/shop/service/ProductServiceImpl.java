@@ -108,10 +108,13 @@ public class ProductServiceImpl implements ProductService {
     public ProductDetailResponse getBuyerProduct(Long productId) {
         Product product = products.findById(productId)
                 .orElseThrow(() -> new NotFoundException("商品不存在"));
-        if (product.getStatus() == ProductStatus.OFFLINE) {
+        com.team.shop.entity.AuctionSession auction = auctions.findByProductId(productId).orElse(null);
+        boolean endedAuction = auction != null
+                && auction.getStatus() == com.team.shop.domain.AuctionStatus.ENDED_UNSOLD;
+        if (product.getStatus() == ProductStatus.OFFLINE && !endedAuction) {
             throw new NotFoundException("商品已下架");
         }
-        return ProductDetailResponse.from(product, auctions.findByProductId(productId).orElse(null));
+        return ProductDetailResponse.from(product, auction);
     }
 
     @Override
