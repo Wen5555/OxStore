@@ -64,11 +64,11 @@ mvn spring-boot:run
 
 ```powershell
 cd frontend
-npm install
-npm run dev
+npm.cmd install
+npm.cmd run dev
 ```
 
-开发前台运行在 `http://localhost:5173/`，Vite 将 `/api` 代理到 `http://localhost:8080`。当前前端已包含顾客注册/登录、商品浏览搜索、购买历史和卖家迭代 2 管理页面；完整浏览器联调仍需先安装前端依赖并执行 Playwright 流程。
+开发前台运行在 `http://localhost:5173/`，Vite 将 `/api` 代理到 `http://localhost:8080`。前端支持一口价购买意向与拍卖出价、实时竞价/结拍提醒、购买历史及卖家拍卖管理。执行 `npm --prefix frontend run test:e2e` 可运行模拟 API 的 Playwright 流程；该测试不替代真实部署环境联调。
 
 ## 已有数据库升级
 
@@ -77,19 +77,20 @@ npm run dev
 3. 已执行旧版 V2 的库按需运行 V3 收紧交易结果约束；新库和修订后的 V2 无需额外执行 V3。V3 若发现不完整旧结果，会拒绝升级，须核实真实结果。
 4. 结束所有交易中意向后执行 `backend/src/main/resources/db/migrations/V4__iteration2_customer_inventory_catalog.sql`。
 5. 执行 `backend/src/main/resources/db/migrations/V5__iteration2_database_contract.sql`，补齐图片元数据与约束、意向状态约束和商品列表索引。已有 V4 库也须执行 V5 后再运行本版后端。
-6. 核对迁移前后行数、状态分布、中文内容及队列序号。旧商品库存未知，因此 V4 会将其设为 0 并下架；卖家须核实实际库存后补充库存、手动上架。
+6. 执行 `backend/src/main/resources/db/migrations/V6__auction_mode.sql`，为现有商品设置 `FIXED_PRICE` 并创建拍卖场次、出价和提醒表。V6 要求完整 V5 结构；已执行过 V6 的库可安全重复执行。
+7. 核对迁移前后行数、状态分布、中文内容及队列序号。旧商品库存未知，因此 V4 会将其设为 0 并下架；卖家须核实实际库存后补充库存、手动上架。
 
-V4 不会创建顾客账号或转换旧口令记录为新顾客历史；旧队列意向会结束为失败。商品图片路径会保留。MySQL DDL 会隐式提交；任一迁移中途失败时先核对结构与备份，不要盲目重跑。空库 schema 不能替代迁移。回退应停写并恢复已演练的备份，旧程序继续写入会破坏新数据语义。
+V4 不会创建顾客账号或转换旧口令记录为新顾客历史；旧队列意向会结束为失败。商品图片路径会保留。V6 不会把旧商品转换为拍卖。MySQL DDL 会隐式提交；任一迁移中途失败时先核对结构与备份，不要盲目重跑。空库 schema 不能替代迁移。回退应停写并恢复已演练的备份，旧程序继续写入会破坏新数据语义。
 
 备份命令、表结构及迁移前后检查项见[数据库设计与使用说明](design/database.md)。
 
-Docker MySQL 可以在停写后使用 `python -X utf8 scripts/migrate_iteration2.py --container 实际容器名 --database 实际数据库名`。该入口先备份，识别五表基线后执行 V4→V5；完整迭代 2 库跳过 V4。重复执行不重置库存或复制旧数据，部分 V4 结构会被拒绝。备份默认保存在 `.work/db-backups/`，不得提交到 Git；容器须提供 `MYSQL_ROOT_PASSWORD`。恢复演练应先在独立空库进行，不能将演练命令直接用于业务库。
+Docker MySQL 可以在停写后使用 `python -X utf8 scripts/migrate_iteration2.py --container 实际容器名 --database 实际数据库名`。该入口先备份，识别五表基线后执行 V4→V5→V6；完整迭代 2 库跳过 V4。重复执行不重置库存或复制旧数据，部分结构会被拒绝。备份默认保存在 `.work/db-backups/`，不得提交到 Git；容器须提供 `MYSQL_ROOT_PASSWORD`。恢复演练应先在独立空库进行，不能将演练命令直接用于业务库。
 
 ## 构建与验证
 
 - 完整步骤见 `docs/build.md`（离线包后续可参考 `build-guide.md`），包含工具安装要求、源码版本、Docker 与本机构建、产物位置及离线打包。
 - 后端：在项目根目录运行 `mvn -B -ntp -f backend/pom.xml clean verify`，生成 `backend/target/shop-0.1.0.jar`，并执行包含 H2 HTTP 集成测试的后端验证。
-- 前端：在项目根目录运行 `npm --prefix frontend ci --registry=https://registry.npmmirror.com --no-audit --no-fund`，成功后运行 `npm --prefix frontend run build`，生成 `frontend/dist/`。
-- 迭代 2 MySQL 专项：先打包后运行 `python -X utf8 scripts/verify_iteration2_database.py`，验证独立 MySQL 上的空库、V4/V5 升级、重复执行、备份恢复、业务接口及重启；结果见[实际报告](test/iteration2-database-validation.md)。旧版 `scripts/verify_database.py` 仍面向基线 schema/API。
+- 前端：在项目根目录运行 `npm --prefix frontend ci --no-audit --no-fund`，再依次执行 `npm --prefix frontend run build` 和 `npm --prefix frontend run test:e2e`；浏览器测试使用模拟 API。
+- MySQL 专项：`python -X utf8 scripts/verify_iteration2_database.py` 验证 V4/V5/V6 迁移与迭代 2 业务；`python -X utf8 scripts/verify_auction_database.py` 在独立 MySQL 上验证 V6 升级、竞价与结拍。具体覆盖以各脚本输出为准。旧版 `scripts/verify_database.py` 仍面向基线 schema/API。
 
 接口契约见[接口说明](design/api.md)。旧数据库验证数据见[历史验证报告](test/db-validation.md)；2026-10-28 迭代 2 的独立验证单独记录，未对实际业务库执行升级。

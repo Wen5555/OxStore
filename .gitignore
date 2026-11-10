@@ -15,7 +15,12 @@ frontend/node_modules/
 frontend/dist/
 frontend/test-results/
 frontend/playwright-report/
+frontend/playwright-fullstack-report/
+frontend/test-results-fullstack/
+frontend/test-results-fullstack-unsold/
+frontend/playwright-fullstack-unsold-report/
 frontend/playwright/.cache/
+frontend/*.tsbuildinfo
 
 # 上传文件
 uploads/
@@ -34,3 +39,4 @@ Thumbs.db
 __pycache__/
 .playwright-cli/
 output/playwright/
+frontend/*.tsbuildinfo

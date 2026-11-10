@@ -1,12 +1,12 @@
 # OxStore 测试用例设计及清单
 
-更新日期：2026-10-20。本文档以当前接口、测试源码和自动化测试资产为依据，按需求和验证入口说明覆盖范围。测试条数不等同于需求覆盖率；执行结果以对应的测试报告和退出码为准。命令与环境准备见[自动化测试执行手册](automation_runbook.md)。
+更新日期：2026-11-09。本文档以当前接口、测试源码和自动化测试资产为依据，按需求和验证入口说明覆盖范围。测试条数不等同于需求覆盖率；执行结果以对应的测试报告和退出码为准。命令与环境准备见[自动化测试执行手册](automation_runbook.md)。
 
 ## 1. 范围与判定
 
 测试资产分为后端 JUnit、真实容器/API 验证、数据库专项验证、前端模拟 API 交互、真实浏览器 Selenium 冒烟及 JMeter 性能/并发验证。
 
-- 后端当前有 11 个测试类、50 个 JUnit 测试方法；以当前源码的 `@Test` 方法统计，执行结果须以 Surefire XML 为准。
+- 后端当前有 12 个测试类、38 个 JUnit 测试方法；以当前源码的 `@Test` 方法统计，执行结果须以 Surefire XML 为准。
 - `scripts/verify_docker_release.py` 通过 Nginx 调用真实 Java/MySQL 服务，执行容器和 API 场景；覆盖计数以该次运行输出为准。
 - `scripts/verify_database.py` 使用隔离数据库验证表结构、约束、迁移、交易记录和持久化。
 - `frontend/e2e/buyer-seller-flows.spec.ts` 使用模拟 API 验证前端交互，不等同于真实服务端到端验证。
@@ -76,20 +76,21 @@ UI-001 运行真实 Chrome 和真实前后端，不模拟 API。每次运行必�
 
 | 测试类 | 测试数 | 主要内容 |
 | --- | ---: | --- |
-| controller/admin/AdminProductControllerTest | 2 | 主图数量与 multipart 契约 |
-| domain/ProductStateMachineTest | 20 | 商品状态迁移、冻结来源、可接收意向状态 |
-| domain/IntentStateMachineTest | 10 | 意向修改、撤销、开始与结束约束 |
-| domain/TokenGeneratorTest | 5 | 口令生成、哈希、校验 |
-| dto/PhoneAndTradeRequestTest | 3 | 姓名/电话、交易尝试 ID 必填 |
+| controller/admin/AdminProductControllerTest | 3 | 多图数量与 multipart 契约 |
+| domain/ProductStateMachineTest | 3 | 商品状态迁移、库存与交易约束 |
+| domain/IntentStateMachineTest | 1 | 意向状态迁移约束 |
+| dto/PhoneAndTradeRequestTest | 2 | 顾客注册字段、交易失败动作 |
+| entity/AuctionSessionTest | 6 | 出价边界、领先者变化、结拍及提醒 |
 | entity/TradeHistoryTest | 3 | 重排保留凭证/首次时间、终态清空、结果不可覆盖 |
+| Iteration2ApiIntegrationTest | 6 | H2 HTTP 流程、一口价回归、拍卖结拍及 SSE |
+| repository/AuctionRepositoryTest | 5 | 拍卖/出价持久化、幂等与截止扫描 |
 | security/JwtUtilTest | 2 | 密钥约束与 JWT 验证 |
-| security/TokenLookupTest | 1 | HMAC 摘要稳定性 |
 | service/ImageStorageServiceTest | 1 | 有效图片、伪造或类型不符拒绝 |
-| service/TradeServiceImplTest | 2 | 旧尝试不能结束新交易、单买家重排 |
+| service/TradeServiceImplTest | 5 | 交易库存递补、终态与拍卖失败分支 |
 | exception/GlobalExceptionHandlerBugFixTest | 1 | 错误 HTTP 方法返回 405 |
-| **合计** | **50** | JUnit 不等同于真实 MySQL、完整 UI 或全接口验收 |
+| **合计** | **38** | JUnit 不等同于真实 MySQL、完整 UI 或全接口验收 |
 
-测试方法数依据当前源码中的 11 个测试类和 `@Test` 方法统计。每次新增或删除测试，应同步本表；执行状态须核对 Surefire XML 和 Maven 退出码。
+测试方法数依据当前源码中的 12 个测试类和 `@Test` 方法统计。2026-11-09 的 `mvn -B -ntp -f backend/pom.xml clean verify` 为 38 项全通过；每次新增或删除测试，应同步本表并核对 Surefire XML 和 Maven 退出码。
 
 ## 5. 重点边界
 
@@ -111,3 +112,29 @@ UI-001 运行真实 Chrome 和真实前后端，不模拟 API。每次运行必�
 - BUG-002 等待需求确认事项按缺陷库状态跟踪。
 
 > 19 个接口的基本场景覆盖不等于所有异常条件、页面路径或并发条件均已通过验收。
+
+## 7. 拍卖与一口价回归（R4）
+
+| Task | 场景与断言 | 自动化证据 |
+| --- | --- | --- |
+| P-A17 | 一口价商品不暴露拍卖快照/出价能力；买家仍可提交意向，卖家按原队列完成交易并生成 SUCCESS 历史 | `Iteration2ApiIntegrationTest.fixedPriceProductsKeepTheIntentFlowAndRejectAuctionOperations` |
+| P-A18 | 普通商品列表/详情保持购买意向入口，不请求拍卖快照；购买历史继续按现有成功/失败终态展示 | Playwright `一口价商品仍走购买意向流程且不请求拍卖快照`、`买家购买历史按后端订单字段展示成功和失败终态` |
+| P-A19 | 两个买家递增出价及竞价 SSE；结拍 SSE；获胜者提醒、卖家提醒、拍卖管理记录；使用既有中标意向履约并生成订单历史 | `Iteration2ApiIntegrationTest.auctionBidsSettleThroughExistingTradeAndPublishSseNotifications` |
+| P-A19 | 浏览器根据出价/结拍事件更新领先状态、成交状态和提醒列表 | Playwright `拍卖 SSE 更新领先状态并在结拍后禁用出价`、`买家拍卖提醒页通过通知 SSE 显示结拍提醒` |
+
+前端 Playwright 场景使用模拟 API；后端集成场景使用 H2 与真实 HTTP/SSE。二者不能替代隔离 MySQL 的 V6 迁移验证或 Docker 部署验收。当前 R4 运行结果和未完成环境项见[R4 验收报告](auction-r4-validation.md)。
+
+## 8. 个性化拍卖 R2 验收（P-A12～P-A16）
+
+需求依据：上游 Wiki「迭代2‐个性化需求·产品待办」PB-A01～PB-A04，以及仓内 [P-A00 拍卖增量契约](../auction/P-A00-拍卖增量契约.md)。执行入口：`python -X utf8 scripts/run_r2_personalized_verification.py`。机器结果索引：[evidence/r2-personalized/INDEX.json](evidence/r2-personalized/INDEX.json)。共享套件只计一次，按下表映射，不重复计通过。
+
+| Task | 场景 | 自动化入口 | 证据分层 |
+| --- | --- | --- | --- |
+| P-A12 | 空库/旧库 V6、重复迁移、索引、金额 DECIMAL(10,2)、幂等、重启保留 | `scripts/verify_auction_database.py`（S/M/R/U/Q 组）；回归 `scripts/verify_iteration2_database.py` | 隔离 Docker MySQL，不可用 H2 代替 |
+| P-A13 | 未登录/卖家自出价、金额精度与过低、截止拒单、并发开拍出价、一口价回归、发布字段互斥 | `Iteration2ApiIntegrationTest` 新增权限/并发/发布校验；既有 `fixedPriceProductsKeepTheIntentFlowAndRejectAuctionOperations`；实体层 `AuctionSessionTest` | H2 HTTP；金额列与唯一约束以 P-A12 MySQL 为准 |
+| P-A14 | 中标→交易中→成功/失败、流拍提醒、重复扫描幂等 | 既有结拍成功/失败履约测试；新增 `expiredLiveAuctionRejectsBidAndDueScanSettlesUnsoldOnce`、`snapshotReportsOutbidAndSseReconnectReplaysSnapshot` 的重复结拍断言；MySQL U02/W03/W04 | H2 HTTP + 隔离 MySQL |
+| P-A15 | 买家出价、OUTBID、SSE 更新/断流重连/快照、截止拒单 | 新增 Playwright `auction-r2-p-a15.spec.ts`（模拟 API）；既有 SSE/结拍禁用出价；JUnit 快照 OUTBID 与 SSE 重连；全栈 `auction-r2-fullstack.spec.ts` | 模拟 API ≠ 全链路 |
+| P-A16 | 卖家模式发布、结果、提醒、履约入口、流拍展示 | 新增 Playwright `auction-r2-p-a16.spec.ts`（模拟 API）；全栈发布后的拍卖管理/履约 | 模拟 API ≠ 全链路 |
+| 补测 | 真实全栈无人出价流拍（定时结拍、无中标意向、卖家流拍展示与提醒、重复扫描幂等） | `scripts/run_auction_fullstack_e2e.py --scenario unsold` + `frontend/e2e/auction-r2-fullstack-unsold.spec.ts` | 隔离 Docker MySQL + JAR + 无头浏览器；证据与教师报告在 `evidence/r2-personalized/fullstack-unsold/`，不与旧轮 131/129/2 混算。2026-11-10 实际执行：结拍/库表/卖家列表与提醒/幂等通过；公开详情流拍文案失败（OFFLINE 商品买家接口 404），未修业务 |
+
+长报告不入库。Wiki 正文由本轮 artifact 提供，仓库只保留用例、脚本和本轮证据。

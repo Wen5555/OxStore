@@ -1,0 +1,48 @@
+{
+  "tasks": {
+    "P-A12": {
+      "dependsOn": ["P-A01", "P-A02", "P-A07"],
+      "suites": ["scripts/verify_auction_database.py", "scripts/verify_iteration2_database.py"],
+      "sharedWith": ["P-A13", "P-A14"]
+    },
+    "P-A13": {
+      "dependsOn": ["P-A03", "P-A04", "P-A05", "P-A06", "P-A07"],
+      "suites": [
+        "Iteration2ApiIntegrationTest.auctionApiRejectsUnauthorizedSellerSelfBidAmountScaleAndLowBid",
+        "Iteration2ApiIntegrationTest.concurrentOpeningBidsAcceptExactlyOne",
+        "Iteration2ApiIntegrationTest.auctionPublishValidatesModeExclusiveFields",
+        "Iteration2ApiIntegrationTest.fixedPriceProductsKeepTheIntentFlowAndRejectAuctionOperations",
+        "AuctionSessionTest",
+        "scripts/verify_auction_database.py"
+      ]
+    },
+    "P-A14": {
+      "dependsOn": ["P-A07", "P-A11"],
+      "suites": [
+        "Iteration2ApiIntegrationTest.auctionBidsSettleThroughExistingTradeAndPublishSseNotifications",
+        "Iteration2ApiIntegrationTest.failedAuctionFulfillmentCannotBeRequeuedAndLeavesFailedHistory",
+        "Iteration2ApiIntegrationTest.expiredLiveAuctionRejectsBidAndDueScanSettlesUnsoldOnce",
+        "Iteration2ApiIntegrationTest.snapshotReportsOutbidAndSseReconnectReplaysSnapshot",
+        "TradeServiceImplTest.auctionFailureRejectsRequeueAndKeepsProductOffline",
+        "scripts/verify_auction_database.py"
+      ]
+    },
+    "P-A15": {
+      "dependsOn": ["P-A09", "P-A10"],
+      "suites": [
+        "frontend/e2e/auction-r2-p-a15.spec.ts",
+        "frontend/e2e/buyer-seller-flows.spec.ts#拍卖 SSE",
+        "Iteration2ApiIntegrationTest.snapshotReportsOutbidAndSseReconnectReplaysSnapshot",
+        "frontend/e2e/auction-r2-fullstack.spec.ts"
+      ]
+    },
+    "P-A16": {
+      "dependsOn": ["P-A08", "P-A11"],
+      "suites": [
+        "frontend/e2e/auction-r2-p-a16.spec.ts",
+        "Iteration2ApiIntegrationTest.sellerCanListLiveAuctionsAndCustomerIsDenied",
+        "frontend/e2e/auction-r2-fullstack.spec.ts"
+      ]
+    }
+  }
+}

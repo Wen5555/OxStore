@@ -1,0 +1,857 @@
+{
+  "run_at": "2026-11-09T23:43:21.527638+08:00",
+  "scope": "Disposable MySQL: fresh schema, constraints, HTTP/JPA, V4/V5/V6, backup restore, restart",
+  "base_commit": "c477a64b879a3c819038417106c0075e739a4f8a",
+  "checks": [
+    {
+      "id": "D01",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "Fresh schema creates the nine iteration-2 tables plus three auction tables on real MySQL",
+      "status": "PASS"
+    },
+    {
+      "id": "D02",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "MySQL 8.0 server is used",
+      "status": "PASS"
+    },
+    {
+      "id": "D03",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "Backend validates real MySQL tables with Hibernate ddl-auto=validate",
+      "status": "PASS"
+    },
+    {
+      "id": "A01",
+      "tasks": [
+        "T-002"
+      ],
+      "description": "Three registered customers can share a phone; login succeeds",
+      "status": "PASS"
+    },
+    {
+      "id": "A02",
+      "tasks": [
+        "T-002"
+      ],
+      "description": "Passwords are BCrypt hashes and optional locations remain NULL",
+      "status": "PASS"
+    },
+    {
+      "id": "A03",
+      "tasks": [
+        "T-002"
+      ],
+      "description": "Database rejects duplicate usernames",
+      "status": "PASS"
+    },
+    {
+      "id": "A04",
+      "tasks": [
+        "T-002",
+        "T-032"
+      ],
+      "description": "History requires login and seller customer data rejects customer tokens",
+      "status": "PASS"
+    },
+    {
+      "id": "C01",
+      "tasks": [
+        "T-006"
+      ],
+      "description": "Initialized category tree has selectable second-level categories",
+      "status": "PASS"
+    },
+    {
+      "id": "C02",
+      "tasks": [
+        "T-006"
+      ],
+      "description": "Publishing against a root category is rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "P01",
+      "tasks": [
+        "T-010",
+        "T-028"
+      ],
+      "description": "Multiple products are ONLINE and first uploaded image is the main image",
+      "status": "PASS"
+    },
+    {
+      "id": "P02",
+      "tasks": [
+        "T-028"
+      ],
+      "description": "Image MIME/byte length/order are persisted; inline image is separate",
+      "status": "PASS"
+    },
+    {
+      "id": "P03",
+      "tasks": [
+        "T-028"
+      ],
+      "description": "Stored product image is retrievable without byte changes",
+      "status": "PASS"
+    },
+    {
+      "id": "C03",
+      "tasks": [
+        "T-006"
+      ],
+      "description": "Anonymous browse combines category/search/pagination and excludes HTML tags",
+      "status": "PASS"
+    },
+    {
+      "id": "P04",
+      "tasks": [
+        "T-014"
+      ],
+      "description": "Negative inventory is rejected by MySQL",
+      "status": "PASS"
+    },
+    {
+      "id": "P05",
+      "tasks": [
+        "T-006"
+      ],
+      "description": "Invalid category reference is rejected by MySQL",
+      "status": "PASS"
+    },
+    {
+      "id": "P06",
+      "tasks": [
+        "T-028"
+      ],
+      "description": "Image position outside the nine-image range is rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "P07",
+      "tasks": [
+        "T-028"
+      ],
+      "description": "Oversized persisted image metadata is rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "P08",
+      "tasks": [
+        "T-028"
+      ],
+      "description": "Half-populated image metadata is rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "Q01",
+      "tasks": [
+        "T-010"
+      ],
+      "description": "Each product starts its own queue sequence",
+      "status": "PASS"
+    },
+    {
+      "id": "Q02",
+      "tasks": [
+        "T-010"
+      ],
+      "description": "Different products can each freeze one queue head without reducing stock",
+      "status": "PASS"
+    },
+    {
+      "id": "Q03",
+      "tasks": [
+        "T-010"
+      ],
+      "description": "MySQL forbids a second trading intent for the same product",
+      "status": "PASS"
+    },
+    {
+      "id": "H01",
+      "tasks": [
+        "T-018"
+      ],
+      "description": "Queuing and in-progress intents do not appear in terminal history",
+      "status": "PASS"
+    },
+    {
+      "id": "Q04",
+      "tasks": [
+        "T-010",
+        "T-014"
+      ],
+      "description": "A success decrements one unit and leaves next head queued; B stays frozen",
+      "status": "PASS"
+    },
+    {
+      "id": "I01",
+      "tasks": [
+        "T-014",
+        "T-018"
+      ],
+      "description": "Last sale takes product offline and writes failure history for its queued intent",
+      "status": "PASS"
+    },
+    {
+      "id": "Q05",
+      "tasks": [
+        "T-010",
+        "T-018"
+      ],
+      "description": "Requeue advances sequence while keeping original time and no terminal history",
+      "status": "PASS"
+    },
+    {
+      "id": "H02",
+      "tasks": [
+        "T-018"
+      ],
+      "description": "Discard creates exactly one FAILED history snapshot",
+      "status": "PASS"
+    },
+    {
+      "id": "H03",
+      "tasks": [
+        "T-018"
+      ],
+      "description": "History pages contain stable snapshots and distinct descending records",
+      "status": "PASS"
+    },
+    {
+      "id": "H04",
+      "tasks": [
+        "T-018",
+        "T-032"
+      ],
+      "description": "Buyer history is isolated by customer and contains only terminal results",
+      "status": "PASS"
+    },
+    {
+      "id": "H05",
+      "tasks": [
+        "T-018"
+      ],
+      "description": "History rejects nonterminal states",
+      "status": "PASS"
+    },
+    {
+      "id": "H06",
+      "tasks": [
+        "T-018"
+      ],
+      "description": "History rejects duplicate results for the same intent",
+      "status": "PASS"
+    },
+    {
+      "id": "S01",
+      "tasks": [
+        "T-024"
+      ],
+      "description": "Manual offline retains inventory and ends queued intents with FAILED history",
+      "status": "PASS"
+    },
+    {
+      "id": "S02",
+      "tasks": [
+        "T-024"
+      ],
+      "description": "Restock keeps OFFLINE and forbidden name edit does not change the product",
+      "status": "PASS"
+    },
+    {
+      "id": "S03",
+      "tasks": [
+        "T-024"
+      ],
+      "description": "Explicit manual online is persisted as a status event",
+      "status": "PASS"
+    },
+    {
+      "id": "R01",
+      "tasks": [
+        "T-032"
+      ],
+      "description": "Seller pagination includes never-ordered customer, stable ID tie-break and optional-address text",
+      "status": "PASS"
+    },
+    {
+      "id": "R02",
+      "tasks": [
+        "T-018",
+        "T-032"
+      ],
+      "description": "Seller and buyer views of the same customer's terminal history agree",
+      "status": "PASS"
+    },
+    {
+      "id": "R03",
+      "tasks": [
+        "T-006",
+        "T-032"
+      ],
+      "description": "Catalog, customer registration and history pagination indexes exist",
+      "status": "PASS"
+    },
+    {
+      "id": "Q06",
+      "tasks": [
+        "T-010"
+      ],
+      "description": "Fresh schema rejects unknown intent statuses",
+      "status": "PASS"
+    },
+    {
+      "id": "M01",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "Upgrade saves a nonempty backup before applying V4/V5/V6",
+      "status": "PASS"
+    },
+    {
+      "id": "M02",
+      "tasks": [
+        "T-001",
+        "T-014"
+      ],
+      "description": "Unknown legacy inventory becomes zero/offline without invented customers",
+      "status": "PASS"
+    },
+    {
+      "id": "M03",
+      "tasks": [
+        "T-018",
+        "T-028"
+      ],
+      "description": "Upgrade preserves names/images, finishes old queue, and omits guest history",
+      "status": "PASS"
+    },
+    {
+      "id": "M04",
+      "tasks": [
+        "T-001",
+        "T-002",
+        "T-006",
+        "T-010",
+        "T-014",
+        "T-018",
+        "T-024",
+        "T-028",
+        "T-032"
+      ],
+      "description": "Fresh and upgraded schemas agree on column types/nullability, constraints and indexes",
+      "status": "PASS"
+    },
+    {
+      "id": "M05",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "Repeated upgrade skips V4 and keeps all application data unchanged",
+      "status": "PASS"
+    },
+    {
+      "id": "M06",
+      "tasks": [
+        "T-010"
+      ],
+      "description": "Upgraded schema also rejects unknown intent statuses",
+      "status": "PASS"
+    },
+    {
+      "id": "M07",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "Backup restores the complete five-table legacy dataset exactly",
+      "status": "PASS"
+    },
+    {
+      "id": "M08",
+      "tasks": [
+        "T-001",
+        "T-010"
+      ],
+      "description": "Upgrade refuses unfinished trades before schema/data mutation",
+      "status": "PASS"
+    },
+    {
+      "id": "M09",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "Direct V4 SQL also blocks unfinished trades before table changes",
+      "status": "PASS"
+    },
+    {
+      "id": "M10",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "Partial V4 layouts are refused without inventing a recovery state",
+      "status": "PASS"
+    },
+    {
+      "id": "M11",
+      "tasks": [
+        "T-001",
+        "T-028"
+      ],
+      "description": "V5 resumes after its metadata column step without duplicating data",
+      "status": "PASS"
+    },
+    {
+      "id": "M12",
+      "tasks": [
+        "T-001",
+        "T-010"
+      ],
+      "description": "A current-schema layout missing an essential V4 relation is also refused",
+      "status": "PASS"
+    },
+    {
+      "id": "E01",
+      "tasks": [
+        "T-001",
+        "T-018",
+        "T-024",
+        "T-028"
+      ],
+      "description": "MySQL restart preserves all application rows",
+      "status": "PASS"
+    },
+    {
+      "id": "E02",
+      "tasks": [
+        "T-002",
+        "T-018"
+      ],
+      "description": "Backend restart preserves password hashes, login and order history",
+      "status": "PASS"
+    },
+    {
+      "id": "E03",
+      "tasks": [
+        "T-028"
+      ],
+      "description": "Image bytes remain accessible after database/backend restart",
+      "status": "PASS"
+    },
+    {
+      "id": "E04",
+      "tasks": [
+        "T-001",
+        "T-002",
+        "T-006"
+      ],
+      "description": "JPA validation and backend startup also succeed on the upgraded legacy schema",
+      "status": "PASS"
+    }
+  ],
+  "http_requests": [
+    {
+      "method": "POST",
+      "path": "/api/admin/auth/login",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "status": 409
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/order-history",
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/customers",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/api/categories/tree",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products",
+      "status": 400
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/products?category2Id=2&q=OrionProbe&page=1&size=1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/products?q=strong",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/products/1/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/products/1/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/products/2/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/products/2/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/1/start",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/3/start",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/2/start",
+      "status": 409
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/order-history",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/1/success",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/3/success",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/products/2",
+      "status": 404
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/2/start",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/2/fail",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/2/start",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/intents/2/fail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/order-history?page=1&size=1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/order-history?page=2&size=1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/order-history",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/products/3/intents",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products/3/offline",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/products/3",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/products/3",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products/3/online",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/customers?page=1&size=1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/customers/3/order-history",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/order-history",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/customers/1/order-history",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/auth/login",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/order-history",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/auth/login",
+      "status": 200
+    }
+  ],
+  "source_sha256": {
+    "backend/src/main/java/com/team/shop/ShopApplication.java": "001084ee2f76da1d2d9ef57f17c1fe56d0ff8c1f4ddda5057843f3167519a200",
+    "backend/src/main/java/com/team/shop/config/DataInitializer.java": "75f6dbc9901685d6d005f592f81b4dbe9da1aaab1261d7db68fd0dbe6cea6448",
+    "backend/src/main/java/com/team/shop/config/SecurityConfig.java": "d662d6f9ac4119d1eca3a12fbef46629046c60492f6acf6369db494ae915ece2",
+    "backend/src/main/java/com/team/shop/controller/AuctionNotificationController.java": "b23436561368a30303fb8504a6612acd31a14555838638b21d9d39d9c929ff2f",
+    "backend/src/main/java/com/team/shop/controller/CategoryController.java": "46332ab9c8e7c9c17f9949f92118704908f0df3fb50eb3a1b9dd58803802a753",
+    "backend/src/main/java/com/team/shop/controller/CustomerAuthController.java": "9d7e3dd816de99d1a81472ce5c67b85ad9023131c6413f521949444d80f73319",
+    "backend/src/main/java/com/team/shop/controller/ImageController.java": "98fea3975031da399e2f2425a4f491bad5c7a2089322acbaea85fb13d1ef3fef",
+    "backend/src/main/java/com/team/shop/controller/admin/AdminCustomerController.java": "eb9b3aa856fdcb79c9280531836b786c38209b27fafcc80d141ea76625a2a0f4",
+    "backend/src/main/java/com/team/shop/controller/admin/AdminIntentController.java": "100595e8559f8fb3503a9f59309d09c3e73676091b4108b188f71aee4f67e7f6",
+    "backend/src/main/java/com/team/shop/controller/admin/AdminProductController.java": "9a20ebfa5863036c25bba956f8c579e12b65817884bfea879cc8a7b0589aaf02",
+    "backend/src/main/java/com/team/shop/controller/admin/AuctionAdminController.java": "f8c4836f0a8f4c306c63f7c572ae4f20ae8af9abcd668dc68db4d170354dd040",
+    "backend/src/main/java/com/team/shop/controller/admin/AuthController.java": "905a512b74b50561da3c0b8d804361c7b30c29cf91f5b6b5dfda5f95df2accf8",
+    "backend/src/main/java/com/team/shop/controller/admin/TradeController.java": "5c837b3c1f89ca117f92385639b583d60803818a5e12ae1e08b16f37ce90383e",
+    "backend/src/main/java/com/team/shop/controller/buyer/AuctionController.java": "cc147b1cb77cd1764dd66b8ba2923ae4e79d4e2266d9ea028871f7f378d89fab",
+    "backend/src/main/java/com/team/shop/controller/buyer/IntentController.java": "f8807b455bb19d7308666ea2a2b86db9bedcba45f996cbfe139ff394b0c4dafb",
+    "backend/src/main/java/com/team/shop/controller/buyer/OrderHistoryController.java": "14badc41d7146c66b5b82cdeeb7c48f2eff0684e24ba70db43c78e583785e505",
+    "backend/src/main/java/com/team/shop/controller/buyer/ProductController.java": "cb101e47c07a70d19bd374a411dcbf421cca4118d74c8189c202df874be37130",
+    "backend/src/main/java/com/team/shop/domain/AuctionNotificationType.java": "ce1b4321b114604d3150e1d7a6d399a2521e4415f95bedc7857b126ba78f8f1c",
+    "backend/src/main/java/com/team/shop/domain/AuctionStatus.java": "e54cf1ec9738c99813b24ea43e5c3ac3dff60d687313265076f3e06f51e545c5",
+    "backend/src/main/java/com/team/shop/domain/BusinessTime.java": "ab1b311574fc1efe8ab3cc9f3f569aa3a1ccda1bf0ce2d9b88b5da629e5561dd",
+    "backend/src/main/java/com/team/shop/domain/FreezeSource.java": "b8ab8ac249af9663dd327b3bcb9b4ac7b28b227c23175578fbc570a37d3867fa",
+    "backend/src/main/java/com/team/shop/domain/IntentStateMachine.java": "699c65aab8fec2a961a81f42515653d76251f1eb0b9e3353b55ad9290afc30e7",
+    "backend/src/main/java/com/team/shop/domain/IntentStatus.java": "83de4eef861ee2adf781f25ea143a68c7c018e2d449bf5953eeb2f774f3dec0b",
+    "backend/src/main/java/com/team/shop/domain/NotificationRecipientRole.java": "aad9036a10647eb5e7fda4f4ad633ba710dfc8be38943dd678c074be56081058",
+    "backend/src/main/java/com/team/shop/domain/ProductEventType.java": "e35e98916a902ee7b046545fdc20eb60d9c2ba9e0290460e0c4c8f475f75b00a",
+    "backend/src/main/java/com/team/shop/domain/ProductStateMachine.java": "f3311592c856c8e846f16c3a5d63e53d156f9ea04633a4e2c4d2833d2245b8e1",
+    "backend/src/main/java/com/team/shop/domain/ProductStatus.java": "d78bbfd6b0e5c72f0484977c93b1decf282f853f938078aaab4138990008e363",
+    "backend/src/main/java/com/team/shop/domain/SellingMode.java": "5ade1be41b94fbc67ddbf37b154089bf2c011428819f68d8876cd35948fd73ff",
+    "backend/src/main/java/com/team/shop/domain/TradeResult.java": "8f8769a848e42513fd0e4e2bc8a03d5fcc6f45c282b7c5fe6a926416f8764d34",
+    "backend/src/main/java/com/team/shop/dto/ApiResponse.java": "404aa7ccc07324a5939d04735ace3422ca58cb0f6d5afed8646257414c19295b",
+    "backend/src/main/java/com/team/shop/dto/request/AuctionBidRequest.java": "cc184dffd1eb006cd53f1a2fe692f2cb19eba17d5334bdc8992d99fcdda5b894",
+    "backend/src/main/java/com/team/shop/dto/request/ChangePasswordRequest.java": "f8f80a5d9213f60ebb683fe8ed6ab4c5c22df8de48111f1532679d776dfcb5e7",
+    "backend/src/main/java/com/team/shop/dto/request/CustomerLoginRequest.java": "b6c581880012ed8f806801a951537726ddb7cf356f4bd07293f23080f2c3cb74",
+    "backend/src/main/java/com/team/shop/dto/request/FailAction.java": "d789efa12bb27bda3dd112870428742874130ce9d828222403369cf162783568",
+    "backend/src/main/java/com/team/shop/dto/request/FailTradeRequest.java": "835b747102bfe4d9b30ce9603064b7229b0a89b56a5213e166588a7360dc8bd3",
+    "backend/src/main/java/com/team/shop/dto/request/LoginRequest.java": "4f80b32b2a0b99d393a5017559bf70a0f348acb568fdfcddd0a83600c19428b3",
+    "backend/src/main/java/com/team/shop/dto/request/ProductUpdateRequest.java": "6bc29f444aa039a9c1211f86fb4f0efb58233b51490671872e1dc00398a0b968",
+    "backend/src/main/java/com/team/shop/dto/request/RegisterRequest.java": "cdef4e8043a23727f5a60c0e07f28f6b89626a7c3ade7dcdd768f6a5fd513a43",
+    "backend/src/main/java/com/team/shop/dto/response/AuctionAdminResponse.java": "38cb5e436b4c133ff221090579175655671914a2f21feb738d057f6ae49d190d",
+    "backend/src/main/java/com/team/shop/dto/response/AuctionBidResponse.java": "16eb8c8c9064155c1ca724f76b0dbb6e799f45dd9974f9375e2af9d0e02deea6",
+    "backend/src/main/java/com/team/shop/dto/response/AuctionNotificationPageResponse.java": "13cf56d678081a445a10e90467a5c1e427dbd3d82975914c36f9c2f8ea720e1d",
+    "backend/src/main/java/com/team/shop/dto/response/AuctionNotificationResponse.java": "0c59afb247aca92639b2ff8270bb96fea0cf4f6ab5598d10ca5f1a6c619cca00",
+    "backend/src/main/java/com/team/shop/dto/response/AuctionSnapshotResponse.java": "ddc56e5ded3cad3e11cd8e903dc22a6cd5d38060bbc61639834a12bff7893046",
+    "backend/src/main/java/com/team/shop/dto/response/AuctionSummaryResponse.java": "567146438e6755e4b3f7f8c335b422754320ca265e1a89aea7296518de09f339",
+    "backend/src/main/java/com/team/shop/dto/response/CategoryTreeItem.java": "4c3064584a008fa7cd370bbaf9c2681b0f10e1e1d51a18e18c65a5bb54409387",
+    "backend/src/main/java/com/team/shop/dto/response/CustomerResponse.java": "616290f3b342b419af68ff8afd0431a4733de2a4aee0edc33fbbc4a621ead04d",
+    "backend/src/main/java/com/team/shop/dto/response/IntentCreatedResponse.java": "d7216d3b62af7807602cbcce6afa38a3b45cf76101ecccd6deade9002e881039",
+    "backend/src/main/java/com/team/shop/dto/response/IntentResponse.java": "13385788106f372b4f8e06ec6d3ddd2a7ebcb3ba8a25a6e6f3083f94565eb5b7",
+    "backend/src/main/java/com/team/shop/dto/response/LoginResult.java": "12c35879ff36a466d1c3c9e768242ff957563e01d84666b9bfdd8feafd5a17dd",
+    "backend/src/main/java/com/team/shop/dto/response/OrderHistoryResponse.java": "0a2ea2926d5a91823d3bcbef25c5bb94bfb5761c8f0776baa40f2d1ae43942bc",
+    "backend/src/main/java/com/team/shop/dto/response/PageResponse.java": "266016e3e310378d9bdf185888719bc5c848e1fe03a3f0b0598587fb2c088d47",
+    "backend/src/main/java/com/team/shop/dto/response/ProductDetailResponse.java": "6b9c2184112d3052065bc3d493649fc23a836964818e5fccbd4a13de3f53e68d",
+    "backend/src/main/java/com/team/shop/dto/response/ProductHistoryDetail.java": "d3eb68287e9c911cada70326f3a5cd2338f199e15a2136a58efc167a6c0142f3",
+    "backend/src/main/java/com/team/shop/dto/response/ProductResponse.java": "a1b8f3ab32a15fafc4d85134ff151c40aa929d42b5892153976e7b4becb1a634",
+    "backend/src/main/java/com/team/shop/dto/response/ProductStatusEventResponse.java": "81ddc251ca8ad0ceae291740b5e16e39ead8d1ecdd74f332ad1e8c34bcf30d93",
+    "backend/src/main/java/com/team/shop/dto/response/ProductSummaryResponse.java": "721426a7cee3ba916cde28b4b4054ab0cefbe6ca16380db67afbf19d4a0a55aa",
+    "backend/src/main/java/com/team/shop/dto/response/QueueItemResponse.java": "cdac0ad9e6614a61964c82e51ef2cc2a90ce14f8aca17d9c09f5e68308a78ca4",
+    "backend/src/main/java/com/team/shop/dto/response/TradeAttemptResponse.java": "77b3776acda32373a6b5138ef280e2756fa7cfd0279fd1530782622fac53f417",
+    "backend/src/main/java/com/team/shop/entity/AuctionBid.java": "5cb070e18f1874451c365f0d177c2409d5e9a594be12614f58244fa603478764",
+    "backend/src/main/java/com/team/shop/entity/AuctionNotification.java": "5dd0765b1b7dbfd8275bb2453577a2eb0634bc0b6a58243c015d6ee00c6e33a8",
+    "backend/src/main/java/com/team/shop/entity/AuctionSession.java": "4bf7fc8cc6d1ec556032120c3f28c9d5e80a5505ea339b64be30994ca07d1f75",
+    "backend/src/main/java/com/team/shop/entity/Category.java": "03e1ca08f188a78fe61059fcefcae252f523f9ea574950cfb7f211dea81e4850",
+    "backend/src/main/java/com/team/shop/entity/Customer.java": "f1ee99ccb80027c97ca93cde2300a101a8cee37517b4474cd87ff7c8b41fc815",
+    "backend/src/main/java/com/team/shop/entity/OrderHistory.java": "bea80bbdd554bcb1e245f67f420e246705c77ca5e3d11992b41bd75e71500141",
+    "backend/src/main/java/com/team/shop/entity/Product.java": "4aca581cd0ca17cabef9d17de6d3b3f28dd8545f9229134b3b3a35af63128754",
+    "backend/src/main/java/com/team/shop/entity/ProductImage.java": "38c63fde20cd8336b07ddb716500d390b67a7bc645e62f66ef7ba7d57c6ffcee",
+    "backend/src/main/java/com/team/shop/entity/ProductStatusEvent.java": "1114739fa7441bdd56d3598c8fd8cf536b15457f789883676c43899e041b652c",
+    "backend/src/main/java/com/team/shop/entity/PurchaseIntent.java": "b8b366242c9ca2a102fde70e338a0982a0991f5c9ddefae96d0d0bcc81dd9491",
+    "backend/src/main/java/com/team/shop/entity/Seller.java": "c20bf5407b396e990c976ea9e641b2f60e449ee94ff5b0c220a2734ae2de8c85",
+    "backend/src/main/java/com/team/shop/entity/TradeAttempt.java": "c33ec51b378c262b7272e9cfe7805f42ba82e877f82ef05f91c84f9aa3608c93",
+    "backend/src/main/java/com/team/shop/exception/AuthenticationFailureException.java": "5ac6db6c289f19c989f4056eb586be16da441990255b1fa78e218f6ff662e169",
+    "backend/src/main/java/com/team/shop/exception/BizException.java": "eae55864afc2808b77d75b9596c8c00af3889005bf9529eca9ff11708b727dfd",
+    "backend/src/main/java/com/team/shop/exception/DuplicateUsernameException.java": "bb2efccd98509c722b5e960dd2c793c70b4aed9aa9af026974b3a733418a33c8",
+    "backend/src/main/java/com/team/shop/exception/ForbiddenException.java": "24d33af01c2287e59ce511d8be9b5a9a6d2792e7bc8b5f68f6667ee9ebaadd05",
+    "backend/src/main/java/com/team/shop/exception/GlobalExceptionHandler.java": "845d9249c3e683dd7067dc7dd218eb002608108140ea385fe213c220190c0122",
+    "backend/src/main/java/com/team/shop/exception/ImageTooLargeException.java": "fbf07f8b6b22527e609d5a2003d947f1335ddf6c6fb1201b449017d7b7fa3416",
+    "backend/src/main/java/com/team/shop/exception/NotFoundException.java": "4cff0d0e66d2f91f9cb9db33c6a12d90e10b57dee435d88f3f5095680122bd30",
+    "backend/src/main/java/com/team/shop/exception/PaginationException.java": "300718da18e2f650c73f3cc9df1299327eebc8dac08938ef1f27f213d75409b0",
+    "backend/src/main/java/com/team/shop/exception/StateConflictException.java": "be5c839dfaad63b478524ddb45df509d4532caa6e73085b55de03061a0c60911",
+    "backend/src/main/java/com/team/shop/exception/UnauthorizedException.java": "7c0279cd46b62368c062718b4bb0337c1d98080f3ab67c68b3285eb2871e9560",
+    "backend/src/main/java/com/team/shop/exception/UnsupportedImageException.java": "24556fa4b1c3f8f0f6743ed732f98ebcc02316f5a2d49c775d58597da6db8881",
+    "backend/src/main/java/com/team/shop/exception/UnsupportedRichTextException.java": "915884019bcc6832c3df25b32bf9b63a297a4069117205cb373ab79d281628c0",
+    "backend/src/main/java/com/team/shop/repository/AuctionBidRepository.java": "19a8c79262b14c0732ebd9989f92d0560afac53e87c1c326b745c48d19fc0717",
+    "backend/src/main/java/com/team/shop/repository/AuctionNotificationRepository.java": "02780b16ca7c3272f3e6b9a61a55773ae98d007465641e82e659de9e282617a5",
+    "backend/src/main/java/com/team/shop/repository/AuctionSessionRepository.java": "e8ae9abcb6777ba3e9fc88ae1fdd8d8b2a16fa912ddb74cdbb38153b94810c75",
+    "backend/src/main/java/com/team/shop/repository/CategoryRepository.java": "eb5f1c5d76aa6cb0e45250690dfad298251594137f3e9866b96810cb289d9085",
+    "backend/src/main/java/com/team/shop/repository/CustomerRepository.java": "956c07f4427e5b0e030864a1db76fea207f86e0a5b1c548ed66614dfd2843b66",
+    "backend/src/main/java/com/team/shop/repository/IntentRepository.java": "61c421923fa24d08bb4e5b977a2aa9a3769e850f389c0a939634f5249a4ed667",
+    "backend/src/main/java/com/team/shop/repository/OrderHistoryRepository.java": "ef8826f825eda360d903ce284eb2d242fa43666fd95942f8522e6afc7627f1f8",
+    "backend/src/main/java/com/team/shop/repository/ProductRepository.java": "51f2b24b6c119dc1fff9905d70ab344a1f54f3d5a2eaaa5079b3625040e48856",
+    "backend/src/main/java/com/team/shop/repository/ProductStatusEventRepository.java": "800330d63610b95d6780d166a9a8fc0352a4ede844f284140e0c58f025623d41",
+    "backend/src/main/java/com/team/shop/repository/SellerRepository.java": "e418fdc6467c6b091ef20891279bf6bbc8b9d5f1c0d4acfc008f0c57e0cbf3b5",
+    "backend/src/main/java/com/team/shop/repository/TradeAttemptRepository.java": "2d98bda74b63a7c4f19144277ead724f773292dbee01c6f0bf9338d0f4827540",
+    "backend/src/main/java/com/team/shop/security/JwtAuthFilter.java": "a97f0b0bc47acb81ad8306998f5b43422d7508b33168e6693411115892fb5777",
+    "backend/src/main/java/com/team/shop/security/JwtUtil.java": "d24afb3cd3f9266a3cdbf85c44f5890b1989e21f8264908e40453e318ccfc056",
+    "backend/src/main/java/com/team/shop/security/UserIdentity.java": "3d900ec0ca77af25c864486c1a45ea9e01c070c00920d56d8e9538ef0af2a062",
+    "backend/src/main/java/com/team/shop/service/AuctionEventHub.java": "d14ca60071960704237eb8c12acfddcb0dd5d1e95ba1e82b5f144a3a680eec49",
+    "backend/src/main/java/com/team/shop/service/AuctionManagementService.java": "f6644bffc91a06b627a10ce39d02adb5c7c0f42c53dffaaa217caa3e454c31c4",
+    "backend/src/main/java/com/team/shop/service/AuctionService.java": "5af5ec4ec1f439106a0cce56284647c5ce2e2bacd793418ed2631678eba4515e",
+    "backend/src/main/java/com/team/shop/service/AuctionServiceImpl.java": "4fbee05178ee5ae3e8bab7523d4933ed33347f41b3e274de7d459d20145f9562",
+    "backend/src/main/java/com/team/shop/service/AuctionSettlementService.java": "16b23f37f8b736c1bd26114e292cf8480b1c0093bf71d73966763eaf3b692742",
+    "backend/src/main/java/com/team/shop/service/AuthService.java": "09d14f6ebee0eaf88af806a34df2d5936dd27b7c11266f86ee242cf533a6873f",
+    "backend/src/main/java/com/team/shop/service/AuthServiceImpl.java": "e3ff66d8f07f0ad35f49158784a2da561e814f5446c02c9afe023c9eb4116412",
+    "backend/src/main/java/com/team/shop/service/CategoryService.java": "234b54424dc81beaee57c54890c1050927053bc9f0e5361cf4794980bfa69ed2",
+    "backend/src/main/java/com/team/shop/service/CategoryServiceImpl.java": "456a108ebc112ad2968ccf9d2b898aaa8963f967360b9f3ef8a4f6956385bb64",
+    "backend/src/main/java/com/team/shop/service/CustomerAuthService.java": "6a1db92440273385836f944d16b8c2100dd8f6633fafc24c2d5d62f433bb2b33",
+    "backend/src/main/java/com/team/shop/service/CustomerAuthServiceImpl.java": "340e52f1068adbe4f0a6fa80e3eb99c5f929238683e96b4611a3667deca39c3a",
+    "backend/src/main/java/com/team/shop/service/CustomerReadService.java": "f5964d4cefd46ed84957d8918aacc2ce148ef14fec4fecf55e459c5e6a0b54c8",
+    "backend/src/main/java/com/team/shop/service/CustomerReadServiceImpl.java": "91d8933f63c5a02b6bf365d305d523d12050ba5241ac6f417a2c22da9671f898",
+    "backend/src/main/java/com/team/shop/service/ImageStorageService.java": "4d02030a73e29e75364a4caacc36d26e18ca1f479da9a827127a5bda4a5ae64f",
+    "backend/src/main/java/com/team/shop/service/IntentService.java": "ad5ee1e84c8dd0848085a2a0446af4b3116c35818400dbe63c7a07ae19aee07f",
+    "backend/src/main/java/com/team/shop/service/IntentServiceImpl.java": "3d9f4b1602d248d1612db3b881c7c82e8256e37975779832cb3a8061bef272ae",
+    "backend/src/main/java/com/team/shop/service/OrderHistoryService.java": "28e5c70fe53c9cd4e245323bcc6ebb0a48f90a910bb2e26524211819ae58853b",
+    "backend/src/main/java/com/team/shop/service/OrderHistoryServiceImpl.java": "fa7244d9654bd20b20c7533d5ae5b66091370b16ae103aa0180325259a6d5954",
+    "backend/src/main/java/com/team/shop/service/ProductService.java": "92dba077b5b57e1223451ee81d3c92912a973b87e05c5705c754fd9daf84a413",
+    "backend/src/main/java/com/team/shop/service/ProductServiceImpl.java": "8fdecadd89cdf066b7636bcfe8b137da7df9f0fce76001d5d6aeef300a7880b4",
+    "backend/src/main/java/com/team/shop/service/TradeService.java": "3774b2c71a7e3861c5a86fd7b847700a9433da9e5c309867a04cd171917ee01a",
+    "backend/src/main/java/com/team/shop/service/TradeServiceImpl.java": "03ad1301ffcd6e0f14a3c0e2813dde4383f7d9e26d6cef0ca515c4c32baee10b",
+    "backend/src/main/resources/application.yml": "145d1ae00300a1f7aa037843fe475cd82d7e4fa547f1b44adf3895b5ff067e7a",
+    "backend/src/main/resources/db/migrations/V2__queue_history.sql": "934290b0180f2191758efb0ad63b102c89cea910dce51eee8d8c4ea8114e6a26",
+    "backend/src/main/resources/db/migrations/V3__trade_attempt_completion_check.sql": "7c995e1aa5296b92b5581aff442cae98513259b194f3c477c37035ab54ab556f",
+    "backend/src/main/resources/db/migrations/V4__iteration2_customer_inventory_catalog.sql": "62384b375a4e469333a92819bd6843a5544915b068cf1bf5d32e2020808d85a7",
+    "backend/src/main/resources/db/migrations/V5__iteration2_database_contract.sql": "9eacafd42c36b2c86ad963c50e536bc1aaff4074a83ee8a3d0a19866f628885f",
+    "backend/src/main/resources/db/migrations/V6__auction_mode.sql": "c91f300a12cf41445004adc887987394717dba84b3a26953a91036caf351b4ac",
+    "backend/src/main/resources/db/schema.sql": "6979c95c9e897e956f16d433c927b3e29444e2965054788b62708c622fb7b981",
+    "backend/src/test/java/com/team/shop/Iteration2ApiIntegrationTest.java": "1bdee7d673a9bafa5e4262a4984808669ad09f8448f36fba43d12b8057e51be2",
+    "backend/src/test/java/com/team/shop/controller/admin/AdminProductControllerTest.java": "df6c41c2996b86e222cd5040f17b942fbab3acba3a18212aa39ca237c239f21a",
+    "backend/src/test/java/com/team/shop/domain/IntentStateMachineTest.java": "05c94a06df60a63089f87c977230be8bffb898cf63cb7978e62051b571946a2a",
+    "backend/src/test/java/com/team/shop/domain/ProductStateMachineTest.java": "5f972c79fe67dc2954bf42f5d16508c0076da07cbe94dd089bfc10cbd2de24d5",
+    "backend/src/test/java/com/team/shop/dto/PhoneAndTradeRequestTest.java": "a122490157fdf824fbd80098901f5627248bc5fceb6a79912619c491e45e7099",
+    "backend/src/test/java/com/team/shop/entity/AuctionSessionTest.java": "581c91912cc382ed5d7703f8265d60f4b374b11ae790a2fb1851e8f24a07dccd",
+    "backend/src/test/java/com/team/shop/entity/TradeHistoryTest.java": "0f8a5b651cfcf51acb114dcb4e408a6d84dad9f937443c5c8b85817885430300",
+    "backend/src/test/java/com/team/shop/exception/GlobalExceptionHandlerBugFixTest.java": "f77950c7be46b4458cb2f0684394ad7e19fccb7d8ef478275ff1f64a8bb94af0",
+    "backend/src/test/java/com/team/shop/repository/AuctionRepositoryTest.java": "29bd3a18a249e2f927aac5ebc4f2be4dad3ac5c71be97b0287b2435b61ad07a4",
+    "backend/src/test/java/com/team/shop/security/JwtUtilTest.java": "7541bdf01263d06f2d3cee6fe99d633f3887fb3a71a5037d5955ec96f63e16a5",
+    "backend/src/test/java/com/team/shop/service/ImageStorageServiceTest.java": "35e3546cf471d1ae29f5e3ea6d63f90bf1586925246e14580107e5a6d09fadc1",
+    "backend/src/test/java/com/team/shop/service/TradeServiceImplTest.java": "5498344c752e10785e2f574a54f65f9f9be9bc4ed312240eb01fbba8f5dbedc3",
+    "backend/src/test/resources/mockito-extensions/org.mockito.plugins.MockMaker": "8eca853a5a457f17e0479b71dfbe95f2a13aff9eeff250261ecdc8ca9b847a6a",
+    "scripts/verify_iteration2_database.py": "cc4a8851994fdbb9b95ff6658263687f41527a7035009583066c87df49a3db12",
+    "scripts/migrate_iteration2.py": "2bf3f35b7fed47bebb1c22d550462f750aa453ce50c61855b5f7a470eff7e202",
+    "docs/test/fixtures/iteration1-schema.sql": "93bc338155596b3e212fc8b6dcd9bc7c18ae21edc7467535884f5f581b41111d",
+    "backend/pom.xml": "5f8d7355b3d1e5da185e7b5a88e35fe12c410ebd23505a0a71085c4cc02d6bac",
+    "backend/target/shop-0.1.0.jar": "8c7cc36badf7c92079ee9d1a931bd08b2ea01f4474146f085d040666d38f9ce2"
+  },
+  "java_version": "openjdk version \"17.0.20.1\" 2026-08-18\nOpenJDK Runtime Environment (build 17.0.20.1+1-1-24.04-Ubuntu)\nOpenJDK 64-Bit Server VM (build 17.0.20.1+1-1-24.04-Ubuntu, mixed mode, sharing)",
+  "mysql_version": "8.0.46",
+  "image_id": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+  "docker_version": "29.1.3",
+  "backup_restore": {
+    "backup_sha256": "438a21198b5e47295a81d0c0e6e8de94e4e4fa16ea00f3ae9a4d95f162525c5f",
+    "before_data_sha256": "34dc95721a27647db286e2f3208f5a86d27606284b580379e3f9dc6204d00319",
+    "after_data_sha256": "71ea243700cb5cdc734599a5acbca5c105046aa7243727116165468ce3f7ec57",
+    "restored_data_sha256": "34dc95721a27647db286e2f3208f5a86d27606284b580379e3f9dc6204d00319"
+  },
+  "cleanup": "owned container and its anonymous volume removed; apps stopped",
+  "success": true,
+  "junit": {
+    "total": 44,
+    "passed": 43
+  },
+  "finished_at": "2026-11-09T23:43:59.277536+08:00"
+}

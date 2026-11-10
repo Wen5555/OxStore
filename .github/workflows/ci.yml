@@ -27,11 +27,19 @@ jobs:
       with:
         node-version: '20'
         # 已移除 cache 和 cache-dependency-path 避免缓存找不到 package-lock.json 报错
-    - name: Install and Test Frontend
+    - name: Install Frontend Dependencies
       run: |
         cd frontend
-        npm install
+        npm ci
+    - name: Install Playwright Chrome
+      run: |
+        cd frontend
+        npx playwright install --with-deps chrome
+    - name: Build and Test Frontend
+      run: |
+        cd frontend
         npm run build
+        npm run test:e2e
 
   docker-check:
     runs-on: ubuntu-latest

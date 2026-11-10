@@ -84,10 +84,8 @@ public class AdminProductController {
                 throw new BizException("普通商品必须填写库存");
             }
             int requestedStock = stock == null ? 1 : stock;
-            ProductDetailResponse created = sellingMode == SellingMode.AUCTION
-                    ? products.publish(name, price, category2Id, requestedStock, descriptionHtml, storedPaths,
-                    sellingMode, startPrice, minIncrement, endsAt)
-                    : products.publish(name, price, category2Id, requestedStock, descriptionHtml, storedPaths);
+            ProductDetailResponse created = products.publish(name, price, category2Id, requestedStock,
+                    descriptionHtml, storedPaths, sellingMode, startPrice, minIncrement, endsAt);
             return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(created));
         } catch (RuntimeException e) {
             cleanupStoredImages(storedPaths);

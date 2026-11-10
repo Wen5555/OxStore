@@ -1,6 +1,6 @@
 # OxStore 自动化测试执行手册
 
-更新日期：2026-10-20。项目测试用例盘点见[测试用例设计及清单](test_case_design_and_inventory.md)。运行真实容器或会写入业务数据的测试时，必须使用脚本创建的专用环境，不得连接现有业务库。
+更新日期：2026-11-10。项目测试用例盘点见[测试用例设计及清单](test_case_design_and_inventory.md)。运行真实容器或会写入业务数据的测试时，必须使用脚本创建的专用环境，不得连接现有业务库。
 
 ## 1. 测试入口
 
@@ -9,7 +9,8 @@
 | Maven/JUnit | JDK 17、Maven 3.9+ | 后端状态机、DTO、安全、服务及 Controller 单元测试 | `backend/target/surefire-reports/` |
 | `scripts/verify_docker_release.py` | Docker Linux 引擎、Compose、Python 3.10+及所需服务镜像 | 真实 Nginx/API/MySQL、交易流程、历史及重启行为 | 指定输出目录中的 `docker-results.json`、操作日志 |
 | `scripts/verify_database.py` | 旧版工具；不适用于迭代 2 | V1 schema、口令 API 的历史验证 | 仅历史结果 |
-| `frontend/e2e/buyer-seller-flows.spec.ts` | Node 20、前端依赖、Playwright 浏览器 | 使用模拟 API 的前端交互 | Playwright 报告 |
+| `scripts/verify_auction_database.py` | Docker Linux 引擎、隔离 MySQL、Python 3.10+ | V6 拍卖迁移及 MySQL 拍卖数据验证 | `docs/test/auction-database-validation.md` 与本次 JSON |
+| `frontend/e2e/buyer-seller-flows.spec.ts` | Node 20、前端依赖、Playwright 浏览器 | 使用模拟 API 的前端交互（含一口价与拍卖 SSE） | Playwright 报告 |
 | `tests/ui-smoke/` | JDK 17、Maven 3.9+、Chrome、运行中的 OxStore 前后端及隔离 MySQL | Selenium 真实浏览器 UI-001 主流程 | Surefire XML；失败时截图和浏览器日志 |
 | `tests/performance/` | JMeter 5.6.3、运行中的后端及专用测试数据库 | API 负载、响应时间与并发队列不变量 | JTL、HTML 报告及 SQL 检查结果 |
 
@@ -25,7 +26,7 @@ mvn -B -ntp -f backend/pom.xml clean verify
 Get-ChildItem backend/target/surefire-reports/TEST-*.xml
 ```
 
-判定条件：命令退出码为 0、Maven 输出 `BUILD SUCCESS`，且 Surefire XML 中失败、错误、跳过均为 0。本次后端完整验证运行 21 个测试方法，全部通过；测试增删后应同步更新[用例清单](test_case_design_and_inventory.md)。依赖下载失败时按[构建手册](../build.md)排查，不用 `-DskipTests` 替代验证。
+判定条件：命令退出码为 0、Maven 输出 `BUILD SUCCESS`，且 Surefire XML 中失败、错误、跳过均为 0。测试增删后应根据 Surefire XML 同步更新[用例清单](test_case_design_and_inventory.md)。依赖下载失败时按[构建手册](../build.md)排查，不用 `-DskipTests` 替代验证。
 
 ## 3. 真实容器/API 验证
 
@@ -63,25 +64,59 @@ Get-Content .work/acceptance-results/compose-operations.log
 
 ## 4. 数据库专项验证
 
-迭代 2 的 H2 API 集成测试由 Maven `clean verify` 一并执行。旧版 `scripts/verify_database.py` 针对 V1 schema 和口令流程，当前不可用于数据库专项验收。V4 MySQL 迁移应在独立 MySQL 副本演练；本次尚未执行。历史验证报告仅供旧版参考，见[数据库验证报告](db-validation.md)。
+H2 API 集成测试由 Maven `clean verify` 一并执行，包含固定价回归、拍卖竞价/结拍、实时竞价与既有履约接口。MySQL 迁移与真实数据库行为须在独立实例运行 `scripts/verify_iteration2_database.py`、`scripts/verify_auction_database.py`；真实 MySQL 结果见[数据库验证报告](auction-database-validation.md)。旧版 `scripts/verify_database.py` 针对 V1 schema 和口令流程，当前不可用于数据库专项验收。
 
 ## 5. 前端模拟 API 交互测试
 
-安装锁定依赖及 Playwright Chromium 后执行：
+安装锁定依赖及 Playwright Chrome 后执行：
 
 ```powershell
-npm --prefix frontend ci --registry=https://registry.npmmirror.com --no-audit --no-fund
+npm --prefix frontend ci --no-audit --no-fund
 Push-Location frontend
-npx playwright install chromium
+npx playwright install chrome
+npm run build
 npm run test:e2e
 Pop-Location
 ```
 
-该 suite 使用模拟 API，验证前端交互；它不能替代真实后端/API 或 Selenium 真实浏览器验收。
+该 suite 使用模拟 API，覆盖一口价意向、购买历史、拍卖出价状态和结拍提醒 SSE；它不能替代真实后端/API 或 Selenium 真实浏览器验收。
 
-## 6. Selenium UI 冒烟测试
+## 6. R4 拍卖回归与联合验证
 
-### 6.1 覆盖范围与已知结果
+| 任务 | 自动化覆盖 | 验证入口 |
+| --- | --- | --- |
+| P-A17 | 一口价商品默认模式、出价/拍卖快照拒绝、原意向队列及成功订单保持可用 | `Iteration2ApiIntegrationTest.fixedPriceProductsKeepTheIntentFlowAndRejectAuctionOperations` |
+| P-A18 | 一口价商品页面仍显示购买意向、不调用拍卖快照；历史页面原有字段和终态展示 | Playwright `一口价商品仍走购买意向流程且不请求拍卖快照`、购买历史测试 |
+| P-A19 | 拍卖出价、真实 HTTP SSE（快照/领先变更/结拍）、提醒落库、获胜意向进入既有履约并写历史 | `Iteration2ApiIntegrationTest.auctionBidsSettleThroughExistingTradeAndPublishSseNotifications` |
+| P-A19 | 买家实时出价/结拍 UI 状态及站内提醒通知 SSE | Playwright `拍卖 SSE 更新领先状态并在结拍后禁用出价`、`买家拍卖提醒页通过通知 SSE 显示结拍提醒` |
+| P-A20 | Maven、前端构建与 Playwright、Compose 配置检查、验证证据与限制 | [R4 验收报告](auction-r4-validation.md) |
+
+真实数据库升级和完整容器部署需要 Docker Engine，并须使用脚本新建的隔离数据库/数据卷；不可用 H2 或模拟 API 结果替代。
+
+## 6.1 R2 个性化拍卖验收（P-A12～P-A16）
+
+在仓库根目录、JDK 17 下执行一次采集：
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+python -X utf8 scripts/run_r2_personalized_verification.py
+```
+
+该入口会依次：`mvn clean verify`、隔离 Docker MySQL 的 `verify_auction_database.py` / `verify_iteration2_database.py`、前端 `npm ci` + `build` + 无头 Playwright（模拟 API），以及在 Docker 可用时启动一次性 MySQL+JAR+Vite 跑全栈 Playwright。证据写入 `docs/test/evidence/r2-personalized/`，索引为 `INDEX.json`。模拟 API 通过不能记为全链路通过；Docker 不可用时 MySQL/全栈标记为阻塞。不得把连接改到已有业务库。
+
+### 6.1.1 全栈无人出价流拍补测
+
+只补测真实全栈流拍，不复跑 P-A12～P-A16 整套，也不改业务：
+
+```bash
+python -X utf8 scripts/run_auction_fullstack_e2e.py --scenario unsold --ends-in-seconds 70
+```
+
+截止时间取契约允许的短窗口（≥60 秒），然后等待后端 `@Scheduled(fixedDelay = 5000)` 扫描结拍；不拨时钟、不直接调用 `settleOne`、不 SQL 写入终态。证据写入 `docs/test/evidence/r2-personalized/fullstack-unsold/`。
+
+## 7. Selenium UI 冒烟测试
+
+### 7.1 覆盖范围与已知结果
 
 > 此处记录的 UI-001 使用旧版口令流程，当前前端也尚未迁移到迭代 2 API；不能用于当前后端验收，需在前端迁移后更新并重跑。
 
@@ -97,7 +132,7 @@ Pop-Location
 
 已报告的运行结果为 **1 个测试通过、0 失败、0 错误，Maven `BUILD SUCCESS`**。这只证明 UI-001 主流程在该次本机环境中通过，不代表完整 UI 失败路径或所有页面已经覆盖。
 
-### 6.2 环境、安全与执行
+### 7.2 环境、安全与执行
 
 需要 JDK 17、Maven 3.9+、Chrome/Chromium、本机 MySQL 8，以及正在运行的 OxStore 前端和后端。本机方式不要求 Docker。
 
@@ -112,7 +147,7 @@ mvn test
 
 仅在一次性隔离测试库上设置 `UI_SMOKE_ALLOW_MUTATIONS=true`。默认无头运行；设置 `UI_SMOKE_HEADLESS=false` 可观察浏览器。首次运行时 Selenium Manager 需要下载与 Chrome 版本匹配的 ChromeDriver，也可使用 `CHROME_DRIVER_PATH` 指定兼容驱动。
 
-### 6.3 证据与覆盖限制
+### 7.3 证据与覆盖限制
 
 - JUnit/Surefire 报告：`tests/ui-smoke/target/surefire-reports/`
 - 失败截图及浏览器日志：`tests/ui-smoke/target/ui-smoke-artifacts/`
@@ -120,7 +155,7 @@ mvn test
 - Selenium/Chrome 出现 CDP 版本警告时，以测试结果和 Maven 退出码判定是否通过。
 - 后续待补：独立的错误密码登录测试、未登录访问后台、表单校验错误及其他页面/异常操作覆盖。UI-001 已含错误密码检查，但这不等同于独立失败路径套件。
 
-## 7. JMeter 性能与并发测试
+## 8. JMeter 性能与并发测试
 
 JMeter 测试计划为 `tests/performance/oxstore-api-load.jmx`。它直接请求后端 API，并会写入购买意向；只可针对隔离测试数据库运行。完整准备步骤、SLA 阈值、命令和并发 SQL 检查见[性能测试说明](../../tests/performance/README.md)。
 
@@ -139,13 +174,13 @@ if ($LASTEXITCODE -ne 0) { throw "JMeter failed: $LASTEXITCODE" }
 
 只有 JMeter 退出码为 0 且报告中的样本错误率、各接口 p95 均满足约定阈值，才能判为性能 SLA 通过。并发数据一致性需另运行 `tests/performance/concurrency-invariants.sql`；固定数量断言必须针对专用空测试库执行，不能对已积累意向的库重复套用。
 
-## 8. 人工录屏
+## 9. 人工录屏
 
 人工录屏独立于自动化测试。录制时使用专用演示/测试环境，不在生产或日常业务库操作。建议展示商品发布、买家提交及凭码查询、冻结/解冻、交易成功、失败重排/作废和历史记录；如果要展示 Selenium 流程，应设置 `UI_SMOKE_HEADLESS=false` 并使用屏幕录制工具。
 
 录制完成后，将可访问的视频地址、实际覆盖内容和验收意见补入对应交付记录。不得用截图、JSON、旧视频或自动化测试报告替代本次录屏证据。
 
-## 9. 旧手动 API 记录与配套资料
+## 10. 旧手动 API 记录与配套资料
 
 旧的手动请求和截图说明仅供历史参考，部分示例凭据、响应和截图可能已过时；以当前 API 文档、自动化脚本和最新测试结果为准：
 

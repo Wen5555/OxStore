@@ -1,0 +1,90 @@
+{
+  "productBaselineSha": "c477a64b879a3c819038417106c0075e739a4f8a",
+  "branch": "cursor/r2-personalized-auction-tests-4a0b",
+  "countingRule": "Shared suites are listed under every task they cover but counted once in the shared row.",
+  "tasks": {
+    "P-A12": {
+      "dependsOn": ["P-A01", "P-A02", "P-A07"],
+      "total": 98,
+      "passed": 98,
+      "failed": 0,
+      "skipped": 0,
+      "blocked": 0,
+      "notes": "verify_auction_database.py 45 PASS + verify_iteration2_database.py 53 PASS on disposable Docker mysql:8.0.46. Not H2. Not a host MySQL substitute.",
+      "commands": [
+        "python -X utf8 scripts/verify_auction_database.py --java $JAVA_HOME/bin/java --jar backend/target/shop-0.1.0.jar --output docs/test/evidence/r2-personalized/p-a12/auction-mysql-results.json  # exit 0",
+        "python -X utf8 scripts/verify_iteration2_database.py --java $JAVA_HOME/bin/java --jar backend/target/shop-0.1.0.jar --output docs/test/evidence/r2-personalized/p-a12/iteration2-mysql-results.json  # exit 0"
+      ]
+    },
+    "P-A13": {
+      "dependsOn": ["P-A03", "P-A04", "P-A05", "P-A06", "P-A07"],
+      "total": 11,
+      "passed": 10,
+      "failed": 1,
+      "skipped": 0,
+      "blocked": 0,
+      "notes": "H2 HTTP integration + entity tests. DECIMAL/unique constraints counted under P-A12, not again here. Mixed FIXED_PRICE+auction fields is a product contract miss.",
+      "primaryCases": [
+        "Iteration2ApiIntegrationTest.auctionApiRejectsUnauthorizedSellerSelfBidAmountScaleAndLowBid PASS",
+        "Iteration2ApiIntegrationTest.concurrentOpeningBidsAcceptExactlyOne PASS",
+        "Iteration2ApiIntegrationTest.auctionPublishValidatesModeExclusiveFields FAIL",
+        "Iteration2ApiIntegrationTest.fixedPriceProductsKeepTheIntentFlowAndRejectAuctionOperations PASS",
+        "AuctionSessionTest (6) PASS"
+      ]
+    },
+    "P-A14": {
+      "dependsOn": ["P-A07", "P-A11"],
+      "total": 9,
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "blocked": 0,
+      "notes": "JUnit sold/failed/unsold/repeat-scan PASS. MySQL U02/W03/W04 counted in P-A12. Fullstack settlement screenshots collected under P-A16/P-A15; not double-counted as extra P-A14 cases.",
+      "primaryCases": [
+        "auctionBidsSettleThroughExistingTradeAndPublishSseNotifications PASS",
+        "failedAuctionFulfillmentCannotBeRequeuedAndLeavesFailedHistory PASS",
+        "expiredLiveAuctionRejectsBidAndDueScanSettlesUnsoldOnce PASS",
+        "snapshotReportsOutbidAndSseReconnectReplaysSnapshot PASS",
+        "TradeServiceImplTest.auctionFailureRejectsRequeueAndKeepsProductOffline PASS"
+      ]
+    },
+    "P-A15": {
+      "dependsOn": ["P-A09", "P-A10"],
+      "total": 8,
+      "passed": 7,
+      "failed": 1,
+      "skipped": 0,
+      "blocked": 0,
+      "notes": "4 new mock specs + 2 existing mock SSE specs PASS. JUnit snapshot/SSE reconnect counted in P-A14, not again. Fullstack OUTBID tag FAIL. Mock ≠ full-chain.",
+      "primaryCases": [
+        "auction-r2-p-a15 买家出价/OUTBID mock PASS",
+        "auction-r2-p-a15 SSE 断流重连 mock PASS",
+        "auction-r2-p-a15 截止拒单 mock PASS",
+        "auction-r2-p-a15 未登录引导登录 mock PASS",
+        "buyer-seller-flows 拍卖 SSE mock PASS",
+        "fullstack OUTBID tag FAIL"
+      ]
+    },
+    "P-A16": {
+      "dependsOn": ["P-A08", "P-A11"],
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "blocked": 0,
+      "notes": "4 mock specs PASS. sellerCanListLiveAuctions JUnit PASS. Fullstack sold/fulfillment/winner-reminder screenshots collected; unsold live path was mock-only this run (not a second empty auction).",
+      "primaryCases": [
+        "auction-r2-p-a16 发布字段 mock PASS",
+        "auction-r2-p-a16 结果与流拍 mock PASS",
+        "auction-r2-p-a16 提醒入口 mock PASS",
+        "auction-r2-p-a16 履约隐藏重排 mock PASS",
+        "Iteration2ApiIntegrationTest.sellerCanListLiveAuctionsAndCustomerIsDenied PASS"
+      ]
+    }
+  },
+  "sharedNotDoubleCounted": [
+    "scripts/verify_auction_database.py → P-A12 (also supports A13/A14 constraints)",
+    "snapshotReportsOutbidAndSseReconnectReplaysSnapshot → counted in P-A14",
+    "fullstack screenshots → evidence for P-A15/P-A16, case counted in P-A15 FAIL"
+  ]
+}

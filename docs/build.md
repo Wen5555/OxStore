@@ -108,8 +108,9 @@ jar tf backend/target/shop-0.1.0.jar | Select-String 'BOOT-INF/' | Select-Object
 ### 5.2 前端静态资源
 
 ```powershell
-npm --prefix frontend ci --registry=https://registry.npmmirror.com --no-audit --no-fund
-npm --prefix frontend run build
+npm.cmd --prefix frontend ci --registry=https://registry.npmmirror.com --no-audit --no-fund
+npm.cmd --prefix frontend run build
+npm.cmd --prefix frontend test
 Get-Item frontend/dist/index.html
 Get-ChildItem frontend/dist/assets
 ```

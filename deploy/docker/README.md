@@ -40,11 +40,11 @@ docker compose up --no-build --pull never --wait --wait-timeout 240
 
 `down` 保留数据库和上传图片的数据卷；不要使用 `down -v` 删除真实业务数据。重建容器时保留相同 `COMPOSE_PROJECT_NAME`、数据卷和 `.env`；随意改变项目名称会连接到另一组新数据卷。
 
-后端使用非 root 用户运行。前端待后端健康后启动；后端健康检查会查询数据库。Nginx 请求上限为 6 MiB，以容纳业务 5 MiB 主图及 multipart 开销。
+后端使用非 root 用户运行。前端待后端健康后启动；后端健康检查会查询数据库。Nginx 请求上限为 46 MiB，以容纳最多 9 张、单张不超过 5 MiB 的商品图片及 multipart 开销。
 
 ## 4. 备份、升级与恢复
 
-已有数据库不能直接用新库 schema 覆盖。升级前停止业务写入，备份数据库、图片和 `.env`，并在副本验证恢复。`TOKEN_LOOKUP_KEY` 随有效买家口令保持稳定。V2/V3 的适用条件和回退边界参见随包 `database/database-guide.md` 与 `database/runbook.md`。
+已有数据库不能直接用新库 schema 覆盖。升级前停止业务写入，备份数据库、图片和 `.env`，并在副本验证恢复。`TOKEN_LOOKUP_KEY` 随有效买家口令保持稳定。旧版数据库需按适用条件依次完成 V2/V3/V4/V5/V6；V6 将既有商品设为一口价并新增拍卖表，不会把旧商品转换为拍卖。V2/V3 的适用条件及迁移与回退边界参见随包 `database/database-guide.md` 与 `database/runbook.md`。
 
 更新程序镜像不自动执行数据库迁移。应用镜像回退和数据库恢复分别处理；DDL 隐式提交，不能假定换回旧镜像即可回退数据。
 

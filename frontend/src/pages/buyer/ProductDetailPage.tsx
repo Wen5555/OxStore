@@ -61,11 +61,13 @@ export default function ProductDetailPage() {
         auctionStatus: event.auctionStatus,
         currentPrice: event.finalPrice ?? current.currentPrice,
         settledAt: event.settledAt ?? current.settledAt,
+        canBid: false,
         myStatus: event.youWon === true
           ? 'WON'
           : event.youWon === false && participated && event.auctionStatus === 'ENDED_SOLD'
             ? 'LOST'
             : current.myStatus,
+        leaderAlias: event.winnerAlias ?? current.leaderAlias,
       }
     })
   })

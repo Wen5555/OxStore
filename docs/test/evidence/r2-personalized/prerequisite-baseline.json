@@ -1,0 +1,25 @@
+{
+  "sha": "c477a64b879a3c819038417106c0075e739a4f8a",
+  "files": {
+    "P-A01/P-A02": {
+      "backend/src/main/resources/db/migrations/V6__auction_mode.sql": "c91f300a12cf41445004adc887987394717dba84b3a26953a91036caf351b4ac",
+      "scripts/verify_auction_database.py": "8076df1fbdab1294259246d1a369c662d9709cece90e6769d18974708c97955b",
+      "backend/src/main/java/com/team/shop/entity/AuctionSession.java": "4bf7fc8cc6d1ec556032120c3f28c9d5e80a5505ea339b64be30994ca07d1f75"
+    },
+    "P-A03-P-A07": {
+      "backend/src/main/java/com/team/shop/service/AuctionServiceImpl.java": "4fbee05178ee5ae3e8bab7523d4933ed33347f41b3e274de7d459d20145f9562",
+      "backend/src/main/java/com/team/shop/service/AuctionSettlementService.java": "16b23f37f8b736c1bd26114e292cf8480b1c0093bf71d73966763eaf3b692742",
+      "backend/src/main/java/com/team/shop/controller/buyer/AuctionController.java": "cc147b1cb77cd1764dd66b8ba2923ae4e79d4e2266d9ea028871f7f378d89fab",
+      "backend/src/main/java/com/team/shop/service/AuctionEventHub.java": "d14ca60071960704237eb8c12acfddcb0dd5d1e95ba1e82b5f144a3a680eec49"
+    },
+    "P-A08-P-A11": {
+      "frontend/src/pages/admin/PublishProductPage.tsx": "355daced3a173d1c8d3f937dee21feb3fffcdecb3cab7a77e900ba640f36d826",
+      "frontend/src/pages/buyer/ProductDetailPage.tsx": "dc62374ef7273d48e6f306130eada7ea794b191b75d56cb84af2d5d5847538c5",
+      "frontend/src/hooks/useAuctionEvents.ts": "7bf0db9fa3755eccb7ed20283adc42ef166dacf59cfba42ddcc0f065dbe9e6ec",
+      "frontend/src/pages/admin/AdminAuctionsPage.tsx": "9805c3e2acf4a9ebd8ce8311c38ca2133277ef3150367f99f699947e7ecff111",
+      "frontend/src/pages/admin/SellerAuctionNotificationsPage.tsx": "3cf766ef014cd18ce0f72f9f3fa4ae4b13a3ffd45e569342bbbbd00b3d0588eb"
+    }
+  },
+  "missing": [],
+  "complete": true
+}
