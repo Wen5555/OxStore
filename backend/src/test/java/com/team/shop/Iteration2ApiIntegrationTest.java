@@ -535,6 +535,11 @@ class Iteration2ApiIntegrationTest {
         assertEquals("ENDED_UNSOLD", snapshot.path("auctionStatus").asText());
         assertFalse(snapshot.path("canBid").asBoolean());
 
+        JsonNode publicDetail = http.getForObject("/api/products/" + productId, JsonNode.class).path("data");
+        assertEquals("OFFLINE", publicDetail.path("status").asText());
+        assertEquals("AUCTION", publicDetail.path("sellingMode").asText());
+        assertEquals("ENDED_UNSOLD", publicDetail.path("auction").path("auctionStatus").asText());
+
         JsonNode sellerAlerts = get("/api/admin/auction-notifications?page=1&size=100", sellerToken).path("data");
         JsonNode buyerAlerts = get("/api/me/auction-notifications?page=1&size=10", buyerToken).path("data");
         int unsoldReminders = countNotifications(sellerAlerts, "AUCTION_UNSOLD", productId);
