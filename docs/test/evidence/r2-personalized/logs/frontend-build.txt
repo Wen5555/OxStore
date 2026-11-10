@@ -1,0 +1,24 @@
+$ npm run build
+cwd=/workspace/frontend
+exit=0
+started=2026-11-09T23:44:02.759602+08:00
+finished=2026-11-09T23:44:08.501639+08:00
+
+
+> shop-frontend@0.1.0 build
+> tsc -b && vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 3115 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                    0.32 kB │ gzip:   0.26 kB
+dist/assets/index-2A5fDhZu.js  1,388.42 kB │ gzip: 442.70 kB
+✓ built in 3.81s
+
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.

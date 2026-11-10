@@ -1,0 +1,24 @@
+$ /workspace/frontend/node_modules/.bin/playwright install chrome
+cwd=/workspace/frontend
+exit=0
+started=2026-11-09T23:44:02.416140+08:00
+finished=2026-11-09T23:44:02.759243+08:00
+
+
+
+╔═════════════════════════════════════════════════════════════════╗
+║ ATTENTION: "chrome" is already installed on the system!         ║
+║                                                                 ║
+║ "chrome" installation is not hermetic; installing newer version ║
+║ requires *removal* of a current installation first.             ║
+║                                                                 ║
+║ To *uninstall* current version and re-install latest "chrome":  ║
+║                                                                 ║
+║ - Close all running instances of "chrome", if any               ║
+║ - Use "--force" to install browser:                             ║
+║                                                                 ║
+║     npx playwright install --force chrome                       ║
+║                                                                 ║
+║ <3 Playwright Team                                              ║
+╚═════════════════════════════════════════════════════════════════╝
+

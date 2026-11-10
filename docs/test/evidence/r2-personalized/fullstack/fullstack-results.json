@@ -1,0 +1,64 @@
+{
+  "run_at": "2026-11-09T23:59:37.552218+08:00",
+  "scope": "Isolated Docker MySQL + JAR + Vite Playwright full-stack E2E",
+  "base_commit": "c477a64b879a3c819038417106c0075e739a4f8a",
+  "checks": [
+    {
+      "id": "D01",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "Fresh schema creates the nine iteration-2 tables plus three auction tables on real MySQL",
+      "status": "PASS"
+    },
+    {
+      "id": "D02",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "MySQL 8.0 server is used",
+      "status": "PASS"
+    }
+  ],
+  "http_requests": [
+    {
+      "method": "POST",
+      "path": "/api/admin/auth/login",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/categories/tree",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products",
+      "status": 201
+    }
+  ],
+  "source_sha256": {},
+  "mysql_version": "8.0.46",
+  "image_id": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+  "docker_version": "29.1.3",
+  "seed": {
+    "productId": 1,
+    "productName": "R2全栈拍卖-a30fd4bd",
+    "endsAt": "2026-11-10T00:01:17+08:00"
+  },
+  "playwright_exit": 1,
+  "error": "fullstack Playwright failed:\n\nRunning 1 test using 1 worker\n\n  ✘  1 [chromium] › e2e/auction-r2-fullstack.spec.ts:32:1 › 真实全栈：买家竞价/OUTBID/SSE、卖家结果与结拍提醒 (1.5m)\n\n\n  1) [chromium] › e2e/auction-r2-fullstack.spec.ts:32:1 › 真实全栈：买家竞价/OUTBID/SSE、卖家结果与结拍提醒 ───────────\n\n    Error: expect(locator).toBeVisible() failed\n\n    Locator: getByText('已被超越', { exact: true })\n    Expected: visible\n    Timeout: 8000ms\n    Error: element(s) not found\n\n    Call log:\n      - Expect \"soft toBeVisible\" getByText('已被超越', { exact: true }) with timeout 8000ms\n      - waiting for getByText('已被超越', { exact: true })\n\n\n      62 |     await saveShot(buyerB, 'p-a15', 'fullstack_buyer_b_leading')\n      63 |     // Soft: keep collecting P-A16 settlement evidence even if OUTBID tag does not update.\n    > 64 |     await expect.soft(buyerA.getByText('已被超越', { exact: true })).toBeVisible({ timeout: 8_000 })\n         |                                                                  ^\n      65 |     await saveShot(buyerA, 'p-a15', 'fullstack_buyer_a_outbid_sse')\n      66 |\n      67 |     await expect(async () => {\n        at /workspace/frontend/e2e/auction-r2-fullstack.spec.ts:64:66\n\n    Error Context: test-results-fullstack/auction-r2-fullstack-真实全栈：买家竞价-OUTBID-SSE、卖家结果与结拍提醒-chromium/error-context.md\n\n    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────\n    test-results-fullstack/auction-r2-fullstack-真实全栈：买家竞价-OUTBID-SSE、卖家结果与结拍提醒-chromium/trace.zip\n    Usage:\n\n        npx playwright show-trace test-results-fullstack/auction-r2-fullstack-真实全栈：买家竞价-OUTBID-SSE、卖家结果与结拍提醒-chromium/trace.zip\n\n    ────────────────────────────────────────────────────────────────────────────────────────────────\n\n  1 failed\n    [chromium] › e2e/auction-r2-fullstack.spec.ts:32:1 › 真实全栈：买家竞价/OUTBID/SSE、卖家结果与结拍提醒 ────────────\n(node:57287) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+  "cleanup": "owned container and its anonymous volume removed; apps stopped",
+  "success": false,
+  "finished_at": "2026-11-10T00:01:22.055850+08:00"
+}

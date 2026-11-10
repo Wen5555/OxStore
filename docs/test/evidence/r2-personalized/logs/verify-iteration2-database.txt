@@ -1,0 +1,60 @@
+$ /usr/bin/python3 -X utf8 scripts/verify_iteration2_database.py --java /usr/lib/jvm/java-17-openjdk-amd64/bin/java --jar /workspace/backend/target/shop-0.1.0.jar --output /workspace/docs/test/evidence/r2-personalized/p-a12/iteration2-mysql-results.json
+cwd=/workspace
+exit=0
+started=2026-11-09T23:43:21.473593+08:00
+finished=2026-11-09T23:43:59.287675+08:00
+
+PASS D01: Fresh schema creates the nine iteration-2 tables plus three auction tables on real MySQL
+PASS D02: MySQL 8.0 server is used
+PASS D03: Backend validates real MySQL tables with Hibernate ddl-auto=validate
+PASS A01: Three registered customers can share a phone; login succeeds
+PASS A02: Passwords are BCrypt hashes and optional locations remain NULL
+PASS A03: Database rejects duplicate usernames
+PASS A04: History requires login and seller customer data rejects customer tokens
+PASS C01: Initialized category tree has selectable second-level categories
+PASS C02: Publishing against a root category is rejected
+PASS P01: Multiple products are ONLINE and first uploaded image is the main image
+PASS P02: Image MIME/byte length/order are persisted; inline image is separate
+PASS P03: Stored product image is retrievable without byte changes
+PASS C03: Anonymous browse combines category/search/pagination and excludes HTML tags
+PASS P04: Negative inventory is rejected by MySQL
+PASS P05: Invalid category reference is rejected by MySQL
+PASS P06: Image position outside the nine-image range is rejected
+PASS P07: Oversized persisted image metadata is rejected
+PASS P08: Half-populated image metadata is rejected
+PASS Q01: Each product starts its own queue sequence
+PASS Q02: Different products can each freeze one queue head without reducing stock
+PASS Q03: MySQL forbids a second trading intent for the same product
+PASS H01: Queuing and in-progress intents do not appear in terminal history
+PASS Q04: A success decrements one unit and leaves next head queued; B stays frozen
+PASS I01: Last sale takes product offline and writes failure history for its queued intent
+PASS Q05: Requeue advances sequence while keeping original time and no terminal history
+PASS H02: Discard creates exactly one FAILED history snapshot
+PASS H03: History pages contain stable snapshots and distinct descending records
+PASS H04: Buyer history is isolated by customer and contains only terminal results
+PASS H05: History rejects nonterminal states
+PASS H06: History rejects duplicate results for the same intent
+PASS S01: Manual offline retains inventory and ends queued intents with FAILED history
+PASS S02: Restock keeps OFFLINE and forbidden name edit does not change the product
+PASS S03: Explicit manual online is persisted as a status event
+PASS R01: Seller pagination includes never-ordered customer, stable ID tie-break and optional-address text
+PASS R02: Seller and buyer views of the same customer's terminal history agree
+PASS R03: Catalog, customer registration and history pagination indexes exist
+PASS Q06: Fresh schema rejects unknown intent statuses
+PASS M01: Upgrade saves a nonempty backup before applying V4/V5/V6
+PASS M02: Unknown legacy inventory becomes zero/offline without invented customers
+PASS M03: Upgrade preserves names/images, finishes old queue, and omits guest history
+PASS M04: Fresh and upgraded schemas agree on column types/nullability, constraints and indexes
+PASS M05: Repeated upgrade skips V4 and keeps all application data unchanged
+PASS M06: Upgraded schema also rejects unknown intent statuses
+PASS M07: Backup restores the complete five-table legacy dataset exactly
+PASS M08: Upgrade refuses unfinished trades before schema/data mutation
+PASS M09: Direct V4 SQL also blocks unfinished trades before table changes
+PASS M10: Partial V4 layouts are refused without inventing a recovery state
+PASS M11: V5 resumes after its metadata column step without duplicating data
+PASS M12: A current-schema layout missing an essential V4 relation is also refused
+PASS E01: MySQL restart preserves all application rows
+PASS E02: Backend restart preserves password hashes, login and order history
+PASS E03: Image bytes remain accessible after database/backend restart
+PASS E04: JPA validation and backend startup also succeed on the upgraded legacy schema
+

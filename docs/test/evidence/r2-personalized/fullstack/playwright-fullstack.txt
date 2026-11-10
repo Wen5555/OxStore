@@ -1,0 +1,44 @@
+
+Running 1 test using 1 worker
+
+  ✘  1 [chromium] › e2e/auction-r2-fullstack.spec.ts:32:1 › 真实全栈：买家竞价/OUTBID/SSE、卖家结果与结拍提醒 (1.5m)
+
+
+  1) [chromium] › e2e/auction-r2-fullstack.spec.ts:32:1 › 真实全栈：买家竞价/OUTBID/SSE、卖家结果与结拍提醒 ───────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('已被超越', { exact: true })
+    Expected: visible
+    Timeout: 8000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "soft toBeVisible" getByText('已被超越', { exact: true }) with timeout 8000ms
+      - waiting for getByText('已被超越', { exact: true })
+
+
+      62 |     await saveShot(buyerB, 'p-a15', 'fullstack_buyer_b_leading')
+      63 |     // Soft: keep collecting P-A16 settlement evidence even if OUTBID tag does not update.
+    > 64 |     await expect.soft(buyerA.getByText('已被超越', { exact: true })).toBeVisible({ timeout: 8_000 })
+         |                                                                  ^
+      65 |     await saveShot(buyerA, 'p-a15', 'fullstack_buyer_a_outbid_sse')
+      66 |
+      67 |     await expect(async () => {
+        at /workspace/frontend/e2e/auction-r2-fullstack.spec.ts:64:66
+
+    Error Context: test-results-fullstack/auction-r2-fullstack-真实全栈：买家竞价-OUTBID-SSE、卖家结果与结拍提醒-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results-fullstack/auction-r2-fullstack-真实全栈：买家竞价-OUTBID-SSE、卖家结果与结拍提醒-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results-fullstack/auction-r2-fullstack-真实全栈：买家竞价-OUTBID-SSE、卖家结果与结拍提醒-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e/auction-r2-fullstack.spec.ts:32:1 › 真实全栈：买家竞价/OUTBID/SSE、卖家结果与结拍提醒 ────────────
+
+(node:57287) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)

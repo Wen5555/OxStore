@@ -1,0 +1,16 @@
+-------------------------------------------------------------------------------
+Test set: com.team.shop.Iteration2ApiIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 12, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 5.132 s <<< FAILURE! -- in com.team.shop.Iteration2ApiIntegrationTest
+com.team.shop.Iteration2ApiIntegrationTest.auctionPublishValidatesModeExclusiveFields -- Time elapsed: 0.104 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: P-A13/P-A00: FIXED_PRICE 发布携带拍卖字段应返回 40001，实际 HTTP 201 body={"code":0,"message":"ok","data":{"productId":4,"name":"一口价带拍卖字段-1984990066915","price":12.5,"category2Id":2,"category2Name":"手机数码","stock":1,"descriptionHtml":"","images":[],"mainImagePath":null,"status":"ONLINE","canPurchase":true,"publishedAt":"2026-11-09T23:42:27.368230359","statusUpdatedAt":"2026-11-09T23:42:27.368230359","sellingMode":"FIXED_PRICE","auction":null}} ==> expected: <400> but was: <201>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:563)
+	at com.team.shop.Iteration2ApiIntegrationTest.auctionPublishValidatesModeExclusiveFields(Iteration2ApiIntegrationTest.java:650)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
