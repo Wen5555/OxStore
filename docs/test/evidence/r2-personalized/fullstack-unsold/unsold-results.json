@@ -1,0 +1,127 @@
+{
+  "run_at": "2026-11-10T15:12:09.004523+08:00",
+  "scope": "Isolated Docker MySQL + JAR + Vite Playwright full-stack E2E",
+  "base_commit": "dbe274586cf5fb8957cf84106dce4fc7fa4b221c",
+  "checks": [
+    {
+      "id": "D01",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "Fresh schema creates the nine iteration-2 tables plus three auction tables on real MySQL",
+      "status": "PASS"
+    },
+    {
+      "id": "D02",
+      "tasks": [
+        "T-001"
+      ],
+      "description": "MySQL 8.0 server is used",
+      "status": "PASS"
+    }
+  ],
+  "http_requests": [
+    {
+      "method": "POST",
+      "path": "/api/admin/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/products/1/auction",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/auctions?page=1&size=20",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/auction-notifications?page=1&size=20",
+      "status": 200
+    }
+  ],
+  "source_sha256": {},
+  "scenario": "unsold",
+  "started_at": "2026-11-10T15:12:09.006653+08:00",
+  "tested_sha": "dbe274586cf5fb8957cf84106dce4fc7fa4b221c",
+  "mysql_version": "8.0.46",
+  "image_id": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+  "docker_version": "29.1.3",
+  "time_preparation": {
+    "kind": "short-but-legal-deadline",
+    "endsInSeconds": 80,
+    "endsAt": "2026-11-10T15:13:40+08:00",
+    "scheduler": "@Scheduled(fixedDelay = 5000) scanDueAuctions",
+    "note": "Deadline is set a short legal offset after the stack is ready. System clock is not faked; settleOne is not called from the test; ENDED_UNSOLD is not written by SQL."
+  },
+  "playwright_exit": 1,
+  "db_after_ui": {
+    "found": true,
+    "auctionId": 1,
+    "productId": 1,
+    "sessionStatus": "ENDED_UNSOLD",
+    "bidCount": 0,
+    "winnerIntentId": null,
+    "currentPrice": null,
+    "productStatus": "OFFLINE",
+    "sellingMode": "AUCTION",
+    "purchaseIntentCount": 0,
+    "bidRowCount": 0,
+    "notifications": [
+      "AUCTION_UNSOLD:1"
+    ],
+    "notificationCount": 1
+  },
+  "api_after_ui": {
+    "snapshot": {
+      "auctionStatus": "ENDED_UNSOLD",
+      "bidCount": 0,
+      "currentPrice": null,
+      "leaderAlias": null
+    },
+    "adminItem": {
+      "productId": 1,
+      "productName": "R2全栈流拍-c12b04d1",
+      "auctionStatus": "ENDED_UNSOLD",
+      "startPrice": 10.0,
+      "currentPrice": null,
+      "bidCount": 0,
+      "endsAt": "2026-11-10T15:13:40",
+      "settledAt": "2026-11-10T15:13:44.188772",
+      "winnerAlias": null,
+      "winnerIntentId": null
+    },
+    "sellerNotifications": [
+      {
+        "type": "AUCTION_UNSOLD",
+        "productId": 1,
+        "productName": "R2全栈流拍-c12b04d1",
+        "finalPrice": null
+      }
+    ]
+  },
+  "db_after_repeat_scan": {
+    "found": true,
+    "auctionId": 1,
+    "productId": 1,
+    "sessionStatus": "ENDED_UNSOLD",
+    "bidCount": 0,
+    "winnerIntentId": null,
+    "currentPrice": null,
+    "productStatus": "OFFLINE",
+    "sellingMode": "AUCTION",
+    "purchaseIntentCount": 0,
+    "bidRowCount": 0,
+    "notifications": [
+      "AUCTION_UNSOLD:1"
+    ],
+    "notificationCount": 1
+  },
+  "repeat_scan_idempotent": true,
+  "error": "fullstack Playwright failed:\n\nRunning 1 test using 1 worker\n\n  ✘  1 [chromium] › e2e/auction-r2-fullstack-unsold.spec.ts:40:1 › 真实全栈：无人出价经定时结拍流拍且重复扫描幂等 (1.9m)\n\n\n  1) [chromium] › e2e/auction-r2-fullstack-unsold.spec.ts:40:1 › 真实全栈：无人出价经定时结拍流拍且重复扫描幂等 ───────────\n\n    Error: expect(locator).toBeVisible() failed\n\n    Locator: getByText('本次拍卖流拍，无人中标。')\n    Expected: visible\n    Timeout: 5000ms\n    Error: element(s) not found\n\n    Call log:\n      - Expect \"soft toBeVisible\" getByText('本次拍卖流拍，无人中标。') with timeout 5000ms\n      - waiting for getByText('本次拍卖流拍，无人中标。')\n\n\n      78 |   await saveShot(page, 'ui', 'product_detail_unsold')\n      79 |   // Keep the contracted copy as a real failure if the public detail 404s OFFLINE auctions.\n    > 80 |   await expect.soft(page.getByText('本次拍卖流拍，无人中标。')).toBeVisible()\n         |                                                     ^\n      81 |   await expect.soft(page.getByRole('button', { name: /出\\s*价/ })).toBeDisabled()\n      82 |   await expect.soft(page.getByText('拍卖已结束，不能继续出价。')).toBeVisible()\n      83 |   await expect(page.getByRole('button', { name: '处理履约' })).toHaveCount(0)\n        at /workspace/frontend/e2e/auction-r2-fullstack-unsold.spec.ts:80:53\n\n    Error: expect(locator).toBeDisabled() failed\n\n    Locator: getByRole('button', { name: /出\\s*价/ })\n    Expected: disabled\n    Timeout: 5000ms\n    Error: element(s) not found\n\n    Call log:\n      - Expect \"soft toBeDisabled\" getByRole('button', { name: /出\\s*价/ }) with timeout 5000ms\n      - waiting for getByRole('button', { name: /出\\s*价/ })\n\n\n      79 |   // Keep the contracted copy as a real failure if the public detail 404s OFFLINE auctions.\n      80 |   await expect.soft(page.getByText('本次拍卖流拍，无人中标。')).toBeVisible()\n    > 81 |   await expect.soft(page.getByRole('button', { name: /出\\s*价/ })).toBeDisabled()\n         |                                                                  ^\n      82 |   await expect.soft(page.getByText('拍卖已结束，不能继续出价。')).toBeVisible()\n      83 |   await expect(page.getByRole('button', { name: '处理履约' })).toHaveCount(0)\n      84 |\n        at /workspace/frontend/e2e/auction-r2-fullstack-unsold.spec.ts:81:66\n\n    Error: expect(locator).toBeVisible() failed\n\n    Locator: getByText('拍卖已结束，不能继续出价。')\n    Expected: visible\n    Timeout: 5000ms\n    Error: element(s) not found\n\n    Call log:\n      - Expect \"soft toBeVisible\" getByText('拍卖已结束，不能继续出价。') with timeout 5000ms\n      - waiting for getByText('拍卖已结束，不能继续出价。')\n\n\n      80 |   await expect.soft(page.getByText('本次拍卖流拍，无人中标。')).toBeVisible()\n      81 |   await expect.soft(page.getByRole('button', { name: /出\\s*价/ })).toBeDisabled()\n    > 82 |   await expect.soft(page.getByText('拍卖已结束，不能继续出价。')).toBeVisible()\n         |                                                      ^\n      83 |   await expect(page.getByRole('button', { name: '处理履约' })).toHaveCount(0)\n      84 |\n      85 |   await page.goto('/admin/products')\n        at /workspace/frontend/e2e/auction-r2-fullstack-unsold.spec.ts:82:54\n\n    Error Context: test-results-fullstack-unsold/auction-r2-fullstack-unsold-真实全栈：无人出价经定时结拍流拍且重复扫描幂等-chromium/error-context.md\n\n    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────\n    test-results-fullstack-unsold/auction-r2-fullstack-unsold-真实全栈：无人出价经定时结拍流拍且重复扫描幂等-chromium/trace.zip\n    Usage:\n\n        npx playwright show-trace test-results-fullstack-unsold/auction-r2-fullstack-unsold-真实全栈：无人出价经定时结拍流拍且重复扫描幂等-chromium/trace.zip\n\n    ────────────────────────────────────────────────────────────────────────────────────────────────\n\n  1 failed\n    [chromium] › e2e/auction-r2-fullstack-unsold.spec.ts:40:1 › 真实全栈：无人出价经定时结拍流拍且重复扫描幂等 ────────────\n(node:61696) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+  "cleanup": "owned container and its anonymous volume removed; apps stopped",
+  "success": false,
+  "finished_at": "2026-11-10T15:14:26.853144+08:00"
+}

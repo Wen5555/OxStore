@@ -135,5 +135,6 @@ UI-001 运行真实 Chrome 和真实前后端，不模拟 API。每次运行必�
 | P-A14 | 中标→交易中→成功/失败、流拍提醒、重复扫描幂等 | 既有结拍成功/失败履约测试；新增 `expiredLiveAuctionRejectsBidAndDueScanSettlesUnsoldOnce`、`snapshotReportsOutbidAndSseReconnectReplaysSnapshot` 的重复结拍断言；MySQL U02/W03/W04 | H2 HTTP + 隔离 MySQL |
 | P-A15 | 买家出价、OUTBID、SSE 更新/断流重连/快照、截止拒单 | 新增 Playwright `auction-r2-p-a15.spec.ts`（模拟 API）；既有 SSE/结拍禁用出价；JUnit 快照 OUTBID 与 SSE 重连；全栈 `auction-r2-fullstack.spec.ts` | 模拟 API ≠ 全链路 |
 | P-A16 | 卖家模式发布、结果、提醒、履约入口、流拍展示 | 新增 Playwright `auction-r2-p-a16.spec.ts`（模拟 API）；全栈发布后的拍卖管理/履约 | 模拟 API ≠ 全链路 |
+| 补测 | 真实全栈无人出价流拍（定时结拍、无中标意向、卖家流拍展示与提醒、重复扫描幂等） | `scripts/run_auction_fullstack_e2e.py --scenario unsold` + `frontend/e2e/auction-r2-fullstack-unsold.spec.ts` | 隔离 Docker MySQL + JAR + 无头浏览器；证据与教师报告在 `evidence/r2-personalized/fullstack-unsold/`，不与旧轮 131/129/2 混算。2026-11-10 实际执行：结拍/库表/卖家列表与提醒/幂等通过；公开详情流拍文案失败（OFFLINE 商品买家接口 404），未修业务 |
 
 长报告不入库。Wiki 正文由本轮 artifact 提供，仓库只保留用例、脚本和本轮证据。

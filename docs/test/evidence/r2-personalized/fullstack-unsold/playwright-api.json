@@ -1,0 +1,8 @@
+{
+  "productId": 1,
+  "auctionStatus": "ENDED_UNSOLD",
+  "bidCount": 0,
+  "winnerIntentId": null,
+  "notificationCount": 1,
+  "notificationType": "AUCTION_UNSOLD"
+}

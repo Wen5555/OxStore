@@ -17,6 +17,8 @@ frontend/test-results/
 frontend/playwright-report/
 frontend/playwright-fullstack-report/
 frontend/test-results-fullstack/
+frontend/test-results-fullstack-unsold/
+frontend/playwright-fullstack-unsold-report/
 frontend/playwright/.cache/
 frontend/*.tsbuildinfo
 
