@@ -1,0 +1,40 @@
+
+Running 1 test using 1 worker
+
+  ✘  1 [chromium] › e2e/auction-r2-fullstack-unsold.spec.ts:35:1 › 真实全栈：无人出价经定时结拍流拍且重复扫描幂等 (1.1s)
+
+
+  1) [chromium] › e2e/auction-r2-fullstack-unsold.spec.ts:35:1 › 真实全栈：无人出价经定时结拍流拍且重复扫描幂等 ───────────
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: '发布商品' }) resolved to 2 elements:
+        1) <button type="button" class="ant-btn css-dev-only-do-not-override-mncuj7 ant-btn-default ant-btn-color-default ant-btn-variant-outlined">…</button> aka getByRole('button', { name: 'upload 发布商品' })
+        2) <button type="button" class="ant-btn css-dev-only-do-not-override-mncuj7 ant-btn-primary ant-btn-color-primary ant-btn-variant-solid">…</button> aka getByRole('button', { name: '发布商品', exact: true })
+
+    Call log:
+      - waiting for getByRole('button', { name: '发布商品' })
+
+
+      37 |   await sellerLogin(page)
+      38 |
+    > 39 |   await page.getByRole('button', { name: '发布商品' }).click()
+         |                                                    ^
+      40 |   await expect(page.getByText('普通在售')).toBeVisible()
+      41 |   await page.getByRole('radio', { name: '拍卖' }).check()
+      42 |   await expect(page.getByText('最低加价幅度')).toBeVisible()
+        at /workspace/frontend/e2e/auction-r2-fullstack-unsold.spec.ts:39:52
+
+    Error Context: test-results-fullstack-unsold/auction-r2-fullstack-unsold-真实全栈：无人出价经定时结拍流拍且重复扫描幂等-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results-fullstack-unsold/auction-r2-fullstack-unsold-真实全栈：无人出价经定时结拍流拍且重复扫描幂等-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results-fullstack-unsold/auction-r2-fullstack-unsold-真实全栈：无人出价经定时结拍流拍且重复扫描幂等-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e/auction-r2-fullstack-unsold.spec.ts:35:1 › 真实全栈：无人出价经定时结拍流拍且重复扫描幂等 ────────────
+
+(node:59163) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)

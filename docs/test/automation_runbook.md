@@ -1,6 +1,6 @@
 # OxStore 自动化测试执行手册
 
-更新日期：2026-11-09。项目测试用例盘点见[测试用例设计及清单](test_case_design_and_inventory.md)。运行真实容器或会写入业务数据的测试时，必须使用脚本创建的专用环境，不得连接现有业务库。
+更新日期：2026-11-10。项目测试用例盘点见[测试用例设计及清单](test_case_design_and_inventory.md)。运行真实容器或会写入业务数据的测试时，必须使用脚本创建的专用环境，不得连接现有业务库。
 
 ## 1. 测试入口
 
@@ -103,6 +103,16 @@ python -X utf8 scripts/run_r2_personalized_verification.py
 ```
 
 该入口会依次：`mvn clean verify`、隔离 Docker MySQL 的 `verify_auction_database.py` / `verify_iteration2_database.py`、前端 `npm ci` + `build` + 无头 Playwright（模拟 API），以及在 Docker 可用时启动一次性 MySQL+JAR+Vite 跑全栈 Playwright。证据写入 `docs/test/evidence/r2-personalized/`，索引为 `INDEX.json`。模拟 API 通过不能记为全链路通过；Docker 不可用时 MySQL/全栈标记为阻塞。不得把连接改到已有业务库。
+
+### 6.1.1 全栈无人出价流拍补测
+
+只补测真实全栈流拍，不复跑 P-A12～P-A16 整套，也不改业务：
+
+```bash
+python -X utf8 scripts/run_auction_fullstack_e2e.py --scenario unsold --ends-in-seconds 70
+```
+
+截止时间取契约允许的短窗口（≥60 秒），然后等待后端 `@Scheduled(fixedDelay = 5000)` 扫描结拍；不拨时钟、不直接调用 `settleOne`、不 SQL 写入终态。证据写入 `docs/test/evidence/r2-personalized/fullstack-unsold/`。
 
 ## 7. Selenium UI 冒烟测试
 

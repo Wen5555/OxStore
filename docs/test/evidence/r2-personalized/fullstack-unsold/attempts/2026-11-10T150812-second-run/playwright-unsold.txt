@@ -1,0 +1,44 @@
+
+Running 1 test using 1 worker
+
+  ✘  1 [chromium] › e2e/auction-r2-fullstack-unsold.spec.ts:40:1 › 真实全栈：无人出价经定时结拍流拍且重复扫描幂等 (1.5m)
+
+
+  1) [chromium] › e2e/auction-r2-fullstack-unsold.spec.ts:40:1 › 真实全栈：无人出价经定时结拍流拍且重复扫描幂等 ───────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('本次拍卖流拍，无人中标。')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('本次拍卖流拍，无人中标。') with timeout 5000ms
+      - waiting for getByText('本次拍卖流拍，无人中标。')
+
+
+      75 |
+      76 |   await page.getByRole('button', { name: '查看商品' }).click()
+    > 77 |   await expect(page.getByText('本次拍卖流拍，无人中标。')).toBeVisible()
+         |                                                ^
+      78 |   await expect(page.getByRole('button', { name: /出\s*价/ })).toBeDisabled()
+      79 |   await expect(page.getByText('拍卖已结束，不能继续出价。')).toBeVisible()
+      80 |   await expect(page.getByRole('button', { name: '处理履约' })).toHaveCount(0)
+        at /workspace/frontend/e2e/auction-r2-fullstack-unsold.spec.ts:77:48
+
+    Error Context: test-results-fullstack-unsold/auction-r2-fullstack-unsold-真实全栈：无人出价经定时结拍流拍且重复扫描幂等-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results-fullstack-unsold/auction-r2-fullstack-unsold-真实全栈：无人出价经定时结拍流拍且重复扫描幂等-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results-fullstack-unsold/auction-r2-fullstack-unsold-真实全栈：无人出价经定时结拍流拍且重复扫描幂等-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e/auction-r2-fullstack-unsold.spec.ts:40:1 › 真实全栈：无人出价经定时结拍流拍且重复扫描幂等 ────────────
+
+(node:60362) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
