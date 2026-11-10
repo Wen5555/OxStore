@@ -123,3 +123,17 @@ UI-001 运行真实 Chrome 和真实前后端，不模拟 API。每次运行必�
 | P-A19 | 浏览器根据出价/结拍事件更新领先状态、成交状态和提醒列表 | Playwright `拍卖 SSE 更新领先状态并在结拍后禁用出价`、`买家拍卖提醒页通过通知 SSE 显示结拍提醒` |
 
 前端 Playwright 场景使用模拟 API；后端集成场景使用 H2 与真实 HTTP/SSE。二者不能替代隔离 MySQL 的 V6 迁移验证或 Docker 部署验收。当前 R4 运行结果和未完成环境项见[R4 验收报告](auction-r4-validation.md)。
+
+## 8. 个性化拍卖 R2 验收（P-A12～P-A16）
+
+需求依据：上游 Wiki「迭代2‐个性化需求·产品待办」PB-A01～PB-A04，以及仓内 [P-A00 拍卖增量契约](../auction/P-A00-拍卖增量契约.md)。执行入口：`python -X utf8 scripts/run_r2_personalized_verification.py`。机器结果索引：[evidence/r2-personalized/INDEX.json](evidence/r2-personalized/INDEX.json)。共享套件只计一次，按下表映射，不重复计通过。
+
+| Task | 场景 | 自动化入口 | 证据分层 |
+| --- | --- | --- | --- |
+| P-A12 | 空库/旧库 V6、重复迁移、索引、金额 DECIMAL(10,2)、幂等、重启保留 | `scripts/verify_auction_database.py`（S/M/R/U/Q 组）；回归 `scripts/verify_iteration2_database.py` | 隔离 Docker MySQL，不可用 H2 代替 |
+| P-A13 | 未登录/卖家自出价、金额精度与过低、截止拒单、并发开拍出价、一口价回归、发布字段互斥 | `Iteration2ApiIntegrationTest` 新增权限/并发/发布校验；既有 `fixedPriceProductsKeepTheIntentFlowAndRejectAuctionOperations`；实体层 `AuctionSessionTest` | H2 HTTP；金额列与唯一约束以 P-A12 MySQL 为准 |
+| P-A14 | 中标→交易中→成功/失败、流拍提醒、重复扫描幂等 | 既有结拍成功/失败履约测试；新增 `expiredLiveAuctionRejectsBidAndDueScanSettlesUnsoldOnce`、`snapshotReportsOutbidAndSseReconnectReplaysSnapshot` 的重复结拍断言；MySQL U02/W03/W04 | H2 HTTP + 隔离 MySQL |
+| P-A15 | 买家出价、OUTBID、SSE 更新/断流重连/快照、截止拒单 | 新增 Playwright `auction-r2-p-a15.spec.ts`（模拟 API）；既有 SSE/结拍禁用出价；JUnit 快照 OUTBID 与 SSE 重连；全栈 `auction-r2-fullstack.spec.ts` | 模拟 API ≠ 全链路 |
+| P-A16 | 卖家模式发布、结果、提醒、履约入口、流拍展示 | 新增 Playwright `auction-r2-p-a16.spec.ts`（模拟 API）；全栈发布后的拍卖管理/履约 | 模拟 API ≠ 全链路 |
+
+长报告不入库。Wiki 正文由本轮 artifact 提供，仓库只保留用例、脚本和本轮证据。
