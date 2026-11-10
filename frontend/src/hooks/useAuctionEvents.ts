@@ -1,15 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { getAuctionSnapshot } from '../api/auction'
-import type { AuctionBidResponse, AuctionSnapshot } from '../types/auction'
+import type { AuctionBidEvent, AuctionSettledEvent, AuctionSnapshot } from '../types/auction'
 
-export type AuctionEvent = AuctionSnapshot | (AuctionBidResponse & { productId: number }) | {
-  productId: number
-  auctionStatus: AuctionSnapshot['auctionStatus']
-  finalPrice?: number
-  settledAt?: string
-  winnerAlias?: string | null
-  youWon?: boolean
-}
+export type AuctionEvent = AuctionSnapshot | AuctionBidEvent | AuctionSettledEvent
 
 export function useAuctionEvents(productId: number | undefined, onEvent: (event: AuctionEvent) => void) {
   const onEventRef = useRef(onEvent)

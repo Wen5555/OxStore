@@ -24,8 +24,10 @@ export interface AuctionSnapshot {
   lastBidSeq: number
   recentBids: AuctionRecentBid[]
   canBid: boolean
-  myStatus: string | null
+  myStatus: AuctionMyStatus | null
 }
+
+export type AuctionMyStatus = 'NONE' | 'LEADING' | 'OUTBID' | 'WON' | 'LOST'
 
 export interface AuctionBidResponse {
   bidId: number
@@ -37,6 +39,27 @@ export interface AuctionBidResponse {
   bidCount: number
   leaderAlias?: string | null
   bidAt: string
+}
+
+export interface AuctionBidEvent {
+  productId: number
+  bidSeq: number
+  amount: number
+  currentPrice: number
+  nextMinBid: number
+  bidCount: number
+  leaderAlias: string
+  bidAt: string
+  youAreLeading: boolean | null
+}
+
+export interface AuctionSettledEvent {
+  productId: number
+  auctionStatus: AuctionStatus
+  finalPrice?: number
+  settledAt?: string
+  winnerAlias?: string | null
+  youWon?: boolean | null
 }
 
 export type AuctionNotificationType = 'AUCTION_SOLD' | 'AUCTION_UNSOLD' | 'AUCTION_WON'

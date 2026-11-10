@@ -77,6 +77,77 @@ test('下架商品详情即使 API 返回成功也不展示商品信息', async 
   await expect(page.getByRole('button', { name: '提交购买意向' })).toHaveCount(0)
 })
 
+test('拍卖实时出价更新最近出价和本人被超越状态', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('customer_token', 'customer-token'))
+  const snapshot = {
+    productId: 42,
+    productName: '实时拍卖商品',
+    sellingMode: 'AUCTION',
+    auctionStatus: 'LIVE',
+    startPrice: 10,
+    minIncrement: 1,
+    currentPrice: 15,
+    nextMinBid: 16,
+    bidCount: 2,
+    endsAt: '2026-11-10T18:00:00',
+    settledAt: null,
+    serverTime: '2026-11-10T17:00:00',
+    leaderAlias: 'B***r',
+    lastBidSeq: 2,
+    recentBids: [{ bidSeq: 2, amount: 15, bidderAlias: 'B***r', bidAt: '2026-11-10T16:59:00' }],
+    canBid: true,
+    myStatus: 'LEADING',
+  }
+  await page.route('**/api/products/42', (route) =>
+    route.fulfill(apiResponse({
+      productId: 42,
+      name: '实时拍卖商品',
+      descriptionHtml: '',
+      price: 10,
+      stock: 1,
+      status: 'ONLINE',
+      canPurchase: false,
+      sellingMode: 'AUCTION',
+      category2Id: 2,
+      category2Name: '上衣',
+      images: [],
+      mainImagePath: null,
+      publishedAt: '2026-11-10T16:00:00',
+      statusUpdatedAt: '2026-11-10T16:00:00',
+    })),
+  )
+  await page.route('**/api/products/42/auction', (route) =>
+    route.fulfill(apiResponse(snapshot)),
+  )
+  await page.route('**/api/products/42/auction/stream', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'text/event-stream',
+      body: [
+        `event: snapshot\ndata: ${JSON.stringify(snapshot)}`,
+        `event: bid\ndata: ${JSON.stringify({
+          productId: 42,
+          bidSeq: 3,
+          amount: 16,
+          currentPrice: 16,
+          nextMinBid: 17,
+          bidCount: 3,
+          leaderAlias: 'C***r',
+          bidAt: '2026-11-10T17:00:01',
+          youAreLeading: false,
+        })}`,
+        '',
+      ].join('\n\n'),
+    }),
+  )
+
+  await page.goto('/products/42')
+
+  await expect(page.getByText('已被超越')).toBeVisible()
+  await expect(page.getByText('#3 C***r：¥16.00')).toBeVisible()
+  await expect(page.getByText('出价次数：3')).toBeVisible()
+})
+
 test('卖家按商品队列开始交易，确认成功请求不带请求体', async ({ page }) => {
   let queueStatus: 'QUEUING' | 'IN_TRANSACTION' | 'DONE' = 'QUEUING'
   let successBody: string | null = 'not-called'

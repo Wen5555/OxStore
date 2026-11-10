@@ -28,20 +28,46 @@ export default function ProductDetailPage() {
   const loggedIn = Boolean(localStorage.getItem('customer_token'))
   useAuctionEvents(product?.sellingMode === 'AUCTION' ? product.id : undefined, (event) => {
     if ('productName' in event) setAuction(event)
-    else if ('auctionStatus' in event && !('bidSeq' in event)) {
-      setAuction((current) => current && {
-        ...current,
-        auctionStatus: event.auctionStatus,
-        currentPrice: event.finalPrice ?? current.currentPrice,
-        settledAt: event.settledAt ?? current.settledAt,
-      })
-    } else if ('currentPrice' in event) setAuction((current) => current && {
+    else if ('bidSeq' in event) setAuction((current) => {
+      if (!current) return current
+      const participated = current.myStatus === 'LEADING' || current.myStatus === 'OUTBID'
+      const recentBid = {
+        bidSeq: event.bidSeq,
+        amount: event.amount,
+        bidderAlias: event.leaderAlias,
+        bidAt: event.bidAt,
+      }
+      return {
         ...current,
         currentPrice: event.currentPrice,
         nextMinBid: event.nextMinBid,
         bidCount: event.bidCount,
-        leaderAlias: event.leaderAlias ?? current?.leaderAlias ?? null,
-      })
+        lastBidSeq: Math.max(current.lastBidSeq, event.bidSeq),
+        leaderAlias: event.leaderAlias,
+        myStatus: event.youAreLeading === true
+          ? 'LEADING'
+          : event.youAreLeading === false && participated ? 'OUTBID' : current.myStatus,
+        recentBids: [
+          recentBid,
+          ...current.recentBids.filter((bid) => bid.bidSeq !== event.bidSeq),
+        ].sort((a, b) => b.bidSeq - a.bidSeq).slice(0, 10),
+      }
+    })
+    else if ('auctionStatus' in event) setAuction((current) => {
+      if (!current) return current
+      const participated = current.myStatus === 'LEADING' || current.myStatus === 'OUTBID'
+      return {
+        ...current,
+        auctionStatus: event.auctionStatus,
+        currentPrice: event.finalPrice ?? current.currentPrice,
+        settledAt: event.settledAt ?? current.settledAt,
+        myStatus: event.youWon === true
+          ? 'WON'
+          : event.youWon === false && participated && event.auctionStatus === 'ENDED_SOLD'
+            ? 'LOST'
+            : current.myStatus,
+      }
+    })
   })
 
   useEffect(() => {
