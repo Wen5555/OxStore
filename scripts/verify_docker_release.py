@@ -36,7 +36,7 @@ class Check:
         self.env = dict(os.environ, COMPOSE_PROJECT_NAME=self.project, APP_PORT=str(self.port),
                         APP_BIND_ADDRESS='127.0.0.1', DB_PASSWORD=secrets.token_hex(32),
                         JWT_SECRET=secrets.token_hex(32), TOKEN_LOOKUP_KEY=secrets.token_hex(32),
-                        ADMIN_INITIAL_PASSWORD=self.password, OXSTORE_VERSION='0.1.0-iteration2-docker.1')
+                        ADMIN_INITIAL_PASSWORD=self.password, OXSTORE_VERSION='0.1.0-iteration2-auction-docker.1')
         self.jwt = ''
         self.base = f'http://127.0.0.1:{self.port}'
         self.report = {'run_at': datetime.now().astimezone().isoformat(), 'project': self.project,

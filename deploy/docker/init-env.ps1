@@ -7,7 +7,7 @@ function New-OxSecret {
     [Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes($ByteCount))
 }
 $oxLines = @(
-    'OXSTORE_VERSION=0.1.0-iteration2-docker.1', 'COMPOSE_PROJECT_NAME=oxstore',
+    'OXSTORE_VERSION=0.1.0-iteration2-auction-docker.1', 'COMPOSE_PROJECT_NAME=oxstore',
     'APP_BIND_ADDRESS=127.0.0.1', 'APP_PORT=8088',
     ('DB_PASSWORD=' + (New-OxSecret)), ('JWT_SECRET=' + (New-OxSecret)),
     ('ADMIN_INITIAL_PASSWORD=Ox!' + (New-OxSecret -ByteCount 24))

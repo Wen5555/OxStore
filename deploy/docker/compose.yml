@@ -18,7 +18,7 @@ services:
       start_period: 30s
       retries: 30
   backend:
-    image: oxstore/backend:${OXSTORE_VERSION:-0.1.0-iteration2-docker.1}
+    image: oxstore/backend:${OXSTORE_VERSION:-0.1.0-iteration2-auction-docker.1}
     platform: linux/amd64
     restart: unless-stopped
     environment:
@@ -34,7 +34,7 @@ services:
     volumes:
       - uploads:/app/uploads
   frontend:
-    image: oxstore/frontend:${OXSTORE_VERSION:-0.1.0-iteration2-docker.1}
+    image: oxstore/frontend:${OXSTORE_VERSION:-0.1.0-iteration2-auction-docker.1}
     platform: linux/amd64
     restart: unless-stopped
     ports:

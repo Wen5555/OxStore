@@ -1,4 +1,4 @@
-# OxStore Docker 交付版 0.1.0-iteration2-docker.1
+# OxStore Docker 交付版 0.1.0-iteration2-auction-docker.1
 
 本包用于软件工程实践课程的容器交付和本机演示，包含 Linux/amd64 的前端、后端和 MySQL 镜像。Windows 使用 Docker Desktop 的 Linux 容器模式；Linux 使用 Docker Engine。ARM 主机、正式公网部署及长期运行未在本轮验收。
 
@@ -55,21 +55,21 @@ docker compose up --no-build --pull never --wait --wait-timeout 240
 从 GitHub Release 下载同版本源码 ZIP，安装 Docker 后，在源码根目录执行：
 
 ```powershell
-docker build --platform linux/amd64 -t oxstore/backend:0.1.0-iteration2-docker.1 backend
-docker build --platform linux/amd64 -t oxstore/frontend:0.1.0-iteration2-docker.1 frontend
+docker build --platform linux/amd64 -t oxstore/backend:0.1.0-iteration2-auction-docker.1 backend
+docker build --platform linux/amd64 -t oxstore/frontend:0.1.0-iteration2-auction-docker.1 frontend
 ```
 
 后端构建镜像使用 Maven 3.9 / Java 17 并执行全部 JUnit 测试；前端使用 Node.js 20 和锁文件安装并执行 TypeScript/Vite 构建。上游基础标签可能更新，本次实际构建 digest 和运行镜像 ID 留在构建日志及 manifest；下载包包含本次确定镜像。
 
 前端默认沿用锁文件和本机已验证的 `https://registry.npmmirror.com` 下载源；可用 `--build-arg NPM_REGISTRY=https://registry.npmjs.org` 显式覆盖。容器实测中官方 npm 源连接被重置，镜像源安装成功，没有关闭 TLS 校验。
 
-可复现的容器验收脚本在 `scripts/verify_docker_release.py`，仅访问脚本新建的独立项目和数据卷，不连接已有实例。运行需要 Python 3.10+ 标准库和 Docker：
+可复现的容器验收脚本在 `scripts/verify_docker_iteration2.py`，仅访问脚本新建的独立项目和数据卷，不连接已有实例。运行需要 Python 3.10+ 标准库和 Docker：
 
 ```powershell
-python scripts/verify_docker_release.py --bundle . --output evidence/retest
+python scripts/verify_docker_iteration2.py --bundle . --output evidence/retest
 ```
 
-真实页面录屏可通过 `scripts/verify_docker_ui.ps1` 和同目录模板复现；需 PowerShell 7、Node.js/npx、Google Chrome及可下载的 Playwright CLI 0.1.22。该脚本会发布测试商品并完成交易，仅用于无活跃商品的独立测试实例：
+基线版真实页面录屏模板 `scripts/verify_docker_ui.ps1`（仅覆盖0.1.0的单商品页面流程，未随迭代2更新） 和同目录模板复现；需 PowerShell 7、Node.js/npx、Google Chrome及可下载的 Playwright CLI 0.1.22。该脚本会发布测试商品并完成交易，仅用于无活跃商品的独立测试实例：
 
 ```powershell
 ./scripts/verify_docker_ui.ps1 -BaseUrl http://127.0.0.1:8088 -OutputDirectory evidence/ui-retest
@@ -79,6 +79,13 @@ python scripts/verify_docker_release.py --bundle . --output evidence/retest
 
 实际执行结果、录屏和限制见 `evidence/verification.md`。本包证明该版本已验证的容器场景，不代表所有课程功能、正式服务器或全部性能指标均已验收。
 
-## 6. 本版本说明（0.1.0-iteration2-docker.1）
+## 6. 本版本说明（0.1.0-iteration2-auction-docker.1）
 
-本包为迭代2（挑战需求A）容器交付版。业务源码与 Release `v0.1.0-iteration2-build.1` 相同（提交 `6b84b68`），仅修正两处部署问题：后端容器健康检查改为查询 `/api/products`（原 `/api/products/current` 在迭代2多商品接口下返回 400，导致容器判为不健康）；初始化脚本生成的管理员初始密码缩短为 51 位，满足后端 8～64 位要求。新库首次启动由 `database/schema.sql` 建表；从基线版本升级的已有数据库需先备份，再按 `database/runbook.md` 依次执行 V2～V5 迁移。
+本包为迭代2（挑战需求A）加个性化需求“拍卖模式”的容器交付版，业务源码为随包 `manifest.json` 记录的提交（含拍卖发布、出价、公开快照、SSE、定时结拍、提醒与中标履约）。与 `0.1.0-iteration2-docker.1`（仅含挑战需求A，不含拍卖）相比：
+
+- 镜像内含 V6 拍卖库表；新库首次启动由 `database/schema.sql` 建出十二张表。
+- 后端容器健康检查查询 `/api/products`（原 `/api/products/current` 在多商品接口下返回 400）。
+- 初始化脚本生成的管理员初始密码为 51 位，满足 8～64 位规则。
+- 从旧版本升级的已有数据库需先备份，再按 `database/runbook.md` 依次完成 V2～V6；V6 将既有商品设为一口价，不会转换为拍卖。
+
+验证入口：`scripts/verify_docker_iteration2.py`（迭代2与拍卖主流程，真实容器，不使用模拟 API）。随包 `scripts/verify_docker_release.py` 针对 0.1.0 基线的单活跃商品接口，不适用于本版本。
