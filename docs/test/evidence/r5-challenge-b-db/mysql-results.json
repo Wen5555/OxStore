@@ -1,0 +1,826 @@
+{
+  "started_at": "2026-11-15T21:41:31",
+  "checks": [
+    {
+      "id": "S01",
+      "tasks": [
+        "B-001",
+        "B-002",
+        "B-003"
+      ],
+      "description": "Fresh schema creates the nine challenge-B tables",
+      "status": "PASS"
+    },
+    {
+      "id": "S02",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "product.stock is LONGTEXT and product.offline_reason exists",
+      "status": "PASS"
+    },
+    {
+      "id": "S03",
+      "tasks": [
+        "B-001",
+        "B-002"
+      ],
+      "description": "Order, favorite, cart, receipt and legacy-archive indexes exist",
+      "status": "PASS"
+    },
+    {
+      "id": "S04",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "Selling-mode, order-guard and order-item immutability triggers are installed",
+      "status": "PASS"
+    },
+    {
+      "id": "S05",
+      "tasks": [
+        "B-001",
+        "B-003"
+      ],
+      "description": "Money and quantity columns are LONGTEXT; unit prices stay DECIMAL(10,2)",
+      "status": "PASS"
+    },
+    {
+      "id": "C01",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "product.stock '-1' is not a canonical non-negative integer (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "C02",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "product.stock '1.5' is not a canonical non-negative integer (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "C03",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "product.stock '007' is not a canonical non-negative integer (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "C04",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "product.stock '' is not a canonical non-negative integer (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "C05",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "product.stock '1e3' is not a canonical non-negative integer (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "C06",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "product.stock ' 5' is not a canonical non-negative integer (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "C07",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "product.stock '5\\\\n' is not a canonical non-negative integer (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "C08",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "Stock beyond 64-bit and JS safe integers is accepted",
+      "status": "PASS"
+    },
+    {
+      "id": "C09",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "The huge stock round-trips as the exact string",
+      "status": "PASS"
+    },
+    {
+      "id": "C10",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "Stock 0 is accepted",
+      "status": "PASS"
+    },
+    {
+      "id": "C11",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "An auction product cannot hold stock 2 (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "C12",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "offline_reason outside AUTO_ZERO/MANUAL is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "O01",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "A PLACED order with an unbounded two-decimal total is accepted",
+      "status": "PASS"
+    },
+    {
+      "id": "O02",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "A duplicate order number is rejected (MySQL error 1062)",
+      "status": "PASS"
+    },
+    {
+      "id": "O03",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "shop_order.status 'FAILED' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "O04",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "shop_order.total_amount '1.5' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "O05",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "shop_order.total_amount '01.00' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "O06",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "shop_order.total_amount '-1.00' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "O07",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "shop_order.total_amount '1.00\\\\n' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "O08",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "shop_order.order_no 'not-a-uuid' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "O09",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "CANCELLED without initiator/time is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "O10",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "A non-cancelled order with cancel metadata is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "O11",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "A cancel time before creation is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "O12",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "An order for an unknown customer is rejected (MySQL error 1452)",
+      "status": "PASS"
+    },
+    {
+      "id": "I01",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "An item with a huge quantity and line amount is accepted",
+      "status": "PASS"
+    },
+    {
+      "id": "I02",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "A second line for the same order and product is rejected (MySQL error 1062)",
+      "status": "PASS"
+    },
+    {
+      "id": "I03",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "order_item quantity '0' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "I04",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "order_item quantity '007' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "I05",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "order_item quantity '1.5' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "I06",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "order_item quantity '-2' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "I07",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "A non-positive unit price snapshot is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "I08",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "order_item.product_name_snapshot is immutable (MySQL error 1644)",
+      "status": "PASS"
+    },
+    {
+      "id": "I09",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "order_item.unit_price_snapshot is immutable (MySQL error 1644)",
+      "status": "PASS"
+    },
+    {
+      "id": "I10",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "order_item.quantity_snapshot is immutable (MySQL error 1644)",
+      "status": "PASS"
+    },
+    {
+      "id": "I11",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "order_item.line_amount_snapshot is immutable (MySQL error 1644)",
+      "status": "PASS"
+    },
+    {
+      "id": "I12",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "order_item.product_id is immutable (MySQL error 1644)",
+      "status": "PASS"
+    },
+    {
+      "id": "I13",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "Changing the product's name and price does not touch the stored snapshot",
+      "status": "PASS"
+    },
+    {
+      "id": "I14",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "The snapshot still holds the original name and unit price",
+      "status": "PASS"
+    },
+    {
+      "id": "O13",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "shop_order.total_amount is immutable (MySQL error 1644)",
+      "status": "PASS"
+    },
+    {
+      "id": "O14",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "shop_order.order_no is immutable (MySQL error 1644)",
+      "status": "PASS"
+    },
+    {
+      "id": "O15",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "shop_order.customer_id is immutable (MySQL error 1644)",
+      "status": "PASS"
+    },
+    {
+      "id": "O16",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "shop_order.created_at is immutable (MySQL error 1644)",
+      "status": "PASS"
+    },
+    {
+      "id": "O17",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "PLACED -> CONFIRMED is accepted by the database",
+      "status": "PASS"
+    },
+    {
+      "id": "O18",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "A seller cancellation with initiator and time is accepted",
+      "status": "PASS"
+    },
+    {
+      "id": "O19",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "A cancelled order cannot return to another state (MySQL error 1644)",
+      "status": "PASS"
+    },
+    {
+      "id": "O20",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "Cancel metadata of a terminal order cannot be rewritten (MySQL error 1644)",
+      "status": "PASS"
+    },
+    {
+      "id": "O21",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "Another order can be completed",
+      "status": "PASS"
+    },
+    {
+      "id": "O22",
+      "tasks": [
+        "B-001"
+      ],
+      "description": "A COMPLETED order cannot be cancelled afterwards (MySQL error 1644)",
+      "status": "PASS"
+    },
+    {
+      "id": "F01",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "A favorite is stored",
+      "status": "PASS"
+    },
+    {
+      "id": "F02",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "A duplicate favorite is rejected (MySQL error 1062)",
+      "status": "PASS"
+    },
+    {
+      "id": "F03",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "A favorite for an unknown product is rejected (MySQL error 1452)",
+      "status": "PASS"
+    },
+    {
+      "id": "F04",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "Mutation counters are stored",
+      "status": "PASS"
+    },
+    {
+      "id": "F05",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "last_cancel_seq above operation_seq is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "F06",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "A second counter row for the same customer/product is rejected (MySQL error 1062)",
+      "status": "PASS"
+    },
+    {
+      "id": "K01",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "A cart row with a huge quantity is stored",
+      "status": "PASS"
+    },
+    {
+      "id": "K02",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "cart quantity '0' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "K03",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "cart quantity '-1' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "K04",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "cart quantity '1.5' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "K05",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "cart quantity '007' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "K06",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "cart quantity '' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "K07",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "cart quantity '1e2' is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "K08",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "A second cart row for the same customer/product is rejected (MySQL error 1062)",
+      "status": "PASS"
+    },
+    {
+      "id": "K09",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "A removed row id is kept as a tombstone",
+      "status": "PASS"
+    },
+    {
+      "id": "K10",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "The same cart row id cannot be tombstoned twice (MySQL error 1062)",
+      "status": "PASS"
+    },
+    {
+      "id": "K11",
+      "tasks": [
+        "B-002"
+      ],
+      "description": "Re-adding after deletion gets a new id; the deleted id is never reused",
+      "status": "PASS"
+    },
+    {
+      "id": "R01",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "A confirmation with its rows is stored",
+      "status": "PASS"
+    },
+    {
+      "id": "R02",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "A duplicate confirmation token is rejected (MySQL error 1062)",
+      "status": "PASS"
+    },
+    {
+      "id": "R03",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "A confirmation row with quantity 0 is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "R04",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "A receipt with a JSON payload is stored",
+      "status": "PASS"
+    },
+    {
+      "id": "R05",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "The same (customer, type, key) cannot be stored twice (MySQL error 1062)",
+      "status": "PASS"
+    },
+    {
+      "id": "R06",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "The same key is allowed for another operation type or customer",
+      "status": "PASS"
+    },
+    {
+      "id": "R07",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "An unknown operation type is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "R08",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "A non-JSON payload is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "L01",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "legacy_closed_at without a reason is rejected (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "L02",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "A finished attempt cannot be marked legacy-closed (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "U01",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "V7 adds the new tables, stock LONGTEXT and offline_reason to an iteration-2 + auction database",
+      "status": "PASS"
+    },
+    {
+      "id": "U02",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "Existing stock values survive the INT -> text conversion unchanged",
+      "status": "PASS"
+    },
+    {
+      "id": "U03",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "offline_reason is initialised for fixed-price OFFLINE rows only (0 stock -> AUTO_ZERO, else MANUAL)",
+      "status": "PASS"
+    },
+    {
+      "id": "U04",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "V7 itself changes no intent/attempt/auction row and no product status",
+      "status": "PASS"
+    },
+    {
+      "id": "U05",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "Re-running V7 succeeds and changes nothing",
+      "status": "PASS"
+    },
+    {
+      "id": "U06",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "V8 runs and reports 3 closed intents, 1 closed attempt, 1 unfrozen and 1 paused product",
+      "status": "PASS"
+    },
+    {
+      "id": "U07",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "Live fixed-price intents are marked closed with their original status and snapshot kept",
+      "status": "PASS"
+    },
+    {
+      "id": "U08",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "The unfinished fixed-price attempt is marked closed without inventing a result",
+      "status": "PASS"
+    },
+    {
+      "id": "U09",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "Trade-frozen fixed-price product returns to ONLINE; manual-frozen becomes OFFLINE/MANUAL; stock untouched",
+      "status": "PASS"
+    },
+    {
+      "id": "U10",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "Old SUCCESS/FAILED history is not rewritten",
+      "status": "PASS"
+    },
+    {
+      "id": "U11",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "The auction product, session, winner intent and its attempt are not touched",
+      "status": "PASS"
+    },
+    {
+      "id": "U12",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "No intent was converted to CANCELLED or FAILED by V8 (unlike the old V4 rule)",
+      "status": "PASS"
+    },
+    {
+      "id": "U13",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "Re-running V8 reports zero changes and leaves every row identical",
+      "status": "PASS"
+    },
+    {
+      "id": "U14",
+      "tasks": [
+        "B-001",
+        "B-004"
+      ],
+      "description": "Upgraded schema equals the fresh schema (columns, constraints, checks, indexes, triggers)",
+      "status": "PASS"
+    },
+    {
+      "id": "U15",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "V8 on a database without V7 stops and changes nothing",
+      "status": "PASS"
+    },
+    {
+      "id": "U16",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "V7 on a database without V6 stops and changes nothing",
+      "status": "PASS"
+    },
+    {
+      "id": "U17",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "A frozen product with stock 0 stops V8 before any change, with a recovery message",
+      "status": "PASS"
+    },
+    {
+      "id": "U18",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "Simulated interruption leaves the stock CHECKs missing",
+      "status": "PASS"
+    },
+    {
+      "id": "U19",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "Re-running V7 re-creates the missing CHECKs and ends equal to the fresh schema",
+      "status": "PASS"
+    },
+    {
+      "id": "U20",
+      "tasks": [
+        "B-003"
+      ],
+      "description": "The re-created stock CHECK rejects a negative value again (MySQL error 3819)",
+      "status": "PASS"
+    },
+    {
+      "id": "Z01",
+      "tasks": [
+        "B-028"
+      ],
+      "description": "Disposable container removed",
+      "status": "PASS"
+    }
+  ],
+  "mysql_version": "8.0.46",
+  "image_id": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+  "finished_at": "2026-11-15T21:43:32",
+  "success": true,
+  "summary": {
+    "pass": 101,
+    "fail": 0
+  }
+}
