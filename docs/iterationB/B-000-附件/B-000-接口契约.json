@@ -1,0 +1,1613 @@
+{
+  "contract": "OxStore B-000",
+  "version": "1.1",
+  "status": "review-required",
+  "date": "2026-11-15",
+  "format": "Custom contract manifest, not OpenAPI",
+  "source": {
+    "wikiCommit": "bb0601f29b4fd6c2db4531d1c20037ce18e90476",
+    "codeCommit": "2c32a880cd4e6ebc7f6717fb5367f6cea60de457"
+  },
+  "schemas": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "NonNegativeInteger": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "PositiveInteger": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "Money": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+    },
+    "AddCartRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "productId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        }
+      },
+      "required": [
+        "productId"
+      ]
+    },
+    "SetQuantityRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "quantity": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        }
+      },
+      "required": [
+        "quantity"
+      ]
+    },
+    "SelectCartRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cartItemIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          }
+        }
+      },
+      "required": [
+        "cartItemIds"
+      ]
+    },
+    "SubmitOrderRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "confirmationToken": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "confirmationToken"
+      ]
+    },
+    "CancelRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "expectedStatus": {
+          "type": "string",
+          "enum": [
+            "PLACED",
+            "CONFIRMED",
+            "PREPARED",
+            "SHIPPED",
+            "COMPLETED",
+            "CANCELLED"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "expectedStatus"
+      ]
+    },
+    "ActionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "expectedStatus": {
+          "type": "string",
+          "enum": [
+            "PLACED",
+            "CONFIRMED",
+            "PREPARED",
+            "SHIPPED",
+            "COMPLETED",
+            "CANCELLED"
+          ]
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "CONFIRM",
+            "PREPARE",
+            "SHIP",
+            "COMPLETE"
+          ]
+        }
+      },
+      "required": [
+        "expectedStatus",
+        "action"
+      ]
+    },
+    "OrderItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "productId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "productName": {
+          "type": "string"
+        },
+        "unitPrice": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+        },
+        "quantity": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "lineAmount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+        }
+      },
+      "required": [
+        "productId",
+        "productName",
+        "unitPrice",
+        "quantity",
+        "lineAmount"
+      ]
+    },
+    "ConfirmationItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cartItemId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "productId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "productName": {
+          "type": "string"
+        },
+        "unitPrice": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+        },
+        "quantity": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "lineAmount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+        }
+      },
+      "required": [
+        "cartItemId",
+        "productId",
+        "productName",
+        "unitPrice",
+        "quantity",
+        "lineAmount"
+      ]
+    },
+    "Order": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "orderId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "orderNo": {
+          "type": "string"
+        },
+        "customerId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PLACED",
+            "CONFIRMED",
+            "PREPARED",
+            "SHIPPED",
+            "COMPLETED",
+            "CANCELLED"
+          ]
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/schemas/OrderItem"
+          }
+        },
+        "totalAmount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "cancelledBy": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "CUSTOMER",
+            "SELLER",
+            null
+          ]
+        },
+        "cancelledAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cancelReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "allowedActions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "CONFIRM",
+              "PREPARE",
+              "SHIP",
+              "COMPLETE",
+              "CANCEL"
+            ]
+          }
+        }
+      },
+      "required": [
+        "orderId",
+        "orderNo",
+        "customerId",
+        "status",
+        "items",
+        "totalAmount",
+        "createdAt",
+        "cancelledBy",
+        "cancelledAt",
+        "cancelReason",
+        "allowedActions"
+      ]
+    },
+    "Confirmation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "confirmationToken": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/schemas/ConfirmationItem"
+          }
+        },
+        "totalAmount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "confirmationToken",
+        "items",
+        "totalAmount",
+        "createdAt"
+      ]
+    },
+    "FavoriteItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "favoriteId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "productId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "productName": {
+          "type": "string"
+        },
+        "unitPrice": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+        },
+        "mainImageUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "invalidLabel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "canOpenDetail": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "favoriteId",
+        "productId",
+        "productName",
+        "unitPrice",
+        "mainImageUrl",
+        "createdAt",
+        "valid",
+        "invalidLabel",
+        "canOpenDetail"
+      ]
+    },
+    "CartItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cartItemId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "productId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "productName": {
+          "type": "string"
+        },
+        "unitPrice": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+        },
+        "mainImageUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "quantity": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "stock": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "online": {
+          "type": "boolean"
+        },
+        "invalidLabel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "defaultCheckoutSelected": {
+          "type": "boolean"
+        },
+        "canCheckoutSelect": {
+          "type": "boolean"
+        },
+        "canFavoriteSelect": {
+          "type": "boolean"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cartItemId",
+        "productId",
+        "productName",
+        "unitPrice",
+        "mainImageUrl",
+        "quantity",
+        "stock",
+        "online",
+        "invalidLabel",
+        "defaultCheckoutSelected",
+        "canCheckoutSelect",
+        "canFavoriteSelect",
+        "updatedAt"
+      ]
+    },
+    "MoveResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "movedLineCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "movedCartItemIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          }
+        },
+        "skippedDeletedCartItemIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          }
+        }
+      },
+      "required": [
+        "movedLineCount",
+        "movedCartItemIds",
+        "skippedDeletedCartItemIds"
+      ]
+    },
+    "ItemError": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cartItemId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "productId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "productName": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "OFFLINE",
+            "NOT_FOUND",
+            "INSUFFICIENT_STOCK",
+            "CART_ITEM_REMOVED",
+            "CONFIRMATION_CHANGED"
+          ]
+        },
+        "availableStock": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "requestedQuantity": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cartItemId",
+        "reason",
+        "message"
+      ]
+    },
+    "LegacyRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "legacyIntentId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "productId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "productNameSnapshot": {
+          "type": "string"
+        },
+        "originalStatus": {
+          "type": "string"
+        },
+        "submittedAt": {
+          "type": "string"
+        },
+        "processedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "closedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "displayStatus": {
+          "type": "string"
+        },
+        "readOnly": {
+          "const": true
+        }
+      },
+      "required": [
+        "legacyIntentId",
+        "productId",
+        "productNameSnapshot",
+        "originalStatus",
+        "submittedAt",
+        "processedAt",
+        "closedAt",
+        "displayStatus",
+        "readOnly"
+      ]
+    },
+    "OrderPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/schemas/Order"
+          }
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pages": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "items",
+        "page",
+        "size",
+        "total",
+        "pages"
+      ]
+    },
+    "FavoritePage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/schemas/FavoriteItem"
+          }
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pages": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "items",
+        "page",
+        "size",
+        "total",
+        "pages"
+      ]
+    },
+    "LegacyPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/schemas/LegacyRecord"
+          }
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pages": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "items",
+        "page",
+        "size",
+        "total",
+        "pages"
+      ]
+    },
+    "Cart": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/schemas/CartItem"
+          }
+        }
+      },
+      "required": [
+        "items"
+      ]
+    },
+    "FavoriteState": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "favorited": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "favorited",
+        "createdAt"
+      ]
+    },
+    "FavoriteWrite": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "favoriteId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "productId": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "favoriteId",
+        "productId",
+        "createdAt"
+      ]
+    }
+  },
+  "endpoints": [
+    {
+      "id": "F01",
+      "method": "PUT",
+      "path": "/api/me/favorites/{productId}",
+      "role": "CUSTOMER",
+      "requestDescription": "无",
+      "success": "favoriteId/productId/createdAt；已收藏",
+      "owner": "R4 B-007",
+      "requestSchema": null,
+      "responseDataSchema": {
+        "$ref": "#/schemas/FavoriteWrite"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "F02",
+      "method": "DELETE",
+      "path": "/api/me/favorites/{productId}",
+      "role": "CUSTOMER",
+      "requestDescription": "无",
+      "success": "null；已取消收藏或未收藏",
+      "owner": "R4 B-007",
+      "requestSchema": null,
+      "responseDataSchema": {
+        "type": "null"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "F03",
+      "method": "GET",
+      "path": "/api/me/favorites?page=1",
+      "role": "CUSTOMER",
+      "requestDescription": "size仅10",
+      "success": "Page<FavoriteItem>",
+      "owner": "R4 B-007",
+      "requestSchema": null,
+      "responseDataSchema": {
+        "$ref": "#/schemas/FavoritePage"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "F04",
+      "method": "GET",
+      "path": "/api/me/favorites/{productId}",
+      "role": "CUSTOMER",
+      "requestDescription": "无",
+      "success": "{favorited:boolean,createdAt:时间或null}，供详情判按钮；不新建",
+      "owner": "R4 B-007",
+      "requestSchema": null,
+      "responseDataSchema": {
+        "$ref": "#/schemas/FavoriteState"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "C01",
+      "method": "POST",
+      "path": "/api/me/cart/items",
+      "role": "CUSTOMER",
+      "requestDescription": "{productId}，Idempotency-Key必填",
+      "success": "CartItem；已加入购物车，只加1",
+      "owner": "R4 B-008",
+      "requestSchema": {
+        "$ref": "#/schemas/AddCartRequest"
+      },
+      "responseDataSchema": {
+        "$ref": "#/schemas/CartItem"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>",
+        "Idempotency-Key": "<UUID for one intent; reuse only for retry>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "C02",
+      "method": "PATCH",
+      "path": "/api/me/cart/items/{cartItemId}",
+      "role": "CUSTOMER",
+      "requestDescription": "{quantity}",
+      "success": "CartItem或null；已更新/已移除",
+      "owner": "R4 B-008",
+      "requestSchema": {
+        "$ref": "#/schemas/SetQuantityRequest"
+      },
+      "responseDataSchema": {
+        "anyOf": [
+          {
+            "$ref": "#/schemas/CartItem"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "C03",
+      "method": "DELETE",
+      "path": "/api/me/cart/items/{cartItemId}",
+      "role": "CUSTOMER",
+      "requestDescription": "无",
+      "success": "null；已移除，已删仍无副作用",
+      "owner": "R4 B-008",
+      "requestSchema": null,
+      "responseDataSchema": {
+        "type": "null"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "C04",
+      "method": "GET",
+      "path": "/api/me/cart",
+      "role": "CUSTOMER",
+      "requestDescription": "无",
+      "success": "{items:CartItem[]}",
+      "owner": "R4 B-009",
+      "requestSchema": null,
+      "responseDataSchema": {
+        "$ref": "#/schemas/Cart"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "C05",
+      "method": "DELETE",
+      "path": "/api/me/cart",
+      "role": "CUSTOMER",
+      "requestDescription": "无，页面须先二次确认",
+      "success": "null；成功，非新增固定原文",
+      "owner": "R4 B-009",
+      "requestSchema": null,
+      "responseDataSchema": {
+        "type": "null"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "Q01",
+      "method": "POST",
+      "path": "/api/me/checkout/confirmations",
+      "role": "CUSTOMER",
+      "requestDescription": "{cartItemIds:[]}",
+      "success": "Confirmation",
+      "owner": "R1 B-010",
+      "requestSchema": {
+        "$ref": "#/schemas/SelectCartRequest"
+      },
+      "responseDataSchema": {
+        "$ref": "#/schemas/Confirmation"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "Q02",
+      "method": "POST",
+      "path": "/api/me/orders",
+      "role": "CUSTOMER",
+      "requestDescription": "{confirmationToken}，Idempotency-Key必填",
+      "success": "Order，201/下单成功",
+      "owner": "R1 B-011/012",
+      "requestSchema": {
+        "$ref": "#/schemas/SubmitOrderRequest"
+      },
+      "responseDataSchema": {
+        "$ref": "#/schemas/Order"
+      },
+      "successHttp": 201,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>",
+        "Idempotency-Key": "<UUID for one intent; reuse only for retry>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "O01",
+      "method": "GET",
+      "path": "/api/me/orders?page=1&size=10",
+      "role": "CUSTOMER",
+      "requestDescription": "无",
+      "success": "Page<Order>",
+      "owner": "R4 B-015",
+      "requestSchema": null,
+      "responseDataSchema": {
+        "$ref": "#/schemas/OrderPage"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "O02",
+      "method": "GET",
+      "path": "/api/me/orders/{orderId}",
+      "role": "CUSTOMER",
+      "requestDescription": "无",
+      "success": "Order",
+      "owner": "R4 B-015",
+      "requestSchema": null,
+      "responseDataSchema": {
+        "$ref": "#/schemas/Order"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "O03",
+      "method": "POST",
+      "path": "/api/me/orders/{orderId}/cancel",
+      "role": "CUSTOMER",
+      "requestDescription": "{expectedStatus,reason?}",
+      "success": "Order；成功，非新增固定原文",
+      "owner": "R1 B-014",
+      "requestSchema": {
+        "$ref": "#/schemas/CancelRequest"
+      },
+      "responseDataSchema": {
+        "$ref": "#/schemas/Order"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "A01",
+      "method": "GET",
+      "path": "/api/admin/orders?page=1&size=10",
+      "role": "SELLER",
+      "requestDescription": "无",
+      "success": "Page<Order>，全站",
+      "owner": "R4 B-015",
+      "requestSchema": null,
+      "responseDataSchema": {
+        "$ref": "#/schemas/OrderPage"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "A02",
+      "method": "GET",
+      "path": "/api/admin/orders/{orderId}",
+      "role": "SELLER",
+      "requestDescription": "无",
+      "success": "Order",
+      "owner": "R4 B-015",
+      "requestSchema": null,
+      "responseDataSchema": {
+        "$ref": "#/schemas/Order"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "A03",
+      "method": "POST",
+      "path": "/api/admin/orders/{orderId}/actions",
+      "role": "SELLER",
+      "requestDescription": "{action,expectedStatus}",
+      "success": "Order",
+      "owner": "R1 B-013",
+      "requestSchema": {
+        "$ref": "#/schemas/ActionRequest"
+      },
+      "responseDataSchema": {
+        "$ref": "#/schemas/Order"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "A04",
+      "method": "POST",
+      "path": "/api/admin/orders/{orderId}/cancel",
+      "role": "SELLER",
+      "requestDescription": "{expectedStatus,reason?}",
+      "success": "Order",
+      "owner": "R1 B-014",
+      "requestSchema": {
+        "$ref": "#/schemas/CancelRequest"
+      },
+      "responseDataSchema": {
+        "$ref": "#/schemas/Order"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "M01",
+      "method": "POST",
+      "path": "/api/me/cart/move-to-favorites",
+      "role": "CUSTOMER",
+      "requestDescription": "{cartItemIds:[]}，Idempotency-Key必填",
+      "success": "MoveResult；已收藏 N 件商品",
+      "owner": "R4 B-025，R1 B-026",
+      "requestSchema": {
+        "$ref": "#/schemas/SelectCartRequest"
+      },
+      "responseDataSchema": {
+        "$ref": "#/schemas/MoveResult"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>",
+        "Idempotency-Key": "<UUID for one intent; reuse only for retry>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "L01",
+      "method": "GET",
+      "path": "/api/me/legacy-intents?page=1&size=10",
+      "role": "CUSTOMER",
+      "requestDescription": "无",
+      "success": "Page<LegacyRecord>，仅本人",
+      "owner": "R4 B-016",
+      "requestSchema": null,
+      "responseDataSchema": {
+        "$ref": "#/schemas/LegacyPage"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    },
+    {
+      "id": "L02",
+      "method": "GET",
+      "path": "/api/admin/legacy-intents?page=1&size=10",
+      "role": "SELLER",
+      "requestDescription": "可选productId/customerId",
+      "success": "Page<LegacyRecord>",
+      "owner": "R4 B-016",
+      "requestSchema": null,
+      "responseDataSchema": {
+        "$ref": "#/schemas/LegacyPage"
+      },
+      "successHttp": 200,
+      "requiredHeaders": {
+        "Authorization": "Bearer <CUSTOMER/SELLER JWT>"
+      },
+      "errorsReference": "主文档第4、8～12节"
+    }
+  ],
+  "fixedMessages": [
+    {
+      "scenario": "---",
+      "message": "---",
+      "effect": "---"
+    },
+    {
+      "scenario": "客户未登录（收藏、加购、下单、转收藏通用）",
+      "message": "请先登录",
+      "effect": "拒绝，不写入"
+    },
+    {
+      "scenario": "客户登录失效",
+      "message": "请重新登录",
+      "effect": "拒绝，不写入"
+    },
+    {
+      "scenario": "商家取消未登录或登录失效",
+      "message": "请先登录后台",
+      "effect": "订单与库存不变"
+    },
+    {
+      "scenario": "操作他人收藏、购物车、混入他人行结算或转收藏",
+      "message": "无权操作",
+      "effect": "整次拒绝，数据不变"
+    },
+    {
+      "scenario": "客户操作他人订单",
+      "message": "无权操作该订单",
+      "effect": "状态与库存不变"
+    },
+    {
+      "scenario": "商家代客户转收藏",
+      "message": "无此权限",
+      "effect": "拒绝，数据不变"
+    },
+    {
+      "scenario": "首次收藏、重复收藏",
+      "message": "已收藏",
+      "effect": "唯一收藏，重复不刷新时间"
+    },
+    {
+      "scenario": "普通取消收藏成功",
+      "message": "已取消收藏",
+      "effect": "立即从列表移除"
+    },
+    {
+      "scenario": "重复取消不存在的收藏",
+      "message": "未收藏",
+      "effect": "幂等成功，仅此文案，其他收藏不变"
+    },
+    {
+      "scenario": "新收藏或新加购时商品已下架",
+      "message": "商品已下架",
+      "effect": "不新建记录"
+    },
+    {
+      "scenario": "新收藏或新加购时商品不存在",
+      "message": "商品不存在",
+      "effect": "不新建记录"
+    },
+    {
+      "scenario": "收藏失效项",
+      "message": "已下架",
+      "effect": "保留，不进入可购买详情"
+    },
+    {
+      "scenario": "首次加购或同请求重复提交",
+      "message": "已加入购物车",
+      "effect": "加购一次，重复不再加量"
+    },
+    {
+      "scenario": "改数量成功",
+      "message": "已更新",
+      "effect": "更新该行"
+    },
+    {
+      "scenario": "删除行或数量改为 0",
+      "message": "已移除",
+      "effect": "移除该行"
+    },
+    {
+      "scenario": "数量负数或小数",
+      "message": "数量无效，请输入正整数",
+      "effect": "拒绝，原数量不变"
+    },
+    {
+      "scenario": "删除后用旧页面改量",
+      "message": "该商品已不在购物车，请刷新页面后查看。",
+      "effect": "不重建，库存、订单、其他行不变"
+    },
+    {
+      "scenario": "空收藏列表",
+      "message": "暂无收藏",
+      "effect": "空态"
+    },
+    {
+      "scenario": "空购物车",
+      "message": "购物车是空的",
+      "effect": "空态"
+    },
+    {
+      "scenario": "空选下单、空选转收藏、转收藏所选行全部已被删除",
+      "message": "请选择商品",
+      "effect": "拒绝，数据不变"
+    },
+    {
+      "scenario": "下单时在售但库存不足",
+      "message": "商品「XX」库存不足：当前可售 N 件，您选购了 M 件，请减少数量或移除后重试。",
+      "effect": "整单拒绝，不建单、不扣库、不清车"
+    },
+    {
+      "scenario": "下单时所选商品已下架",
+      "message": "商品「XX」已下架，请从购物车移除后重试。",
+      "effect": "整单拒绝，不建单、不扣库、不清车"
+    },
+    {
+      "scenario": "下单成功",
+      "message": "下单成功",
+      "effect": "同时完成建单、扣库、清车，并展示订单号及详情入口"
+    },
+    {
+      "scenario": "同一结算再次提交",
+      "message": "订单已提交，请勿重复下单",
+      "effect": "最多一张订单，不重复扣库、清车"
+    },
+    {
+      "scenario": "客户在开始发货状态取消",
+      "message": "订单已开始发货，不可取消",
+      "effect": "取消失败，状态与库存不变"
+    },
+    {
+      "scenario": "完成后取消",
+      "message": "订单已完成，不可取消",
+      "effect": "取消失败，状态与库存不变"
+    },
+    {
+      "scenario": "重复取消已取消订单",
+      "message": "订单已取消",
+      "effect": "拒绝，不再次回补"
+    },
+    {
+      "scenario": "客户请求部分取消",
+      "message": "不支持部分取消",
+      "effect": "整次拒绝，状态与库存不变"
+    },
+    {
+      "scenario": "订单不存在",
+      "message": "订单不存在",
+      "effect": "拒绝，不变"
+    },
+    {
+      "scenario": "客户取消先成功，商家再发货",
+      "message": "订单已取消，不可发货",
+      "effect": "发货失败，不改变已取消结果"
+    },
+    {
+      "scenario": "非法库存（负数、小数或非整数）",
+      "message": "库存不能为负数，请输入非负整数。",
+      "effect": "整次拒绝，原库存不变"
+    },
+    {
+      "scenario": "转收藏二次确认",
+      "message": "所选 N 件商品将从购物车移除并加入收藏",
+      "effect": "N 为商品行数，不是数量之和"
+    },
+    {
+      "scenario": "转收藏成功",
+      "message": "已收藏 N 件商品",
+      "effect": "整行移出，已收藏去重仍移车"
+    },
+    {
+      "scenario": "同一转收藏重复提交",
+      "message": "请勿重复操作",
+      "effect": "最多处理一次；原成功后再取消并重试时返回原结果，不重新收藏"
+    },
+    {
+      "scenario": "转收藏写入或移车失败",
+      "message": "操作失败，请重试",
+      "effect": "整批回滚"
+    },
+    {
+      "scenario": "顾客未设置默认交易地点",
+      "message": "未设置",
+      "effect": "既有顾客列表占位"
+    }
+  ],
+  "mocks": {
+    "orderSuccess": {
+      "http": 201,
+      "body": {
+        "code": 0,
+        "message": "下单成功",
+        "data": {
+          "orderId": "101",
+          "orderNo": "aa8ec998-07a2-4f02-a97e-e19043f6f6e3",
+          "customerId": "7",
+          "status": "PLACED",
+          "items": [
+            {
+              "productId": "11",
+              "productName": "显示器",
+              "unitPrice": "19.90",
+              "quantity": "3",
+              "lineAmount": "59.70"
+            },
+            {
+              "productId": "12",
+              "productName": "键盘",
+              "unitPrice": "2.35",
+              "quantity": "2",
+              "lineAmount": "4.70"
+            }
+          ],
+          "totalAmount": "64.40",
+          "createdAt": "2026-11-15T10:00:00.000000",
+          "cancelledBy": null,
+          "cancelledAt": null,
+          "cancelReason": null,
+          "allowedActions": [
+            "CANCEL"
+          ]
+        }
+      }
+    },
+    "orderDetail": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "message": "ok",
+        "data": {
+          "orderId": "101",
+          "orderNo": "aa8ec998-07a2-4f02-a97e-e19043f6f6e3",
+          "customerId": "7",
+          "status": "PLACED",
+          "items": [
+            {
+              "productId": "11",
+              "productName": "显示器",
+              "unitPrice": "19.90",
+              "quantity": "3",
+              "lineAmount": "59.70"
+            },
+            {
+              "productId": "12",
+              "productName": "键盘",
+              "unitPrice": "2.35",
+              "quantity": "2",
+              "lineAmount": "4.70"
+            }
+          ],
+          "totalAmount": "64.40",
+          "createdAt": "2026-11-15T10:00:00.000000",
+          "cancelledBy": null,
+          "cancelledAt": null,
+          "cancelReason": null,
+          "allowedActions": [
+            "CANCEL"
+          ]
+        }
+      }
+    },
+    "cancelledOrder": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "message": "ok",
+        "data": {
+          "orderId": "101",
+          "orderNo": "aa8ec998-07a2-4f02-a97e-e19043f6f6e3",
+          "customerId": "7",
+          "status": "CANCELLED",
+          "items": [
+            {
+              "productId": "11",
+              "productName": "显示器",
+              "unitPrice": "19.90",
+              "quantity": "3",
+              "lineAmount": "59.70"
+            },
+            {
+              "productId": "12",
+              "productName": "键盘",
+              "unitPrice": "2.35",
+              "quantity": "2",
+              "lineAmount": "4.70"
+            }
+          ],
+          "totalAmount": "64.40",
+          "createdAt": "2026-11-15T10:00:00.000000",
+          "cancelledBy": "SELLER",
+          "cancelledAt": "2026-11-15T10:10:00.000000",
+          "cancelReason": null,
+          "allowedActions": []
+        }
+      }
+    },
+    "cartInsufficientButSelectable": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "message": "ok",
+        "data": {
+          "items": [
+            {
+              "cartItemId": "21",
+              "productId": "11",
+              "productName": "显示器",
+              "unitPrice": "19.90",
+              "mainImageUrl": null,
+              "quantity": "3",
+              "stock": "2",
+              "online": true,
+              "invalidLabel": null,
+              "defaultCheckoutSelected": false,
+              "canCheckoutSelect": true,
+              "canFavoriteSelect": true,
+              "updatedAt": "2026-11-15T09:59:00.000000"
+            }
+          ]
+        }
+      }
+    },
+    "confirmation": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "message": "ok",
+        "data": {
+          "confirmationToken": "confirmation-example-token",
+          "items": [
+            {
+              "productId": "11",
+              "productName": "显示器",
+              "unitPrice": "19.90",
+              "quantity": "3",
+              "lineAmount": "59.70",
+              "cartItemId": "21"
+            },
+            {
+              "productId": "12",
+              "productName": "键盘",
+              "unitPrice": "2.35",
+              "quantity": "2",
+              "lineAmount": "4.70",
+              "cartItemId": "22"
+            }
+          ],
+          "totalAmount": "64.40",
+          "createdAt": "2026-11-15T09:59:59.000000"
+        }
+      }
+    },
+    "checkoutFailed": {
+      "http": 409,
+      "body": {
+        "code": 40910,
+        "message": "所选商品无法下单",
+        "data": {
+          "errors": [
+            {
+              "cartItemId": "21",
+              "productId": "11",
+              "productName": "显示器",
+              "reason": "INSUFFICIENT_STOCK",
+              "availableStock": "2",
+              "requestedQuantity": "3",
+              "message": "商品「显示器」库存不足：当前可售 2 件，您选购了 3 件，请减少数量或移除后重试。"
+            },
+            {
+              "cartItemId": "22",
+              "productId": "12",
+              "productName": "键盘",
+              "reason": "OFFLINE",
+              "message": "商品「键盘」已下架，请从购物车移除后重试。"
+            }
+          ]
+        }
+      }
+    },
+    "checkoutDuplicate": {
+      "http": 409,
+      "body": {
+        "code": 40909,
+        "message": "订单已提交，请勿重复下单",
+        "data": {
+          "orderId": "101",
+          "orderNo": "aa8ec998-07a2-4f02-a97e-e19043f6f6e3"
+        }
+      }
+    },
+    "staleQuantity": {
+      "http": 409,
+      "body": {
+        "code": 40912,
+        "message": "该商品已不在购物车，请刷新页面后查看。",
+        "data": null
+      }
+    },
+    "moveSuccess": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "message": "已收藏 1 件商品",
+        "data": {
+          "movedLineCount": 1,
+          "movedCartItemIds": [
+            "21"
+          ],
+          "skippedDeletedCartItemIds": [
+            "22"
+          ]
+        }
+      }
+    },
+    "moveRepeat": {
+      "http": 409,
+      "body": {
+        "code": 40915,
+        "message": "请勿重复操作",
+        "data": null
+      }
+    },
+    "moveReplayAfterCancel": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "message": "已收藏 1 件商品",
+        "data": {
+          "movedLineCount": 1,
+          "movedCartItemIds": [
+            "21"
+          ],
+          "skippedDeletedCartItemIds": [
+            "22"
+          ]
+        }
+      }
+    },
+    "unauthenticated": {
+      "http": 401,
+      "body": {
+        "code": 40101,
+        "message": "请先登录",
+        "data": null
+      }
+    },
+    "expired": {
+      "http": 401,
+      "body": {
+        "code": 40101,
+        "message": "请重新登录",
+        "data": null
+      }
+    },
+    "favoritePageEmpty": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "message": "ok",
+        "data": {
+          "items": [],
+          "page": 1,
+          "size": 10,
+          "total": 0,
+          "pages": 0
+        }
+      }
+    },
+    "amountBeyondSafeInteger": {
+      "quantity": "9007199254740993",
+      "unitPrice": "0.01",
+      "lineAmount": "90071992547409.93"
+    }
+  }
+}
