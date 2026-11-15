@@ -62,6 +62,13 @@ public class PurchaseIntent {
     @Column(name = "processed_at")
     private LocalDateTime processedAt;
 
+    /** 挑战 B 关闭一口价旧意向时由 V8 写入；原 status 与快照保持不变，应用代码只读。 */
+    @Column(name = "legacy_closed_at", insertable = false, updatable = false)
+    private LocalDateTime legacyClosedAt;
+
+    @Column(name = "legacy_close_reason", length = 40, insertable = false, updatable = false)
+    private String legacyCloseReason;
+
     protected PurchaseIntent() {
     }
 
@@ -155,6 +162,19 @@ public class PurchaseIntent {
     public Long getQueueSeq() { return queueSeq; }
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public LocalDateTime getLegacyClosedAt() {
+        return legacyClosedAt;
+    }
+
+    public String getLegacyCloseReason() {
+        return legacyCloseReason;
+    }
+
+    /** 已被挑战 B 关闭的一口价旧意向，只能作为只读归档展示。 */
+    public boolean isLegacyClosed() {
+        return legacyClosedAt != null;
     }
 
     public LocalDateTime getProcessedAt() {

@@ -1,6 +1,7 @@
 package com.team.shop.entity;
 
 import com.team.shop.domain.FreezeSource;
+import com.team.shop.domain.OfflineReason;
 import com.team.shop.domain.BusinessTime;
 import com.team.shop.domain.ProductStateMachine;
 import com.team.shop.domain.ProductStatus;
@@ -70,6 +71,11 @@ public class Product {
     @Enumerated(EnumType.STRING) @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "freeze_source", length = 20)
     private FreezeSource freezeSource;
+
+    /** 下架原因；取消回补时据此判断能否自动恢复在售。取值与清除规则由库存维护（B-006）负责。 */
+    @Enumerated(EnumType.STRING) @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "offline_reason", length = 20)
+    private OfflineReason offlineReason;
 
     @Column(name = "published_at", nullable = false)
     private LocalDateTime publishedAt;
@@ -213,6 +219,10 @@ public class Product {
 
     public FreezeSource getFreezeSource() {
         return freezeSource;
+    }
+
+    public OfflineReason getOfflineReason() {
+        return offlineReason;
     }
 
     public LocalDateTime getPublishedAt() {
