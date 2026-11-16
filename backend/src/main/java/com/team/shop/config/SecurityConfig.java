@@ -45,9 +45,11 @@ public class SecurityConfig {
                 .exceptionHandling(eh -> eh
                         // 未认证/无权限时也返回统一 ApiResponse 结构，供前端按 401 跳转登录页
                         .authenticationEntryPoint((request, response, ex) ->
-                                writeJson(response, 401, 40101, "未登录或登录已过期"))
+                                writeJson(response, 401, 40101, authenticationMessage(request)))
                         .accessDeniedHandler((request, response, ex) ->
-                                writeJson(response, 403, 40301, "角色无权访问")))
+                                writeJson(response, 403, 40301,
+                                        request.getRequestURI().equals(request.getContextPath() + "/api/me/cart/move-to-favorites")
+                                                ? "无此权限" : "角色无权访问")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/api/categories/**", "/api/images/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
@@ -66,6 +68,12 @@ public class SecurityConfig {
         response.setStatus(status);
         response.setContentType("application/json;charset=UTF-8");
         new ObjectMapper().writeValue(response.getWriter(), com.team.shop.dto.ApiResponse.error(code, message));
+    }
+
+    private String authenticationMessage(jakarta.servlet.http.HttpServletRequest request) {
+        String path = request.getRequestURI().substring(request.getContextPath().length());
+        if (path.startsWith("/api/admin/orders/") && path.endsWith("/cancel")) return "请先登录后台";
+        return Boolean.TRUE.equals(request.getAttribute(JwtAuthFilter.INVALID_TOKEN)) ? "请重新登录" : "请先登录";
     }
 
     @Bean
