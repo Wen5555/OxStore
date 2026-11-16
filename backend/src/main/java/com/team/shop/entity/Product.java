@@ -24,6 +24,10 @@ import jakarta.persistence.CascadeType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import jakarta.persistence.Convert;
+import com.team.shop.entity.converter.BigIntegerStringConverter;
+import com.team.shop.exception.BizException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,8 +52,9 @@ public class Product {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    @Column(nullable = false)
-    private int stock;
+    @Convert(converter = BigIntegerStringConverter.class)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
+    private BigInteger stock;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category2_id", nullable = false)
@@ -90,14 +95,16 @@ public class Product {
     }
 
     /** Create an item with its initial inventory and category. */
-    public static Product create(String name, String description, BigDecimal price, int stock, Category category) {
+    public static Product create(String name, String description, BigDecimal price, BigInteger stock, Category category) {
+        requireNonNegative(stock);
         Product p = new Product();
         p.name = name;
         p.description = description;
         p.price = price;
         p.stock = stock;
         p.category = category;
-        p.status = stock > 0 ? ProductStatus.ONLINE : ProductStatus.OFFLINE;
+        p.status = stock.signum() > 0 ? ProductStatus.ONLINE : ProductStatus.OFFLINE;
+        p.offlineReason = stock.signum() == 0 ? OfflineReason.AUTO_ZERO : null;
         p.publishedAt = BusinessTime.now();
         p.statusUpdatedAt = p.publishedAt;
         return p;
@@ -110,37 +117,83 @@ public class Product {
         return p;
     }
 
+    /** Compatibility for internal callers creating small legacy fixtures. */
+    public static Product create(String name, String description, BigDecimal price, int stock, Category category) {
+        return create(name, description, price, BigInteger.valueOf(stock), category);
+    }
+
+    public static void requireNonNegative(BigInteger stock) {
+        if (stock == null || stock.signum() < 0) throw new BizException("库存不能为负数，请输入非负整数。");
+    }
+
+    /** Called inside the future checkout transaction after the product row has been locked. */
+    public void deductForOrder(BigInteger quantity, LocalDateTime now) {
+        requirePositiveQuantity(quantity);
+        if (isAuction()) throw new com.team.shop.exception.StateConflictException("拍卖商品不能经购物车下单", 40908);
+        if (status != ProductStatus.ONLINE) throw new com.team.shop.exception.StateConflictException("商品已下架");
+        if (stock.compareTo(quantity) < 0) throw new com.team.shop.exception.StateConflictException("库存不足", 40905);
+        stock = stock.subtract(quantity);
+        if (stock.signum() == 0) {
+            status = ProductStatus.OFFLINE;
+            offlineReason = OfflineReason.AUTO_ZERO;
+            freezeSource = null;
+        }
+        statusUpdatedAt = now;
+    }
+
+    /** Caller must atomically guard the order transition so this compensation runs only once. */
+    public void restoreForCancelledOrder(BigInteger quantity, LocalDateTime now) {
+        requirePositiveQuantity(quantity);
+        if (isAuction()) throw new com.team.shop.exception.StateConflictException("拍卖商品不使用五态取消回补", 40908);
+        stock = stock.add(quantity);
+        if (status == ProductStatus.OFFLINE && offlineReason == OfflineReason.AUTO_ZERO && stock.signum() > 0) {
+            status = ProductStatus.ONLINE;
+            offlineReason = null;
+            freezeSource = null;
+        }
+        statusUpdatedAt = now;
+    }
+
+    private static void requirePositiveQuantity(BigInteger quantity) {
+        if (quantity == null || quantity.signum() <= 0) throw new BizException("数量无效，请输入正整数");
+    }
+
     public void addImage(String imagePath, int sortOrder, String contentType, long sizeBytes) {
         images.add(new ProductImage(this, imagePath, sortOrder, contentType, sizeBytes));
     }
 
-    public void updateInventoryAndCategory(int stock, Category category, LocalDateTime now) {
-        if (stock < 0) {
-            throw new IllegalArgumentException("库存不能为负数");
-        }
+    public void updateInventoryAndCategory(BigInteger stock, Category category, LocalDateTime now) {
+        requireNonNegative(stock);
         this.stock = stock;
         this.category = category;
-        if (stock == 0) {
+        if (stock.signum() == 0) {
             this.status = ProductStatus.OFFLINE;
+            if (offlineReason != OfflineReason.MANUAL) offlineReason = OfflineReason.AUTO_ZERO;
             this.freezeSource = null;
         }
         this.statusUpdatedAt = now;
     }
 
+    public void updateInventoryAndCategory(int stock, Category category, LocalDateTime now) {
+        updateInventoryAndCategory(BigInteger.valueOf(stock), category, now);
+    }
+
     public void takeOffline(LocalDateTime now) {
-        if (status != ProductStatus.ONLINE) {
-            throw new com.team.shop.exception.StateConflictException("仅在售商品可以手动下架");
+        if (status != ProductStatus.ONLINE && status != ProductStatus.OFFLINE) {
+            throw new com.team.shop.exception.StateConflictException("商品当前不可手动下架");
         }
         status = ProductStatus.OFFLINE;
+        offlineReason = OfflineReason.MANUAL;
         freezeSource = null;
         statusUpdatedAt = now;
     }
 
     public void putOnline(LocalDateTime now) {
-        if (status != ProductStatus.OFFLINE || stock <= 0) {
+        if (status != ProductStatus.OFFLINE || stock.signum() <= 0) {
             throw new com.team.shop.exception.StateConflictException("仅库存大于零的已下架商品可以上架");
         }
         status = ProductStatus.ONLINE;
+        offlineReason = null;
         freezeSource = null;
         statusUpdatedAt = now;
     }
@@ -155,23 +208,25 @@ public class Product {
     /** Confirm one successful purchase and apply its inventory change. */
     public boolean markTradeSucceeded(LocalDateTime now) {
         ProductStateMachine.assertCanMarkSuccess(status, freezeSource);
-        if (stock <= 0) {
+        if (stock.signum() <= 0) {
             throw new com.team.shop.exception.StateConflictException("库存不足，无法确认交易成功", 40905);
         }
-        stock--;
-        this.status = stock == 0 ? ProductStatus.OFFLINE : ProductStatus.ONLINE;
+        stock = stock.subtract(BigInteger.ONE);
+        this.status = stock.signum() == 0 ? ProductStatus.OFFLINE : ProductStatus.ONLINE;
+        this.offlineReason = stock.signum() == 0 ? OfflineReason.AUTO_ZERO : null;
         this.freezeSource = null;
-        if (stock == 0) {
+        if (stock.signum() == 0) {
             this.soldAt = now;
         }
         this.statusUpdatedAt = now;
-        return stock == 0;
+        return stock.signum() == 0;
     }
 
     /** A failed trade restores the item to sale without starting the next queued trade. */
     public void markTradeFailed(LocalDateTime now) {
         ProductStateMachine.assertCanMarkFailed(status, freezeSource);
         this.status = ProductStatus.ONLINE;
+        this.offlineReason = null;
         this.freezeSource = null;
         this.statusUpdatedAt = now;
     }
@@ -183,6 +238,7 @@ public class Product {
         }
         ProductStateMachine.assertCanMarkFailed(status, freezeSource);
         this.status = ProductStatus.OFFLINE;
+        this.offlineReason = OfflineReason.MANUAL;
         this.freezeSource = null;
         this.statusUpdatedAt = now;
     }
@@ -203,7 +259,7 @@ public class Product {
         return price;
     }
 
-    public int getStock() { return stock; }
+    public BigInteger getStock() { return stock; }
 
     public Category getCategory() { return category; }
 

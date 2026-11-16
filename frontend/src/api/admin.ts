@@ -23,7 +23,7 @@ export function createProduct(data: FormData) {
   return request<ProductDetailResponse>({ url: '/admin/products', method: 'POST', data }).then(mapProductDetail)
 }
 
-export function updateProduct(productId: number, data: { stock?: number; category2Id?: number }) {
+export function updateProduct(productId: number, data: { stock?: string; category2Id?: number }) {
   return request<ProductDetailResponse>({ url: `/admin/products/${productId}`, method: 'PATCH', data }).then(mapProductDetail)
 }
 

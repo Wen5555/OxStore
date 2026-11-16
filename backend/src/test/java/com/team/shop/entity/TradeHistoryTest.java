@@ -54,13 +54,13 @@ class TradeHistoryTest {
         Product inStock = Product.create("测试", "", BigDecimal.ONE, 2, category());
         inStock.startTrade(BusinessTime.now());
         assertEquals(false, inStock.markTradeSucceeded(BusinessTime.now()));
-        assertEquals(1, inStock.getStock());
+        assertEquals(java.math.BigInteger.valueOf(1), inStock.getStock());
         assertEquals(ProductStatus.ONLINE, inStock.getStatus());
 
         Product lastItem = Product.create("测试", "", BigDecimal.ONE, 1, category());
         lastItem.startTrade(BusinessTime.now());
         assertEquals(true, lastItem.markTradeSucceeded(BusinessTime.now()));
-        assertEquals(0, lastItem.getStock());
+        assertEquals(java.math.BigInteger.valueOf(0), lastItem.getStock());
         assertEquals(ProductStatus.OFFLINE, lastItem.getStatus());
     }
 }
