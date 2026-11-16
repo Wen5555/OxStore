@@ -2,7 +2,6 @@ package com.team.shop.service;
 
 import com.team.shop.domain.BusinessTime;
 import com.team.shop.domain.IntentStatus;
-import com.team.shop.domain.ProductEventType;
 import com.team.shop.domain.ProductStatus;
 import com.team.shop.domain.TradeResult;
 import com.team.shop.dto.request.FailAction;
@@ -21,18 +20,15 @@ import com.team.shop.repository.ProductStatusEventRepository;
 import com.team.shop.repository.TradeAttemptRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -73,52 +69,40 @@ class TradeServiceImplTest {
     }
 
     @Test
-    void successDeductsOneAndReturnsProductOnlineWithoutAdvancingQueue() {
+    void auctionWinnerCanCompleteThroughTheExistingTradePath() {
+        prepareAuctionFixture();
         service.confirmSuccess(2L);
 
-        assertEquals(java.math.BigInteger.valueOf(1), product.getStock());
-        assertEquals(ProductStatus.ONLINE, product.getStatus());
+        assertEquals(java.math.BigInteger.ZERO, product.getStock());
+        assertEquals(ProductStatus.OFFLINE, product.getStatus());
         assertEquals(IntentStatus.SUCCESS, intent.getStatus());
         assertEquals(TradeResult.SUCCESS, attempt.getResult());
         verify(histories).save(any(OrderHistory.class));
-        verify(intents, never()).findQueueForUpdate(1L, IntentStatus.QUEUING);
+        verify(intents).findQueueForUpdate(1L, IntentStatus.QUEUING);
     }
 
     @Test
-    void finalUnitOfflinesProductAndFailsEveryQueuedIntentAtomically() {
-        product = Product.create("test", "", BigDecimal.ONE, 1, product.getCategory());
-        ReflectionTestUtils.setField(product, "id", 1L);
-        product.startTrade(BusinessTime.now());
-        when(products.findByIdForUpdate(1L)).thenReturn(Optional.of(product));
-        PurchaseIntent pending = PurchaseIntent.submit(product, intent.getCustomer(), 2);
-        ReflectionTestUtils.setField(pending, "id", 4L);
-        when(intents.findQueueForUpdate(1L, IntentStatus.QUEUING)).thenReturn(List.of(pending));
+    void fixedPriceLegacyTradeActionsAreClosedWithoutMutation() {
+        StateConflictException start = assertThrows(StateConflictException.class, () -> service.startTrade(2L));
+        StateConflictException success = assertThrows(StateConflictException.class, () -> service.confirmSuccess(2L));
+        StateConflictException discard = assertThrows(StateConflictException.class,
+                () -> service.confirmFail(2L, FailAction.DISCARD));
+        StateConflictException requeue = assertThrows(StateConflictException.class,
+                () -> service.confirmFail(2L, FailAction.REQUEUE));
 
-        service.confirmSuccess(2L);
-
-        assertEquals(java.math.BigInteger.valueOf(0), product.getStock());
-        assertEquals(ProductStatus.OFFLINE, product.getStatus());
-        assertEquals(IntentStatus.FAILED, pending.getStatus());
-        verify(histories, org.mockito.Mockito.times(2)).save(any(OrderHistory.class));
-    }
-
-    @Test
-    void discardRecordsFailureWhileRequeueLeavesNextIntentQueued() {
-        when(intents.maxQueueSeq(1L)).thenReturn(4L);
-        service.confirmFail(2L, FailAction.REQUEUE);
-
-        assertEquals(ProductStatus.ONLINE, product.getStatus());
-        assertEquals(IntentStatus.QUEUING, intent.getStatus());
-        assertEquals(5L, intent.getQueueSeq());
-        assertEquals(TradeResult.FAILED, attempt.getResult());
-        ArgumentCaptor<ProductStatusEvent> captor = ArgumentCaptor.forClass(ProductStatusEvent.class);
-        verify(events).save(captor.capture());
-        assertEquals(ProductEventType.TRADE_FAILED, captor.getValue().getEventType());
-        assertEquals(ProductStatus.ONLINE, captor.getValue().getToStatus());
+        assertEquals(40917, start.getCode());
+        assertEquals(40917, success.getCode());
+        assertEquals(40917, discard.getCode());
+        assertEquals(40917, requeue.getCode());
+        assertEquals(java.math.BigInteger.valueOf(2), product.getStock());
+        assertEquals(ProductStatus.FROZEN, product.getStatus());
+        assertEquals(IntentStatus.IN_TRANSACTION, intent.getStatus());
+        verifyNoInteractions(attempts, events, histories);
     }
 
     @Test
     void alreadyFinishedTradeCannotBeConfirmedAgain() {
+        prepareAuctionFixture();
         attempt.succeed(BusinessTime.now());
         when(attempts.findOpen(2L)).thenReturn(Optional.empty());
         assertThrows(StateConflictException.class, () -> service.confirmSuccess(2L));
@@ -145,5 +129,22 @@ class TradeServiceImplTest {
         assertEquals(ProductStatus.OFFLINE, auctionProduct.getStatus());
         assertEquals(IntentStatus.FAILED, auctionIntent.getStatus());
         assertEquals(TradeResult.FAILED, auctionAttempt.getResult());
+    }
+
+    private void prepareAuctionFixture() {
+        var auctionProduct = Product.createAuction("auction", "", BigDecimal.ONE, product.getCategory());
+        ReflectionTestUtils.setField(auctionProduct, "id", 1L);
+        var now = BusinessTime.now();
+        var auctionIntent = PurchaseIntent.createAuctionWinner(auctionProduct, intent.getCustomer(), now);
+        ReflectionTestUtils.setField(auctionIntent, "id", 2L);
+        auctionProduct.startTrade(now);
+        var auctionAttempt = new TradeAttempt(auctionIntent, now);
+        product = auctionProduct;
+        intent = auctionIntent;
+        attempt = auctionAttempt;
+        when(products.findByIdForUpdate(1L)).thenReturn(Optional.of(auctionProduct));
+        when(intents.findById(2L)).thenReturn(Optional.of(auctionIntent));
+        when(intents.findByIdForUpdate(2L)).thenReturn(Optional.of(auctionIntent));
+        when(attempts.findOpen(2L)).thenReturn(Optional.of(auctionAttempt));
     }
 }
