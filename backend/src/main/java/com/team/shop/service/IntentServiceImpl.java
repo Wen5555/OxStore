@@ -4,6 +4,7 @@ import com.team.shop.domain.BusinessTime;
 import com.team.shop.domain.IntentStatus;
 import com.team.shop.domain.ProductStateMachine;
 import com.team.shop.domain.ProductStatus;
+import com.team.shop.domain.SellingMode;
 import com.team.shop.dto.response.IntentCreatedResponse;
 import com.team.shop.dto.response.PageResponse;
 import com.team.shop.dto.response.QueueItemResponse;
@@ -44,6 +45,9 @@ public class IntentServiceImpl implements IntentService {
         if (product.isAuction()) {
             throw new StateConflictException("拍卖商品不能提交购买意向", 40908);
         }
+        if (product.getSellingMode() == SellingMode.FIXED_PRICE) {
+            throw new StateConflictException("一口价旧购买意向已关闭，请通过购物车下单", 40917);
+        }
         if (!ProductStateMachine.isAcceptingIntent(product.getStatus())) {
             throw new StateConflictException("商品当前不可提交购买意向");
         }
@@ -60,7 +64,10 @@ public class IntentServiceImpl implements IntentService {
         if (page < 1 || size < 1 || size > MAX_PAGE_SIZE) {
             throw new PaginationException("分页参数必须满足 page>=1 且 1<=size<=100");
         }
-        products.findById(productId).orElseThrow(() -> new NotFoundException("商品不存在"));
+        Product product = products.findById(productId).orElseThrow(() -> new NotFoundException("商品不存在"));
+        if (product.getSellingMode() == SellingMode.FIXED_PRICE) {
+            throw new StateConflictException("一口价旧购买意向已关闭，请查看只读归档", 40917);
+        }
         List<PurchaseIntent> ordered = new ArrayList<>();
         intents.findByProductIdAndStatus(productId, IntentStatus.IN_TRANSACTION).ifPresent(ordered::add);
         ordered.addAll(intents.findQueue(productId, IntentStatus.QUEUING));

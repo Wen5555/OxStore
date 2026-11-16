@@ -1,8 +1,12 @@
 package com.team.shop.repository;
 
 import com.team.shop.domain.IntentStatus;
+import com.team.shop.domain.SellingMode;
 import com.team.shop.entity.PurchaseIntent;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -36,4 +40,24 @@ public interface IntentRepository extends JpaRepository<PurchaseIntent, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select i from PurchaseIntent i where i.id = :id")
     Optional<PurchaseIntent> findByIdForUpdate(@Param("id") Long id);
+
+    @EntityGraph(attributePaths = {"product"})
+    @Query(value = """
+            select i from PurchaseIntent i
+            join i.product p
+            where p.sellingMode = :sellingMode
+              and (:productId is null or p.id = :productId)
+              and (:customerId is null or i.customer.id = :customerId)
+            """,
+            countQuery = """
+                    select count(i) from PurchaseIntent i
+                    join i.product p
+                    where p.sellingMode = :sellingMode
+                      and (:productId is null or p.id = :productId)
+                      and (:customerId is null or i.customer.id = :customerId)
+                    """)
+    Page<PurchaseIntent> findLegacyPage(@Param("sellingMode") SellingMode sellingMode,
+                                        @Param("productId") Long productId,
+                                        @Param("customerId") Long customerId,
+                                        Pageable pageable);
 }

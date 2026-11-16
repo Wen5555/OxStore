@@ -15,6 +15,9 @@ public interface ShopOrderRepository extends JpaRepository<ShopOrder, Long> {
 
     Optional<ShopOrder> findByOrderNo(String orderNo);
 
+    @Query("select o.customer.id from ShopOrder o where o.id = :id")
+    Optional<Long> findCustomerIdById(@Param("id") Long id);
+
     /** 锁顺序 customer → operation_receipt → order → product…，调用前应已持有客户锁。 */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select o from ShopOrder o where o.id = :id")

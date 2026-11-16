@@ -45,6 +45,7 @@ public class TradeServiceImpl implements TradeService {
     public void startTrade(Long intentId) {
         Product product = lockProductForIntent(intentId);
         PurchaseIntent intent = lockIntent(intentId, product);
+        assertLegacyTradeAllowed(intent, product);
         if (intents.findByProductIdAndStatus(product.getId(), IntentStatus.IN_TRANSACTION).isPresent()) {
             throw new StateConflictException("该商品已有交易中的意向", 40902);
         }
@@ -67,6 +68,7 @@ public class TradeServiceImpl implements TradeService {
     public void confirmSuccess(Long intentId) {
         Product product = lockProductForIntent(intentId);
         PurchaseIntent intent = lockIntent(intentId, product);
+        assertLegacyTradeAllowed(intent, product);
         TradeAttempt attempt = requireOpenAttempt(intent);
         LocalDateTime now = BusinessTime.now();
         ProductStatus before = product.getStatus();
@@ -92,6 +94,7 @@ public class TradeServiceImpl implements TradeService {
         }
         Product product = lockProductForIntent(intentId);
         PurchaseIntent intent = lockIntent(intentId, product);
+        assertLegacyTradeAllowed(intent, product);
         TradeAttempt attempt = requireOpenAttempt(intent);
         LocalDateTime now = BusinessTime.now();
         ProductStatus before = product.getStatus();
@@ -141,6 +144,12 @@ public class TradeServiceImpl implements TradeService {
         }
         return attempts.findOpen(intent.getId())
                 .orElseThrow(() -> new StateConflictException("交易尝试已结束，请刷新队列"));
+    }
+
+    private void assertLegacyTradeAllowed(PurchaseIntent intent, Product product) {
+        if (intent.isLegacyClosed() || !product.isAuction()) {
+            throw new StateConflictException("一口价旧交易已关闭，仅拍卖中标履约保留原入口", 40917);
+        }
     }
 
     private OrderHistory historyFor(PurchaseIntent intent, IntentStatus status, LocalDateTime transactedAt) {
