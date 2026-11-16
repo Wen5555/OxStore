@@ -10,6 +10,7 @@ export class ApiError extends Error {
 }
 
 function apiErrorMessage(code: number | undefined, fallback: string, url?: string) {
+  if (code === 40001 && url?.startsWith('/admin/products') && fallback === '库存不能为负数，请输入非负整数。') return fallback
   if (code === 40903 && url === '/auth/register') return '用户名已存在，请更换用户名。'
   switch (code) {
     case 40001: return '请检查必填字段和输入格式。'

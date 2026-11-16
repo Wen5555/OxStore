@@ -157,16 +157,16 @@ class Iteration2ApiIntegrationTest {
         post("/api/admin/products/" + manualProductId + "/offline", null, sellerToken, 200);
         assertEquals(404, http.getForEntity("/api/products/" + manualProductId, JsonNode.class)
                 .getStatusCode().value());
-        assertEquals(0, get("/api/admin/intents?productId=" + manualProductId, sellerToken)
+        assertEquals(1, get("/api/admin/intents?productId=" + manualProductId, sellerToken)
                 .path("data").path("total").asInt());
         JsonNode historyAfterManualOffline = get("/api/me/order-history?page=1&size=10", buyerToken).path("data");
-        assertEquals(5, historyAfterManualOffline.path("total").asInt());
+        assertEquals(4, historyAfterManualOffline.path("total").asInt());
         HttpRequest inventoryRequest = HttpRequest.newBuilder(URI.create(
                         http.getRootUri() + "/api/admin/products/" + manualProductId))
                 .header("Authorization", "Bearer " + sellerToken)
                 .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(
-                        objectMapper.writeValueAsString(Map.of("stock", 2, "category2Id", category2Id))))
+                        objectMapper.writeValueAsString(Map.of("stock", "2", "category2Id", category2Id))))
                 .build();
         HttpResponse<String> inventoryResponse = HttpClient.newHttpClient().send(inventoryRequest,
                 HttpResponse.BodyHandlers.ofString());

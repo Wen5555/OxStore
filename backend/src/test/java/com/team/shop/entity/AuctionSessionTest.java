@@ -41,7 +41,7 @@ class AuctionSessionTest {
         assertEquals(SellingMode.FIXED_PRICE, Product.create("普通", "", BigDecimal.ONE, 5, category()).getSellingMode());
         Product auction = Product.createAuction("拍品", "", new BigDecimal("10.00"), category());
         assertEquals(SellingMode.AUCTION, auction.getSellingMode());
-        assertEquals(1, auction.getStock());
+        assertEquals(java.math.BigInteger.valueOf(1), auction.getStock());
         assertEquals(ProductStatus.ONLINE, auction.getStatus());
         assertThrows(IllegalArgumentException.class, () -> AuctionSession.open(
                 Product.create("普通", "", BigDecimal.ONE, 1, category()), BigDecimal.ONE, BigDecimal.ONE, start, end));

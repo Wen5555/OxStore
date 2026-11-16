@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -131,7 +132,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductDetailResponse publish(String name, BigDecimal price, Long category2Id, int stock,
+    public ProductDetailResponse publish(String name, BigDecimal price, Long category2Id, BigInteger stock,
                                          String descriptionHtml, List<String> imagePaths) {
         return publish(name, price, category2Id, stock, descriptionHtml, imagePaths,
                 SellingMode.FIXED_PRICE, null, null, null);
@@ -139,7 +140,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductDetailResponse publish(String name, BigDecimal price, Long category2Id, int stock,
+    public ProductDetailResponse publish(String name, BigDecimal price, Long category2Id, BigInteger stock,
                                          String descriptionHtml, List<String> imagePaths, SellingMode sellingMode,
                                          BigDecimal startPrice, BigDecimal minIncrement, LocalDateTime endsAt) {
         SellingMode mode = sellingMode == null ? SellingMode.FIXED_PRICE : sellingMode;
@@ -151,7 +152,7 @@ public class ProductServiceImpl implements ProductService {
             if (startPrice == null || minIncrement == null || endsAt == null) {
                 throw new BizException("拍卖必须填写起拍价、最小加价和截止时间");
             }
-            if (stock != 1) {
+            if (!BigInteger.ONE.equals(stock)) {
                 throw new BizException("拍卖商品库存必须为 1");
             }
             LocalDateTime now = BusinessTime.now();
@@ -182,12 +183,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductDetailResponse update(Long productId, Integer stock, Long category2Id) {
+    public ProductDetailResponse update(Long productId, BigInteger stock, Long category2Id) {
         if (stock == null && category2Id == null) {
             throw new BizException("必须提供库存或二级类目");
         }
-        if (stock != null && stock < 0) {
-            throw new BizException("库存不能为负数");
+        if (stock != null && stock.signum() < 0) {
+            throw new BizException("库存不能为负数，请输入非负整数。");
         }
         Product product = lockProduct(productId);
         if (product.isAuction() && stock != null) {
@@ -197,11 +198,10 @@ public class ProductServiceImpl implements ProductService {
             throw new StateConflictException("交易中的商品不可编辑");
         }
         ProductStatus before = product.getStatus();
-        int newStock = stock == null ? product.getStock() : stock;
+        BigInteger newStock = stock == null ? product.getStock() : stock;
         Category category = category2Id == null ? product.getCategory() : requireSecondLevelCategory(category2Id);
         product.updateInventoryAndCategory(newStock, category, BusinessTime.now());
-        if (before == ProductStatus.ONLINE && newStock == 0) {
-            failQueuedIntents(product, BusinessTime.now());
+        if (before == ProductStatus.ONLINE && newStock.signum() == 0) {
             events.save(new ProductStatusEvent(product, null, ProductEventType.INVENTORY_OFFLINE, before,
                     product.getStatusUpdatedAt()));
         }
@@ -215,12 +215,8 @@ public class ProductServiceImpl implements ProductService {
         if (product.isAuction()) {
             throw new StateConflictException("拍卖商品不能手动下架", 40901);
         }
-        if (intents.findByProductIdAndStatus(productId, IntentStatus.IN_TRANSACTION).isPresent()) {
-            throw new StateConflictException("交易中的商品不可下架");
-        }
         ProductStatus before = product.getStatus();
         product.takeOffline(BusinessTime.now());
-        failQueuedIntents(product, product.getStatusUpdatedAt());
         events.save(new ProductStatusEvent(product, null, ProductEventType.MANUAL_OFFLINE, before,
                 product.getStatusUpdatedAt()));
         return ProductDetailResponse.from(product);
@@ -270,7 +266,7 @@ public class ProductServiceImpl implements ProductService {
         return Jsoup.clean(descriptionHtml, DESCRIPTION_TAGS);
     }
 
-    private void validateProduct(String name, BigDecimal price, int stock, List<String> imagePaths) {
+    private void validateProduct(String name, BigDecimal price, BigInteger stock, List<String> imagePaths) {
         if (name == null || name.isBlank() || name.length() > 200) {
             throw new BizException("商品名称必填且不能超过 200 个字符");
         }
@@ -278,8 +274,8 @@ public class ProductServiceImpl implements ProductService {
                 || price.compareTo(new BigDecimal("99999999.99")) > 0) {
             throw new BizException("价格必须为正数且最多两位小数");
         }
-        if (stock < 0) {
-            throw new BizException("库存不能为负数");
+        if (stock == null || stock.signum() < 0) {
+            throw new BizException("库存不能为负数，请输入非负整数。");
         }
         if (imagePaths == null || imagePaths.size() > 9) {
             throw new BizException("商品图片最多上传 9 张");
@@ -300,16 +296,6 @@ public class ProductServiceImpl implements ProductService {
 
     private Product lockProduct(Long productId) {
         return products.findByIdForUpdate(productId).orElseThrow(() -> new NotFoundException("商品不存在"));
-    }
-
-    private void failQueuedIntents(Product product, java.time.LocalDateTime now) {
-        for (var intent : intents.findQueueForUpdate(product.getId(), IntentStatus.QUEUING)) {
-            intent.markQueuedIntentFailed(now);
-            if (intent.getCustomer() != null) {
-                orderHistory.save(new OrderHistory(intent.getId(), intent.getCustomer(),
-                        intent.getProductNameSnapshot(), intent.getSubmittedAt(), IntentStatus.FAILED, now));
-            }
-        }
     }
 
     private Pageable pageable(int page, int size) {

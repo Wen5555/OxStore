@@ -76,7 +76,7 @@ class TradeServiceImplTest {
     void successDeductsOneAndReturnsProductOnlineWithoutAdvancingQueue() {
         service.confirmSuccess(2L);
 
-        assertEquals(1, product.getStock());
+        assertEquals(java.math.BigInteger.valueOf(1), product.getStock());
         assertEquals(ProductStatus.ONLINE, product.getStatus());
         assertEquals(IntentStatus.SUCCESS, intent.getStatus());
         assertEquals(TradeResult.SUCCESS, attempt.getResult());
@@ -96,7 +96,7 @@ class TradeServiceImplTest {
 
         service.confirmSuccess(2L);
 
-        assertEquals(0, product.getStock());
+        assertEquals(java.math.BigInteger.valueOf(0), product.getStock());
         assertEquals(ProductStatus.OFFLINE, product.getStatus());
         assertEquals(IntentStatus.FAILED, pending.getStatus());
         verify(histories, org.mockito.Mockito.times(2)).save(any(OrderHistory.class));

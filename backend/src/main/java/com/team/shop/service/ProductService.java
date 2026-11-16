@@ -6,6 +6,7 @@ import com.team.shop.dto.response.ProductSummaryResponse;
 import com.team.shop.domain.SellingMode;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 import java.time.LocalDateTime;
 
@@ -17,12 +18,12 @@ public interface ProductService {
                                                int page, int size);
     ProductDetailResponse getBuyerProduct(Long productId);
     PageResponse<ProductDetailResponse> getSellerProducts(int page, int size);
-    ProductDetailResponse publish(String name, BigDecimal price, Long category2Id, int stock,
+    ProductDetailResponse publish(String name, BigDecimal price, Long category2Id, BigInteger stock,
                                   String descriptionHtml, List<String> imagePaths);
-    ProductDetailResponse publish(String name, BigDecimal price, Long category2Id, int stock,
+    ProductDetailResponse publish(String name, BigDecimal price, Long category2Id, BigInteger stock,
                                   String descriptionHtml, List<String> imagePaths, SellingMode sellingMode,
                                   BigDecimal startPrice, BigDecimal minIncrement, LocalDateTime endsAt);
-    ProductDetailResponse update(Long productId, Integer stock, Long category2Id);
+    ProductDetailResponse update(Long productId, BigInteger stock, Long category2Id);
     ProductDetailResponse takeOffline(Long productId);
     ProductDetailResponse putOnline(Long productId);
 }

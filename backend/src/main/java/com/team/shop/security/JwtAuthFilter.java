@@ -19,6 +19,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  */
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
+    public static final String INVALID_TOKEN = JwtAuthFilter.class.getName() + ".invalidToken";
 
     private final JwtUtil jwtUtil;
 
@@ -30,6 +31,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         String header = request.getHeader("Authorization");
+        if (header != null) request.setAttribute(INVALID_TOKEN, Boolean.TRUE);
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
             UserIdentity identity;
@@ -39,6 +41,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 identity = null;
             }
             if (identity != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                request.removeAttribute(INVALID_TOKEN);
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(identity, null,
                                 List.of(new SimpleGrantedAuthority("ROLE_" + identity.role())));

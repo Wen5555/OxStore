@@ -25,6 +25,11 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(ApiBusinessException.class)
+    public ResponseEntity<ApiResponse<Object>> handleBusinessResponse(ApiBusinessException e) {
+        return ResponseEntity.status(e.getStatus()).body(ApiResponse.error(e.getCode(), e.getMessage(), e.getData()));
+    }
+
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ApiResponse<Void>> handleUnauthorized(UnauthorizedException e) {
         return build(HttpStatus.UNAUTHORIZED, 40101, e.getMessage());
@@ -110,6 +115,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({HttpMessageNotReadableException.class, HttpMediaTypeNotSupportedException.class})
     public ResponseEntity<ApiResponse<Void>> handleInvalidBody(Exception e) {
+        for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause()) {
+            if (cause instanceof BizException business) return build(HttpStatus.BAD_REQUEST, 40001, business.getMessage());
+            if (cause instanceof ApiBusinessException business) return build(HttpStatus.valueOf(business.getStatus()), business.getCode(), business.getMessage());
+        }
         return build(HttpStatus.BAD_REQUEST, 40002, "请求体格式不正确或缺失");
     }
 
