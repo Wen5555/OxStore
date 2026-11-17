@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, Card, Form, Input, Space, Typography, message } from 'antd'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { login, register } from '../../api/auth'
+import { consumeAuthRedirectMessage, getReturnPath } from '../../utils/navigation'
 
 interface AuthValues {
   username: string
@@ -14,7 +15,12 @@ export default function BuyerAuthPage({ registration = false }: { registration?:
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
-  const returnTo = (location.state as { from?: string } | null)?.from ?? '/'
+  const returnTo = getReturnPath(location.state, location.search, '/')
+
+  useEffect(() => {
+    const authMessage = consumeAuthRedirectMessage()
+    if (authMessage) message.error(authMessage)
+  }, [])
 
   const onFinish = async (values: AuthValues) => {
     try {

@@ -49,7 +49,16 @@ export default function CustomersPage() {
                 { title: '电话', dataIndex: 'phone', key: 'phone' },
                 { title: '默认交易地点', dataIndex: 'location', key: 'location', render: (value: string | null) => value || '未设置' },
                 { title: '注册时间', dataIndex: 'registeredAt', key: 'registeredAt', render: formatDate },
-                { title: '操作', key: 'action', render: (_, customer) => <Button type="link" onClick={() => navigate(`/admin/customers/${customer.customerId}/order-history`)}>购买历史</Button> },
+                {
+                  title: '操作',
+                  key: 'action',
+                  render: (_, customer) => (
+                    <Space>
+                      <Button type="link" onClick={() => navigate(`/admin/customers/${customer.customerId}/order-history`)}>购买历史</Button>
+                      <Button type="link" onClick={() => navigate(`/admin/legacy-intents?customerId=${customer.customerId}`)}>旧意向归档</Button>
+                    </Space>
+                  ),
+                },
               ]}
             />
           )}

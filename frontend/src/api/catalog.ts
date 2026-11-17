@@ -16,13 +16,6 @@ export function getProduct(productId: number) {
     .then(mapProductDetail)
 }
 
-export function submitPurchaseIntent(productId: number) {
-  return request<{ intentId: number; productId: number; status: 'QUEUING'; createdAt: string }>({
-    url: `/products/${productId}/intents`,
-    method: 'POST',
-  })
-}
-
 export function getMyOrderHistory(page: number, size: number) {
   return request<Page<import('../types/common').OrderHistoryItem>>({
     url: '/me/order-history',
