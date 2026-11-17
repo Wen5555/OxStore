@@ -66,7 +66,7 @@ public class OrderCancellationService {
         customers.findByIdForUpdate(ownerId)
                 .orElseThrow(() -> new UnauthorizedException("请重新登录"));
         ShopOrder order = orders.findByIdForUpdate(orderId)
-                .orElseThrow(() -> new NotFoundException("订单不存在"));
+                .orElseThrow(() -> new NotFoundException("订单不存在", 40405));
         if (!ownerId.equals(order.getCustomer().getId())) {
             throw new IllegalStateException("订单归属在持有客户锁后发生变化");
         }
@@ -102,7 +102,7 @@ public class OrderCancellationService {
     }
 
     private Long findOrderOwnerId(Long orderId) {
-        return orders.findCustomerIdById(orderId).orElseThrow(() -> new NotFoundException("订单不存在"));
+        return orders.findCustomerIdById(orderId).orElseThrow(() -> new NotFoundException("订单不存在", 40405));
     }
 
     private void validateCancellation(OrderStatus actual, OrderStatus expected, OrderCancelledBy actor) {
