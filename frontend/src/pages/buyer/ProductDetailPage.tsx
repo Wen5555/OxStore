@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Descriptions, Empty, Image, InputNumber, List, Space, Spin, Tag, Typography, message } from 'antd'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { getProduct, submitPurchaseIntent } from '../../api/catalog'
+import { getProduct } from '../../api/catalog'
+import { addCartItem, addFavorite, getFavoriteState, removeFavorite } from '../../api/challengeB'
 import { getAuctionSnapshot, placeBid } from '../../api/auction'
 import type { AuctionSnapshot } from '../../types/auction'
 import type { Product } from '../../types/product'
@@ -18,13 +19,15 @@ export default function ProductDetailPage() {
   const navigate = useNavigate()
   const [product, setProduct] = useState<Product>()
   const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
   const [auction, setAuction] = useState<AuctionSnapshot>()
   const [bidAmount, setBidAmount] = useState('')
   const [bidSubmitting, setBidSubmitting] = useState(false)
   const [bidError, setBidError] = useState('')
   const [bidStatus, setBidStatus] = useState('')
+  const [favorited, setFavorited] = useState(false)
+  const [favoriteLoading, setFavoriteLoading] = useState(false)
+  const [cartLoading, setCartLoading] = useState(false)
   const loggedIn = Boolean(localStorage.getItem('customer_token'))
   useAuctionEvents(product?.sellingMode === 'AUCTION' ? product.id : undefined, (event) => {
     if ('productName' in event) setAuction(event)
@@ -92,23 +95,54 @@ export default function ProductDetailPage() {
       .finally(() => setLoading(false))
   }, [id])
 
-  const submitIntent = async () => {
+  useEffect(() => {
+    if (!loggedIn || !product || product.sellingMode !== 'FIXED_PRICE' || product.status !== 'ONLINE') return
+    let active = true
+    getFavoriteState(product.id)
+      .then((state) => { if (active) setFavorited(state.favorited) })
+      .catch((error) => console.error('获取收藏状态失败:', error))
+    return () => { active = false }
+  }, [loggedIn, product])
+
+  const toggleFavorite = async () => {
     if (!loggedIn) {
       navigate('/login', { state: { from: `/products/${id}` } })
       return
     }
-
-    if (!product || product.status !== 'ONLINE' || !product.canPurchase) return
+    if (!product || product.sellingMode !== 'FIXED_PRICE' || product.status !== 'ONLINE') return
     try {
-      setSubmitting(true)
-      await submitPurchaseIntent(product.id)
-      message.success('购买意向已提交')
+      setFavoriteLoading(true)
+      if (favorited) {
+        const result = await removeFavorite(product.id)
+        setFavorited(false)
+        if (result.message) message.success(result.message)
+      } else {
+        const result = await addFavorite(product.id)
+        setFavorited(true)
+        message.success(result.message)
+      }
     } catch (error) {
-      console.error('提交购买意向失败:', error)
+      console.error('更新收藏失败:', error)
     } finally {
-      setSubmitting(false)
+      setFavoriteLoading(false)
     }
+  }
 
+  const addToCart = async () => {
+    if (!loggedIn) {
+      navigate('/login', { state: { from: `/products/${id}` } })
+      return
+    }
+    if (!product || product.sellingMode !== 'FIXED_PRICE' || product.status !== 'ONLINE' || !product.canPurchase) return
+    try {
+      setCartLoading(true)
+      const result = await addCartItem(product.id)
+      message.success(result.message)
+    } catch (error) {
+      console.error('加入购物车失败:', error)
+    } finally {
+      setCartLoading(false)
+    }
   }
 
   const submitBid = async () => {
@@ -224,9 +258,12 @@ export default function ProductDetailPage() {
                   {auction.recentBids.length > 0 && <List size="small" header="最近出价" dataSource={auction.recentBids} renderItem={(bid) => <List.Item>#{bid.bidSeq} {bid.bidderAlias}：¥{Number(bid.amount).toFixed(2)}</List.Item>} />}
                 </Space>
               ) : product.status === 'ONLINE' && product.canPurchase ? (
-                <Button type="primary" onClick={submitIntent} loading={submitting}>提交购买意向</Button>
-              ) : <Typography.Text type="secondary">当前不可提交购买意向</Typography.Text>}
-              {!loggedIn && product.status === 'ONLINE' && product.canPurchase && <Typography.Text type="secondary">提交意向前需要登录。</Typography.Text>}
+                <Space wrap>
+                  <Button type="primary" loading={cartLoading} onClick={() => void addToCart()}>加入购物车</Button>
+                  <Button loading={favoriteLoading} onClick={() => void toggleFavorite()}>{favorited ? '取消收藏' : '收藏'}</Button>
+                  {loggedIn && <Button onClick={() => navigate('/me/cart')}>查看购物车</Button>}
+                </Space>
+              ) : <Typography.Text type="secondary">当前不可购买</Typography.Text>}
             </Space>
           </div>
           {hasReadableContent(description) && (

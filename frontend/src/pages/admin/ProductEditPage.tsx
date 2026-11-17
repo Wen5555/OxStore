@@ -91,6 +91,11 @@ export default function ProductEditPage() {
             ? '拍卖商品只能修改二级类目，不能修改库存或上下架。名称、价格、描述和图片不可原地修改。'
             : '只能修改库存和二级类目。名称、价格、描述和图片不可原地修改；需要变更时请下架后重新发布。'}
         </Typography.Paragraph>
+        {product.sellingMode === 'FIXED_PRICE' && product.status === 'OFFLINE' && (
+          <Typography.Paragraph type="secondary">
+            库存恢复为正数不会自动上架；确认库存后请使用“手动上架”操作。
+          </Typography.Paragraph>
+        )}
         <Form form={form} layout="vertical" onFinish={save}>
           {product.sellingMode === 'FIXED_PRICE' && (
             <Form.Item label="库存数量" name="stock" rules={[{ required: true, message: '请输入库存' }]}>
@@ -108,15 +113,21 @@ export default function ProductEditPage() {
               </Popconfirm>
             )}
             {product.sellingMode === 'FIXED_PRICE' && product.status === 'OFFLINE' && (
-              <Popconfirm
-                title="上架该商品？"
-                description={(product.stock ?? 0) <= 0 ? '库存必须大于 0 才能上架。' : undefined}
-                onConfirm={() => changeListing(true)}
-                okText="上架"
-                cancelText="取消"
-              >
-                <Button disabled={(product.stock ?? 0) <= 0} loading={saving}>手动上架</Button>
-              </Popconfirm>
+              <Space direction="vertical" size={4}>
+                <Popconfirm
+                  title="上架该商品？"
+                  onConfirm={() => changeListing(true)}
+                  okText="上架"
+                  cancelText="取消"
+                >
+                  <Button disabled={(product.stock ?? 0) <= 0} loading={saving}>
+                    手动上架
+                  </Button>
+                </Popconfirm>
+                {(product.stock ?? 0) <= 0 && (
+                  <Typography.Text type="secondary">库存必须大于 0 才能上架。</Typography.Text>
+                )}
+              </Space>
             )}
           </Space>
         </Form>
