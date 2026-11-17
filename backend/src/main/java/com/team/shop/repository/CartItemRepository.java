@@ -20,6 +20,8 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
     Optional<CartItem> findByCustomerIdAndProductId(Long customerId, Long productId);
 
+    List<CartItem> findAllByIdIn(Collection<Long> ids);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select c from CartItem c where c.id = :id")
     Optional<CartItem> findByIdForUpdate(@Param("id") Long id);

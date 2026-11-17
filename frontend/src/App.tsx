@@ -3,6 +3,7 @@ import AdminLayout from './pages/admin/AdminLayout'
 import AdminProductsPage from './pages/admin/AdminProductsPage'
 import AdminAuctionsPage from './pages/admin/AdminAuctionsPage'
 import AdminLegacyIntentPage from './pages/admin/AdminLegacyIntentPage'
+import AdminOrdersPage from './pages/admin/AdminOrdersPage'
 import ChangePasswordPage from './pages/admin/ChangePasswordPage'
 import CustomerHistoryPage from './pages/admin/CustomerHistoryPage'
 import CustomersPage from './pages/admin/CustomersPage'
@@ -62,6 +63,7 @@ export default function App() {
         <Route path="customers" element={<CustomersPage />} />
         <Route path="customers/:customerId/order-history" element={<CustomerHistoryPage />} />
         <Route path="legacy-intents" element={<AdminLegacyIntentPage />} />
+        <Route path="orders" element={<AdminOrdersPage />} />
         <Route path="password" element={<ChangePasswordPage />} />
         <Route path="auction-notifications" element={<SellerAuctionNotificationsPage />} />
       </Route>
