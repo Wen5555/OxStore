@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Alert, Button, Card, Cascader, Form, InputNumber, Popconfirm, Space, Spin, Typography, message } from 'antd'
+import { Alert, Button, Card, Cascader, Form, Input, Popconfirm, Space, Spin, Typography, message } from 'antd'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getCategoryTree } from '../../api/catalog'
 import { getAdminProduct, setProductOffline, setProductOnline, updateProduct } from '../../api/admin'
@@ -7,7 +7,7 @@ import type { CategoryTreeItem } from '../../types/common'
 import type { Product } from '../../types/product'
 
 interface EditValues {
-  stock?: number
+  stock?: string
   category: number[]
 }
 
@@ -33,7 +33,7 @@ export default function ProductEditPage() {
         const path = tree.flatMap((parent) =>
           (parent.children ?? []).filter((child) => child.id === item.category2Id).map((child) => [parent.id, child.id]),
         )[0]
-        form.setFieldsValue({ stock: item.stock ?? 0, category: path })
+        form.setFieldsValue({ stock: item.stock ?? '0', category: path })
       })
       .catch((error) => {
         console.error('获取商品信息失败:', error)
@@ -98,8 +98,8 @@ export default function ProductEditPage() {
         )}
         <Form form={form} layout="vertical" onFinish={save}>
           {product.sellingMode === 'FIXED_PRICE' && (
-            <Form.Item label="库存数量" name="stock" rules={[{ required: true, message: '请输入库存' }]}>
-              <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+            <Form.Item label="库存数量" name="stock" rules={[{ required: true, message: '请输入库存' }, { pattern: /^(0|[1-9][0-9]*)$/, message: '库存不能为负数，请输入非负整数。' }]}>
+              <Input inputMode="numeric" />
             </Form.Item>
           )}
           <Form.Item label="二级类目" name="category" rules={[{ required: true, message: '请选择二级类目' }]}>
@@ -108,7 +108,7 @@ export default function ProductEditPage() {
           <Space wrap>
             <Button type="primary" htmlType="submit" loading={saving}>保存库存和类目</Button>
             {product.sellingMode === 'FIXED_PRICE' && product.status === 'ONLINE' && (
-              <Popconfirm title="下架该商品？未完成意向将按规则作废。" onConfirm={() => changeListing(false)} okText="下架" cancelText="取消">
+              <Popconfirm title="下架该商品？已下单订单仍可继续履约。" onConfirm={() => changeListing(false)} okText="下架" cancelText="取消">
                 <Button danger loading={saving}>手动下架</Button>
               </Popconfirm>
             )}
@@ -120,11 +120,11 @@ export default function ProductEditPage() {
                   okText="上架"
                   cancelText="取消"
                 >
-                  <Button disabled={(product.stock ?? 0) <= 0} loading={saving}>
+                  <Button disabled={product.stock === '0'} loading={saving}>
                     手动上架
                   </Button>
                 </Popconfirm>
-                {(product.stock ?? 0) <= 0 && (
+                {product.stock === '0' && (
                   <Typography.Text type="secondary">库存必须大于 0 才能上架。</Typography.Text>
                 )}
               </Space>

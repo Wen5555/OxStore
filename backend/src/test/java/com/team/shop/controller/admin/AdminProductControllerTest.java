@@ -40,7 +40,7 @@ class AdminProductControllerTest {
     void setUp() {
         mvc = MockMvcBuilders.standaloneSetup(new AdminProductController(products, images))
                 .setControllerAdvice(new GlobalExceptionHandler()).build();
-        when(products.publish(anyString(), any(BigDecimal.class), any(), anyInt(), nullable(String.class),
+        when(products.publish(anyString(), any(BigDecimal.class), any(), any(java.math.BigInteger.class), nullable(String.class),
                 anyList(), any(SellingMode.class), nullable(BigDecimal.class), nullable(BigDecimal.class),
                 nullable(LocalDateTime.class)))
                 .thenReturn(new ProductDetailResponse(1L, "测试", BigDecimal.ONE, 2L, "leaf", 1,
@@ -78,7 +78,7 @@ class AdminProductControllerTest {
                         .param("descriptionHtml", "<p>说明</p>"))
                 .andExpect(status().isCreated());
 
-        verify(products).publish("商品", new BigDecimal("1.00"), 2L, 1, "<p>说明</p>",
+        verify(products).publish("商品", new BigDecimal("1.00"), 2L, java.math.BigInteger.ONE, "<p>说明</p>",
                 List.of("/api/images/first.jpg", "/api/images/second.jpg"),
                 SellingMode.FIXED_PRICE, null, null, null);
     }
@@ -92,13 +92,13 @@ class AdminProductControllerTest {
                         .param("stock", "0"))
                 .andExpect(status().isCreated());
 
-        verify(products).publish(eq("商品"), eq(new BigDecimal("1.00")), eq(2L), eq(0),
+        verify(products).publish(eq("商品"), eq(new BigDecimal("1.00")), eq(2L), eq(java.math.BigInteger.ZERO),
                 isNull(), eq(List.of()), eq(SellingMode.FIXED_PRICE), isNull(), isNull(), isNull());
     }
 
     @Test
     void rejectsFixedPricePublishThatCarriesAuctionFields() throws Exception {
-        when(products.publish(eq("一口价"), eq(new BigDecimal("12.50")), eq(2L), eq(1),
+        when(products.publish(eq("一口价"), eq(new BigDecimal("12.50")), eq(2L), eq(java.math.BigInteger.ONE),
                 isNull(), eq(List.of()), eq(SellingMode.FIXED_PRICE),
                 eq(new BigDecimal("10.00")), eq(new BigDecimal("1.00")), any(LocalDateTime.class)))
                 .thenThrow(new BizException("普通在售不能填写拍卖参数"));
@@ -115,7 +115,7 @@ class AdminProductControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(40001));
 
-        verify(products).publish(eq("一口价"), eq(new BigDecimal("12.50")), eq(2L), eq(1),
+        verify(products).publish(eq("一口价"), eq(new BigDecimal("12.50")), eq(2L), eq(java.math.BigInteger.ONE),
                 isNull(), eq(List.of()), eq(SellingMode.FIXED_PRICE),
                 eq(new BigDecimal("10.00")), eq(new BigDecimal("1.00")), any(LocalDateTime.class));
     }

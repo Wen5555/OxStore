@@ -1,7 +1,7 @@
 package com.team.shop.dto;
 
 /**
- * 统一响应结构：{ code, message, data }。code=0 表示成功，否则为 HTTP 状态码。
+ * 统一响应结构：code=0 表示成功，非零为业务错误码。
  */
 public class ApiResponse<T> {
 
@@ -25,6 +25,14 @@ public class ApiResponse<T> {
 
     public int getCode() {
         return code;
+    }
+
+    public static <T> ApiResponse<T> ok(String message, T data) {
+        return new ApiResponse<>(0, message, data);
+    }
+
+    public static <T> ApiResponse<T> error(int code, String message, T data) {
+        return new ApiResponse<>(code, message, data);
     }
 
     public String getMessage() {

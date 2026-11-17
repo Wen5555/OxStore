@@ -30,7 +30,7 @@ export interface Product {
   id: number
   name: string
   price: number
-  stock: number
+  stock: string
   category2Id: number
   categoryName: string
   status: ProductStatus
@@ -59,7 +59,7 @@ export interface ProductDetailResponse {
   price: number
   category2Id: number
   category2Name: string
-  stock: number
+  stock: string
   descriptionHtml: string
   images: string[]
   mainImagePath: string | null
@@ -89,7 +89,7 @@ export function mapProductDetail(response: ProductDetailResponse): Product {
     id: response.productId,
     name: response.name,
     price: response.price,
-    stock: response.stock,
+    stock: String(response.stock),
     category2Id: response.category2Id,
     categoryName: response.category2Name,
     status: response.status,

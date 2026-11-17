@@ -32,6 +32,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import com.team.shop.domain.InventoryInput;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDateTime;
@@ -61,7 +63,7 @@ public class AdminProductController {
             @RequestParam("name") @NotBlank @Size(max = 200) String name,
             @RequestParam(value = "price", required = false) @Positive BigDecimal price,
             @RequestParam("category2Id") @NotNull Long category2Id,
-            @RequestParam(value = "stock", required = false) @PositiveOrZero Integer stock,
+            @RequestParam(value = "stock", required = false) String stock,
             @RequestParam(value = "sellingMode", defaultValue = "FIXED_PRICE") SellingMode sellingMode,
             @RequestParam(value = "startPrice", required = false) BigDecimal startPrice,
             @RequestParam(value = "minIncrement", required = false) BigDecimal minIncrement,
@@ -83,7 +85,7 @@ public class AdminProductController {
             if (sellingMode == SellingMode.FIXED_PRICE && stock == null) {
                 throw new BizException("普通商品必须填写库存");
             }
-            int requestedStock = stock == null ? 1 : stock;
+            BigInteger requestedStock = stock == null ? BigInteger.ONE : InventoryInput.parse(stock);
             ProductDetailResponse created = products.publish(name, price, category2Id, requestedStock,
                     descriptionHtml, storedPaths, sellingMode, startPrice, minIncrement, endsAt);
             return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(created));
@@ -96,7 +98,7 @@ public class AdminProductController {
     @PatchMapping("/{productId}")
     public ApiResponse<ProductDetailResponse> update(@PathVariable Long productId,
                                                      @Valid @RequestBody ProductUpdateRequest request) {
-        return ApiResponse.ok(products.update(productId, request.stock(), request.category2Id()));
+        return ApiResponse.ok(products.update(productId, request.parsedStock(), request.category2Id()));
     }
 
     @PostMapping("/{productId}/offline")

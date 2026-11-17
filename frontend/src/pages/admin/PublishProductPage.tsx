@@ -11,7 +11,7 @@ import type { Dayjs } from 'dayjs'
 interface PublishValues {
   name: string
   price: number
-  stock: number
+  stock: string
   category: number[]
   sellingMode: SellingMode
   minIncrement?: number
@@ -150,7 +150,7 @@ export default function PublishProductPage() {
     <main style={{ maxWidth: 800, margin: '0 auto', padding: 24 }}>
       <Card title="发布商品">
         {categoryError && <Alert style={{ marginBottom: 16 }} type="error" showIcon message="类目加载失败，暂时无法发布商品。" />}
-        <Form form={form} layout="vertical" onFinish={onFinish} initialValues={{ stock: 0, sellingMode: 'FIXED_PRICE' }}>
+        <Form form={form} layout="vertical" onFinish={onFinish} initialValues={{ stock: '0', sellingMode: 'FIXED_PRICE' }}>
           <Form.Item label="商品名称" name="name" rules={[{ required: true, whitespace: true, message: '请输入商品名称' }]}>
             <Input />
           </Form.Item>
@@ -160,8 +160,8 @@ export default function PublishProductPage() {
           <Form.Item label="二级类目" name="category" rules={[{ required: true, message: '请选择二级类目' }]}>
             <Cascader options={categoryOptions} placeholder="请选择一级及二级类目" />
           </Form.Item>
-          <Form.Item label="库存数量" name="stock" rules={[{ required: true, message: '请输入库存' }, { type: 'number', min: 0, message: '库存必须为非负整数' }]}>
-            <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+          <Form.Item label="库存数量" name="stock" rules={[{ required: true, message: '请输入库存' }, { pattern: /^(0|[1-9][0-9]*)$/, message: '库存不能为负数，请输入非负整数。' }]}>
+            <Input inputMode="numeric" />
           </Form.Item>
           <Form.Item label="售卖模式" name="sellingMode">
             <Radio.Group options={[{ label: '普通在售', value: 'FIXED_PRICE' }, { label: '拍卖', value: 'AUCTION' }]} />

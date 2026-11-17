@@ -21,6 +21,9 @@ public class TradeAttempt {
     private TradeResult result;
     @Enumerated(EnumType.STRING) @JdbcTypeCode(SqlTypes.VARCHAR) @Column(name = "fail_action", length = 10)
     private FailAction failAction;
+    /** V8 对被关闭的一口价旧意向的未结束尝试写入；result/finished_at 保持为空，应用代码只读。 */
+    @Column(name = "legacy_closed_at", insertable = false, updatable = false)
+    private LocalDateTime legacyClosedAt;
     protected TradeAttempt() { }
     public TradeAttempt(PurchaseIntent intent, LocalDateTime now) {
         this.intent = intent; this.startedAt = now;
@@ -37,6 +40,7 @@ public class TradeAttempt {
     public PurchaseIntent getIntent() { return intent; }
     public LocalDateTime getStartedAt() { return startedAt; }
     public LocalDateTime getFinishedAt() { return finishedAt; }
+    public LocalDateTime getLegacyClosedAt() { return legacyClosedAt; }
     public TradeResult getResult() { return result; }
     public FailAction getFailAction() { return failAction; }
 }
