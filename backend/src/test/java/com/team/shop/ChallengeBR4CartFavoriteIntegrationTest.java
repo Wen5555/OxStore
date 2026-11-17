@@ -182,6 +182,130 @@ class ChallengeBR4CartFavoriteIntegrationTest {
     }
 
     @Test
+    void movingCartItemsToFavoritesIsTransactionalAndIdempotent() {
+        String suffix = Long.toString(System.nanoTime());
+        String buyerToken = registerAndLogin("r4-move-favorite-" + suffix, phone());
+        Product product = fixedProduct("转收藏商品-" + suffix, 2);
+        Product deletedProduct = fixedProduct("已删除购物车商品-" + suffix, 2);
+        String cartItemId = addCart(buyerToken, product.getId(), UUID.randomUUID().toString())
+                .path("data").path("cartItemId").asText();
+        String deletedCartItemId = addCart(buyerToken, deletedProduct.getId(), UUID.randomUUID().toString())
+                .path("data").path("cartItemId").asText();
+        assertEquals("已移除", exchange(HttpMethod.DELETE, "/api/me/cart/items/" + deletedCartItemId,
+                null, buyerToken, null).path("message").asText());
+        String requestKey = UUID.randomUUID().toString();
+        Map<String, Object> body = Map.of("cartItemIds", java.util.List.of(deletedCartItemId, cartItemId));
+
+        JsonNode moved = exchange(HttpMethod.POST, "/api/me/cart/move-to-favorites",
+                body, buyerToken, requestKey);
+        assertEquals(0, moved.path("code").asInt());
+        assertEquals(1, moved.path("data").path("movedLineCount").asInt());
+        assertEquals(cartItemId, moved.path("data").path("movedCartItemIds").get(0).asText());
+        assertEquals(deletedCartItemId, moved.path("data").path("skippedDeletedCartItemIds").get(0).asText());
+        assertEquals(40915, exchange(HttpMethod.POST, "/api/me/cart/move-to-favorites",
+                body, buyerToken, requestKey).path("code").asInt());
+        assertEquals(40916, exchange(HttpMethod.POST, "/api/me/cart/move-to-favorites",
+                Map.of("cartItemIds", java.util.List.of("999999999")), buyerToken, requestKey)
+                .path("code").asInt());
+        assertEquals(0, exchange(HttpMethod.GET, "/api/me/cart", null, buyerToken, null)
+                .path("data").path("items").size());
+        assertTrue(exchange(HttpMethod.GET, "/api/me/favorites/" + product.getId(),
+                null, buyerToken, null).path("data").path("favorited").asBoolean());
+
+        assertEquals("已取消收藏", exchange(HttpMethod.DELETE, "/api/me/favorites/" + product.getId(),
+                null, buyerToken, null).path("message").asText());
+        JsonNode retry = exchange(HttpMethod.POST, "/api/me/cart/move-to-favorites",
+                body, buyerToken, requestKey);
+        assertEquals(0, retry.path("code").asInt());
+        assertEquals(cartItemId, retry.path("data").path("movedCartItemIds").get(0).asText());
+        assertFalse(exchange(HttpMethod.GET, "/api/me/favorites/" + product.getId(),
+                null, buyerToken, null).path("data").path("favorited").asBoolean());
+    }
+
+    @Test
+    void movingCartItemsRejectsForeignRowsAndOfflineProductsWithoutPartialWrites() {
+        String suffix = Long.toString(System.nanoTime());
+        String buyerToken = registerAndLogin("r4-move-offline-" + suffix, phone());
+        Product online = fixedProduct("可转收藏商品-" + suffix, 2);
+        Product offline = fixedProduct("转收藏下架商品-" + suffix, 2);
+        String onlineItemId = addCart(buyerToken, online.getId(), UUID.randomUUID().toString())
+                .path("data").path("cartItemId").asText();
+        String offlineItemId = addCart(buyerToken, offline.getId(), UUID.randomUUID().toString())
+                .path("data").path("cartItemId").asText();
+        offline.takeOffline(BusinessTime.now());
+        products.saveAndFlush(offline);
+
+        JsonNode rejected = exchange(HttpMethod.POST, "/api/me/cart/move-to-favorites",
+                Map.of("cartItemIds", java.util.List.of(onlineItemId, offlineItemId)),
+                buyerToken, UUID.randomUUID().toString());
+        assertEquals(40914, rejected.path("code").asInt());
+        assertEquals(1, rejected.path("data").path("errors").size());
+        assertEquals("OFFLINE", rejected.path("data").path("errors").get(0).path("reason").asText());
+        assertEquals(2, exchange(HttpMethod.GET, "/api/me/cart", null, buyerToken, null)
+                .path("data").path("items").size());
+        assertFalse(exchange(HttpMethod.GET, "/api/me/favorites/" + online.getId(),
+                null, buyerToken, null).path("data").path("favorited").asBoolean());
+
+        String ownerToken = registerAndLogin("r4-move-owner-" + suffix, phone());
+        String foreignItemId = addCart(ownerToken, online.getId(), UUID.randomUUID().toString())
+                .path("data").path("cartItemId").asText();
+        JsonNode foreignBatch = exchange(HttpMethod.POST, "/api/me/cart/move-to-favorites",
+                Map.of("cartItemIds", java.util.List.of(onlineItemId, foreignItemId)),
+                buyerToken, UUID.randomUUID().toString());
+        assertEquals(40302, foreignBatch.path("code").asInt());
+        assertEquals(2, exchange(HttpMethod.GET, "/api/me/cart", null, buyerToken, null)
+                .path("data").path("items").size());
+        assertFalse(exchange(HttpMethod.GET, "/api/me/favorites/" + online.getId(),
+                null, buyerToken, null).path("data").path("favorited").asBoolean());
+    }
+
+    @Test
+    void orderQueriesEnforceOwnershipAndExposeSellerWideResults() {
+        String suffix = Long.toString(System.nanoTime());
+        String buyerToken = registerAndLogin("r4-order-query-" + suffix, phone());
+        String otherBuyerToken = registerAndLogin("r4-order-query-other-" + suffix, phone());
+        String sellerToken = sellerToken();
+        Customer buyer = customers.findByUsername("r4-order-query-" + suffix).orElseThrow();
+        Customer otherBuyer = customers.findByUsername("r4-order-query-other-" + suffix).orElseThrow();
+        Product product = fixedProduct("订单查询商品-" + suffix, 2);
+        ShopOrder ownOrder = order(buyer, product, BigInteger.ONE, OrderStatus.PLACED);
+        ShopOrder otherOrder = order(otherBuyer, product, BigInteger.ONE, OrderStatus.SHIPPED);
+
+        JsonNode buyerPage = exchange(HttpMethod.GET, "/api/me/orders?page=1&size=100",
+                null, buyerToken, null).path("data");
+        assertTrue(containsOrder(buyerPage, ownOrder.getId()));
+        assertFalse(containsOrder(buyerPage, otherOrder.getId()));
+        assertEquals(ownOrder.getId().toString(), exchange(HttpMethod.GET,
+                "/api/me/orders/" + ownOrder.getId(), null, buyerToken, null)
+                .path("data").path("orderId").asText());
+        assertEquals(40302, exchange(HttpMethod.GET, "/api/me/orders/" + otherOrder.getId(),
+                null, buyerToken, null).path("code").asInt());
+        assertEquals(40003, exchange(HttpMethod.GET, "/api/me/orders?page=0&size=10",
+                null, buyerToken, null).path("code").asInt());
+
+        JsonNode sellerPage = exchange(HttpMethod.GET, "/api/admin/orders?page=1&size=100",
+                null, sellerToken, null).path("data");
+        assertTrue(containsOrder(sellerPage, ownOrder.getId()));
+        assertTrue(containsOrder(sellerPage, otherOrder.getId()));
+        assertEquals(otherOrder.getId().toString(), exchange(HttpMethod.GET,
+                "/api/admin/orders/" + otherOrder.getId(), null, sellerToken, null)
+                .path("data").path("orderId").asText());
+        assertEquals(40301, exchange(HttpMethod.GET, "/api/admin/orders?page=1&size=10",
+                null, buyerToken, null).path("code").asInt());
+        assertEquals(401, status(HttpMethod.GET, "/api/me/orders?page=1&size=10",
+                null, null, null));
+    }
+
+    private boolean containsOrder(JsonNode page, Long id) {
+        for (JsonNode order : page.path("items")) {
+            if (Long.toString(id).equals(order.path("orderId").asText())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Test
     void fixedPriceIntentActionsAreClosedAndLegacyArchiveIsReadOnly() {
         String suffix = Long.toString(System.nanoTime());
         String buyer = "r4-legacy-" + suffix;

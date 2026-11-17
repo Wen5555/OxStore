@@ -1,4 +1,4 @@
-import { BellOutlined, HistoryOutlined, LockOutlined, ShopOutlined, TrophyOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons'
+import { BellOutlined, FileTextOutlined, HistoryOutlined, LockOutlined, ShopOutlined, TrophyOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Layout, Space, Typography } from 'antd'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
@@ -10,6 +10,7 @@ const navigation = [
   { label: '拍卖管理', path: '/admin/auctions', icon: <TrophyOutlined /> },
   { label: '发布商品', path: '/admin/products/publish', icon: <UploadOutlined /> },
   { label: '全部顾客', path: '/admin/customers', icon: <UserOutlined /> },
+  { label: '订单管理', path: '/admin/orders', icon: <FileTextOutlined /> },
   { label: '旧意向归档', path: '/admin/legacy-intents', icon: <HistoryOutlined /> },
   { label: '修改密码', path: '/admin/password', icon: <LockOutlined /> },
   { label: '拍卖提醒', path: '/admin/auction-notifications', icon: <BellOutlined /> },
@@ -20,6 +21,8 @@ export default function AdminLayout() {
   const navigate = useNavigate()
   const selectedPath = location.pathname.startsWith('/admin/customers')
     ? '/admin/customers'
+    : location.pathname.startsWith('/admin/orders')
+      ? '/admin/orders'
     : location.pathname.startsWith('/admin/legacy-intents')
       ? '/admin/legacy-intents'
     : location.pathname.startsWith('/admin/auctions')
