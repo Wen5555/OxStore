@@ -1,0 +1,522 @@
+{
+  "run_at": "2026-11-19T00:12:37.324958+08:00",
+  "db_source": "docker",
+  "checks": [
+    {
+      "id": "D01",
+      "tasks": [
+        "B-028"
+      ],
+      "description": "Packaged backend starts on the V7/V8-era schema with Hibernate ddl-auto=validate",
+      "status": "PASS"
+    },
+    {
+      "id": "S01",
+      "tasks": [
+        "B-011",
+        "B-012"
+      ],
+      "description": "6 customers race for 3 units x3 rounds: exactly 3 orders, stock 0, auto offline, winners' rows tombstoned, losers' rows kept, losers get 40910 per-item errors",
+      "status": "PASS",
+      "detail": [
+        {
+          "wins": 3,
+          "loss_outcomes": [
+            "(409, 40910, 'OFFLINE')"
+          ],
+          "order_items": "3\t3",
+          "stock": "0",
+          "state": "OFFLINE:AUTO_ZERO",
+          "winner_tombstones": 3,
+          "loser_rows_kept": 3
+        }
+      ]
+    },
+    {
+      "id": "S02",
+      "tasks": [
+        "B-011",
+        "B-012"
+      ],
+      "description": "5 customers x qty 3 on stock 10: 3 orders, stock 1 and still ONLINE, 2 INSUFFICIENT_STOCK",
+      "status": "PASS",
+      "detail": {
+        "wins": 3,
+        "stock": "1",
+        "fail_codes": [
+          "409/40910",
+          "409/40910"
+        ],
+        "availableStock": [
+          "1",
+          "1"
+        ]
+      }
+    },
+    {
+      "id": "S03",
+      "tasks": [
+        "B-012"
+      ],
+      "description": "6 concurrent requests with the same token and key: exactly one order and receipt, stock deducted once, the rest 409/40909 pointing at the original order",
+      "status": "PASS",
+      "detail": {
+        "results": [
+          "409/40909",
+          "409/40909",
+          "409/40909",
+          "409/40909",
+          "201/0",
+          "409/40909"
+        ],
+        "counts": "1\t1",
+        "stock": "3"
+      }
+    },
+    {
+      "id": "S04",
+      "tasks": [
+        "B-011",
+        "B-012"
+      ],
+      "description": "Two confirmations of the same cart row placed concurrently with different keys: one order only, stock deducted once, the other refused with a per-item/changed error",
+      "status": "PASS",
+      "detail": [
+        "409/40910",
+        "201/0"
+      ]
+    },
+    {
+      "id": "S05",
+      "tasks": [
+        "B-014"
+      ],
+      "description": "8 racing cancels (4 customer + 4 seller) x3: exactly one succeeds, stock restored exactly once to 5, cancel metadata present, the rest refused with 409",
+      "status": "PASS",
+      "detail": [
+        {
+          "wins": 1,
+          "stock": "5",
+          "status": "CANCELLED",
+          "cancelled_by": "SELLER",
+          "others": [
+            "409/40911"
+          ]
+        },
+        {
+          "wins": 1,
+          "stock": "5",
+          "status": "CANCELLED",
+          "cancelled_by": "SELLER",
+          "others": [
+            "409/40911"
+          ]
+        },
+        {
+          "wins": 1,
+          "stock": "5",
+          "status": "CANCELLED",
+          "cancelled_by": "CUSTOMER",
+          "others": [
+            "409/40911"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S06",
+      "tasks": [
+        "B-013",
+        "B-014"
+      ],
+      "description": "Customer cancel vs seller SHIP on a PREPARED order x8: exactly one wins; stock restored iff cancelled",
+      "status": "PASS",
+      "detail": {
+        "outcomes": {
+          "SHIPPED": 6,
+          "CANCELLED": 2
+        },
+        "violations": []
+      }
+    },
+    {
+      "id": "S07",
+      "tasks": [
+        "B-013",
+        "B-014"
+      ],
+      "description": "SHIPPED: customer cancel refused with no stock change; seller cancel vs COMPLETE x6: exactly one wins, stock restored iff cancelled",
+      "status": "PASS",
+      "detail": {
+        "customer_cancel": "409/40911 订单已开始发货，不可取消",
+        "outcomes": {
+          "COMPLETED": 2,
+          "CANCELLED": 4
+        },
+        "violations": []
+      }
+    },
+    {
+      "id": "S08",
+      "tasks": [
+        "B-006",
+        "B-014"
+      ],
+      "description": "Manual stock edits and cancel restores add up (7+3=10; cancel then set 4 = 4); MANUAL offline stays offline after restore; AUTO_ZERO offline recovers to ONLINE with reason cleared",
+      "status": "PASS",
+      "detail": {
+        "manual_then_restore": "10",
+        "restore_then_manual": "4",
+        "manual_offline": {
+          "stock": "2",
+          "state": "OFFLINE:MANUAL",
+          "orders": "0",
+          "items": "0",
+          "cart": "",
+          "tombstones": "0",
+          "receipts": "0",
+          "favorites": "0"
+        },
+        "auto_zero_before": "OFFLINE:AUTO_ZERO",
+        "after_restore": {
+          "stock": "1",
+          "state": "ONLINE:-",
+          "orders": "0",
+          "items": "0",
+          "cart": "",
+          "tombstones": "0",
+          "receipts": "0",
+          "favorites": "0"
+        }
+      }
+    },
+    {
+      "id": "S09",
+      "tasks": [
+        "B-008",
+        "B-012"
+      ],
+      "description": "Same key x6: one row with quantity 1 and one id; five different keys: one row whose quantity equals the number of successes (no lost update), no 5xx",
+      "status": "PASS",
+      "detail": {
+        "same_key": [
+          "200/0",
+          "200/0",
+          "200/0",
+          "200/0",
+          "200/0",
+          "200/0"
+        ],
+        "row": "1:1",
+        "distinct_keys": [
+          "200/0",
+          "200/0",
+          "200/0",
+          "200/0",
+          "200/0"
+        ],
+        "row2": "1:5"
+      }
+    },
+    {
+      "id": "S10a",
+      "tasks": [
+        "B-025",
+        "B-026"
+      ],
+      "description": "Move 3 rows with the same key x5: one success (3 rows), others 409/40915; 3 favorites, cart empty, 3 tombstones, one receipt, stock untouched",
+      "status": "PASS",
+      "detail": {
+        "responses": [
+          "409/40915",
+          "409/40915",
+          "200/0",
+          "409/40915",
+          "409/40915"
+        ],
+        "moved": {
+          "movedLineCount": 3,
+          "movedCartItemIds": [
+            "50",
+            "51",
+            "52"
+          ],
+          "skippedDeletedCartItemIds": []
+        },
+        "db": {
+          "stock": "5",
+          "state": "ONLINE:-",
+          "orders": "0",
+          "items": "0",
+          "cart": "",
+          "tombstones": "3",
+          "receipts": "4",
+          "favorites": "3"
+        },
+        "stocks": [
+          "5",
+          "5",
+          "5"
+        ]
+      }
+    },
+    {
+      "id": "S10b",
+      "tasks": [
+        "B-025",
+        "B-026"
+      ],
+      "description": "Move vs deleting one selected row: no 5xx, cart ends without both rows, the surviving product is always favourited, a favourite exists for the deleted one only if the move won",
+      "status": "PASS",
+      "detail": {
+        "move": "200/0",
+        "delete": "200/0",
+        "favourites": [
+          "33",
+          "34"
+        ],
+        "moved": 2
+      }
+    },
+    {
+      "id": "S10c",
+      "tasks": [
+        "B-026"
+      ],
+      "description": "Move vs cancelling the same favourite: both succeed, the cart row is gone either way, no half state",
+      "status": "PASS",
+      "detail": {
+        "move": "200/0",
+        "unfavourite": "200/0"
+      }
+    },
+    {
+      "id": "S11",
+      "tasks": [
+        "B-011",
+        "B-012"
+      ],
+      "description": "8 customers buying products A,B in opposite cart orders: no deadlock/5xx; abundant stock -> 8 orders; scarce stock (4) -> exactly 4 orders and both stocks 0",
+      "status": "PASS",
+      "detail": {
+        "abundant": {
+          "wins": 8,
+          "server_errors": [],
+          "stock": [
+            "32",
+            "32"
+          ],
+          "non_201": []
+        },
+        "scarce": {
+          "wins": 4,
+          "server_errors": [],
+          "stock": [
+            "0",
+            "0"
+          ],
+          "non_201": [
+            "409/40910"
+          ]
+        }
+      }
+    },
+    {
+      "id": "S12a",
+      "tasks": [
+        "B-011",
+        "B-012"
+      ],
+      "description": "Failure injected at 4 write points of checkout (order item, stock deduction, cart tombstone, receipt): request fails, nothing persisted (no order/deduction/cart change/receipt), and the same key+token then succeeds",
+      "status": "PASS",
+      "detail": [
+        {
+          "point": "order_item.INSERT",
+          "failed": "500/50000",
+          "unchanged": true,
+          "retry": "201/0",
+          "stock_after_retry": "3"
+        },
+        {
+          "point": "product.UPDATE",
+          "failed": "500/50000",
+          "unchanged": true,
+          "retry": "201/0",
+          "stock_after_retry": "3"
+        },
+        {
+          "point": "cart_item_tombstone.INSERT",
+          "failed": "500/50000",
+          "unchanged": true,
+          "retry": "201/0",
+          "stock_after_retry": "3"
+        },
+        {
+          "point": "operation_receipt.INSERT",
+          "failed": "500/50000",
+          "unchanged": true,
+          "retry": "201/0",
+          "stock_after_retry": "3"
+        }
+      ]
+    },
+    {
+      "id": "S12b",
+      "tasks": [
+        "B-014"
+      ],
+      "description": "Failure injected while cancelling (stock restore, order update): order stays PLACED, stock unchanged, a later cancel restores exactly once",
+      "status": "PASS",
+      "detail": [
+        {
+          "point": "product.UPDATE",
+          "failed": "500/50000",
+          "unchanged": true,
+          "retry": "200/0",
+          "stock_after_retry": "5"
+        },
+        {
+          "point": "shop_order.UPDATE",
+          "failed": "500/50000",
+          "unchanged": true,
+          "retry": "200/0",
+          "stock_after_retry": "5"
+        }
+      ]
+    },
+    {
+      "id": "S12c",
+      "tasks": [
+        "B-025",
+        "B-026"
+      ],
+      "description": "Failure injected at favourite insert, cart tombstone and receipt of move-to-favorites: 500/50001, nothing persisted, the same key then succeeds",
+      "status": "PASS",
+      "detail": [
+        {
+          "point": "favorite.INSERT",
+          "failed": "500/50001",
+          "message": "操作失败，请重试",
+          "unchanged": true,
+          "retry": "200/0"
+        },
+        {
+          "point": "cart_item_tombstone.INSERT",
+          "failed": "500/50001",
+          "message": "操作失败，请重试",
+          "unchanged": true,
+          "retry": "200/0"
+        },
+        {
+          "point": "operation_receipt.INSERT",
+          "failed": "500/50001",
+          "message": "操作失败，请重试",
+          "unchanged": true,
+          "retry": "200/0"
+        }
+      ]
+    },
+    {
+      "id": "S13",
+      "tasks": [
+        "B-003",
+        "B-011",
+        "B-014"
+      ],
+      "description": "Stock 1.2e29 and quantity 9.9e19: exact total, exact deduction, exact one-time restore (no int/long/JS-safe cap)",
+      "status": "PASS",
+      "detail": {
+        "place": "201/0",
+        "total_api": "1234567901373456790125.00",
+        "total_expected": "1234567901373456790125.00",
+        "stock_after": "123456788913580246791358024680",
+        "restored": "123456789012345678901234567890"
+      }
+    },
+    {
+      "id": "S14",
+      "tasks": [
+        "B-005"
+      ],
+      "description": "Anonymous, wrong-role and other-customer calls are all refused (401/403) and leave the owner's cart, orders, stock and receipts byte-identical",
+      "status": "PASS",
+      "detail": {
+        "anonymous place": "401/40101",
+        "seller on customer cart": "403/40301",
+        "customer on admin orders": "403/40301",
+        "other customer reads order": "403/40302",
+        "other customer cancels order": "403/40302",
+        "other customer edits cart row": "403/40302",
+        "other customer deletes cart row": "403/40302",
+        "other customer checks out the row": "403/40302",
+        "other customer moves the row": "403/40302"
+      }
+    },
+    {
+      "id": "S15",
+      "tasks": [
+        "B-016"
+      ],
+      "description": "Submitting a legacy purchase intent for a fixed-price product is refused with 409/40917 and writes no intent",
+      "status": "PASS",
+      "detail": {
+        "response": "409/40917",
+        "message": "一口价旧购买意向已关闭，请通过购物车下单",
+        "intents": "0"
+      }
+    },
+    {
+      "id": "S16a",
+      "tasks": [
+        "B-028"
+      ],
+      "description": "Backend restarts on the same database with ddl-auto=validate",
+      "status": "PASS"
+    },
+    {
+      "id": "S16b",
+      "tasks": [
+        "B-012"
+      ],
+      "description": "After restart the receipt still answers the original key with 409/40909 and the original order, stock stays deducted once, the order is readable",
+      "status": "PASS",
+      "detail": {
+        "replay": "409/40909",
+        "detail": "200/0"
+      }
+    },
+    {
+      "id": "S17",
+      "tasks": [
+        "B-028"
+      ],
+      "description": "Final ledger over every product the run created: stock >= 0 and initial - live order quantities = stock (manually edited products excluded); OFFLINE exactly when stock 0; no cart row shares an id with a tombstone",
+      "status": "PASS",
+      "detail": {
+        "products": 56,
+        "ledger_errors": [],
+        "offline_errors": [],
+        "rows_also_tombstoned": "0"
+      }
+    },
+    {
+      "id": "Z01",
+      "tasks": [
+        "B-028"
+      ],
+      "description": "Disposable MySQL container removed",
+      "status": "PASS"
+    }
+  ],
+  "scenario_errors": [],
+  "http_request_count": 582,
+  "base_commit": "0f089faf8be631c58245a38e60c018ed52d76493",
+  "image_id": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+  "mysql_version": "8.0.46",
+  "app_log_tail": [],
+  "summary": {
+    "pass": 24,
+    "fail": 0,
+    "scenario_errors": 0
+  }
+}
