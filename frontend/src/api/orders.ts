@@ -1,6 +1,8 @@
+
 import { request, requestWithMessage } from './request'
 import type { Order, OrderAction, OrderStatus, OrderPage } from '../types/challengeB'
 
+// 买家订单 API
 export function getMyOrders(page: number, size: number) {
   return request<OrderPage>({ url: '/me/orders', method: 'GET', params: { page, size } })
 }
@@ -17,6 +19,7 @@ export function cancelMyOrder(orderId: string, expectedStatus: OrderStatus, reas
   })
 }
 
+// 管理员订单 API
 export function getAdminOrders(page: number, size: number) {
   return request<OrderPage>({ url: '/admin/orders', method: 'GET', params: { page, size } })
 }

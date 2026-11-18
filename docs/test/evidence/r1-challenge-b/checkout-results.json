@@ -1,0 +1,183 @@
+{
+  "date": "2026-11-17",
+  "baseCommit": "7de95d93a9e965c793430ee01579c5f298b2c741",
+  "tasksImplemented": [
+    "B-010",
+    "B-011",
+    "B-012",
+    "B-013"
+  ],
+  "existingTaskIntegrated": "B-014 from PR24; 40405 fix and real checkout/transition/cancel tests",
+  "backendVerify": {
+    "command": "mvn -B -ntp -f backend/pom.xml clean verify",
+    "tests": 93,
+    "failures": 0,
+    "errors": 0
+  },
+  "mysqlSpecialist": {
+    "version": "8.0.25",
+    "ddlAuto": "none",
+    "isolatedDatabase": "oxstore_b010_20261117",
+    "tests": 19,
+    "failures": 0,
+    "errors": 0,
+    "report": {
+      "name": "com.team.shop.ChallengeBCheckoutIntegrationTest",
+      "tests": "19",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  },
+  "frontendBuild": "passed; no frontend business implementation added",
+  "localJdk": "21.0.10, release 17; GitHub CI uses 17",
+  "coverage": [
+    "selection ownership and individual errors",
+    "confirmation changes require reconfirmation",
+    "multi-item exact snapshots and huge quantity/amount",
+    "one transaction and tombstones",
+    "same request/confirmation replay and new intent",
+    "reverse-selection multi-customer stock contention",
+    "post-lock add survives checkout",
+    "injected failure creating order/removing cart/recording receipt",
+    "five states without second inventory deduction",
+    "real checkout then cancellation once",
+    "customer vs seller cancellation race",
+    "cancellation vs shipping/completion"
+  ],
+  "notImplemented": [
+    "B-026 requires B-025",
+    "B-015 query endpoints",
+    "B-021/B-022/B-023 UI",
+    "independent R2 acceptance",
+    "deployment or B-000 team signoff"
+  ],
+  "latestSuiteReports": [
+    {
+      "name": "com.team.shop.ChallengeBCheckoutIntegrationTest",
+      "tests": "19",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.ChallengeBInventoryIntegrationTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.ChallengeBR4CartFavoriteIntegrationTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.controller.admin.AdminProductControllerTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.domain.IntentStateMachineTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.domain.ProductStateMachineTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.dto.PhoneAndTradeRequestTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.entity.AuctionSessionTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.entity.ChallengeBInventoryTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.entity.TradeHistoryTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.exception.GlobalExceptionHandlerBugFixTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.Iteration2ApiIntegrationTest",
+      "tests": "12",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.repository.AuctionRepositoryTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.repository.ChallengeBRepositoryTest",
+      "tests": "10",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.security.ChallengeBSecurityIntegrationTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.security.JwtUtilTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.service.ImageStorageServiceTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.team.shop.service.TradeServiceImplTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ]
+}
