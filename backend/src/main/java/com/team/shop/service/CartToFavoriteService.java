@@ -31,6 +31,7 @@ import com.team.shop.repository.ProductRepository;
 import com.team.shop.security.CustomerAccess;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
+import jakarta.persistence.PersistenceException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
@@ -87,12 +89,13 @@ public class CartToFavoriteService {
         String requestKey = ChallengeBRequestParser.requireIdempotencyKey(idempotencyKey);
         Customer customer = customers.findByIdForUpdate(customerId)
                 .orElseThrow(() -> new UnauthorizedException("请重新登录"));
-        String requestHash = hash(encode(selectedIds.stream().map(String::valueOf).toList()));
+        // Selection is a set; request order only determines the first response/error ordering.
+        String requestHash = hash(encode(selectedIds.stream().sorted().map(String::valueOf).toList()));
 
         Optional<OperationReceipt> prior = receipts.findByCustomerIdAndOperationTypeAndRequestKey(
                 customerId, ReceiptOperationType.MOVE_TO_FAVORITES, requestKey);
         if (prior.isPresent()) {
-            return retry(prior.get(), requestHash, customerId);
+            return retry(prior.get(), requestHash, customerId, selectedIds);
         }
 
         Map<Long, CartItem> initiallyLocated = new HashMap<>();
@@ -192,18 +195,20 @@ public class CartToFavoriteService {
             entityManager.flush();
             receipts.saveAndFlush(new OperationReceipt(customer, ReceiptOperationType.MOVE_TO_FAVORITES,
                     requestKey, requestHash, encode(new StoredMoveResult(result, writeSequences)), now));
-        } catch (DataAccessException e) {
+        } catch (DataAccessException | PersistenceException e) {
             throw new ApiBusinessException(500, 50001, "操作失败，请重试", null);
         }
         return result;
     }
 
-    private MoveToFavoritesResponse retry(OperationReceipt receipt, String requestHash, Long customerId) {
-        if (!receipt.getRequestHash().equals(requestHash)) {
+    private MoveToFavoritesResponse retry(OperationReceipt receipt, String requestHash, Long customerId,
+                                          List<Long> selectedIds) {
+        StoredMoveResult stored = decode(receipt.getResultPayload());
+        if (!receipt.getRequestHash().equals(requestHash) && !sameStoredSelection(stored.result(), selectedIds)) {
             throw new StateConflictException("同一请求键不能用于不同转收藏请求", 40916);
         }
-        StoredMoveResult stored = decode(receipt.getResultPayload());
-        boolean independentlyCancelled = stored.writeSequences().entrySet().stream().anyMatch(entry -> {
+        boolean independentlyCancelled = stored.writeSequences().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(Comparator.comparingLong(Long::parseLong))).anyMatch(entry -> {
             Long productId = ChallengeBRequestParser.parseId(entry.getKey(), "商品");
             FavoriteMutation mutation = mutations.findForUpdate(customerId, productId)
                     .orElseThrow(() -> new IllegalStateException("转收藏幂等记录缺少收藏操作代次"));
@@ -213,6 +218,14 @@ public class CartToFavoriteService {
             throw new StateConflictException("请勿重复操作", 40915);
         }
         return stored.result();
+    }
+
+    /** B-025 receipts hashed the input order. Their result still contains the full original selection. */
+    private boolean sameStoredSelection(MoveToFavoritesResponse result, List<Long> selectedIds) {
+        Set<Long> original = new LinkedHashSet<>();
+        result.movedCartItemIds().forEach(id -> original.add(Long.valueOf(id)));
+        result.skippedDeletedCartItemIds().forEach(id -> original.add(Long.valueOf(id)));
+        return original.equals(new LinkedHashSet<>(selectedIds));
     }
 
     private List<Long> selectedIds(JsonNode value) {
@@ -268,7 +281,7 @@ public class CartToFavoriteService {
                 throw new StateConflictException("拍卖商品不能转为收藏", 40908);
             } else if (product.getStatus() != ProductStatus.ONLINE) {
                 errors.add(itemError(item, productId, product.getName(), "OFFLINE",
-                        "商品「" + product.getName() + "」已下架，请从购物车移除后重试。"));
+                        "商品已下架"));
             }
         }
         return errors;

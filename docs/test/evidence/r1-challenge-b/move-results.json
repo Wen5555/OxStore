@@ -1,0 +1,168 @@
+{
+  "date": "2026-11-18",
+  "task": "B-026",
+  "owner": "R1",
+  "baseCommit": "48325f18607d2196dec2af2c6c10044ea71e96db",
+  "prerequisite": "B-025 merged in PR #27; B-003/B-007/B-008 already available",
+  "stories": [
+    "PB-B09",
+    "PB-B11",
+    "PB-B14",
+    "PB-B15"
+  ],
+  "backendVerify": {
+    "command": "mvn -B -ntp -f backend/pom.xml clean verify",
+    "tests": 116,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "h2Specialist": {
+    "testClass": "com.team.shop.ChallengeBMoveConcurrencyIntegrationTest",
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "mysqlSpecialist": {
+    "version": "8.0.25",
+    "database": "oxstore_b026_20261118",
+    "ddlAuto": "none",
+    "testClass": "com.team.shop.ChallengeBMoveConcurrencyIntegrationTest",
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "mysqlProcessRestart": {
+    "applicationProcesses": 2,
+    "database": "MySQL 8.0.25 / oxstore_b026_20261118",
+    "ddlAuto": "none",
+    "originalMoveHttpStatus": 200,
+    "ordinaryRetryAfterRestart": {
+      "httpStatus": 409,
+      "code": 40915
+    },
+    "replayAfterIndependentCancellation": {
+      "httpStatus": 200,
+      "originalResponsePreserved": true
+    },
+    "cancelledFavoriteRemainsAbsent": true,
+    "laterNewCartRowSurvivesOriginalRetry": true,
+    "passed": true
+  },
+  "frontendBuild": "npm run build passed",
+  "localJdk": "21.0.10, Maven release 17; GitHub CI uses JDK 17",
+  "implementationFixes": [
+    "Canonical selected-row set for new fingerprints; input order preserved in first result",
+    "Compatible replay of existing B-025 order-sensitive receipts, including skipped rows",
+    "Numeric product order when locking favorite mutation rows during replay",
+    "JPA persistence failures and Spring data failures return 50001 and roll back",
+    "Move-specific OFFLINE item message uses the frozen contract"
+  ],
+  "specialistCases": [
+    {
+      "name": "legacyOrderSensitiveReceiptRemainsUsableIncludingItsSkippedRows",
+      "seconds": 0.277,
+      "passed": true
+    },
+    {
+      "name": "earlierAddIsIncludedInTheEntireMovedRow",
+      "seconds": 0.289,
+      "passed": true
+    },
+    {
+      "name": "sameKeyConcurrentRequestsCommitOnceAndDifferentBodyIsRejected",
+      "seconds": 0.159,
+      "passed": true
+    },
+    {
+      "name": "cancellationBeforeMoveDoesNotEnableTheSpecialReplayRule",
+      "seconds": 0.077,
+      "passed": true
+    },
+    {
+      "name": "storageFailureRollsBackAllTablesAndSameKeyCanRetry(FailurePoint)[1]",
+      "seconds": 0.148,
+      "passed": true
+    },
+    {
+      "name": "storageFailureRollsBackAllTablesAndSameKeyCanRetry(FailurePoint)[2]",
+      "seconds": 0.117,
+      "passed": true
+    },
+    {
+      "name": "storageFailureRollsBackAllTablesAndSameKeyCanRetry(FailurePoint)[3]",
+      "seconds": 0.126,
+      "passed": true
+    },
+    {
+      "name": "foreignDeletedRowRejectsWholeBatchBeforeProductDetailsAreExposed",
+      "seconds": 0.053,
+      "passed": true
+    },
+    {
+      "name": "laterCancelWinsAndOriginalReceiptReplaysWithoutRecreatingFavorite",
+      "seconds": 0.3,
+      "passed": true
+    },
+    {
+      "name": "overlappingDifferentKeysMoveEachRowOnceAndSkipTheAlreadyMovedRow",
+      "seconds": 0.09,
+      "passed": true
+    },
+    {
+      "name": "normalizedSelectionKeepsOriginalResultOrderForPermutedRetries",
+      "seconds": 0.092,
+      "passed": true
+    },
+    {
+      "name": "laterQuantityUpdateCannotResurrectTheRemovedRow",
+      "seconds": 0.272,
+      "passed": true
+    },
+    {
+      "name": "reversedSelectionsAcrossCustomersUseTheSameProductLockOrder",
+      "seconds": 0.104,
+      "passed": true
+    },
+    {
+      "name": "existingFavoriteIsDeduplicatedAndItsOriginalTimestampIsKept",
+      "seconds": 0.27,
+      "passed": true
+    },
+    {
+      "name": "laterNewAddSurvivesOldMoveRetryAndGetsANewRowId",
+      "seconds": 0.301,
+      "passed": true
+    },
+    {
+      "name": "waitingForSellerProductLockRechecksOfflineStateAndRejectsWholeBatch",
+      "seconds": 0.276,
+      "passed": true
+    },
+    {
+      "name": "earlierClearRejectsAllGoneWithoutWritingReceipt",
+      "seconds": 0.254,
+      "passed": true
+    },
+    {
+      "name": "cancellationThenIndependentRefavoriteDoesNotLetOldRetryOverwriteNewFavorite",
+      "seconds": 0.069,
+      "passed": true
+    },
+    {
+      "name": "earlierQuantityChangeMovesEntireRowWithoutStockOrOrderChanges",
+      "seconds": 0.267,
+      "passed": true
+    },
+    {
+      "name": "earlierDeletionIsSkippedAndActualCountIsReturned",
+      "seconds": 0.284,
+      "passed": true
+    }
+  ],
+  "scope": "R1 implementation self-test; R4 code review and R2 independent acceptance remain team responsibilities",
+  "schemaChanges": false,
+  "frontendImplementationChanges": false
+}
