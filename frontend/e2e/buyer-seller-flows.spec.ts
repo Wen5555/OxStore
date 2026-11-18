@@ -580,7 +580,7 @@ test('挑战B越权提示使用服务端原文', async ({ page }) => {
   await expect(page.getByText('当前账号无权执行此操作。')).toHaveCount(0)
 })
 
-test('买家购买历史按后端订单字段展示成功和失败终态', async ({ page }) => {
+test('买家订单历史按挑战B订单字段展示状态与快照', async ({ page }) => {
   await page.route('**/api/categories/tree', (route) =>
     route.fulfill(apiResponse([])),
   )
@@ -590,14 +590,20 @@ test('买家购买历史按后端订单字段展示成功和失败终态', async
   await page.route('**/api/auth/login', (route) =>
     route.fulfill(apiResponse({ token: 'customer-token', userId: 17, role: 'CUSTOMER', username: 'buyer' })),
   )
-  await page.route('**/api/me/order-history?**', (route) =>
+  await page.route('**/api/me/orders?**', (route) =>
     route.fulfill(apiResponse({
       items: [{
-        orderId: 904,
-        productName: '历史商品',
-        submittedAt: '2026-10-25T10:00:00',
-        status: 'FAILED',
-        transactedAt: '2026-10-25T10:30:00',
+        orderId: '904',
+        orderNo: 'OX-904',
+        customerId: '17',
+        status: 'CANCELLED',
+        items: [{ productId: '42', productName: '历史商品', unitPrice: '88.00', quantity: '1', lineAmount: '88.00' }],
+        totalAmount: '88.00',
+        createdAt: '2026-10-25T10:00:00',
+        cancelledBy: 'CUSTOMER',
+        cancelledAt: '2026-10-25T10:30:00',
+        cancelReason: null,
+        allowedActions: [],
       }],
       page: 1,
       size: 10,
@@ -610,9 +616,9 @@ test('买家购买历史按后端订单字段展示成功和失败终态', async
   await page.getByLabel('用户名').fill('buyer')
   await page.getByLabel('密码').fill('password')
   await page.getByRole('button', { name: /登\s*录/ }).click()
-  await page.getByRole('button', { name: '我的购买历史' }).click()
+  await page.getByRole('button', { name: '订单历史' }).click()
   await expect(page.getByRole('cell', { name: '历史商品' })).toBeVisible()
-  await expect(page.getByRole('cell', { name: '失败' })).toBeVisible()
+  await expect(page.getByRole('cell', { name: '已取消' })).toBeVisible()
 })
 
 test('买家可查看账户概览、进入购买历史并退出登录', async ({ page }) => {
@@ -625,7 +631,7 @@ test('买家可查看账户概览、进入购买历史并退出登录', async ({
   await page.route('**/api/products?**', (route) =>
     route.fulfill(apiResponse({ items: [], page: 1, size: 10, total: 0, pages: 0 })),
   )
-  await page.route('**/api/me/order-history?**', (route) =>
+  await page.route('**/api/me/orders?**', (route) =>
     route.fulfill(apiResponse({ items: [], page: 1, size: 10, total: 0, pages: 0 })),
   )
 
@@ -639,8 +645,8 @@ test('买家可查看账户概览、进入购买历史并退出登录', async ({
   await expect(page.getByText('buyer', { exact: true }).first()).toBeVisible()
   await expect(page.getByText('17', { exact: true })).toBeVisible()
 
-  await page.getByRole('button', { name: '查看购买历史' }).click()
-  await expect(page.getByRole('heading', { name: '我的购买历史' })).toBeVisible()
+  await page.getByRole('button', { name: '订单历史' }).click()
+  await expect(page.getByRole('heading', { name: '订单历史' })).toBeVisible()
   await page.goto('/me/account')
   await page.getByRole('button', { name: '退出登录' }).click()
   await expect(page).toHaveURL('/')
@@ -836,6 +842,65 @@ test('清空购物车二次确认后只清车，不创建订单', async ({ page 
   expect(orderRequests).toBe(0)
 })
 
+test('HTTP环境缺少randomUUID时仍可确认并提交订单', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('customer_token', 'customer-token')
+    Object.defineProperty(Crypto.prototype, 'randomUUID', { configurable: true, value: undefined })
+  })
+
+  const cartItem = {
+    cartItemId: '21', productId: '11', productName: '键盘', unitPrice: '10.00', mainImageUrl: null,
+    quantity: '2', stock: '5', online: true, invalidLabel: null, defaultCheckoutSelected: true,
+    canCheckoutSelect: true, canFavoriteSelect: true, updatedAt: '2026-11-16T10:00:00',
+  }
+  let orderRequest: { confirmationToken: string; key?: string } | undefined
+  let confirmationRequests = 0
+  await page.route('**/api/me/cart', (route) =>
+    route.fulfill(apiResponse({ items: orderRequest ? [] : [cartItem] })),
+  )
+  await page.route('**/api/me/checkout/confirmations', (route) => {
+    confirmationRequests += 1
+    return route.fulfill(apiResponse({
+      confirmationToken: 'b6f90dc4-e989-4cd7-97d8-6f754dd40d1a',
+      items: [{
+        cartItemId: '21', productId: '11', productName: '键盘', unitPrice: '10.00',
+        quantity: '2', lineAmount: '20.00',
+      }],
+      totalAmount: '20.00',
+      createdAt: '2026-11-16T10:00:00',
+    }))
+  })
+  await page.route('**/api/me/orders', async (route) => {
+    orderRequest = {
+      confirmationToken: route.request().postDataJSON().confirmationToken,
+      key: route.request().headers()['idempotency-key'],
+    }
+    await route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        code: 0,
+        message: '下单成功',
+        data: {
+          orderId: '904', orderNo: 'OX-904', customerId: '17', status: 'PLACED',
+          items: [{ productId: '11', productName: '键盘', unitPrice: '10.00', quantity: '2', lineAmount: '20.00' }],
+          totalAmount: '20.00', createdAt: '2026-11-16T10:00:00', cancelledBy: null,
+          cancelledAt: null, cancelReason: null, allowedActions: ['CANCEL'],
+        },
+      }),
+    })
+  })
+
+  await page.goto('/me/cart')
+  await page.getByRole('button', { name: '下单' }).click()
+  await expect.poll(() => confirmationRequests).toBe(1)
+  await expect(page.getByRole('dialog', { name: '确认下单' })).toBeVisible()
+  await page.getByRole('button', { name: '确认下单' }).click()
+  await expect(page.getByRole('dialog', { name: '下单成功' })).toContainText('OX-904')
+  expect(orderRequest?.confirmationToken).toBe('b6f90dc4-e989-4cd7-97d8-6f754dd40d1a')
+  expect(orderRequest?.key).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)
+})
+
 test('购物车旧行改量冲突后刷新并保留仍有效的勾选', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('customer_token', 'customer-token'))
   let cartItems = [{
@@ -932,4 +997,236 @@ test('卖家库存改为正数不会触发自动上架，旧意向归档可按�
   await page.goto('/admin/legacy-intents?customerId=17')
   await expect(page.getByRole('heading', { name: '旧意向归档' })).toBeVisible()
   await expect.poll(() => archiveQuery).toBe('17')
+})
+
+test('购物车下单与转收藏使用各自的默认选择规则', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('customer_token', 'customer-token'))
+  await page.route('**/api/me/cart', (route) =>
+    route.fulfill(apiResponse({
+      items: [
+        {
+          cartItemId: '21', productId: '11', productName: '库存充足商品', unitPrice: '10.00',
+          mainImageUrl: null, quantity: '2', stock: '5', online: true, invalidLabel: null,
+          defaultCheckoutSelected: true, canCheckoutSelect: true, canFavoriteSelect: true,
+          updatedAt: '2026-11-16T10:00:00',
+        },
+        {
+          cartItemId: '22', productId: '12', productName: '超库存商品', unitPrice: '15.00',
+          mainImageUrl: null, quantity: '3', stock: '1', online: true, invalidLabel: null,
+          defaultCheckoutSelected: false, canCheckoutSelect: true, canFavoriteSelect: true,
+          updatedAt: '2026-11-16T10:00:00',
+        },
+      ],
+    })),
+  )
+
+  await page.goto('/me/cart')
+  await expect(page.getByLabel('选择库存充足商品')).toBeChecked()
+  await expect(page.getByLabel('选择超库存商品')).not.toBeChecked()
+
+  await page.getByText('转收藏选择', { exact: true }).click()
+  await expect(page.getByLabel('选择库存充足商品')).toBeChecked()
+  await expect(page.getByLabel('选择超库存商品')).toBeChecked()
+  await page.getByRole('button', { name: '转为收藏' }).click()
+  await expect(page.getByRole('dialog', { name: '确认转为收藏' })).toContainText('所选 2 件商品')
+})
+
+test('下单确认失败时保留勾选和未提交数量', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('customer_token', 'customer-token'))
+  await page.route('**/api/me/cart', (route) =>
+    route.fulfill(apiResponse({
+      items: [{
+        cartItemId: '21', productId: '11', productName: '显示器', unitPrice: '10.00',
+        mainImageUrl: null, quantity: '2', stock: '5', online: true, invalidLabel: null,
+        defaultCheckoutSelected: true, canCheckoutSelect: true, canFavoriteSelect: true,
+        updatedAt: '2026-11-16T10:00:00',
+      }],
+    })),
+  )
+  await page.route('**/api/me/checkout/confirmations', (route) =>
+    route.fulfill({
+      status: 409,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        code: 40910,
+        message: '所选商品无法下单',
+        data: {
+          errors: [{
+            cartItemId: '21',
+            productId: '11',
+            productName: '显示器',
+            reason: 'INSUFFICIENT_STOCK',
+            message: '商品「显示器」库存不足：当前可售 1 件，您选购了 2 件，请减少数量或移除后重试。',
+            availableStock: '1',
+            requestedQuantity: '2',
+          }],
+        },
+      }),
+    }),
+  )
+
+  await page.goto('/me/cart')
+  await page.getByLabel('显示器数量').fill('4')
+  await page.getByRole('button', { name: '下单' }).click()
+  await expect(page.getByLabel('选择显示器')).toBeChecked()
+  await expect(page.getByLabel('显示器数量')).toHaveValue('4')
+  await expect(page.getByText('商品「显示器」库存不足：当前可售 1 件，您选购了 2 件，请减少数量或移除后重试。')).toBeVisible()
+})
+
+test('40913 后重新生成确认并使用新的幂等键', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('customer_token', 'customer-token'))
+  let confirmationRequests = 0
+  const submitted: Array<{ token: string; key?: string }> = []
+  await page.route('**/api/me/cart', (route) =>
+    route.fulfill(apiResponse({
+      items: [{
+        cartItemId: '21', productId: '11', productName: '键盘', unitPrice: '10.00',
+        mainImageUrl: null, quantity: '2', stock: '5', online: true, invalidLabel: null,
+        defaultCheckoutSelected: true, canCheckoutSelect: true, canFavoriteSelect: true,
+        updatedAt: '2026-11-16T10:00:00',
+      }],
+    })),
+  )
+  await page.route('**/api/me/checkout/confirmations', (route) => {
+    confirmationRequests += 1
+    const token = confirmationRequests === 1
+      ? 'b6f90dc4-e989-4cd7-97d8-6f754dd40d1a'
+      : 'c6f90dc4-e989-4cd7-97d8-6f754dd40d1a'
+    const quantity = confirmationRequests === 1 ? '2' : '1'
+    return route.fulfill(apiResponse({
+      confirmationToken: token,
+      items: [{
+        cartItemId: '21', productId: '11', productName: '键盘', unitPrice: '10.00',
+        quantity, lineAmount: `${quantity}0.00`,
+      }],
+      totalAmount: `${quantity}0.00`,
+      createdAt: '2026-11-16T10:00:00',
+    }))
+  })
+  await page.route('**/api/me/orders**', async (route) => {
+    submitted.push({
+      token: route.request().postDataJSON().confirmationToken,
+      key: route.request().headers()['idempotency-key'],
+    })
+    if (submitted.length === 1) {
+      await route.fulfill({
+        status: 409,
+        contentType: 'application/json',
+        body: JSON.stringify({ code: 40913, message: '确认信息已变化，请重新确认', data: null }),
+      })
+      return
+    }
+    await route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        code: 0,
+        message: '下单成功',
+        data: {
+          orderId: '904', orderNo: 'OX-904', customerId: '17', status: 'PLACED',
+          items: [{ productId: '11', productName: '键盘', unitPrice: '10.00', quantity: '1', lineAmount: '10.00' }],
+          totalAmount: '10.00', createdAt: '2026-11-16T10:00:00', cancelledBy: null,
+          cancelledAt: null, cancelReason: null, allowedActions: ['CANCEL'],
+        },
+      }),
+    })
+  })
+
+  await page.goto('/me/cart')
+  await page.getByRole('button', { name: '下单' }).click()
+  await page.getByRole('button', { name: '确认下单' }).click()
+  await expect.poll(() => confirmationRequests).toBe(2)
+  await expect(page.getByRole('dialog', { name: '确认下单' })).toContainText('× 1')
+  await page.getByRole('button', { name: '确认下单' }).click()
+  await expect(page.getByRole('dialog', { name: '下单成功' })).toContainText('OX-904')
+  expect(submitted[0].token).not.toBe(submitted[1].token)
+  expect(submitted[0].key).not.toBe(submitted[1].key)
+})
+
+test('重复下单响应可跳转订单历史查找原单', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('customer_token', 'customer-token'))
+  await page.route('**/api/me/cart', (route) =>
+    route.fulfill(apiResponse({
+      items: [{
+        cartItemId: '21', productId: '11', productName: '键盘', unitPrice: '10.00',
+        mainImageUrl: null, quantity: '1', stock: '5', online: true, invalidLabel: null,
+        defaultCheckoutSelected: true, canCheckoutSelect: true, canFavoriteSelect: true,
+        updatedAt: '2026-11-16T10:00:00',
+      }],
+    })),
+  )
+  await page.route('**/api/me/checkout/confirmations', (route) =>
+    route.fulfill(apiResponse({
+      confirmationToken: 'b6f90dc4-e989-4cd7-97d8-6f754dd40d1a',
+      items: [{
+        cartItemId: '21', productId: '11', productName: '键盘', unitPrice: '10.00',
+        quantity: '1', lineAmount: '10.00',
+      }],
+      totalAmount: '10.00',
+      createdAt: '2026-11-16T10:00:00',
+    })),
+  )
+  await page.route('**/api/me/orders**', async (route) => {
+    if (route.request().method() === 'POST') {
+      await route.fulfill({
+        status: 409,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 40909,
+          message: '订单已提交，请勿重复下单',
+          data: { orderId: '904', orderNo: 'OX-904' },
+        }),
+      })
+      return
+    }
+    await route.fulfill(apiResponse({
+      items: [{
+        orderId: '904', orderNo: 'OX-904', customerId: '17', status: 'PLACED',
+        items: [{ productId: '11', productName: '键盘', unitPrice: '10.00', quantity: '1', lineAmount: '10.00' }],
+        totalAmount: '10.00', createdAt: '2026-11-16T10:00:00', cancelledBy: null,
+        cancelledAt: null, cancelReason: null, allowedActions: ['CANCEL'],
+      }],
+      page: 1, size: 10, total: 1, pages: 1,
+    }))
+  })
+
+  await page.goto('/me/cart')
+  await page.getByRole('button', { name: '下单' }).click()
+  await page.getByRole('button', { name: '确认下单' }).click()
+  await expect(page).toHaveURL('/me/order-history')
+  await expect(page.getByText('OX-904')).toBeVisible()
+})
+
+test('大字符串商品 ID 从详情路由到加购请求不丢精度', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('customer_token', 'customer-token'))
+  let addedProductId: unknown
+  await page.route('**/api/products/9007199254740993', (route) =>
+    route.fulfill(apiResponse({
+      productId: '9007199254740993',
+      name: '大 ID 商品',
+      descriptionHtml: '',
+      price: 10,
+      stock: '2',
+      status: 'ONLINE',
+      canPurchase: true,
+      category2Id: 2,
+      category2Name: '灯具',
+      images: [],
+      mainImagePath: null,
+      publishedAt: '2026-11-16T10:00:00',
+      statusUpdatedAt: '2026-11-16T10:00:00',
+      sellingMode: 'FIXED_PRICE',
+    })),
+  )
+  await page.route('**/api/me/favorites/9007199254740993', (route) =>
+    route.fulfill(apiResponse({ favorited: false, createdAt: null })),
+  )
+  await page.route('**/api/me/cart/items', async (route) => {
+    addedProductId = route.request().postDataJSON().productId
+    await route.fulfill(apiResponse({ cartItemId: '21' }))
+  })
+
+  await page.goto('/products/9007199254740993')
+  await page.getByRole('button', { name: '加入购物车' }).click()
+  expect(addedProductId).toBe('9007199254740993')
 })

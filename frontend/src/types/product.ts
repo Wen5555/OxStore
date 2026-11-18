@@ -16,7 +16,7 @@ export interface ProductImage {
 }
 
 export interface ProductSummary {
-  id: number
+  id: string
   name: string
   price: number
   category2Id: number
@@ -27,7 +27,7 @@ export interface ProductSummary {
 }
 
 export interface Product {
-  id: number
+  id: string
   name: string
   price: number
   stock: string
@@ -43,7 +43,7 @@ export interface Product {
 }
 
 export interface ProductSummaryResponse {
-  productId: number
+  productId: string | number
   name: string
   price: number
   mainImagePath: string | null
@@ -54,7 +54,7 @@ export interface ProductSummaryResponse {
 }
 
 export interface ProductDetailResponse {
-  productId: number
+  productId: string | number
   name: string
   price: number
   category2Id: number
@@ -73,7 +73,7 @@ export interface ProductDetailResponse {
 
 export function mapProductSummary(response: ProductSummaryResponse): ProductSummary {
   return {
-    id: response.productId,
+    id: String(response.productId),
     name: response.name,
     price: response.price,
     category2Id: response.category2Id,
@@ -86,7 +86,7 @@ export function mapProductSummary(response: ProductSummaryResponse): ProductSumm
 
 export function mapProductDetail(response: ProductDetailResponse): Product {
   return {
-    id: response.productId,
+    id: String(response.productId),
     name: response.name,
     price: response.price,
     stock: String(response.stock),

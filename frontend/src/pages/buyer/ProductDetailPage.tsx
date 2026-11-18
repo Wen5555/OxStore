@@ -81,11 +81,11 @@ export default function ProductDetailPage() {
       setLoading(false)
       return
     }
-    getProduct(Number(id))
+    getProduct(id)
       .then(async (loadedProduct) => {
         setProduct(loadedProduct)
         if (loadedProduct.sellingMode === 'AUCTION') {
-          setAuction(await getAuctionSnapshot(Number(id)))
+          setAuction(await getAuctionSnapshot(id))
         }
       })
       .catch((error) => {

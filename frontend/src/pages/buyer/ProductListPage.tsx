@@ -60,7 +60,7 @@ export default function ProductListPage() {
             {loggedIn ? (
               <>
                 <Button onClick={() => navigate('/me/account')}>我的账户</Button>
-                <Button onClick={() => navigate('/me/order-history')}>我的购买历史</Button>
+                <Button onClick={() => navigate('/me/order-history')}>订单历史</Button>
                 <Button onClick={() => {
                   localStorage.removeItem('customer_token')
                   localStorage.removeItem('customer_username')
