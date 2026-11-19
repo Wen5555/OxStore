@@ -1,4 +1,4 @@
-# OxStore Docker 交付版 0.1.0-docker.1
+# OxStore Docker 交付版 0.1.0-iteration3-challenge-b.1
 
 本包用于软件工程实践课程的容器交付和本机演示，包含 Linux/amd64 的前端、后端和 MySQL 镜像。Windows 使用 Docker Desktop 的 Linux 容器模式；Linux 使用 Docker Engine。ARM 主机、正式公网部署及长期运行未在本轮验收。
 
@@ -55,8 +55,8 @@ docker compose up --no-build --pull never --wait --wait-timeout 240
 从 GitHub Release 下载同版本源码 ZIP，安装 Docker 后，在源码根目录执行：
 
 ```powershell
-docker build --platform linux/amd64 -t oxstore/backend:0.1.0-docker.1 backend
-docker build --platform linux/amd64 -t oxstore/frontend:0.1.0-docker.1 frontend
+docker build --platform linux/amd64 -t oxstore/backend:0.1.0-iteration3-challenge-b.1 backend
+docker build --platform linux/amd64 -t oxstore/frontend:0.1.0-iteration3-challenge-b.1 frontend
 ```
 
 后端构建镜像使用 Maven 3.9 / Java 17 并执行全部 JUnit 测试；前端使用 Node.js 20 和锁文件安装并执行 TypeScript/Vite 构建。上游基础标签可能更新，本次实际构建 digest 和运行镜像 ID 留在构建日志及 manifest；下载包包含本次确定镜像。
