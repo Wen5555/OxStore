@@ -1,0 +1,266 @@
+{
+  "label": "volume",
+  "run_at": "2026-11-19T08:47:20.241224+08:00",
+  "project": "oxstore-b039-volume-ba74c602",
+  "checks": [
+    {
+      "id": "V01",
+      "description": "Previous release (iteration2 + auction) starts healthy on a new volume with its V6-era schema",
+      "status": "PASS"
+    },
+    {
+      "id": "V02",
+      "description": "Old data exists: 1 trade-frozen product, 2 queued intents, 1 SUCCESS history, a LIVE auction with a bid",
+      "status": "PASS",
+      "detail": {
+        "intents": "IN_TRANSACTION\t1,QUEUING\t2,SUCCESS\t1",
+        "history": "1",
+        "bids": "1"
+      }
+    },
+    {
+      "id": "V03",
+      "description": "New images on the un-upgraded volume do NOT come up healthy and leave the 12-table database untouched (Compose restart does not upgrade tables); the backend defaults to ddl-auto=none, so it fails on its first query instead of validating at start-up",
+      "status": "PASS",
+      "detail": {
+        "compose_exit": 1,
+        "tables": 12,
+        "backend_reason": "Caused by: java.sql.SQLSyntaxErrorException: Unknown column 'p1_0.offline_reason' in 'field list'"
+      }
+    },
+    {
+      "id": "V04",
+      "description": "The explicit upgrade tool classifies the volume 'auction', applies V7+V8 after a non-empty backup, ends 'challenge_b'",
+      "status": "PASS",
+      "detail": {
+        "phase_before": "auction",
+        "phase_after": "challenge_b",
+        "applied": [
+          "V7",
+          "V8"
+        ],
+        "v8_counts": {
+          "closed_intents": 3,
+          "closed_attempts": 1,
+          "unfrozen_products": 1,
+          "paused_products": 0
+        },
+        "backup_bytes": 24082
+      }
+    },
+    {
+      "id": "V05",
+      "description": "V8 closed exactly the live fixed-price intents (1 in-trade + 2 queued) and the trade-frozen product returned to sale",
+      "status": "PASS",
+      "detail": {
+        "closed_intents": 3,
+        "closed_attempts": 1,
+        "unfrozen_products": 1,
+        "paused_products": 0
+      }
+    },
+    {
+      "id": "V101",
+      "description": "mysql, backend and frontend are healthy with no build and no registry pull",
+      "status": "PASS",
+      "detail": [
+        [
+          "backend",
+          "healthy"
+        ],
+        [
+          "frontend",
+          "healthy"
+        ],
+        [
+          "mysql",
+          "healthy"
+        ]
+      ]
+    },
+    {
+      "id": "V102",
+      "description": "Only the frontend port is published to the host",
+      "status": "PASS"
+    },
+    {
+      "id": "V103_",
+      "description": "SPA route served by Nginx",
+      "status": "PASS"
+    },
+    {
+      "id": "V103_admin_login",
+      "description": "SPA route served by Nginx",
+      "status": "PASS"
+    },
+    {
+      "id": "V103_cart",
+      "description": "SPA route served by Nginx",
+      "status": "PASS"
+    },
+    {
+      "id": "V06",
+      "description": "Database has the 21 tables, 3 triggers and the text stock column of the challenge-B schema",
+      "status": "PASS",
+      "detail": {
+        "tables": 21,
+        "triggers": 3,
+        "stock": "longtext"
+      }
+    },
+    {
+      "id": "V07",
+      "description": "Old data survives: intent statuses unchanged (no CANCELLED/FAILED invented), SUCCESS history readable, auction and bid unchanged",
+      "status": "PASS",
+      "detail": {
+        "pre": "IN_TRANSACTION\t1,QUEUING\t2,SUCCESS\t1",
+        "post": "IN_TRANSACTION\t1,QUEUING\t2,SUCCESS\t1"
+      }
+    },
+    {
+      "id": "V08",
+      "description": "The closed intent is shown read-only in the buyer's archive without becoming a new order",
+      "status": "PASS",
+      "detail": {
+        "archive_rows": 1
+      }
+    },
+    {
+      "id": "V09",
+      "description": "Closed intents cannot be driven any more (start/success on a closed fixed-price intent is refused with 409/40917)",
+      "status": "PASS"
+    },
+    {
+      "id": "V10",
+      "description": "The previously trade-frozen product is on sale again with its stock unchanged and uploaded images still served",
+      "status": "PASS"
+    },
+    {
+      "id": "VF01",
+      "description": "Fixed-price product published with an image served through Nginx",
+      "status": "PASS"
+    },
+    {
+      "id": "VF02",
+      "description": "Favourite stored, readable and listed (F01/F03/F04)",
+      "status": "PASS"
+    },
+    {
+      "id": "VF03",
+      "description": "Cart -> confirmation -> order: 201, six-state PLACED, exact total, stock deducted in the database",
+      "status": "PASS",
+      "detail": {
+        "status": "PLACED",
+        "total": "37.50"
+      }
+    },
+    {
+      "id": "VF04",
+      "description": "Customer and seller read the same order (O01/O02/A01/A02): identical except allowedActions (customer [CANCEL], seller [CONFIRM, CANCEL])",
+      "status": "PASS",
+      "detail": {
+        "detail": "200/0",
+        "admin_detail": "200/0",
+        "admin_list": "200/0",
+        "differs": [
+          "allowedActions"
+        ]
+      }
+    },
+    {
+      "id": "VF05",
+      "description": "A cart row whose quantity was ordered is gone from the cart",
+      "status": "PASS"
+    },
+    {
+      "id": "VF06",
+      "description": "Seller advances CONFIRM -> PREPARE; skipping or repeating a step is refused (409)",
+      "status": "PASS"
+    },
+    {
+      "id": "VF07",
+      "description": "Customer cancel before shipping: CANCELLED with initiator/time, stock restored once, repeat refused",
+      "status": "PASS",
+      "detail": {
+        "repeat": "409/40911"
+      }
+    },
+    {
+      "id": "VF08",
+      "description": "After shipping the customer cannot cancel but the seller can; stock restored",
+      "status": "PASS"
+    },
+    {
+      "id": "VF09",
+      "description": "Same confirmation and Idempotency-Key: second request is 409/40909 pointing at the first order",
+      "status": "PASS"
+    },
+    {
+      "id": "VF10",
+      "description": "5 customers race for 2 units through Nginx: exactly 2 orders, stock 0, auto offline, losers get 409/40910",
+      "status": "PASS",
+      "detail": [
+        "201/0",
+        "409/40910",
+        "409/40910",
+        "201/0",
+        "409/40910"
+      ]
+    },
+    {
+      "id": "VF11",
+      "description": "Move-to-favourites moves the whole row: favourite exists, cart row gone, no order, stock untouched",
+      "status": "PASS"
+    },
+    {
+      "id": "VF12",
+      "description": "Anonymous and wrong-role calls are refused (401/403)",
+      "status": "PASS"
+    },
+    {
+      "id": "VF13",
+      "description": "Legacy purchase intent on a fixed-price product is closed: 409/40917; archive endpoints answer 200",
+      "status": "PASS"
+    },
+    {
+      "id": "VF14",
+      "description": "Auction regression: bid accepted, public snapshot LIVE, auction cannot enter the cart (409)",
+      "status": "PASS",
+      "detail": {
+        "cart": "409/40908"
+      }
+    },
+    {
+      "id": "V99",
+      "description": "Orders, stock, receipts, favourites, auction and uploaded image identical after backend restart and after container re-creation",
+      "status": "PASS"
+    }
+  ],
+  "requests": 121,
+  "old_state": {
+    "intents": "IN_TRANSACTION\t1,QUEUING\t2,SUCCESS\t1",
+    "history": "1",
+    "bids": "1"
+  },
+  "upgrade_tool": {
+    "phase_before": "auction",
+    "phase_after": "challenge_b",
+    "applied": [
+      "V7",
+      "V8"
+    ],
+    "v8_counts": {
+      "closed_intents": 3,
+      "closed_attempts": 1,
+      "unfrozen_products": 1,
+      "paused_products": 0
+    },
+    "backup_bytes": 24082
+  },
+  "mysql_version": "8.0.46",
+  "cleanup": {
+    "containers_left": false,
+    "volumes_left": false
+  },
+  "result": "PASS"
+}
