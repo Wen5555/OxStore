@@ -1,6 +1,25 @@
+
 import { request, requestWithMessage } from './request'
 import type { Order, OrderAction, OrderStatus, OrderPage } from '../types/challengeB'
 
+// 买家订单 API
+export function getMyOrders(page: number, size: number) {
+  return request<OrderPage>({ url: '/me/orders', method: 'GET', params: { page, size } })
+}
+
+export function getMyOrder(orderId: string) {
+  return request<Order>({ url: `/me/orders/${encodeURIComponent(orderId)}`, method: 'GET' })
+}
+
+export function cancelMyOrder(orderId: string, expectedStatus: OrderStatus, reason?: string) {
+  return requestWithMessage<Order>({
+    url: `/me/orders/${encodeURIComponent(orderId)}/cancel`,
+    method: 'POST',
+    data: { expectedStatus, ...(reason?.trim() ? { reason: reason.trim() } : {}) },
+  })
+}
+
+// 管理员订单 API
 export function getAdminOrders(page: number, size: number) {
   return request<OrderPage>({ url: '/admin/orders', method: 'GET', params: { page, size } })
 }

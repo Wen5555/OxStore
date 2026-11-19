@@ -11,8 +11,8 @@ export function getProducts(params: { category2Id?: number; q?: string; page: nu
     .then((page) => ({ ...page, items: page.items.map(mapProductSummary) }))
 }
 
-export function getProduct(productId: number) {
-  return request<ProductDetailResponse>({ url: `/products/${productId}`, method: 'GET' })
+export function getProduct(productId: string | number) {
+  return request<ProductDetailResponse>({ url: `/products/${encodeURIComponent(String(productId))}`, method: 'GET' })
     .then(mapProductDetail)
 }
 

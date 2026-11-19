@@ -7,13 +7,14 @@ export async function getAdminProducts(page: number, size: number) {
   return { ...result, items: result.items.map(mapProductDetail) }
 }
 
-export async function getAdminProduct(productId: number) {
+export async function getAdminProduct(productId: string | number) {
+  const requestedId = String(productId)
   const firstPage = await getAdminProducts(1, 100)
-  const firstMatch = firstPage.items.find((product) => product.id === productId)
+  const firstMatch = firstPage.items.find((product) => product.id === requestedId)
   if (firstMatch) return firstMatch
   for (let page = 2; page <= firstPage.pages; page += 1) {
     const result = await getAdminProducts(page, 100)
-    const match = result.items.find((product) => product.id === productId)
+    const match = result.items.find((product) => product.id === requestedId)
     if (match) return match
   }
   throw new Error('商品不存在')
@@ -23,16 +24,16 @@ export function createProduct(data: FormData) {
   return request<ProductDetailResponse>({ url: '/admin/products', method: 'POST', data }).then(mapProductDetail)
 }
 
-export function updateProduct(productId: number, data: { stock?: string; category2Id?: number }) {
-  return request<ProductDetailResponse>({ url: `/admin/products/${productId}`, method: 'PATCH', data }).then(mapProductDetail)
+export function updateProduct(productId: string | number, data: { stock?: string; category2Id?: number }) {
+  return request<ProductDetailResponse>({ url: `/admin/products/${encodeURIComponent(String(productId))}`, method: 'PATCH', data }).then(mapProductDetail)
 }
 
-export function setProductOffline(productId: number) {
-  return request<ProductDetailResponse>({ url: `/admin/products/${productId}/offline`, method: 'POST' }).then(mapProductDetail)
+export function setProductOffline(productId: string | number) {
+  return request<ProductDetailResponse>({ url: `/admin/products/${encodeURIComponent(String(productId))}/offline`, method: 'POST' }).then(mapProductDetail)
 }
 
-export function setProductOnline(productId: number) {
-  return request<ProductDetailResponse>({ url: `/admin/products/${productId}/online`, method: 'POST' }).then(mapProductDetail)
+export function setProductOnline(productId: string | number) {
+  return request<ProductDetailResponse>({ url: `/admin/products/${encodeURIComponent(String(productId))}/online`, method: 'POST' }).then(mapProductDetail)
 }
 
 export function getAdminCustomers(page: number, size: number) {

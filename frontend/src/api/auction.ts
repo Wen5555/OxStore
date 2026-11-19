@@ -2,13 +2,13 @@ import { request } from './request'
 import type { AuctionAdminItem, AuctionNotification, AuctionSnapshot, AuctionBidResponse } from '../types/auction'
 import type { Page } from '../types/common'
 
-export function getAuctionSnapshot(productId: number) {
-  return request<AuctionSnapshot>({ url: `/products/${productId}/auction`, method: 'GET' })
+export function getAuctionSnapshot(productId: string | number) {
+  return request<AuctionSnapshot>({ url: `/products/${encodeURIComponent(String(productId))}/auction`, method: 'GET' })
 }
 
-export function placeBid(productId: number, amount: number) {
+export function placeBid(productId: string | number, amount: number) {
   return request<AuctionBidResponse>({
-    url: `/products/${productId}/auction/bids`,
+    url: `/products/${encodeURIComponent(String(productId))}/auction/bids`,
     method: 'POST',
     data: { amount },
   })

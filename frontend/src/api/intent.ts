@@ -2,7 +2,7 @@ import { request } from './request'
 import type { Intent } from '../types/intent'
 import type { Page } from '../types/common'
 
-export function getProductIntentQueue(productId: number, page = 1, size = 10) {
+export function getProductIntentQueue(productId: string | number, page = 1, size = 10) {
   return request<Page<Intent>>({
     url: '/admin/intents',
     method: 'GET',

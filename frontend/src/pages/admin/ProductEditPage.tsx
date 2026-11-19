@@ -26,7 +26,7 @@ export default function ProductEditPage() {
       setLoading(false)
       return
     }
-    Promise.all([getAdminProduct(Number(id)), getCategoryTree()])
+    Promise.all([getAdminProduct(id), getCategoryTree()])
       .then(([item, tree]) => {
         setProduct(item)
         setCategories(tree)

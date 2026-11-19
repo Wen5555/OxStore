@@ -25,7 +25,7 @@ function toAuctionSummary(snapshot: AuctionSnapshot) {
 export default function ProductIntentQueuePage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const productId = Number(id)
+  const productId = id ?? ''
   const [items, setItems] = useState<Intent[]>([])
   const [currentIntent, setCurrentIntent] = useState<Intent>()
   const [total, setTotal] = useState(0)
@@ -85,7 +85,7 @@ export default function ProductIntentQueuePage() {
   }, [product?.id, product?.sellingMode])
 
   const load = async () => {
-    if (!Number.isInteger(productId) || productId <= 0) {
+    if (!/^[1-9]\d*$/.test(productId)) {
       setLoadError(true)
       setLoading(false)
       return

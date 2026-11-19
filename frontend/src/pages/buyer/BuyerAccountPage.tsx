@@ -40,7 +40,7 @@ export default function BuyerAccountPage() {
         <Card title="账户服务">
           <Space wrap>
             <Button type="primary" icon={<UnorderedListOutlined />} onClick={() => navigate('/me/order-history')}>
-              查看购买历史
+              订单历史
             </Button>
             <Button icon={<BellOutlined />} onClick={() => navigate('/me/auction-notifications')}>
               拍卖提醒
