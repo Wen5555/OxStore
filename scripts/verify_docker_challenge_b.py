@@ -39,7 +39,16 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parents[1]
 NEW_VERSION = os.environ.get("OXSTORE_VERSION", "0.1.0-iteration3-challenge-b.1")
 OLD_VERSION = "0.1.0-iteration2-auction-docker.1"
-OLD_SCHEMA_COMMIT = "0cef9ec"  # last develop commit before V7: the V6-era schema.sql the previous release shipped
+# The V6-era schema.sql the previous release shipped (develop 0cef9ec, before V7), kept as a fixture so this script
+# also runs from an exported bundle that has no git history.
+def old_schema_file():
+    here = Path(__file__).resolve().parent
+    for candidate in (here / "fixtures/v6-schema.sql", ROOT / "docs/test/fixtures/v6-schema.sql"):
+        if candidate.exists():
+            return candidate
+    raise FileNotFoundError("v6-schema.sql fixture not found")
+
+
 PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1cAAAAASUVORK5CYII=")
 
 
@@ -378,8 +387,7 @@ def run_existing_volume(bundle, output):
         old_dir = staging / "database"
         old_dir.mkdir()
         shutil.copy2(bundle / "compose.yml", staging / "compose.yml")
-        schema = subprocess.run(["git", "-C", str(ROOT), "show", f"{OLD_SCHEMA_COMMIT}:backend/src/main/resources/db/schema.sql"], capture_output=True, check=True).stdout
-        (old_dir / "schema.sql").write_bytes(schema)
+        (old_dir / "schema.sql").write_bytes(old_schema_file().read_bytes())
         old_compose = staging / "compose.yml"
 
         # 1. the previous release creates the volume and fills it through its own API
@@ -425,8 +433,8 @@ def run_existing_volume(bundle, output):
         container = subprocess.run(["docker", "compose", "-f", str(bundle / "compose.yml"), "-p", s.project, "ps", "-q", "mysql"], env=s.env,
                                    capture_output=True, cwd=bundle).stdout.decode().strip()
         name = subprocess.run(["docker", "inspect", "--format", "{{.Name}}", container], capture_output=True).stdout.decode().strip().lstrip("/")
-        tool = subprocess.run([sys.executable, "-X", "utf8", str(ROOT / "scripts/migrate_challenge_b.py"), "--container", name, "--database", "shop",
-                               "--backup-dir", str(backups)], capture_output=True, cwd=ROOT)
+        tool = subprocess.run([sys.executable, "-X", "utf8", str(Path(__file__).resolve().parent / "migrate_challenge_b.py"), "--container", name, "--database", "shop",
+                               "--backup-dir", str(backups)], capture_output=True, cwd=bundle)
         try:
             result = json.loads(tool.stdout.decode("utf-8"))
         except ValueError:

@@ -15,6 +15,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = '0.1.0-iteration3-challenge-b.1'
 SCRIPTS = ['verify_docker_release.py', 'verify_docker_challenge_b.py', 'migrate_iteration2.py', 'migrate_challenge_b.py']
+FIXTURES = ['v6-schema.sql']
 OPS_DOCS = ['B-042-数据库字典与升级运维说明.md', 'B-038-039-集成候选与部署验证.md']
 IMAGES = ['oxstore/backend:' + VERSION, 'oxstore/frontend:' + VERSION, 'mysql:8.0.46']
 
@@ -38,6 +39,9 @@ def prepare(folder: Path):
     (folder / 'scripts').mkdir()
     for name in SCRIPTS:
         shutil.copy2(ROOT / 'scripts' / name, folder / 'scripts' / name)
+    (folder / 'scripts/fixtures').mkdir(exist_ok=True)
+    for name in FIXTURES:
+        shutil.copy2(ROOT / 'docs/test/fixtures' / name, folder / 'scripts/fixtures' / name)
     for name in OPS_DOCS:
         if (ROOT / 'docs/iterationB' / name).exists():
             shutil.copy2(ROOT / 'docs/iterationB' / name, folder / 'database' / name)
@@ -65,6 +69,9 @@ def export(folder: Path, save_images=True):
     shutil.copy2(ROOT / 'docs/build.md', folder / 'build-guide.md')
     for name in SCRIPTS:
         shutil.copy2(ROOT / 'scripts' / name, folder / 'scripts' / name)
+    (folder / 'scripts/fixtures').mkdir(exist_ok=True)
+    for name in FIXTURES:
+        shutil.copy2(ROOT / 'docs/test/fixtures' / name, folder / 'scripts/fixtures' / name)
     for name in OPS_DOCS:
         if (ROOT / 'docs/iterationB' / name).exists():
             shutil.copy2(ROOT / 'docs/iterationB' / name, folder / 'database' / name)
