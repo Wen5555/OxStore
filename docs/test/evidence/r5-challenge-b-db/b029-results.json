@@ -1,0 +1,273 @@
+{
+  "started_at": "2026-11-19T08:22:56",
+  "checks": [
+    {
+      "id": "P1a",
+      "tasks": [
+        "B-029"
+      ],
+      "description": "An iteration-1 database is classified 'legacy' and upgraded through V4,V5,V6,V7,V8 by the tool",
+      "status": "PASS"
+    },
+    {
+      "id": "P1b",
+      "tasks": [
+        "B-029"
+      ],
+      "description": "No product or intent row is lost and Chinese text survives",
+      "status": "PASS"
+    },
+    {
+      "id": "P1c",
+      "tasks": [
+        "B-029"
+      ],
+      "description": "Upgraded legacy schema equals the fresh challenge-B schema",
+      "status": "PASS"
+    },
+    {
+      "id": "P1d",
+      "tasks": [
+        "B-029"
+      ],
+      "description": "Legacy products (stock never persisted) end OFFLINE with offline_reason AUTO_ZERO and stock 0",
+      "status": "PASS"
+    },
+    {
+      "id": "P2a",
+      "tasks": [
+        "B-029",
+        "B-004"
+      ],
+      "description": "An iteration-2+auction database is classified 'auction' and gets V7,V8 only",
+      "status": "PASS"
+    },
+    {
+      "id": "P2b",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "V8 reports 3 closed intents, 1 closed attempt, 1 unfrozen and 1 paused fixed-price product",
+      "status": "PASS"
+    },
+    {
+      "id": "P2c",
+      "tasks": [
+        "B-029",
+        "B-004"
+      ],
+      "description": "Auction rows and old SUCCESS/FAILED history are unchanged; no intent was turned into CANCELLED/FAILED",
+      "status": "PASS"
+    },
+    {
+      "id": "P2d",
+      "tasks": [
+        "B-029",
+        "B-004"
+      ],
+      "description": "Original intent status and snapshots of the closed fixed-price intents are kept",
+      "status": "PASS"
+    },
+    {
+      "id": "P2e",
+      "tasks": [
+        "B-029"
+      ],
+      "description": "Upgraded schema equals the fresh challenge-B schema",
+      "status": "PASS"
+    },
+    {
+      "id": "P2f",
+      "tasks": [
+        "B-029"
+      ],
+      "description": "A database stopped at iteration 2 is classified 'iteration2' and gets V5,V6,V7,V8",
+      "status": "PASS"
+    },
+    {
+      "id": "P3",
+      "tasks": [
+        "B-029",
+        "B-004"
+      ],
+      "description": "Running the tool again classifies 'challenge_b', V8 reports four zeros and every row of every table is identical (no second unfreeze, no duplicated or re-closed records)",
+      "status": "PASS"
+    },
+    {
+      "id": "P4a",
+      "tasks": [
+        "B-029"
+      ],
+      "description": "Simulated interruption after V7's column changes (new tables missing) is still classified 'auction'",
+      "status": "PASS"
+    },
+    {
+      "id": "P4b",
+      "tasks": [
+        "B-029"
+      ],
+      "description": "Re-running the tool completes the upgrade and the schema equals the fresh schema",
+      "status": "PASS"
+    },
+    {
+      "id": "P4c",
+      "tasks": [
+        "B-029"
+      ],
+      "description": "A layout missing a table is refused before any backup or change",
+      "status": "PASS"
+    },
+    {
+      "id": "P5a",
+      "tasks": [
+        "B-029",
+        "B-004"
+      ],
+      "description": "A frozen product with stock 0 stops the upgrade at V8 with a recovery instruction and a kept backup",
+      "status": "PASS"
+    },
+    {
+      "id": "P5b",
+      "tasks": [
+        "B-004"
+      ],
+      "description": "V8 changed no data before stopping (V7 DDL stays, as documented)",
+      "status": "PASS"
+    },
+    {
+      "id": "P5c",
+      "tasks": [
+        "B-029"
+      ],
+      "description": "The pre-upgrade backup restores into a scratch database with identical data and no challenge-B tables",
+      "status": "PASS"
+    },
+    {
+      "id": "P5d",
+      "tasks": [
+        "B-029"
+      ],
+      "description": "The backup taken for the successful upgrade also restores to the pre-upgrade data",
+      "status": "PASS"
+    },
+    {
+      "id": "P6",
+      "tasks": [
+        "B-029"
+      ],
+      "description": "After restarting the MySQL container every upgraded database is byte-identical and still classified 'challenge_b'",
+      "status": "PASS"
+    },
+    {
+      "id": "Z01",
+      "tasks": [
+        "B-028"
+      ],
+      "description": "Disposable container removed",
+      "status": "PASS"
+    }
+  ],
+  "scope": "Upgrade rehearsal with the delivered tool on disposable databases (MySQL container)",
+  "scenario_errors": [],
+  "mysql_version": "8.0.46",
+  "image_id": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+  "finished_at": "2026-11-19T08:25:50",
+  "tool_results": {
+    "p1": {
+      "phase_before": "legacy",
+      "phase_after": "challenge_b",
+      "applied": [
+        "V4",
+        "V5",
+        "V6",
+        "V7",
+        "V8"
+      ],
+      "v8_counts": {
+        "closed_intents": 0,
+        "closed_attempts": 0,
+        "unfrozen_products": 0,
+        "paused_products": 0
+      },
+      "backup_bytes": 9118,
+      "backup_sha256_prefix": "5d5b9048f2bc"
+    },
+    "p2": {
+      "phase_before": "auction",
+      "phase_after": "challenge_b",
+      "applied": [
+        "V7",
+        "V8"
+      ],
+      "v8_counts": {
+        "closed_intents": 3,
+        "closed_attempts": 1,
+        "unfrozen_products": 1,
+        "paused_products": 1
+      },
+      "backup_bytes": 23615,
+      "backup_sha256_prefix": "ff8406490126"
+    },
+    "p2b": {
+      "phase_before": "iteration2",
+      "phase_after": "challenge_b",
+      "applied": [
+        "V5",
+        "V6",
+        "V7",
+        "V8"
+      ],
+      "v8_counts": {
+        "closed_intents": 0,
+        "closed_attempts": 0,
+        "unfrozen_products": 0,
+        "paused_products": 0
+      },
+      "backup_bytes": 13871,
+      "backup_sha256_prefix": "6a27082eb010"
+    },
+    "p3": {
+      "phase_before": "challenge_b",
+      "phase_after": "challenge_b",
+      "applied": [
+        "V7",
+        "V8"
+      ],
+      "v8_counts": {
+        "closed_intents": 0,
+        "closed_attempts": 0,
+        "unfrozen_products": 0,
+        "paused_products": 0
+      },
+      "backup_bytes": 40605,
+      "backup_sha256_prefix": "fb4330952c11"
+    },
+    "p4": {
+      "phase_before": "auction",
+      "phase_after": "challenge_b",
+      "applied": [
+        "V7",
+        "V8"
+      ],
+      "v8_counts": {
+        "closed_intents": 3,
+        "closed_attempts": 1,
+        "unfrozen_products": 1,
+        "paused_products": 1
+      },
+      "backup_bytes": 24868,
+      "backup_sha256_prefix": "ca63f697b8a8"
+    },
+    "p5": {
+      "phase_before": "auction",
+      "applied": [
+        "V7"
+      ],
+      "failed_at": "V8"
+    }
+  },
+  "summary": {
+    "pass": 20,
+    "fail": 0
+  }
+}

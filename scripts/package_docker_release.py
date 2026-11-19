@@ -14,6 +14,8 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = '0.1.0-iteration3-challenge-b.1'
+SCRIPTS = ['verify_docker_release.py', 'verify_docker_challenge_b.py', 'migrate_iteration2.py', 'migrate_challenge_b.py']
+OPS_DOCS = ['B-042-数据库字典与升级运维说明.md', 'B-038-039-集成候选与部署验证.md']
 IMAGES = ['oxstore/backend:' + VERSION, 'oxstore/frontend:' + VERSION, 'mysql:8.0.46']
 
 
@@ -34,7 +36,11 @@ def prepare(folder: Path):
     shutil.copy2(ROOT / 'docs/design/database.md', folder / 'database/database-guide.md')
     shutil.copy2(ROOT / 'docs/runbook.md', folder / 'database/runbook.md')
     (folder / 'scripts').mkdir()
-    shutil.copy2(ROOT / 'scripts/verify_docker_release.py', folder / 'scripts/verify_docker_release.py')
+    for name in SCRIPTS:
+        shutil.copy2(ROOT / 'scripts' / name, folder / 'scripts' / name)
+    for name in OPS_DOCS:
+        if (ROOT / 'docs/iterationB' / name).exists():
+            shutil.copy2(ROOT / 'docs/iterationB' / name, folder / 'database' / name)
     for name in ['docker_ui_smoke.js', 'verify_docker_ui.ps1']:
         shutil.copy2(ROOT / 'scripts' / name, folder / 'scripts' / name)
     (folder / 'evidence').mkdir()
@@ -57,7 +63,11 @@ def export(folder: Path, save_images=True):
     for name in ['compose.yml', '.env.example', 'init-env.ps1', 'init-env.sh', 'README.md']:
         shutil.copy2(ROOT / 'deploy/docker' / name, folder / name)
     shutil.copy2(ROOT / 'docs/build.md', folder / 'build-guide.md')
-    shutil.copy2(ROOT / 'scripts/verify_docker_release.py', folder / 'scripts/verify_docker_release.py')
+    for name in SCRIPTS:
+        shutil.copy2(ROOT / 'scripts' / name, folder / 'scripts' / name)
+    for name in OPS_DOCS:
+        if (ROOT / 'docs/iterationB' / name).exists():
+            shutil.copy2(ROOT / 'docs/iterationB' / name, folder / 'database' / name)
     for name in ['docker_ui_smoke.js', 'verify_docker_ui.ps1']:
         shutil.copy2(ROOT / 'scripts' / name, folder / 'scripts' / name)
     if save_images:

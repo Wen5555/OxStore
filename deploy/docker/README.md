@@ -44,7 +44,7 @@ docker compose up --no-build --pull never --wait --wait-timeout 240
 
 ## 4. 备份、升级与恢复
 
-已有数据库不能直接用新库 schema 覆盖。升级前停止业务写入，备份数据库、图片和 `.env`，并在副本验证恢复。`TOKEN_LOOKUP_KEY` 随有效买家口令保持稳定。旧版数据库需按适用条件依次完成 V2/V3/V4/V5/V6；V6 将既有商品设为一口价并新增拍卖表，不会把旧商品转换为拍卖。V2/V3 的适用条件及迁移与回退边界参见随包 `database/database-guide.md` 与 `database/runbook.md`。
+已有数据库不能直接用新库 schema 覆盖。升级前停止业务写入，备份数据库、图片和 `.env`，并在副本验证恢复。`TOKEN_LOOKUP_KEY` 随有效买家口令保持稳定。旧版数据库升级到本版（挑战需求 B）请使用随包 `scripts/migrate_challenge_b.py`（需要 Python 3 和 Docker；容器内须有 `MYSQL_ROOT_PASSWORD`，如官方 mysql 镜像）：它先识别库的当前版本、备份，再按需执行 V4～V8，部分结构会被拒绝。V6 将既有商品设为一口价并新增拍卖表；V7 新增订单、收藏、购物车等表并把库存改为文本；V8 关闭一口价旧意向。**已有数据卷不会因为换镜像或重启而升级表**：必须先停写、运行该工具，再用新镜像启动。步骤、异常处理与恢复见 `database/B-042-数据库字典与升级运维说明.md`。V2/V3 的适用条件及迁移与回退边界参见随包 `database/database-guide.md` 与 `database/runbook.md`。
 
 更新程序镜像不自动执行数据库迁移。应用镜像回退和数据库恢复分别处理；DDL 隐式提交，不能假定换回旧镜像即可回退数据。
 
