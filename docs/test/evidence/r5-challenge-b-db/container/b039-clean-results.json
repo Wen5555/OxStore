@@ -1,0 +1,163 @@
+{
+  "label": "clean",
+  "run_at": "2026-11-19T08:45:45.394455+08:00",
+  "project": "oxstore-b039-clean-8d7ca4ff",
+  "checks": [
+    {
+      "id": "C01",
+      "description": "mysql, backend and frontend are healthy with no build and no registry pull",
+      "status": "PASS",
+      "detail": [
+        [
+          "backend",
+          "healthy"
+        ],
+        [
+          "frontend",
+          "healthy"
+        ],
+        [
+          "mysql",
+          "healthy"
+        ]
+      ]
+    },
+    {
+      "id": "C02",
+      "description": "Only the frontend port is published to the host",
+      "status": "PASS"
+    },
+    {
+      "id": "C03_",
+      "description": "SPA route served by Nginx",
+      "status": "PASS"
+    },
+    {
+      "id": "C03_admin_login",
+      "description": "SPA route served by Nginx",
+      "status": "PASS"
+    },
+    {
+      "id": "C03_cart",
+      "description": "SPA route served by Nginx",
+      "status": "PASS"
+    },
+    {
+      "id": "C04",
+      "description": "Database has the 21 tables, 3 triggers and the text stock column of the challenge-B schema",
+      "status": "PASS",
+      "detail": {
+        "tables": 21,
+        "triggers": 3,
+        "stock": "longtext"
+      }
+    },
+    {
+      "id": "F01",
+      "description": "Fixed-price product published with an image served through Nginx",
+      "status": "PASS"
+    },
+    {
+      "id": "F02",
+      "description": "Favourite stored, readable and listed (F01/F03/F04)",
+      "status": "PASS"
+    },
+    {
+      "id": "F03",
+      "description": "Cart -> confirmation -> order: 201, six-state PLACED, exact total, stock deducted in the database",
+      "status": "PASS",
+      "detail": {
+        "status": "PLACED",
+        "total": "37.50"
+      }
+    },
+    {
+      "id": "F04",
+      "description": "Customer and seller read the same order (O01/O02/A01/A02): identical except allowedActions (customer [CANCEL], seller [CONFIRM, CANCEL])",
+      "status": "PASS",
+      "detail": {
+        "detail": "200/0",
+        "admin_detail": "200/0",
+        "admin_list": "200/0",
+        "differs": [
+          "allowedActions"
+        ]
+      }
+    },
+    {
+      "id": "F05",
+      "description": "A cart row whose quantity was ordered is gone from the cart",
+      "status": "PASS"
+    },
+    {
+      "id": "F06",
+      "description": "Seller advances CONFIRM -> PREPARE; skipping or repeating a step is refused (409)",
+      "status": "PASS"
+    },
+    {
+      "id": "F07",
+      "description": "Customer cancel before shipping: CANCELLED with initiator/time, stock restored once, repeat refused",
+      "status": "PASS",
+      "detail": {
+        "repeat": "409/40911"
+      }
+    },
+    {
+      "id": "F08",
+      "description": "After shipping the customer cannot cancel but the seller can; stock restored",
+      "status": "PASS"
+    },
+    {
+      "id": "F09",
+      "description": "Same confirmation and Idempotency-Key: second request is 409/40909 pointing at the first order",
+      "status": "PASS"
+    },
+    {
+      "id": "F10",
+      "description": "5 customers race for 2 units through Nginx: exactly 2 orders, stock 0, auto offline, losers get 409/40910",
+      "status": "PASS",
+      "detail": [
+        "409/40910",
+        "201/0",
+        "409/40910",
+        "201/0",
+        "409/40910"
+      ]
+    },
+    {
+      "id": "F11",
+      "description": "Move-to-favourites moves the whole row: favourite exists, cart row gone, no order, stock untouched",
+      "status": "PASS"
+    },
+    {
+      "id": "F12",
+      "description": "Anonymous and wrong-role calls are refused (401/403)",
+      "status": "PASS"
+    },
+    {
+      "id": "F13",
+      "description": "Legacy purchase intent on a fixed-price product is closed: 409/40917; archive endpoints answer 200",
+      "status": "PASS"
+    },
+    {
+      "id": "F14",
+      "description": "Auction regression: bid accepted, public snapshot LIVE, auction cannot enter the cart (409)",
+      "status": "PASS",
+      "detail": {
+        "cart": "409/40908"
+      }
+    },
+    {
+      "id": "C99",
+      "description": "Orders, stock, receipts, favourites, auction and uploaded image identical after backend restart and after container re-creation",
+      "status": "PASS"
+    }
+  ],
+  "requests": 92,
+  "mysql_version": "8.0.46",
+  "cleanup": {
+    "containers_left": false,
+    "volumes_left": false
+  },
+  "result": "PASS"
+}
