@@ -1,0 +1,41 @@
+{
+  "snap": [
+    {
+      "product_id": 25,
+      "product_name": "B032-在售-10",
+      "quantity": "1",
+      "unit_price": "12.50",
+      "line_amount": "12.50"
+    }
+  ],
+  "snap_after": [
+    {
+      "product_id": 25,
+      "product_name": "B032-在售-10",
+      "quantity": "1",
+      "unit_price": "12.50",
+      "line_amount": "12.50"
+    }
+  ],
+  "cart_after_cancel": [],
+  "order_status": [
+    {
+      "id": 114,
+      "order_no": "1630b5d5-d0e5-4020-bcb3-f479cc49e553",
+      "status": "PREPARED",
+      "total_amount": "12.50",
+      "created_at": "2026-11-21T03:52:44.880599",
+      "cancelled_by": null,
+      "cancelled_at": null
+    },
+    {
+      "id": 115,
+      "order_no": "be0b012b-8e77-4448-ba15-164453cc491c",
+      "status": "CANCELLED",
+      "total_amount": "8.00",
+      "created_at": "2026-11-21T03:52:44.947584",
+      "cancelled_by": "CUSTOMER",
+      "cancelled_at": "2026-11-21T03:52:44.955572"
+    }
+  ]
+}

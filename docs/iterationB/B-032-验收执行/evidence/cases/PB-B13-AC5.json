@@ -1,0 +1,68 @@
+{
+  "race": {
+    "A": {
+      "ok": true,
+      "result": [
+        201,
+        {
+          "code": 0,
+          "message": "下单成功",
+          "data": {
+            "orderId": "118",
+            "orderNo": "b817f370-dbb6-4d7e-b640-3735672f600e",
+            "customerId": "3",
+            "status": "PLACED",
+            "items": [
+              {
+                "productId": "27",
+                "productName": "B032-低库存-1",
+                "unitPrice": "3.30",
+                "quantity": "1",
+                "lineAmount": "3.30"
+              }
+            ],
+            "totalAmount": "3.30",
+            "createdAt": "2026-11-20T19:52:45.606157",
+            "cancelledBy": null,
+            "cancelledAt": null,
+            "cancelReason": null,
+            "allowedActions": [
+              "CANCEL"
+            ]
+          }
+        },
+        "d7f2250a-c7c4-491b-a447-dee487bb2003"
+      ],
+      "elapsed_ms": 11
+    },
+    "B": {
+      "ok": true,
+      "result": [
+        409,
+        {
+          "code": 40910,
+          "message": "所选商品无法下单",
+          "data": {
+            "errors": [
+              {
+                "cartItemId": "279",
+                "productId": "27",
+                "productName": "B032-低库存-1",
+                "reason": "OFFLINE",
+                "message": "商品「B032-低库存-1」已下架，请从购物车移除后重试。"
+              }
+            ]
+          }
+        },
+        "88f62699-fff4-4b4a-bedb-fe7a7e10f525"
+      ],
+      "elapsed_ms": 13
+    }
+  },
+  "stock": "0",
+  "placed": 1,
+  "offline_submit": {
+    "http": 409,
+    "message": "所选商品无法下单"
+  }
+}

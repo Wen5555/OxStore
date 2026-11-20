@@ -1,0 +1,32 @@
+{
+  "cart_items": [
+    {
+      "cartItemId": "257",
+      "productId": "25",
+      "productName": "B032-在售-10",
+      "unitPrice": "12.50",
+      "mainImageUrl": "/api/images/ac857481-706f-4eab-870b-f29a14b977f1.png",
+      "quantity": "1",
+      "stock": "10",
+      "online": true,
+      "invalidLabel": null,
+      "defaultCheckoutSelected": true,
+      "canCheckoutSelect": true,
+      "canFavoriteSelect": true,
+      "updatedAt": "2026-11-20T19:52:41.326977"
+    }
+  ],
+  "offline_add": {
+    "http": 400,
+    "message": "Idempotency-Key 必须为 UUID"
+  },
+  "selected_submit": {
+    "http": 201,
+    "message": "下单成功"
+  },
+  "empty": {
+    "http": 400,
+    "message": "请选择商品"
+  },
+  "ui": "default checkbox / disable offline — see screenshots"
+}

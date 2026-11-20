@@ -1,0 +1,86 @@
+{
+  "steps": [
+    {
+      "action": "CONFIRM",
+      "http": 200,
+      "message": "ok",
+      "body_keys": [
+        "orderId",
+        "orderNo",
+        "customerId",
+        "status",
+        "items",
+        "totalAmount",
+        "createdAt",
+        "cancelledBy",
+        "cancelledAt",
+        "cancelReason",
+        "allowedActions"
+      ]
+    },
+    {
+      "action": "PREPARE",
+      "http": 200,
+      "message": "ok",
+      "body_keys": [
+        "orderId",
+        "orderNo",
+        "customerId",
+        "status",
+        "items",
+        "totalAmount",
+        "createdAt",
+        "cancelledBy",
+        "cancelledAt",
+        "cancelReason",
+        "allowedActions"
+      ]
+    },
+    {
+      "action": "SHIP",
+      "http": 200,
+      "message": "ok",
+      "body_keys": [
+        "orderId",
+        "orderNo",
+        "customerId",
+        "status",
+        "items",
+        "totalAmount",
+        "createdAt",
+        "cancelledBy",
+        "cancelledAt",
+        "cancelReason",
+        "allowedActions"
+      ]
+    },
+    {
+      "action": "COMPLETE",
+      "http": 200,
+      "message": "ok",
+      "body_keys": [
+        "orderId",
+        "orderNo",
+        "customerId",
+        "status",
+        "items",
+        "totalAmount",
+        "createdAt",
+        "cancelledBy",
+        "cancelledAt",
+        "cancelReason",
+        "allowedActions"
+      ]
+    }
+  ],
+  "final": {
+    "id": 93,
+    "order_no": "3bb8e79c-7daa-4f82-8a42-eed567b9c134",
+    "status": "COMPLETED",
+    "total_amount": "12.50",
+    "created_at": "2026-11-21T03:52:36.645834",
+    "cancelled_by": null,
+    "cancelled_at": null
+  },
+  "note": "actions body only action+expectedStatus"
+}

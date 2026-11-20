@@ -1,0 +1,42 @@
+{
+  "zero": {
+    "id": 30,
+    "name": "B032-库存编辑",
+    "stock": "0",
+    "status": "OFFLINE",
+    "offline_reason": "AUTO_ZERO",
+    "price": "7.00"
+  },
+  "restock_no_auto": {
+    "id": 30,
+    "name": "B032-库存编辑",
+    "stock": "5",
+    "status": "OFFLINE",
+    "offline_reason": "AUTO_ZERO",
+    "price": "7.00"
+  },
+  "manual_online": {
+    "id": 30,
+    "name": "B032-库存编辑",
+    "stock": "5",
+    "status": "ONLINE",
+    "offline_reason": null,
+    "price": "7.00"
+  },
+  "manual_offline": {
+    "id": 30,
+    "name": "B032-库存编辑",
+    "stock": "5",
+    "status": "OFFLINE",
+    "offline_reason": "MANUAL",
+    "price": "7.00"
+  },
+  "reonline": {
+    "id": 30,
+    "name": "B032-库存编辑",
+    "stock": "5",
+    "status": "ONLINE",
+    "offline_reason": null,
+    "price": "7.00"
+  }
+}

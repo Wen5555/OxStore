@@ -1,0 +1,21 @@
+{
+  "probed": [
+    {
+      "path": "/api/admin/legacy-intents",
+      "http": 200,
+      "message": "ok"
+    },
+    {
+      "path": "/api/me/legacy-intents",
+      "http": 200,
+      "message": "ok"
+    },
+    {
+      "path": "/api/me/order-history",
+      "http": 200,
+      "message": "ok"
+    }
+  ],
+  "open_intents": 0,
+  "note": "legacy records read-only if present; new path has no open intents"
+}

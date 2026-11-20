@@ -1,0 +1,9 @@
+{
+  "table": {
+    "下单成功": "10->8 (delta -2)",
+    "交易完成成功": "8->8 (unchanged)",
+    "完成前取消": "4->5 (expect restore +1 if B05 wired)"
+  },
+  "cancel_restore_observed": true,
+  "note": "cancel restore detailed in PB-B05"
+}

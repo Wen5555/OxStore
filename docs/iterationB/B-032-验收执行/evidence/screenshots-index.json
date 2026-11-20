@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "shots": [
+    "b03-after-login.png",
+    "b12-product-detail-no-direct-buy.png",
+    "b12-cart-selection.png",
+    "b12-checkout-confirm.png",
+    "b12-clear-cart-confirm.png",
+    "b03-order-history.png",
+    "b03-admin-orders.png"
+  ]
+}

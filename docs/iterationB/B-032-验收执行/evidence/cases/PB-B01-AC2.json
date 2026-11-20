@@ -1,0 +1,46 @@
+{
+  "place": "下单成功",
+  "seq": [
+    {
+      "action": "CONFIRM",
+      "http": 200,
+      "message": "ok",
+      "status": "CONFIRMED"
+    },
+    {
+      "action": "PREPARE",
+      "http": 200,
+      "message": "ok",
+      "status": "PREPARED"
+    },
+    {
+      "action": "SHIP",
+      "http": 200,
+      "message": "ok",
+      "status": "SHIPPED"
+    },
+    {
+      "action": "COMPLETE",
+      "http": 200,
+      "message": "ok",
+      "status": "COMPLETED"
+    }
+  ],
+  "skip": {
+    "http": 409,
+    "message": "订单已完成，不可推进"
+  },
+  "customer_advance": {
+    "http": 403,
+    "message": "角色无权访问"
+  },
+  "final": {
+    "id": 90,
+    "order_no": "b4d6b434-b747-4f62-b034-8dd8dc09a082",
+    "status": "COMPLETED",
+    "total_amount": "12.50",
+    "created_at": "2026-11-21T03:52:36.019845",
+    "cancelled_by": null,
+    "cancelled_at": null
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "first": {
+    "http": 201,
+    "message": "下单成功"
+  },
+  "replay": {
+    "http": 409,
+    "message": "订单已提交，请勿重复下单"
+  },
+  "new_purchase": {
+    "http": 201,
+    "message": "下单成功"
+  },
+  "orders": 2,
+  "stock": "9"
+}

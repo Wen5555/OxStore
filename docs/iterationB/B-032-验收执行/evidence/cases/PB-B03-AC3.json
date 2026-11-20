@@ -1,0 +1,11 @@
+{
+  "me_orders": {
+    "http": 200,
+    "message": "ok"
+  },
+  "admin_orders": {
+    "http": 200,
+    "message": "ok"
+  },
+  "ui_labels": "订单历史 / 订单管理 (see screenshots)"
+}

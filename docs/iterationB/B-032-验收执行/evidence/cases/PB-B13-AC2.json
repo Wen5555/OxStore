@@ -1,0 +1,19 @@
+{
+  "unselected_kept": [
+    {
+      "id": 270,
+      "product_id": 26,
+      "quantity": "1"
+    }
+  ],
+  "selected_gone": true,
+  "fail_unchanged": true,
+  "post_success_add": [
+    {
+      "id": 273,
+      "product_id": 25,
+      "quantity": "2"
+    }
+  ],
+  "remainder_note": "confirm qty==cart qty under digest; remainder>0 requires post-lock concurrent add"
+}

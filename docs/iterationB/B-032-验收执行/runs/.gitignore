@@ -1,0 +1,4 @@
+.env.local
+be.env
+*.log
+__pycache__/

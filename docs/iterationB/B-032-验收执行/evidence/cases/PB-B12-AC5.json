@@ -1,0 +1,17 @@
+{
+  "clear": {
+    "http": 200,
+    "message": "ok"
+  },
+  "stock_before": {
+    "P-ON-10": "10",
+    "P-ON-5": "5"
+  },
+  "stock_after": {
+    "P-ON-10": "10",
+    "P-ON-5": "5"
+  },
+  "cart_after": [],
+  "orders": [],
+  "ui": "二次确认清空 — see screenshot"
+}

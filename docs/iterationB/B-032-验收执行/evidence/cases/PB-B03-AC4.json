@@ -1,0 +1,15 @@
+{
+  "unauth": {
+    "http": 401,
+    "message": "请先登录"
+  },
+  "invalid": {
+    "http": 401,
+    "message": "请重新登录"
+  },
+  "placed_count": 2,
+  "other_access": {
+    "http": 403,
+    "message": "无权操作该订单"
+  }
+}

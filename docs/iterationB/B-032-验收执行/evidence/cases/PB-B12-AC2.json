@@ -1,0 +1,26 @@
+{
+  "multi": {
+    "http": 201,
+    "message": "下单成功",
+    "items": [
+      {
+        "product_id": 25,
+        "product_name": "B032-在售-10",
+        "quantity": "3",
+        "unit_price": "12.50",
+        "line_amount": "37.50"
+      },
+      {
+        "product_id": 26,
+        "product_name": "B032-在售-5",
+        "quantity": "1",
+        "unit_price": "8.00",
+        "line_amount": "8.00"
+      }
+    ]
+  },
+  "single": {
+    "http": 201,
+    "message": "下单成功"
+  }
+}

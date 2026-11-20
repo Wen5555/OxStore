@@ -1,0 +1,12 @@
+{
+  "confirm": {
+    "http": 200,
+    "message": "ok",
+    "token_present": true
+  },
+  "submit_after_change": {
+    "http": 409,
+    "message": "确认信息已变化，请重新确认",
+    "code": 40913
+  }
+}

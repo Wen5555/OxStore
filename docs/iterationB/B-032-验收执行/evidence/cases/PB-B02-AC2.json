@@ -1,0 +1,13 @@
+{
+  "buyer_seen_stock": "7",
+  "db_stock": "7",
+  "order_after_offline": {
+    "id": 97,
+    "order_no": "128324ee-8aea-4c3d-bf00-d4315bf572bc",
+    "status": "CONFIRMED",
+    "total_amount": "37.50",
+    "created_at": "2026-11-21T03:52:37.605466",
+    "cancelled_by": null,
+    "cancelled_at": null
+  }
+}

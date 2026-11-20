@@ -1,0 +1,23 @@
+{
+  "direct": {
+    "http": 400,
+    "message": "请求包含未知字段"
+  },
+  "unauth": {
+    "http": 401,
+    "message": "请先登录"
+  },
+  "invalid": {
+    "http": 401,
+    "message": "请重新登录"
+  },
+  "other": {
+    "http": 403,
+    "message": "无权操作"
+  },
+  "mixed": {
+    "http": 403,
+    "message": "无权操作"
+  },
+  "stock_unchanged": true
+}
