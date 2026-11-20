@@ -16,6 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from b030_common import load_env, login_customer, login_seller  # noqa: E402
 from helpers_lib import HELPERS, load_fixtures  # noqa: E402
+from redact import redact_obj  # noqa: E402
 
 
 def main() -> int:
@@ -74,9 +75,9 @@ def main() -> int:
         else:
             out = fn(env)
     except Exception as e:
-        print(json.dumps({"ok": False, "helper": args.helper, "error": str(e)}, ensure_ascii=False, indent=2))
+        print(json.dumps(redact_obj({"ok": False, "helper": args.helper, "error": str(e)}), ensure_ascii=False, indent=2))
         return 1
-    print(json.dumps({"ok": True, "helper": args.helper, "result": out}, ensure_ascii=False, indent=2, default=str))
+    print(json.dumps(redact_obj({"ok": True, "helper": args.helper, "result": out}), ensure_ascii=False, indent=2, default=str))
     return 0
 
 

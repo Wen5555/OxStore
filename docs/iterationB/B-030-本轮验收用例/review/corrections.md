@@ -34,3 +34,11 @@
 | 16 | 仅 echo 栅栏 | 真实双 curl SEQ-01 + 代表性 API 演练 |
 | 17 | reset 外键失败 | 先删 confirmation_item |
 | 18 | orderId 字段名 | 使用 data.orderId |
+
+## 相对 0a0d1e7 追加（三项）
+
+| # | 项 | 结果 |
+|---|---|---|
+| 19 | SEQ-01 A先/B先/同时 | `review/seq01/` 三模式 all_pass；双方响应+库存0+失败方车保留 |
+| 20 | 真浏览器主路径 | `review/browser/` 截图+evidence；页面/接口/DB 一致 |
+| 21 | 清除明文 JWT | review 内已 `<jwt-redacted>`；`check_no_jwt.sh` + self_review 拦截 |

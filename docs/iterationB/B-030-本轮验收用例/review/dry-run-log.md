@@ -68,8 +68,8 @@ wrote /workspace/docs/iterationB/B-030-本轮验收用例/runs/SEQ-01-simultaneo
   "ok": true,
   "helper": "favorite_then_offline",
   "result": {
-    "tokenA": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiMDMwX2J1eWVyX2EiLCJ1c2VySWQiOjEsInJvbGUiOiJDVVNUT01FUiIsImlhdCI6MTc5NTE2MTc1NywiZXhwIjoxNzk1MTY4OTU3fQ.BhTZ37OiybrO92ShqKSCrPFUf5v2Oy2oEN8PrmtVcBM",
-    "tokenS": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6MSwicm9sZSI6IlNFTExFUiIsImlhdCI6MTc5NTE2MTc1NywiZXhwIjoxNzk1MTY4OTU3fQ.ktfXT8qixwlbp0RPqfRmJVKg9BmLb1kpciEaYP2F3vM",
+    "tokenA": "<jwt-redacted>",
+    "tokenS": "<jwt-redacted>",
     "productId": "1"
   }
 }

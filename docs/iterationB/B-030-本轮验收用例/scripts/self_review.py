@@ -15,6 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = json.loads((ROOT / "cases" / "manifest.json").read_text(encoding="utf-8"))
 ACS = json.loads((ROOT / "acs-79.json").read_text(encoding="utf-8"))
 
+JWT_RE = __import__("re").compile(r"eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+")
+
 PLACEHOLDERS = [
     "按 AC 描述的合法路径",
     "查询 DB 验证不变量",
@@ -61,6 +63,20 @@ def main() -> int:
         for tip in c.get("forbidden") or []:
             if tip in (c.get("required_messages") or []):
                 errors.append(f"{c['case_id']}: tip both required and forbidden: {tip}")
+
+    # ban raw JWTs in review/ and cases/
+    for folder in (ROOT / "review", ROOT / "cases", ROOT / "execution", ROOT / "concurrency"):
+        if not folder.exists():
+            continue
+        for f in folder.rglob("*"):
+            if not f.is_file() or f.suffix in {".png", ".jpg", ".gif", ".webp"}:
+                continue
+            try:
+                text = f.read_text(encoding="utf-8")
+            except Exception:
+                continue
+            if JWT_RE.search(text):
+                errors.append(f"{f.relative_to(ROOT)}: raw JWT must be redacted")
 
     # scan markdown for placeholders
     for md in (ROOT / "cases").glob("PB-B*.md"):
