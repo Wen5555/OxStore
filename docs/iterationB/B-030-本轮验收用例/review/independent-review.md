@@ -1,16 +1,16 @@
-# 独立审阅结论（B-030 重写）
+# 独立审阅结论（625ff10 修订后）
 
-审阅角色：本代理内独立于用例生成步骤的自审 + 代表性演练（`scripts/self_review.py`、`scripts/dry_run_representative.py`）。
+## 跟做结果
 
-## 结论
+1. 消灭 cases 中全部 `helper:` 悬空引用；实现 `helpers_lib.py` + `run_helper.py`。
+2. `prepare_fixtures.py` 以 multipart 真实创建商品并校验响应；`ready=true` 才继续。
+3. `verify_api_db.py`：API 创建 canary 后在 `oxstore_b030_local` 查到同行；DATABASE() 一致。
+4. B031–B037 / SEQ 改为 `source scripts/env_from_fixtures.sh` 后可直接执行的命令。
+5. 本机已启独立 MySQL + develop BE(`29c20ea`) + Vite FE(`5173`)；`run_representative.py` 真实演练：
+   - place_order → 201 下单成功 orderId 有值
+   - oversell → 409 库存不足（expected_reject）
+   - SEQ-01 真实双 curl 栅栏
+   - favorite_then_offline OK
+6. **未**将 79 AC 标为通过；B-030 **仍不可宣称完成**（全量 AC 未跑完）。
 
-1. **静态可执行性**：PASS_STATIC_REVIEW（79 AC 全覆盖；无旧占位句；禁止中间态/旧规则未再标为 required tip；脚本可语法编译；B031–B037 与 SEQ 入口存在）。
-2. **代表性演练**：栅栏烟测通过；DB 门禁在未配置时正确拒绝；配置 `B030_DB_NAME=oxstore_b030_*` 后 dry-check/reset dry-run 可通过。
-3. **业务验收**：当前环境 **无** 独立 MySQL+BE+FE 被测栈 → **不能** 将任何 AC/用例标为通过。阻塞已写入 `dry-run-log.md`。
-4. **与旧交付差异**：不以「79/79」或用例编号数宣称完成；以纠错清单 + 执行入口 + 演练证据为准。
-
-## 签字栏
-
-- 自审结果文件：`review/self-review.json`
-- 演练日志：`review/dry-run-log.md`
-- 日期：2026-11-20
+证据：`review/dry-run-log.md`、`runs/representative-results.json`、`runs/verify-api-db.json`、`runs/SEQ-01-simultaneous.json`

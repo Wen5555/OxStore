@@ -33,7 +33,11 @@
 
 #### 步骤 1 · SETUP · 准备可取消状态订单并记录 stock_before 与 snapshot_qty
 
-- 操作：`{"ref": "helper:order_in_status", "status": "PREPARED"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py order_in_status --status PREPARED --product P-ON-10 --qty 1
+```
 
 #### 步骤 2 · CUSTOMER_A · 取消
 
@@ -99,7 +103,13 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · SHIPPED 单
 
-- 操作：`{"ref": "helper:advance_to", "status": "SHIPPED"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py advance_to --order-id "$ORDER_ID" --status SHIPPED
+# HTTP：按 PLACED→CONFIRMED→PREPARED→SHIPPED→COMPLETED 依次
+# POST /api/admin/orders/{id}/actions {action, expectedStatus}
+```
 
 #### 步骤 2 · CUSTOMER_A · 取消
 
@@ -161,7 +171,13 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · COMPLETED
 
-- 操作：`{"ref": "helper:advance_to", "status": "COMPLETED"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py advance_to --order-id "$ORDER_ID" --status COMPLETED
+# HTTP：按 PLACED→CONFIRMED→PREPARED→SHIPPED→COMPLETED 依次
+# POST /api/admin/orders/{id}/actions {action, expectedStatus}
+```
 
 #### 步骤 2 · CUSTOMER_A · 取消
 
@@ -223,7 +239,11 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · 准备可取消状态订单并记录 stock_before 与 snapshot_qty
 
-- 操作：`{"ref": "helper:order_in_status", "status": "PLACED"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py order_in_status --status PLACED --product P-ON-10 --qty 1
+```
 
 #### 步骤 2 · CUSTOMER_A · 取消
 
@@ -289,7 +309,11 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · 准备可取消状态订单并记录 stock_before 与 snapshot_qty
 
-- 操作：`{"ref": "helper:order_in_status", "status": "PLACED"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py order_in_status --status PLACED --product P-ON-10 --qty 1
+```
 
 #### 步骤 2 · CUSTOMER_A · 取消
 
@@ -413,7 +437,11 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · 准备可取消状态订单并记录 stock_before 与 snapshot_qty
 
-- 操作：`{"ref": "helper:order_in_status", "status": "PLACED"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py order_in_status --status PLACED --product P-ON-10 --qty 1
+```
 
 #### 步骤 2 · CUSTOMER_A · 取消
 
@@ -480,7 +508,11 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · 准备可取消状态订单并记录 stock_before 与 snapshot_qty
 
-- 操作：`{"ref": "helper:order_in_status", "status": "PREPARED"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py order_in_status --status PREPARED --product P-ON-10 --qty 1
+```
 
 #### 步骤 2 · CUSTOMER_A · 取消
 
@@ -546,7 +578,13 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · SHIPPED 单
 
-- 操作：`{"ref": "helper:advance_to", "status": "SHIPPED"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py advance_to --order-id "$ORDER_ID" --status SHIPPED
+# HTTP：按 PLACED→CONFIRMED→PREPARED→SHIPPED→COMPLETED 依次
+# POST /api/admin/orders/{id}/actions {action, expectedStatus}
+```
 
 #### 步骤 2 · CUSTOMER_A · 取消
 
@@ -608,7 +646,13 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · COMPLETED
 
-- 操作：`{"ref": "helper:advance_to", "status": "COMPLETED"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py advance_to --order-id "$ORDER_ID" --status COMPLETED
+# HTTP：按 PLACED→CONFIRMED→PREPARED→SHIPPED→COMPLETED 依次
+# POST /api/admin/orders/{id}/actions {action, expectedStatus}
+```
 
 #### 步骤 2 · CUSTOMER_A · 取消
 
@@ -670,11 +714,23 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · 造单使某商品扣至 0→AUTO_ZERO；另一单商品为 MANUAL 下架
 
-- 操作：`{"ref": "helper:cancel_restock_matrix"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py cancel_restock_matrix
+# 下 P-ON-1×1 使库存归零；保留 P-OFF-M 人工下架对照
+```
 
 #### 步骤 2 · CUSTOMER_A · 取消 AUTO_ZERO 来源单
 
-- 操作：`{"ref": "helper:cancel"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py cancel --order-id "$ORDER_ID" --status "$EXPECTED_STATUS"
+# 商家取消加 --as-seller
+# HTTP：POST /api/me/orders/{id}/cancel 或 /api/admin/orders/{id}/cancel
+# body={expectedStatus, reason:"B030-test"}
+```
 
 #### 步骤 3 · DB · 回补后 stock>0 且自动恢复在售；MANUAL 下架不因回补自动上架
 
@@ -733,7 +789,11 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · 准备可取消状态订单并记录 stock_before 与 snapshot_qty
 
-- 操作：`{"ref": "helper:order_in_status", "status": "PLACED"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py order_in_status --status PLACED --product P-ON-10 --qty 1
+```
 
 #### 步骤 2 · CUSTOMER_A · 取消
 
@@ -799,7 +859,11 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · 准备可取消状态订单并记录 stock_before 与 snapshot_qty
 
-- 操作：`{"ref": "helper:order_in_status", "status": "PLACED"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py order_in_status --status PLACED --product P-ON-10 --qty 1
+```
 
 #### 步骤 2 · CUSTOMER_A · 取消
 
@@ -865,7 +929,13 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · SHIPPED 单
 
-- 操作：`{"ref": "helper:advance_to", "status": "SHIPPED"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py advance_to --order-id "$ORDER_ID" --status SHIPPED
+# HTTP：按 PLACED→CONFIRMED→PREPARED→SHIPPED→COMPLETED 依次
+# POST /api/admin/orders/{id}/actions {action, expectedStatus}
+```
 
 #### 步骤 2 · CUSTOMER_A · 取消
 

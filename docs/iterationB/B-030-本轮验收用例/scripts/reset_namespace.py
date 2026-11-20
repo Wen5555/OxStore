@@ -45,6 +45,11 @@ DELETE fm FROM favorite_mutation fm
   JOIN customer c ON c.id = fm.customer_id
  WHERE c.username LIKE 'b030\_%';
 
+DELETE cci FROM checkout_confirmation_item cci
+  JOIN checkout_confirmation cc ON cc.id = cci.confirmation_id
+  JOIN customer c ON c.id = cc.customer_id
+ WHERE c.username LIKE 'b030\_%';
+
 DELETE cc FROM checkout_confirmation cc
   JOIN customer c ON c.id = cc.customer_id
  WHERE c.username LIKE 'b030\_%';

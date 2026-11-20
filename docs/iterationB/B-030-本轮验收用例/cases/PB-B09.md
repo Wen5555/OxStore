@@ -234,7 +234,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 收藏后商家下架
 
-- 操作：`{"ref": "helper:favorite_then_offline"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py favorite_then_offline --product P-ON-10
+# HTTP：PUT /api/me/favorites/{id} → POST /api/admin/products/{id}/offline
+```
 
 #### 步骤 2 · CUSTOMER_A · GET 列表
 
@@ -366,7 +371,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 收藏后商家下架
 
-- 操作：`{"ref": "helper:favorite_then_offline"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py favorite_then_offline --product P-ON-10
+# HTTP：PUT /api/me/favorites/{id} → POST /api/admin/products/{id}/offline
+```
 
 #### 步骤 2 · CUSTOMER_A · GET 列表
 
@@ -498,7 +508,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 收藏后商家下架
 
-- 操作：`{"ref": "helper:favorite_then_offline"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py favorite_then_offline --product P-ON-10
+# HTTP：PUT /api/me/favorites/{id} → POST /api/admin/products/{id}/offline
+```
 
 #### 步骤 2 · CUSTOMER_A · GET 列表
 
@@ -705,7 +720,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 收藏后商家下架
 
-- 操作：`{"ref": "helper:favorite_then_offline"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py favorite_then_offline --product P-ON-10
+# HTTP：PUT /api/me/favorites/{id} → POST /api/admin/products/{id}/offline
+```
 
 #### 步骤 2 · CUSTOMER_A · GET 列表
 

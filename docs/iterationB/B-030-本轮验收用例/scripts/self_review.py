@@ -21,6 +21,11 @@ PLACEHOLDERS = [
     "准备满足本 AC 的在售",
     "行为符合上方「验收标准原文」",
     "可选自动化映射见文末",
+    "helper:",
+    "NEEDS_MANUAL_OR_SQL_SEED",
+    "$CMD_A",
+    "$CMD_B",
+    "$TOK",
 ]
 
 # If these appear as required_messages for an AC that prohibits them — fail
@@ -79,6 +84,10 @@ def main() -> int:
         ROOT / "scripts" / "reset_namespace.py",
         ROOT / "scripts" / "barrier_runner.py",
         ROOT / "scripts" / "b030_common.py",
+        ROOT / "scripts" / "helpers_lib.py",
+        ROOT / "scripts" / "run_helper.py",
+        ROOT / "scripts" / "env_from_fixtures.sh",
+        ROOT / "scripts" / "verify_api_db.py",
         ROOT / "concurrency" / "SEQ.md",
         ROOT / "execution" / "B031.md",
         ROOT / "execution" / "B037.md",

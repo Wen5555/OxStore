@@ -1,10 +1,12 @@
-# B-030 代表性演练日志
+# B-030 代表性真实演练日志
 
-- 时间（UTC）：2026-11-20T07:37:33.402860+00:00
-- 目的：验证交付物可执行性；**不**将业务 AC 标为通过
+- UTC：2026-11-20T08:02:36.346877+00:00
+- BASE：http://127.0.0.1:8080
+- SUT_SHA：29c20ea0927528a98f873f4a1a0e169a6fa12281
+- DB：oxstore_b030_local
+- 声明：本日志证明脚本/接口可跑；**不**将业务 AC 标为通过
 
-## 1. 静态自审
-
+## 0. self_review
 ```
 {
   "ac_count": 79,
@@ -17,86 +19,65 @@
 
 ```
 
-## 2. prepare --dry-check
-
+## 1. verify_api_db
 ```
-DB OK: oxstore_b030_local
-BASE: http://127.0.0.1:8080
-SUT_SHA: (unset)
-dry-check only; no API writes
-
-```
-
-## 3. reset --dry-run
-
-```
-Would execute namespace reset SQL on oxstore_b030_local case= DRY
-
--- Resolve B030 customers and products
-SET @ns := 'B030';
-
-DELETE oi FROM order_item oi
-  JOIN shop_order so ON so.id = oi.order_id
-  JOIN customer c ON c.id = so.customer_id
- WHERE c.username LIKE 'b030\_%';
-
-DELETE so FROM shop_order so
-  JOIN customer c ON c.id = so.customer_id
- WHERE c.username LIKE 'b030\_%';
-
-DELETE ci FROM cart_item ci
-  JOIN customer c ON c.id = ci.customer_id
- WHERE c.us ...
+{
+  "configured_db": "oxstore_b030_local",
+  "connection_database": "oxstore_b030_local",
+  "api_product_id": "9",
+  "api_product_name": "B030-CANARY-e051ea23",
+  "row_in_db": {
+    "id": 9,
+    "name": "B030-CANARY-e051ea23"
+  },
+  "ok": true,
+  "sut_sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
+  "base_url": "http://127.0.0.1:8080",
+  "ts": 1795161756.5992568
+}
 
 ```
 
-## 4. barrier_runner 烟测（echo，非业务）
+## 2. place_order POS
+- http=201 message=下单成功 orderId=3
 
+## 3. oversell NEG (qty5 vs stock1)
+- http=409 message=所选商品无法下单 expected_reject=True
+
+## 4. SEQ-01 simultaneous real curl
 ```
 wrote /workspace/docs/iterationB/B-030-本轮验收用例/runs/SEQ-01-simultaneous.json
 {
-  "A": {
-    "returncode": 0,
-    "stderr": "",
-    "elapsed_ms": 51
-  },
   "B": {
     "returncode": 0,
     "stderr": "",
-    "elapsed_ms": 51
+    "elapsed_ms": 20
+  },
+  "A": {
+    "returncode": 0,
+    "stderr": "",
+    "elapsed_ms": 23
   }
 }
 
 ```
 
-## 5. 被测服务探测
+## 5. favorite_then_offline
+```
+{
+  "ok": true,
+  "helper": "favorite_then_offline",
+  "result": {
+    "tokenA": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiMDMwX2J1eWVyX2EiLCJ1c2VySWQiOjEsInJvbGUiOiJDVVNUT01FUiIsImlhdCI6MTc5NTE2MTc1NywiZXhwIjoxNzk1MTY4OTU3fQ.BhTZ37OiybrO92ShqKSCrPFUf5v2Oy2oEN8PrmtVcBM",
+    "tokenS": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6MSwicm9sZSI6IlNFTExFUiIsImlhdCI6MTc5NTE2MTc1NywiZXhwIjoxNzk1MTY4OTU3fQ.ktfXT8qixwlbp0RPqfRmJVKg9BmLb1kpciEaYP2F3vM",
+    "productId": "1"
+  }
+}
 
-- BASE `http://127.0.0.1:8080` GET / → reachable=False (<urlopen error [Errno 111] Connection refused>)
-- POST path probe GET `/api/auth/login` → reachable=False (<urlopen error [Errno 111] Connection refused>)
-
-**阻塞（如实）**：当前云代理环境未启动挑战 B 被测栈；代表性业务演练无法连真实接口。
-已完成：静态自审、DB 名前置门禁演练、reset dry-run、栅栏烟测。
-## 6. 代表性用例纸面走查（非业务通过）
-
-- `PB-B01-AC1-POS`：已在 cases/ 含 HTTP/断言/清理；执行状态仍 **待执行**
-- `PB-B13-AC1-POS`：已在 cases/ 含 HTTP/断言/清理；执行状态仍 **待执行**
-- `PB-B13-AC1-NEG`：已在 cases/ 含 HTTP/断言/清理；执行状态仍 **待执行**
-- `PB-B02-AC3-NEG`：已在 cases/ 含 HTTP/断言/清理；执行状态仍 **待执行**
-- `PB-B13-AC5-CON`：已在 cases/ 含 HTTP/断言/清理；执行状态仍 **待执行**
-- `PB-B08-AC1-POS`：已在 cases/ 含 HTTP/断言/清理；执行状态仍 **待执行**
+```
 
 ## 结论
 
-- 交付物可执行性：**脚本与用例入口可用**；**业务验收演练阻塞于缺少独立测试环境**。
-- 不得将任何 AC 标为通过。
-
-### blockers
-
-- No live BE at http://127.0.0.1:8080. Cannot rehearse POS/NEG/UI/concurrency against real MySQL+BE+FE in this environment. Scripts and cases are ready; business execution blocked until independent test stack is up with oxstore_b030_* DB.
-
-### evidence
-
-- self_review exit=0
-- prepare --dry-check exit=0
-- reset --dry-run exit=0
-- barrier smoke exit=0
+- 已对 develop 候选做真实 API+DB 演练（见上）。
+- **未**将任何 AC 标记为通过；用例状态仍为待执行。
+- 若单项 FAIL，见 results JSON。

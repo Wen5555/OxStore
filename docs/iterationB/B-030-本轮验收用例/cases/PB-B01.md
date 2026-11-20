@@ -144,7 +144,19 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 登录并建 PLACED 单（P-ON-10×1）
 
-- 操作：`{"ref": "helper:place_order", "product": "P-ON-10", "qty": "1"}`
+- 操作（已展开）：
+**实现（勿留悬空 helper）**
+```bash
+python3 scripts/reset_namespace.py --case-id $CASE_ID
+python3 scripts/run_helper.py place_order --product P-ON-10 --qty 1
+# 等价 HTTP：
+# 1) POST /api/auth/login {username:b030_buyer_a,password:B030-BuyerA-Pass9} → tokenA
+# 2) POST /api/me/cart/items + Idempotency-Key 新 UUID  body={productId:$(P-ON-10.id)} → cartItemId
+# 3) PATCH /api/me/cart/items/{cartItemId} {quantity:"1"} （若 qty≠1）
+# 4) POST /api/me/checkout/confirmations {cartItemIds:[cartItemId]} → confirmationToken
+# 5) POST /api/me/orders + Idempotency-Key  body={confirmationToken} → orderId/orderNo；message=下单成功
+```
+提取：`orderId`、`orderNo`、`tokenA`
 - 提取：`{"orderId": "order.id"}`
 
 #### 步骤 2 · SELLER · 登录后台
@@ -251,7 +263,19 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 持有 PLACED 单
 
-- 操作：`{"ref": "helper:place_order", "product": "P-ON-10", "qty": "1"}`
+- 操作（已展开）：
+**实现（勿留悬空 helper）**
+```bash
+python3 scripts/reset_namespace.py --case-id $CASE_ID
+python3 scripts/run_helper.py place_order --product P-ON-10 --qty 1
+# 等价 HTTP：
+# 1) POST /api/auth/login {username:b030_buyer_a,password:B030-BuyerA-Pass9} → tokenA
+# 2) POST /api/me/cart/items + Idempotency-Key 新 UUID  body={productId:$(P-ON-10.id)} → cartItemId
+# 3) PATCH /api/me/cart/items/{cartItemId} {quantity:"1"} （若 qty≠1）
+# 4) POST /api/me/checkout/confirmations {cartItemIds:[cartItemId]} → confirmationToken
+# 5) POST /api/me/orders + Idempotency-Key  body={confirmationToken} → orderId/orderNo；message=下单成功
+```
+提取：`orderId`、`orderNo`、`tokenA`
 - 提取：`{"orderId": "order.id", "tokenA": "token"}`
 
 #### 步骤 2 · CUSTOMER_A · 调用商家 actions
@@ -320,7 +344,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · BOTH · 准备 COMPLETED 单与 CANCELLED 单各一
 
-- 操作：`{"ref": "helper:seed_terminal_orders"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py seed_terminal_orders
+# 产出 completedId / cancelledId / tokenA / tokenS
+```
 
 #### 步骤 2 · SELLER · 对 COMPLETED 再 COMPLETE/取消
 
@@ -400,7 +429,13 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SELLER · 将订单推到 PREPARED
 
-- 操作：`{"ref": "helper:advance_to", "status": "PREPARED"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py advance_to --order-id "$ORDER_ID" --status PREPARED
+# HTTP：按 PLACED→CONFIRMED→PREPARED→SHIPPED→COMPLETED 依次
+# POST /api/admin/orders/{id}/actions {action, expectedStatus}
+```
 
 #### 步骤 2 · SELLER · SHIP 无地址/运单字段
 
@@ -547,7 +582,19 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · PLACED 单；两个商家 JWT（或同商家双连接）
 
-- 操作：`{"ref": "helper:place_order"}`
+- 操作（已展开）：
+**实现（勿留悬空 helper）**
+```bash
+python3 scripts/reset_namespace.py --case-id $CASE_ID
+python3 scripts/run_helper.py place_order --product P-ON-10 --qty 1
+# 等价 HTTP：
+# 1) POST /api/auth/login {username:b030_buyer_a,password:B030-BuyerA-Pass9} → tokenA
+# 2) POST /api/me/cart/items + Idempotency-Key 新 UUID  body={productId:$(P-ON-10.id)} → cartItemId
+# 3) PATCH /api/me/cart/items/{cartItemId} {quantity:"1"} （若 qty≠1）
+# 4) POST /api/me/checkout/confirmations {cartItemIds:[cartItemId]} → confirmationToken
+# 5) POST /api/me/orders + Idempotency-Key  body={confirmationToken} → orderId/orderNo；message=下单成功
+```
+提取：`orderId`、`orderNo`、`tokenA`
 
 #### 步骤 2 · BARRIER · 同时 CONFIRM
 

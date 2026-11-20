@@ -1,10 +1,16 @@
 # B-030 并发 SEQ（可运行栅栏）
 
+## 环境（必须）
+
+```bash
+cd docs/iterationB/B-030-本轮验收用例
+set -a; source runs/.env.local; set +a
+python3 scripts/prepare_fixtures.py && source scripts/env_from_fixtures.sh
+```
+
 工具：`python3 scripts/barrier_runner.py --seq SEQ-XX --mode {a_first|b_first|simultaneous} --a-cmd '...' --b-cmd '...'`
 
-全部 SEQ 状态：**待执行**。禁止仅靠人工连点宣称通过。故障注入仅测试侧（如 mock 抛错），不改业务代码。
-
-环境变量：`${BASE}`=`$B030_BASE_URL`；`${TA}`/`${TB}`/`${TS}` 为客户 A/B、商家 JWT；商品/订单 ID 来自 `runs/fixture-ids.json`。
+全部 SEQ 状态：**待执行**。`$BASE/$TA/$TB/$TS/$PID_*` 由 `env_from_fixtures.sh` 导出，禁止手填占位。
 
 ## SEQ-01 库存1双买（高风险 · B032）
 

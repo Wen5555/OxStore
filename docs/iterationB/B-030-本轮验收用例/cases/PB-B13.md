@@ -33,11 +33,22 @@
 
 #### 步骤 1 · CUSTOMER_A · 车行 qty=2；记录 stock/cart
 
-- 操作：`{"ref": "helper:cart_qty", "qty": "2"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py cart_qty --product P-ON-10 --qty 2
+# HTTP：login → POST /api/me/cart/items {productId} → PATCH quantity="2" → cartItemId
+```
 
 #### 步骤 2 · CUSTOMER_A · 确认+下单
 
-- 操作：`{"ref": "helper:checkout_submit"}`
+- 操作（已展开）：
+**实现**
+```bash
+# 需已有 cartItemId；或先 cart_qty
+python3 scripts/run_helper.py checkout_submit --cart-item-id "$CART_ITEM_ID"
+# HTTP：POST /api/me/checkout/confirmations → POST /api/me/orders + Idempotency-Key
+```
 - 提取：`{"orderId": "data.id"}`
 - 断言：`{"message": "下单成功"}`
 
@@ -100,11 +111,22 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 车行 qty=5 > stock 1
 
-- 操作：`{"ref": "helper:cart_qty", "product": "P-ON-1", "qty": "5"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py cart_qty --product P-ON-1 --qty 5
+# HTTP：login → POST /api/me/cart/items {productId} → PATCH quantity="5" → cartItemId
+```
 
 #### 步骤 2 · CUSTOMER_A · 下单应失败
 
-- 操作：`{"ref": "helper:checkout_submit"}`
+- 操作（已展开）：
+**实现**
+```bash
+# 需已有 cartItemId；或先 cart_qty
+python3 scripts/run_helper.py checkout_submit --cart-item-id "$CART_ITEM_ID"
+# HTTP：POST /api/me/checkout/confirmations → POST /api/me/orders + Idempotency-Key
+```
 - 断言：`{"message_contains": "库存不足", "no_order": true}`
 
 #### 步骤 3 · DB · 无订单；库存仍 1；车行仍 5
@@ -313,7 +335,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 确认
 
-- 操作：`{"ref": "helper:confirm"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py confirm --cart-item-id "$CART_ITEM_ID"
+# HTTP：POST /api/me/checkout/confirmations {cartItemIds:[$CART_ITEM_ID]}
+```
 
 #### 步骤 2 · SELLER · 下架
 
@@ -322,7 +349,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 3 · CUSTOMER_A · 提交
 
-- 操作：`{"ref": "helper:submit"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py submit --confirmation-token "$CONFIRMATION_TOKEN"
+# HTTP：POST /api/me/orders + Idempotency-Key {confirmationToken}
+```
 - 断言：`{"message_contains": "已下架"}`
 
 ### 期望（响应 / 页面 / DB）
@@ -379,7 +411,13 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 确认并提交成功
 
-- 操作：`{"ref": "helper:checkout_submit"}`
+- 操作（已展开）：
+**实现**
+```bash
+# 需已有 cartItemId；或先 cart_qty
+python3 scripts/run_helper.py checkout_submit --cart-item-id "$CART_ITEM_ID"
+# HTTP：POST /api/me/checkout/confirmations → POST /api/me/orders + Idempotency-Key
+```
 - 提取：`{"orderId": "data.id", "key": "idemKey", "token": "confirmationToken"}`
 
 #### 步骤 2 · CUSTOMER_A · 同 confirmationToken + 同 Idempotency-Key 重放
@@ -447,7 +485,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · SETUP · P-ON-1 stock=1；A/B 各确认 qty=1
 
-- 操作：`{"ref": "helper:dual_confirm", "product": "P-ON-1"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py dual_confirm --product P-ON-1 --qty 1
+# 产出 JSON：A/B 的 token、confirmationToken、idem — 供 barrier_runner / SEQ-01 使用
+```
 
 #### 步骤 2 · BARRIER · 同时提交
 

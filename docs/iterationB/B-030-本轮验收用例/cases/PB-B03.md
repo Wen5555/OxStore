@@ -32,12 +32,29 @@
 
 #### 步骤 1 · CUSTOMER_A · 下单
 
-- 操作：`{"ref": "helper:place_order", "qty": "2"}`
+- 操作（已展开）：
+**实现（勿留悬空 helper）**
+```bash
+python3 scripts/reset_namespace.py --case-id $CASE_ID
+python3 scripts/run_helper.py place_order --product P-ON-10 --qty 2
+# 等价 HTTP：
+# 1) POST /api/auth/login {username:b030_buyer_a,password:B030-BuyerA-Pass9} → tokenA
+# 2) POST /api/me/cart/items + Idempotency-Key 新 UUID  body={productId:$(P-ON-10.id)} → cartItemId
+# 3) PATCH /api/me/cart/items/{cartItemId} {quantity:"2"} （若 qty≠1）
+# 4) POST /api/me/checkout/confirmations {cartItemIds:[cartItemId]} → confirmationToken
+# 5) POST /api/me/orders + Idempotency-Key  body={confirmationToken} → orderId/orderNo；message=下单成功
+```
+提取：`orderId`、`orderNo`、`tokenA`
 - 提取：`{"orderId": "id", "unit": "items[0].unitPrice", "qty": "items[0].quantity"}`
 
 #### 步骤 2 · SELLER · 改价改库存改名
 
-- 操作：`{"ref": "helper:mutate_product"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py mutate_product --product P-ON-10
+# HTTP：PATCH /api/admin/products/{id} {stock:"99"}
+```
 
 #### 步骤 3 · CUSTOMER_A · GET 订单详情
 
@@ -105,12 +122,29 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 下单
 
-- 操作：`{"ref": "helper:place_order", "qty": "2"}`
+- 操作（已展开）：
+**实现（勿留悬空 helper）**
+```bash
+python3 scripts/reset_namespace.py --case-id $CASE_ID
+python3 scripts/run_helper.py place_order --product P-ON-10 --qty 2
+# 等价 HTTP：
+# 1) POST /api/auth/login {username:b030_buyer_a,password:B030-BuyerA-Pass9} → tokenA
+# 2) POST /api/me/cart/items + Idempotency-Key 新 UUID  body={productId:$(P-ON-10.id)} → cartItemId
+# 3) PATCH /api/me/cart/items/{cartItemId} {quantity:"2"} （若 qty≠1）
+# 4) POST /api/me/checkout/confirmations {cartItemIds:[cartItemId]} → confirmationToken
+# 5) POST /api/me/orders + Idempotency-Key  body={confirmationToken} → orderId/orderNo；message=下单成功
+```
+提取：`orderId`、`orderNo`、`tokenA`
 - 提取：`{"orderId": "id", "unit": "items[0].unitPrice", "qty": "items[0].quantity"}`
 
 #### 步骤 2 · SELLER · 改价改库存改名
 
-- 操作：`{"ref": "helper:mutate_product"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py mutate_product --product P-ON-10
+# HTTP：PATCH /api/admin/products/{id} {stock:"99"}
+```
 
 #### 步骤 3 · CUSTOMER_A · GET 订单详情
 
@@ -178,12 +212,29 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 下单
 
-- 操作：`{"ref": "helper:place_order", "qty": "2"}`
+- 操作（已展开）：
+**实现（勿留悬空 helper）**
+```bash
+python3 scripts/reset_namespace.py --case-id $CASE_ID
+python3 scripts/run_helper.py place_order --product P-ON-10 --qty 2
+# 等价 HTTP：
+# 1) POST /api/auth/login {username:b030_buyer_a,password:B030-BuyerA-Pass9} → tokenA
+# 2) POST /api/me/cart/items + Idempotency-Key 新 UUID  body={productId:$(P-ON-10.id)} → cartItemId
+# 3) PATCH /api/me/cart/items/{cartItemId} {quantity:"2"} （若 qty≠1）
+# 4) POST /api/me/checkout/confirmations {cartItemIds:[cartItemId]} → confirmationToken
+# 5) POST /api/me/orders + Idempotency-Key  body={confirmationToken} → orderId/orderNo；message=下单成功
+```
+提取：`orderId`、`orderNo`、`tokenA`
 - 提取：`{"orderId": "id", "unit": "items[0].unitPrice", "qty": "items[0].quantity"}`
 
 #### 步骤 2 · SELLER · 改价改库存改名
 
-- 操作：`{"ref": "helper:mutate_product"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py mutate_product --product P-ON-10
+# HTTP：PATCH /api/admin/products/{id} {stock:"99"}
+```
 
 #### 步骤 3 · CUSTOMER_A · GET 订单详情
 
@@ -251,12 +302,29 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 下单
 
-- 操作：`{"ref": "helper:place_order", "qty": "2"}`
+- 操作（已展开）：
+**实现（勿留悬空 helper）**
+```bash
+python3 scripts/reset_namespace.py --case-id $CASE_ID
+python3 scripts/run_helper.py place_order --product P-ON-10 --qty 2
+# 等价 HTTP：
+# 1) POST /api/auth/login {username:b030_buyer_a,password:B030-BuyerA-Pass9} → tokenA
+# 2) POST /api/me/cart/items + Idempotency-Key 新 UUID  body={productId:$(P-ON-10.id)} → cartItemId
+# 3) PATCH /api/me/cart/items/{cartItemId} {quantity:"2"} （若 qty≠1）
+# 4) POST /api/me/checkout/confirmations {cartItemIds:[cartItemId]} → confirmationToken
+# 5) POST /api/me/orders + Idempotency-Key  body={confirmationToken} → orderId/orderNo；message=下单成功
+```
+提取：`orderId`、`orderNo`、`tokenA`
 - 提取：`{"orderId": "id", "unit": "items[0].unitPrice", "qty": "items[0].quantity"}`
 
 #### 步骤 2 · SELLER · 改价改库存改名
 
-- 操作：`{"ref": "helper:mutate_product"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py mutate_product --product P-ON-10
+# HTTP：PATCH /api/admin/products/{id} {stock:"99"}
+```
 
 #### 步骤 3 · CUSTOMER_A · GET 订单详情
 
@@ -324,12 +392,29 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 下单
 
-- 操作：`{"ref": "helper:place_order", "qty": "2"}`
+- 操作（已展开）：
+**实现（勿留悬空 helper）**
+```bash
+python3 scripts/reset_namespace.py --case-id $CASE_ID
+python3 scripts/run_helper.py place_order --product P-ON-10 --qty 2
+# 等价 HTTP：
+# 1) POST /api/auth/login {username:b030_buyer_a,password:B030-BuyerA-Pass9} → tokenA
+# 2) POST /api/me/cart/items + Idempotency-Key 新 UUID  body={productId:$(P-ON-10.id)} → cartItemId
+# 3) PATCH /api/me/cart/items/{cartItemId} {quantity:"2"} （若 qty≠1）
+# 4) POST /api/me/checkout/confirmations {cartItemIds:[cartItemId]} → confirmationToken
+# 5) POST /api/me/orders + Idempotency-Key  body={confirmationToken} → orderId/orderNo；message=下单成功
+```
+提取：`orderId`、`orderNo`、`tokenA`
 - 提取：`{"orderId": "id", "unit": "items[0].unitPrice", "qty": "items[0].quantity"}`
 
 #### 步骤 2 · SELLER · 改价改库存改名
 
-- 操作：`{"ref": "helper:mutate_product"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py mutate_product --product P-ON-10
+# HTTP：PATCH /api/admin/products/{id} {stock:"99"}
+```
 
 #### 步骤 3 · CUSTOMER_A · GET 订单详情
 

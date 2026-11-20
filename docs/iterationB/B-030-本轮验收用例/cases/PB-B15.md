@@ -33,7 +33,12 @@
 
 #### 步骤 1 · CUSTOMER_A · 车内两行在售
 
-- 操作：`{"ref": "helper:cart_two_lines"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py cart_two_lines
+# 产出 c1/c2/tokenA（P-ON-10 与 P-ON-5 各一行）
+```
 
 #### 步骤 2 · UI · 二次确认文案
 
@@ -219,7 +224,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 车内两行在售
 
-- 操作：`{"ref": "helper:cart_two_lines"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py cart_two_lines
+# 产出 c1/c2/tokenA（P-ON-10 与 P-ON-5 各一行）
+```
 
 #### 步骤 2 · UI · 二次确认文案
 
@@ -405,7 +415,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 车内两行在售
 
-- 操作：`{"ref": "helper:cart_two_lines"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py cart_two_lines
+# 产出 c1/c2/tokenA（P-ON-10 与 P-ON-5 各一行）
+```
 
 #### 步骤 2 · UI · 二次确认文案
 
@@ -591,7 +606,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 车内两行在售
 
-- 操作：`{"ref": "helper:cart_two_lines"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py cart_two_lines
+# 产出 c1/c2/tokenA（P-ON-10 与 P-ON-5 各一行）
+```
 
 #### 步骤 2 · UI · 二次确认文案
 
@@ -835,7 +855,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 车内两行在售
 
-- 操作：`{"ref": "helper:cart_two_lines"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py cart_two_lines
+# 产出 c1/c2/tokenA（P-ON-10 与 P-ON-5 各一行）
+```
 
 #### 步骤 2 · UI · 二次确认文案
 
@@ -1021,7 +1046,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 车内两行在售
 
-- 操作：`{"ref": "helper:cart_two_lines"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py cart_two_lines
+# 产出 c1/c2/tokenA（P-ON-10 与 P-ON-5 各一行）
+```
 
 #### 步骤 2 · UI · 二次确认文案
 

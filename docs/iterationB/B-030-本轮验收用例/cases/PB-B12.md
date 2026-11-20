@@ -254,7 +254,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 确认
 
-- 操作：`{"ref": "helper:confirm"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py confirm --cart-item-id "$CART_ITEM_ID"
+# HTTP：POST /api/me/checkout/confirmations {cartItemIds:[$CART_ITEM_ID]}
+```
 
 #### 步骤 2 · SELLER · 下架
 
@@ -263,7 +268,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 3 · CUSTOMER_A · 提交
 
-- 操作：`{"ref": "helper:submit"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py submit --confirmation-token "$CONFIRMATION_TOKEN"
+# HTTP：POST /api/me/orders + Idempotency-Key {confirmationToken}
+```
 - 断言：`{"message_contains": "已下架"}`
 
 ### 期望（响应 / 页面 / DB）
@@ -541,7 +551,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 1 · CUSTOMER_A · 确认
 
-- 操作：`{"ref": "helper:confirm"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py confirm --cart-item-id "$CART_ITEM_ID"
+# HTTP：POST /api/me/checkout/confirmations {cartItemIds:[$CART_ITEM_ID]}
+```
 
 #### 步骤 2 · SELLER · 下架
 
@@ -550,7 +565,12 @@ SELECT COUNT(*) AS intent_cnt FROM purchase_intent pi JOIN customer c ON c.id=pi
 
 #### 步骤 3 · CUSTOMER_A · 提交
 
-- 操作：`{"ref": "helper:submit"}`
+- 操作（已展开）：
+**实现**
+```bash
+python3 scripts/run_helper.py submit --confirmation-token "$CONFIRMATION_TOKEN"
+# HTTP：POST /api/me/orders + Idempotency-Key {confirmationToken}
+```
 - 断言：`{"message_contains": "已下架"}`
 
 ### 期望（响应 / 页面 / DB）

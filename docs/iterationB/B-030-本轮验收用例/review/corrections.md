@@ -22,3 +22,15 @@
 2. 若文案属于 `fixedMessages` 且为成功/失败提示 → **required**。
 3. 「备货完成」「开始发货」「交易完成」「已取消」等 → **UI 状态标签**，不是错误 tip。
 4. 不得编造未在契约出现的提示；前端不得替换为无货/缺货/超限/下单历史。
+
+## 相对 625ff10 的追加纠正（本提交）
+
+| # | 问题 | 纠正 |
+|---|---|---|
+| 12 | cases 含未实现 helper:* | 全部展开 + `run_helper.py`/`helpers_lib.py` |
+| 13 | prepare 空 POST / NEEDS_MANUAL | multipart 创建+响应校验；失败 ready=false |
+| 14 | 未核实 API→DB | `verify_api_db.py` canary |
+| 15 | B032 等悬空 $BASE/$TOK/$CMD_* | `env_from_fixtures.sh` 导出全变量 |
+| 16 | 仅 echo 栅栏 | 真实双 curl SEQ-01 + 代表性 API 演练 |
+| 17 | reset 外键失败 | 先删 confirmation_item |
+| 18 | orderId 字段名 | 使用 data.orderId |
