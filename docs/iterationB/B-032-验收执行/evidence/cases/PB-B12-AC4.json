@@ -1,12 +1,30 @@
 {
-  "confirm": {
-    "http": 200,
-    "message": "ok",
-    "token_present": true
-  },
-  "submit_after_change": {
+  "qty_change": {
     "http": 409,
-    "message": "确认信息已变化，请重新确认",
-    "code": 40913
-  }
+    "message": "确认信息已变化，请重新确认"
+  },
+  "offline_after_confirm": {
+    "http": 409,
+    "message": "所选商品无法下单",
+    "nested": "所选商品无法下单 商品「B032-在售-10」已下架，请从购物车移除后重试。"
+  },
+  "reconfirm_success": {
+    "http": 201,
+    "message": "下单成功"
+  },
+  "ui_confirm": {
+    "ok": true,
+    "shots": [
+      "b12-checkout-confirm.png"
+    ],
+    "ui": {
+      "hasTotal": 1,
+      "hasUnit": 3,
+      "bodyText": "确认下单\nB032-在售-5\n¥8.00 × 1\n¥8.00\n总金额：¥8.00\n返回购物车\n确认下单",
+      "url": "http://127.0.0.1:5173/me/cart"
+    },
+    "stderr_tail": "",
+    "stdout_tail": "{\"ok\":true,\"shots\":[\"b12-checkout-confirm.png\"],\"ui\":{\"hasTotal\":1,\"hasUnit\":3,\"bodyText\":\"确认下单\\nB032-在售-5\\n¥8.00 × 1\\n¥8.00\\n总金额：¥8.00\\n返回购物车\\n确认下单\",\"url\":\"http://127.0.0.1:5173/me/cart\"}}\n"
+  },
+  "shots_distinct_from_cart": true
 }

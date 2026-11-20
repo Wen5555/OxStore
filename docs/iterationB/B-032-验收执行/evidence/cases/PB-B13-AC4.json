@@ -3,14 +3,15 @@
     "http": 201,
     "message": "下单成功"
   },
-  "replay": {
+  "lost_response_replay": {
     "http": 409,
     "message": "订单已提交，请勿重复下单"
   },
+  "recovered_in_history": true,
+  "cart_after_replay": [],
+  "idempotency_not_cart_clear": true,
   "new_purchase": {
     "http": 201,
     "message": "下单成功"
-  },
-  "orders": 2,
-  "stock": "9"
+  }
 }

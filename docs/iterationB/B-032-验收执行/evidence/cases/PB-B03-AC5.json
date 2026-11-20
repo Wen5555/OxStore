@@ -1,21 +1,47 @@
 {
-  "probed": [
-    {
-      "path": "/api/admin/legacy-intents",
+  "archive_get": {
+    "admin": {
       "http": 200,
       "message": "ok"
     },
-    {
-      "path": "/api/me/legacy-intents",
-      "http": 200,
-      "message": "ok"
-    },
-    {
-      "path": "/api/me/order-history",
+    "me": {
       "http": 200,
       "message": "ok"
     }
+  },
+  "close_attempt": {
+    "http": 500,
+    "message": "服务器内部错误"
+  },
+  "seeded_rows": [
+    {
+      "id": 9,
+      "status": "SUCCESS",
+      "legacy_closed_at": null,
+      "legacy_close_reason": null,
+      "product_name_snapshot": "LEGACY-SUCCESS"
+    },
+    {
+      "id": 10,
+      "status": "FAILED",
+      "legacy_closed_at": null,
+      "legacy_close_reason": null,
+      "product_name_snapshot": "LEGACY-FAILED"
+    },
+    {
+      "id": 11,
+      "status": "QUEUING",
+      "legacy_closed_at": null,
+      "legacy_close_reason": null,
+      "product_name_snapshot": "LEGACY-QUEUING"
+    },
+    {
+      "id": 12,
+      "status": "IN_TRANSACTION",
+      "legacy_closed_at": null,
+      "legacy_close_reason": null,
+      "product_name_snapshot": "LEGACY-IN-TX"
+    }
   ],
-  "open_intents": 0,
-  "note": "legacy records read-only if present; new path has no open intents"
+  "note": "seeded legacy rows exist; no close/unfreeze API succeeded — cannot prove close/unfreeze/restore"
 }

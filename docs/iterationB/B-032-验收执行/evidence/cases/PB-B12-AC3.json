@@ -1,24 +1,7 @@
 {
-  "cart_items": [
-    {
-      "cartItemId": "257",
-      "productId": "25",
-      "productName": "B032-在售-10",
-      "unitPrice": "12.50",
-      "mainImageUrl": "/api/images/ac857481-706f-4eab-870b-f29a14b977f1.png",
-      "quantity": "1",
-      "stock": "10",
-      "online": true,
-      "invalidLabel": null,
-      "defaultCheckoutSelected": true,
-      "canCheckoutSelect": true,
-      "canFavoriteSelect": true,
-      "updatedAt": "2026-11-20T19:52:41.326977"
-    }
-  ],
   "offline_add": {
-    "http": 400,
-    "message": "Idempotency-Key 必须为 UUID"
+    "http": 409,
+    "message": "商品已下架"
   },
   "selected_submit": {
     "http": 201,
@@ -28,5 +11,19 @@
     "http": 400,
     "message": "请选择商品"
   },
-  "ui": "default checkbox / disable offline — see screenshots"
+  "ui": {
+    "ok": true,
+    "shots": [
+      "b12-cart-selection.png"
+    ],
+    "ui": {
+      "allLabel": 1,
+      "disabled": 0,
+      "invalidTag": 0,
+      "insufHint": 1,
+      "checked": 1
+    },
+    "stderr_tail": "",
+    "stdout_tail": "{\"ok\":true,\"shots\":[\"b12-cart-selection.png\"],\"ui\":{\"allLabel\":1,\"disabled\":0,\"invalidTag\":0,\"insufHint\":1,\"checked\":1}}\n"
+  }
 }

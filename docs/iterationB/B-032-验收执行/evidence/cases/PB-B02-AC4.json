@@ -7,6 +7,15 @@
     "offline_reason": "AUTO_ZERO",
     "price": "7.00"
   },
+  "list_has_product": false,
+  "detail": {
+    "http": 404,
+    "message": "商品已下架"
+  },
+  "add": {
+    "http": 409,
+    "message": "商品已下架"
+  },
   "restock_no_auto": {
     "id": 30,
     "name": "B032-库存编辑",

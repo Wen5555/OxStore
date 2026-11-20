@@ -1,5 +1,5 @@
 {
-  "race": {
+  "oversell_race": {
     "A": {
       "ok": true,
       "result": [
@@ -8,8 +8,8 @@
           "code": 0,
           "message": "下单成功",
           "data": {
-            "orderId": "118",
-            "orderNo": "b817f370-dbb6-4d7e-b640-3735672f600e",
+            "orderId": "240",
+            "orderNo": "c2b2263b-4c89-4687-b86d-08086d181376",
             "customerId": "3",
             "status": "PLACED",
             "items": [
@@ -22,7 +22,7 @@
               }
             ],
             "totalAmount": "3.30",
-            "createdAt": "2026-11-20T19:52:45.606157",
+            "createdAt": "2026-11-20T20:12:56.590609",
             "cancelledBy": null,
             "cancelledAt": null,
             "cancelReason": null,
@@ -31,9 +31,9 @@
             ]
           }
         },
-        "d7f2250a-c7c4-491b-a447-dee487bb2003"
+        "f03d6b4c-4cfe-40f5-917b-378998ae2cec"
       ],
-      "elapsed_ms": 11
+      "elapsed_ms": 10
     },
     "B": {
       "ok": true,
@@ -45,7 +45,7 @@
           "data": {
             "errors": [
               {
-                "cartItemId": "279",
+                "cartItemId": "458",
                 "productId": "27",
                 "productName": "B032-低库存-1",
                 "reason": "OFFLINE",
@@ -54,15 +54,91 @@
             ]
           }
         },
-        "88f62699-fff4-4b4a-bedb-fe7a7e10f525"
+        "87ff0322-cad1-46b6-b3fb-f22d48554f98"
       ],
-      "elapsed_ms": 13
+      "elapsed_ms": 12
     }
   },
   "stock": "0",
   "placed": 1,
+  "lock_before_mutate": {
+    "http": 409,
+    "message": "确认信息已变化，请重新确认"
+  },
+  "lock_after_mutate": {
+    "submit": [
+      201,
+      {
+        "code": 0,
+        "message": "下单成功",
+        "data": {
+          "orderId": "241",
+          "orderNo": "753b02e5-35c3-4335-b55b-8197648fc43f",
+          "customerId": "3",
+          "status": "PLACED",
+          "items": [
+            {
+              "productId": "25",
+              "productName": "B032-在售-10",
+              "unitPrice": "12.50",
+              "quantity": "1",
+              "lineAmount": "12.50"
+            }
+          ],
+          "totalAmount": "12.50",
+          "createdAt": "2026-11-20T20:12:56.922764",
+          "cancelledBy": null,
+          "cancelledAt": null,
+          "cancelReason": null,
+          "allowedActions": [
+            "CANCEL"
+          ]
+        }
+      },
+      "033fd12a-d743-47c2-8574-d48291c01f67"
+    ],
+    "patch": [
+      409,
+      {
+        "code": 40912,
+        "message": "该商品已不在购物车，请刷新页面后查看。",
+        "data": null
+      }
+    ],
+    "add": [
+      200,
+      {
+        "code": 0,
+        "message": "已加入购物车",
+        "data": {
+          "cartItemId": "461",
+          "productId": "26",
+          "productName": "B032-在售-5",
+          "unitPrice": "8.00",
+          "mainImageUrl": "/api/images/38ea5578-8ab7-43b7-8493-782a2fed951d.png",
+          "quantity": "2",
+          "stock": "5",
+          "online": true,
+          "invalidLabel": null,
+          "defaultCheckoutSelected": true,
+          "canCheckoutSelect": true,
+          "canFavoriteSelect": true,
+          "updatedAt": "2026-11-20T20:12:59.935798"
+        }
+      }
+    ],
+    "order_qty": "1",
+    "cart_after": [
+      {
+        "id": 461,
+        "product_id": 26,
+        "quantity": "2"
+      }
+    ]
+  },
   "offline_submit": {
     "http": 409,
-    "message": "所选商品无法下单"
+    "message": "所选商品无法下单",
+    "nested": "所选商品无法下单 商品「B032-在售-10」已下架，请从购物车移除后重试。"
   }
 }

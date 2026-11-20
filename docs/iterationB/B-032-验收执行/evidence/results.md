@@ -1,9 +1,10 @@
 # B-032 results
 
-- window: 2026-11-20T11:52:34Z → 2026-11-20T11:52:55Z
+- window UTC: 2026-11-20T12:12:25Z → 2026-11-20T12:13:04Z
+- window Asia/Singapore: 2026-11-20T20:12:25+08:00 → 2026-11-20T20:13:04+08:00
 - sut: develop@29c20ea0927528a98f873f4a1a0e169a6fa12281
 - db: oxstore_b032_local
-- totals: PASS 26 / FAIL 0 / BLOCKED 0 / total 26
+- totals: PASS 24 / FAIL 1 / BLOCKED 1 / NOT_EXECUTED 0 / total 26
 
 | AC | Verdict |
 |---|---|
@@ -21,7 +22,7 @@
 | PB-B03-AC2 | PASS |
 | PB-B03-AC3 | PASS |
 | PB-B03-AC4 | PASS |
-| PB-B03-AC5 | PASS |
+| PB-B03-AC5 | BLOCKED |
 | PB-B12-AC1 | PASS |
 | PB-B12-AC2 | PASS |
 | PB-B12-AC3 | PASS |
@@ -29,7 +30,7 @@
 | PB-B12-AC5 | PASS |
 | PB-B12-AC6 | PASS |
 | PB-B13-AC1 | PASS |
-| PB-B13-AC2 | PASS |
+| PB-B13-AC2 | FAIL |
 | PB-B13-AC3 | PASS |
 | PB-B13-AC4 | PASS |
 | PB-B13-AC5 | PASS |

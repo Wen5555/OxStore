@@ -1,23 +1,29 @@
 {
   "task": "B-032",
+  "round": "independent-audit-fix",
   "acs_total": 26,
-  "acs_pass": 26,
-  "acs_fail": 0,
-  "acs_blocked": 0,
+  "acs_pass": 24,
+  "acs_fail": 1,
+  "acs_blocked": 1,
+  "acs_not_executed": 0,
+  "fail": ["PB-B13-AC2"],
+  "blocked": ["PB-B03-AC5"],
+  "fail_notes": {
+    "PB-B13-AC2": "lock-before / lock-after / unselected proven; 余数>0 unreachable via public API because CheckoutService digest includes cart quantity (confirmation.qty always equals cart.qty on success path)."
+  },
+  "blocked_notes": {
+    "PB-B03-AC5": "legacy rows seeded; archive GET works; close/unfreeze API returns 500 — cannot prove close/not-cancelled/unfreeze/no-stock-restore without business fix."
+  },
   "strict_messages": true,
   "isolated_db": "oxstore_b032_local",
   "sut_sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
   "delivery_baseline": "topic/r2@0cef9ec",
-  "transaction_breakpoints": ["after_order", "after_stock", "after_cart/before_receipt"],
-  "concurrency": ["PB-B01-AC5 dual advance", "PB-B13-AC5 dual submit stock=1"],
-  "screenshots": 7,
+  "transaction_breakpoints": ["after_order", "after_stock", "after_cart"],
+  "tx_probe_sql_committed": "fixtures/b032_tx_probes.sql",
+  "concurrency": ["PB-B01-AC5", "PB-B13-AC5 dual submit + lock mutate"],
+  "screenshots_distinct": true,
   "business_code_changed": false,
   "pr_opened": false,
   "force_push": false,
-  "co_authored_by_only": "YanPeng240607",
-  "notes": [
-    "TX fault injection uses isolated-DB triggers + MyISAM probe log; no SUT patch.",
-    "Unified single evidence window in evidence/results.json execution_window.",
-    "JWT redacted in evidence payloads."
-  ]
+  "co_authored_by_only": "YanPeng240607"
 }

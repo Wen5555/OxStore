@@ -3,10 +3,19 @@
   "shots": [
     "b03-after-login.png",
     "b12-product-detail-no-direct-buy.png",
-    "b12-cart-selection.png",
-    "b12-checkout-confirm.png",
-    "b12-clear-cart-confirm.png",
-    "b03-order-history.png",
-    "b03-admin-orders.png"
-  ]
+    "b12-clear-cart-confirm.png"
+  ],
+  "detail": {
+    "directBuy": 0,
+    "addCart": 1
+  },
+  "required": {
+    "cart": true,
+    "confirm": true,
+    "history": true,
+    "admin": true,
+    "cart_confirm_distinct": true
+  },
+  "stderr_tail": "",
+  "stdout_tail": "{\"ok\":true,\"shots\":[\"b03-after-login.png\",\"b12-product-detail-no-direct-buy.png\",\"b12-clear-cart-confirm.png\"],\"detail\":{\"directBuy\":0,\"addCart\":1},\"required\":{\"cart\":true,\"confirm\":true,\"history\":true,\"admin\":true,\"cart_confirm_distinct\":true}}\n"
 }

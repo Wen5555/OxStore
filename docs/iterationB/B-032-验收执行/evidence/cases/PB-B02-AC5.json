@@ -1,9 +1,43 @@
 {
   "table": {
-    "下单成功": "10->8 (delta -2)",
-    "交易完成成功": "8->8 (unchanged)",
-    "完成前取消": "4->5 (expect restore +1 if B05 wired)"
-  },
-  "cancel_restore_observed": true,
-  "note": "cancel restore detailed in PB-B05"
+    "下单成功": "10->8",
+    "交易完成成功": "8->8",
+    "完成前取消": "4->5",
+    "零库存自动下架后取消恢复在售": {
+      "before": {
+        "id": 27,
+        "name": "B032-低库存-1",
+        "stock": "0",
+        "status": "OFFLINE",
+        "offline_reason": "AUTO_ZERO",
+        "price": "3.30"
+      },
+      "after": {
+        "id": 27,
+        "name": "B032-低库存-1",
+        "stock": "1",
+        "status": "ONLINE",
+        "offline_reason": null,
+        "price": "3.30"
+      }
+    },
+    "人工下架后取消保持下架": {
+      "before": {
+        "id": 26,
+        "name": "B032-在售-5",
+        "stock": "4",
+        "status": "OFFLINE",
+        "offline_reason": "MANUAL",
+        "price": "8.00"
+      },
+      "after": {
+        "id": 26,
+        "name": "B032-在售-5",
+        "stock": "5",
+        "status": "OFFLINE",
+        "offline_reason": "MANUAL",
+        "price": "8.00"
+      }
+    }
+  }
 }

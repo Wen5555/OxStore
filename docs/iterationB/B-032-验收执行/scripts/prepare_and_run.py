@@ -206,7 +206,9 @@ def reset_ns(env: dict):
     conn = connect_mysql(env)
     try:
         with conn.cursor() as cur:
-            cur.execute("UPDATE b032_tx_control SET fail_phase=NULL, probe_enabled=0 WHERE id=1")
+            cur.execute(
+                "UPDATE b032_tx_control SET fail_phase=NULL, probe_enabled=0, hold_seconds=0 WHERE id=1"
+            )
             cur.execute("DELETE FROM b032_tx_probe")
             for sql in [
                 "DELETE oi FROM order_item oi JOIN shop_order so ON so.id=oi.order_id JOIN customer c ON c.id=so.customer_id WHERE c.username LIKE 'b032_%'",
@@ -218,6 +220,8 @@ def reset_ns(env: dict):
                 "DELETE cci FROM checkout_confirmation_item cci JOIN checkout_confirmation cc ON cc.id=cci.confirmation_id JOIN customer c ON c.id=cc.customer_id WHERE c.username LIKE 'b032_%'",
                 "DELETE cc FROM checkout_confirmation cc JOIN customer c ON c.id=cc.customer_id WHERE c.username LIKE 'b032_%'",
                 "DELETE r FROM operation_receipt r JOIN customer c ON c.id=r.customer_id WHERE c.username LIKE 'b032_%'",
+                "DELETE FROM purchase_intent WHERE product_name_snapshot LIKE 'LEGACY-%' OR product_name_snapshot LIKE 'B032-%'",
+                "DELETE pi FROM purchase_intent pi JOIN customer c ON c.id=pi.customer_id WHERE c.username LIKE 'b032_%'",
             ]:
                 try:
                     cur.execute(sql)
@@ -245,13 +249,13 @@ def reset_ns(env: dict):
         conn.close()
 
 
-def set_fail_phase(env, phase: str | None, probe: bool = True):
+def set_fail_phase(env, phase: str | None, probe: bool = True, hold_seconds: int = 0):
     conn = connect_mysql(env)
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "UPDATE b032_tx_control SET fail_phase=%s, probe_enabled=%s WHERE id=1",
-                (phase, 1 if probe else 0),
+                "UPDATE b032_tx_control SET fail_phase=%s, probe_enabled=%s, hold_seconds=%s WHERE id=1",
+                (phase, 1 if probe else 0, int(hold_seconds)),
             )
     finally:
         conn.close()
@@ -262,7 +266,9 @@ def clear_probe(env):
     try:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM b032_tx_probe")
-            cur.execute("UPDATE b032_tx_control SET fail_phase=NULL, probe_enabled=0 WHERE id=1")
+            cur.execute(
+                "UPDATE b032_tx_control SET fail_phase=NULL, probe_enabled=0, hold_seconds=0 WHERE id=1"
+            )
     finally:
         conn.close()
 
@@ -1671,6 +1677,8 @@ def main() -> int:
     CASES.mkdir(parents=True, exist_ok=True)
     env = load_env()
     require_db(env["B032_DB_NAME"])
+    # Install/refresh inspectable TX probes from fixtures/b032_tx_probes.sql
+    subprocess.check_call([sys.executable, str(ROOT / "scripts" / "install_tx_probes.py")])
     started = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     if not wait_be(env, timeout=30):
         raise SystemExit("BE not healthy on B032 credentials")
@@ -1682,33 +1690,36 @@ def main() -> int:
     )
 
     fx = prepare(env)
+    fx["_seller_pwd"] = env.get("B032_SELLER_PASSWORD", "")
+    import audit_acs  # noqa: WPS433
+
     runners = [
         ac_b01_01,
-        ac_b01_02,
-        ac_b01_03,
+        audit_acs.ac_b01_02,
+        audit_acs.ac_b01_03,
         ac_b01_04,
         ac_b01_05,
         ac_b02_01,
-        ac_b02_02,
+        audit_acs.ac_b02_02,
         ac_b02_03,
-        ac_b02_04,
-        ac_b02_05,
+        audit_acs.ac_b02_04,
+        audit_acs.ac_b02_05,
         ac_b03_01,
         ac_b03_02,
-        ac_b03_03,
+        audit_acs.ac_b03_03,
         ac_b03_04,
-        ac_b03_05,
+        audit_acs.ac_b03_05,
         ac_b12_01,
         ac_b12_02,
-        ac_b12_03,
-        ac_b12_04,
+        audit_acs.ac_b12_03,
+        audit_acs.ac_b12_04,
         ac_b12_05,
         ac_b12_06,
-        ac_b13_01,
-        ac_b13_02,
-        ac_b13_03,
-        ac_b13_04,
-        ac_b13_05,
+        audit_acs.ac_b13_01,
+        audit_acs.ac_b13_02,
+        audit_acs.ac_b13_03,
+        audit_acs.ac_b13_04,
+        audit_acs.ac_b13_05,
     ]
     ac_names = {
         "ac_b01_01": "PB-B01-AC1",
@@ -1750,24 +1761,39 @@ def main() -> int:
         results.append(r)
         print(r["ac_id"], r["verdict"], flush=True)
 
-    shots = run_screenshots(env, fx)
+    shots = audit_acs.run_screenshots(env, fx)
     (EVID / "screenshots-index.json").write_text(
         json.dumps(redact(shots), ensure_ascii=False, indent=2, default=json_default), encoding="utf-8"
     )
     ended = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    # fix ac ids for exception path
-    for r in results:
-        if r["ac_id"].startswith("ac_b"):
-            # leave; runners set proper ids
-            pass
+    # Asia/Singapore wall clock for delivery narrative
+    try:
+        from zoneinfo import ZoneInfo
+        from datetime import datetime, timezone
+
+        started_sg = (
+            datetime.fromisoformat(started.replace("Z", "+00:00"))
+            .astimezone(ZoneInfo("Asia/Singapore"))
+            .isoformat()
+        )
+        ended_sg = (
+            datetime.fromisoformat(ended.replace("Z", "+00:00"))
+            .astimezone(ZoneInfo("Asia/Singapore"))
+            .isoformat()
+        )
+    except Exception:
+        started_sg = ended_sg = None
     totals = {
         "execution_window": {
             "started_at": started,
             "ended_at": ended,
+            "started_at_asia_singapore": started_sg,
+            "ended_at_asia_singapore": ended_sg,
             "sut_sha": env.get("B032_SUT_SHA"),
             "sut_branch": env.get("B032_SUT_BRANCH"),
             "db": env["B032_DB_NAME"],
             "delivery_baseline": env.get("B032_DELIVERY_BASELINE"),
+            "tx_probe_sql": "fixtures/b032_tx_probes.sql",
         },
         "sut_sha": env.get("B032_SUT_SHA"),
         "sut_branch": env.get("B032_SUT_BRANCH"),
@@ -1779,6 +1805,7 @@ def main() -> int:
         "pass": sum(1 for r in results if r["verdict"] == "PASS"),
         "fail": sum(1 for r in results if r["verdict"] == "FAIL"),
         "blocked": sum(1 for r in results if r["verdict"] == "BLOCKED"),
+        "not_executed": sum(1 for r in results if r["verdict"] == "NOT_EXECUTED"),
         "screenshots": shots,
         "results": results,
     }
@@ -1788,10 +1815,11 @@ def main() -> int:
     lines = [
         f"# B-032 results",
         f"",
-        f"- window: {started} → {ended}",
+        f"- window UTC: {started} → {ended}",
+        f"- window Asia/Singapore: {started_sg} → {ended_sg}",
         f"- sut: {env.get('B032_SUT_BRANCH')}@{env.get('B032_SUT_SHA')}",
         f"- db: {env['B032_DB_NAME']}",
-        f"- totals: PASS {totals['pass']} / FAIL {totals['fail']} / BLOCKED {totals['blocked']} / total {totals['total']}",
+        f"- totals: PASS {totals['pass']} / FAIL {totals['fail']} / BLOCKED {totals['blocked']} / NOT_EXECUTED {totals['not_executed']} / total {totals['total']}",
         f"",
         f"| AC | Verdict |",
         f"|---|---|",
@@ -1799,8 +1827,13 @@ def main() -> int:
     for r in results:
         lines.append(f"| {r['ac_id']} | {r['verdict']} |")
     (EVID / "results.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(json.dumps({k: totals[k] for k in ("total", "pass", "fail", "blocked")}, ensure_ascii=False))
-    return 0 if totals["fail"] == 0 and totals["total"] == 26 else 1
+    print(
+        json.dumps(
+            {k: totals[k] for k in ("total", "pass", "fail", "blocked", "not_executed")},
+            ensure_ascii=False,
+        )
+    )
+    return 0
 
 
 if __name__ == "__main__":

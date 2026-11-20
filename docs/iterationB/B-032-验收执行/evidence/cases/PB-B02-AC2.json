@@ -1,13 +1,48 @@
 {
   "buyer_seen_stock": "7",
   "db_stock": "7",
-  "order_after_offline": {
-    "id": 97,
-    "order_no": "128324ee-8aea-4c3d-bf00-d4315bf572bc",
-    "status": "CONFIRMED",
+  "flow_after_offline": [
+    {
+      "action": "CONFIRM",
+      "http": 200,
+      "message": "ok",
+      "status": "CONFIRMED"
+    },
+    {
+      "action": "PREPARE",
+      "http": 200,
+      "message": "ok",
+      "status": "PREPARED"
+    },
+    {
+      "action": "SHIP",
+      "http": 200,
+      "message": "ok",
+      "status": "SHIPPED"
+    },
+    {
+      "action": "COMPLETE",
+      "http": 200,
+      "message": "ok",
+      "status": "COMPLETED"
+    }
+  ],
+  "final_order": {
+    "id": 211,
+    "order_no": "27e65b40-05a2-4a1d-b72e-975c6cbef59f",
+    "status": "COMPLETED",
     "total_amount": "37.50",
-    "created_at": "2026-11-21T03:52:37.605466",
+    "created_at": "2026-11-21T04:12:32.399347",
     "cancelled_by": null,
     "cancelled_at": null
+  },
+  "new_order_refused": {
+    "http": 409,
+    "message": "所选商品无法下单",
+    "nested": "所选商品无法下单 商品「B032-在售-10」已下架，请从购物车移除后重试。"
+  },
+  "offline_add": {
+    "http": 409,
+    "message": "商品已下架"
   }
 }

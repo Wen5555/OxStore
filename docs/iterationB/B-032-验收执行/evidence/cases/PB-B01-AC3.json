@@ -11,24 +11,38 @@
     "http": 409,
     "message": "订单已取消，不可推进"
   },
+  "no_timeout_auto_cancel": {
+    "wait_sec": 2,
+    "status_after_wait": "PLACED",
+    "note": "no cancel-timer API; short wait shows status stayed PLACED"
+  },
   "orders": [
     {
-      "id": 91,
-      "order_no": "e2cf616d-64a7-4b19-9621-63cfdf568c70",
+      "id": 204,
+      "order_no": "b4daf9a5-ccbe-4021-afc0-ef7dbe1e6484",
       "status": "COMPLETED",
       "total_amount": "12.50",
-      "created_at": "2026-11-21T03:52:36.321177",
+      "created_at": "2026-11-21T04:12:29.001069",
       "cancelled_by": null,
       "cancelled_at": null
     },
     {
-      "id": 92,
-      "order_no": "ed9e010d-2f2c-43fa-98d1-dfeb594d730d",
+      "id": 205,
+      "order_no": "36bfb1a5-aed2-4624-af94-389d7aefc910",
       "status": "CANCELLED",
       "total_amount": "8.00",
-      "created_at": "2026-11-21T03:52:36.363572",
+      "created_at": "2026-11-21T04:12:29.051099",
       "cancelled_by": "CUSTOMER",
-      "cancelled_at": "2026-11-21T03:52:36.373544"
+      "cancelled_at": "2026-11-21T04:12:29.058023"
+    },
+    {
+      "id": 206,
+      "order_no": "93a85e65-2ba6-4afc-a87a-3bbb3cf2ef64",
+      "status": "PLACED",
+      "total_amount": "12.50",
+      "created_at": "2026-11-21T04:12:29.078596",
+      "cancelled_by": null,
+      "cancelled_at": null
     }
   ]
 }

@@ -1,5 +1,4 @@
 {
-  "place": "下单成功",
   "seq": [
     {
       "action": "CONFIRM",
@@ -26,20 +25,24 @@
       "status": "COMPLETED"
     }
   ],
-  "skip": {
+  "skip_from_placed": {
     "http": 409,
-    "message": "订单已完成，不可推进"
+    "message": "订单不允许跳步、回退或重复推进"
+  },
+  "no_rollback": {
+    "http": 409,
+    "message": "订单状态已变化，请刷新后重试"
   },
   "customer_advance": {
     "http": 403,
     "message": "角色无权访问"
   },
-  "final": {
-    "id": 90,
-    "order_no": "b4d6b434-b747-4f62-b034-8dd8dc09a082",
-    "status": "COMPLETED",
-    "total_amount": "12.50",
-    "created_at": "2026-11-21T03:52:36.019845",
+  "no_auto_after_wait": {
+    "id": 203,
+    "order_no": "f5884c44-c3c5-412b-9ee7-223c553a7ba2",
+    "status": "CONFIRMED",
+    "total_amount": "8.00",
+    "created_at": "2026-11-21T04:12:27.159319",
     "cancelled_by": null,
     "cancelled_at": null
   }
