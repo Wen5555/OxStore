@@ -1,0 +1,1085 @@
+{
+  "execution_window": {
+    "started_at": "2026-11-20T11:10:37Z",
+    "sut_sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
+    "db": "oxstore_b031_local",
+    "ended_at": "2026-11-20T11:11:18Z"
+  },
+  "sut_sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
+  "sut_branch": "develop",
+  "db": "oxstore_b031_local",
+  "base": "http://127.0.0.1:8080",
+  "fe": "http://127.0.0.1:5173",
+  "total": 21,
+  "pass": 19,
+  "fail": 2,
+  "blocked": 0,
+  "results": [
+    {
+      "ac_id": "PB-B08-AC1",
+      "verdict": "FAIL",
+      "detail": {
+        "api_model": {
+          "favorites_resource": "/api/me/favorites/{productId}",
+          "addressable_by": "caller's own productId namespace only",
+          "foreign_favorite_id_endpoint": null,
+          "note": "No API exposes another user's favorite row id for direct mutate/delete."
+        },
+        "unauth": {
+          "code": 40101,
+          "message": "请先登录",
+          "data": null
+        },
+        "invalid_auth": {
+          "code": 40101,
+          "message": "请重新登录",
+          "data": null
+        },
+        "seller": {
+          "code": 40301,
+          "message": "角色无权访问",
+          "data": null
+        },
+        "ok": {
+          "code": 0,
+          "message": "已收藏",
+          "data": {
+            "favoriteId": "107",
+            "productId": "1",
+            "createdAt": "2026-11-20T19:10:38.229984"
+          }
+        },
+        "b_delete_own_namespace": {
+          "response": {
+            "code": 0,
+            "message": "未收藏",
+            "data": null
+          },
+          "message": "未收藏",
+          "a_fav_count_before": 1,
+          "a_fav_count_after": 1,
+          "b_fav_count_after": 0,
+          "a_db_row": {
+            "id": "107",
+            "created_at": "2026-11-21 03:10:38.229984"
+          }
+        },
+        "b_state_for_same_productId": {
+          "code": 0,
+          "message": "ok",
+          "data": {
+            "favorited": false,
+            "createdAt": null
+          }
+        },
+        "cart_ownership_cross_move_NOT_favorites_proof": {
+          "response": {
+            "code": 40302,
+            "message": "无权操作",
+            "data": null
+          },
+          "message": "无权操作",
+          "a_cart_count_after": 1,
+          "note": "Tests cart line ownership via move-to-favorites; not a foreign-favorite mutate."
+        },
+        "b_list_has_a_product": 0,
+        "expected_seller_message": "无此权限",
+        "actual_seller_message": "角色无权访问",
+        "seller_code": 40301,
+        "observations": {
+          "foreign_favorite_mutate_endpoint_exists": false,
+          "tested_isolation_paths": [
+            "B DELETE /api/me/favorites/{productId} only affects B namespace (未收藏)",
+            "A favorite row count/id unchanged after B DELETE",
+            "B list does not contain A's favorited product solely via B namespace ops",
+            "cart move-to-favorites with foreign cartItemId → 无权操作 (cart proof only)"
+          ]
+        },
+        "fail_reason": "商家访问期望「无此权限」，实得「角色无权访问」/code=40301"
+      },
+      "criteria": "收藏是写操作，必须登录，仅能查看和操作本人收藏，无游客暂存、无本地暂存。商家不可访问客户收藏。未登录点击收藏：拒绝，提示「请先登录」，不创建记录；登录失效：拒绝，提示「请重新登录」。登录成功后回到原页面，由客户重新点击，不自动补做刚才的收藏。访问或修改他人收藏：拒绝，提示「无权操作」，数据不变。",
+      "pb_id": "PB-B08"
+    },
+    {
+      "ac_id": "PB-B08-AC2",
+      "verdict": "PASS",
+      "detail": {
+        "before": {
+          "stock": "10",
+          "status": "ONLINE"
+        },
+        "after": {
+          "stock": "10",
+          "status": "ONLINE"
+        },
+        "orders": 0,
+        "resp": {
+          "code": 0,
+          "message": "已收藏",
+          "data": {
+            "favoriteId": "108",
+            "productId": "1",
+            "createdAt": "2026-11-20T19:10:38.625269"
+          }
+        }
+      },
+      "criteria": "收藏只作标记，不生成订单，不占用、不扣减、不预占库存，不改变商品状态。允许不收藏直接购买（购买路径仍须经购物车，见 `US-B12` / `PB-B12`）。",
+      "pb_id": "PB-B08"
+    },
+    {
+      "ac_id": "PB-B08-AC3",
+      "verdict": "PASS",
+      "detail": {
+        "first": {
+          "code": 0,
+          "message": "已收藏",
+          "data": {
+            "favoriteId": "109",
+            "productId": "1",
+            "createdAt": "2026-11-20T19:10:38.886166"
+          }
+        },
+        "second": {
+          "code": 0,
+          "message": "已收藏",
+          "data": {
+            "favoriteId": "109",
+            "productId": "1",
+            "createdAt": "2026-11-20T19:10:38.886166"
+          }
+        },
+        "count": 1
+      },
+      "criteria": "同一客户对同一商品有且仅有一条收藏。重复收藏（含同一请求被网络重试、双击重复提交）为幂等成功：不新增、不取消、不刷新收藏时间，提示「已收藏」。UI 上，未收藏时点击为收藏，已收藏时点击为「取消收藏」；二者是不同操作，靠操作语义区分，不靠点击次数。首次收藏成功提示「已收藏」。",
+      "pb_id": "PB-B08"
+    },
+    {
+      "ac_id": "PB-B08-AC4",
+      "verdict": "PASS",
+      "detail": {
+        "offline": {
+          "code": 40901,
+          "message": "商品已下架",
+          "data": null
+        },
+        "zero": {
+          "code": 40901,
+          "message": "商品已下架",
+          "data": null
+        },
+        "gone": {
+          "code": 40401,
+          "message": "商品不存在",
+          "data": null
+        }
+      },
+      "criteria": "仅在售商品可新建收藏。对已下架（含因零库存自动下架）商品新建收藏：拒绝，提示「商品已下架」，不新建记录。对不存在的商品新建收藏：拒绝，提示「商品不存在」，不新建记录。零库存与已下架是同一状态，不并用「无货」作为另一种标注或另一种拒绝文案。",
+      "pb_id": "PB-B08"
+    },
+    {
+      "ac_id": "PB-B08-AC5",
+      "verdict": "PASS",
+      "detail": {
+        "ui": {
+          "ok": true,
+          "listFav": 0,
+          "searchFav": 0,
+          "searchCards": 2,
+          "unfav": 1,
+          "fav": 1,
+          "unfavText": "收 藏",
+          "favText": "取消收藏",
+          "url": "http://127.0.0.1:5173/products/1"
+        },
+        "screenshots": [
+          "evidence/screenshots/b08ac5-list-logged-in.png",
+          "evidence/screenshots/b08ac5-search-results.png",
+          "evidence/screenshots/b08ac5-detail-unfavorited.png",
+          "evidence/screenshots/b08ac5-detail-favorited.png"
+        ],
+        "search_keyword": "B031-在售-10"
+      },
+      "criteria": "收藏入口只出现在商品详情页；商品列表、搜索卡片不提供快捷收藏。入口处须区分已收藏与未收藏。",
+      "pb_id": "PB-B08"
+    },
+    {
+      "ac_id": "PB-B09-AC1",
+      "verdict": "FAIL",
+      "detail": {
+        "orig_favorite": {
+          "favoriteId": "111",
+          "createdAt": "2026-11-20T19:10:43.488003"
+        },
+        "hit_offline": {
+          "favoriteId": "111",
+          "productId": "1",
+          "productName": "B031-在售-10",
+          "unitPrice": "12.50",
+          "mainImageUrl": "/api/images/b1d0bc3a-ab1a-49eb-abba-bf8de24c9804.png",
+          "createdAt": "2026-11-20T19:10:43.488003",
+          "valid": false,
+          "invalidLabel": "已下架",
+          "canOpenDetail": false
+        },
+        "api_detail_offline_tip": {
+          "code": 40401,
+          "message": "商品已下架",
+          "data": null
+        },
+        "ui_click": {
+          "ok": true,
+          "labelTag": 1,
+          "buyableLinks": 0,
+          "stillFavorites": true,
+          "urlAfterClick": "http://127.0.0.1:5173/me/favorites",
+          "unavailableEmpty": 1,
+          "tipOfflineExact": 0,
+          "addBtn": 0
+        },
+        "hit_reonline_same": {
+          "favoriteId": "111",
+          "productId": "1",
+          "productName": "B031-在售-10",
+          "unitPrice": "12.50",
+          "mainImageUrl": "/api/images/b1d0bc3a-ab1a-49eb-abba-bf8de24c9804.png",
+          "createdAt": "2026-11-20T19:10:43.488003",
+          "valid": true,
+          "invalidLabel": null,
+          "canOpenDetail": true
+        },
+        "db_before": {
+          "id": "111",
+          "created_at": "2026-11-21 03:10:43.488003"
+        },
+        "db_after_reonline": {
+          "id": "111",
+          "created_at": "2026-11-21 03:10:43.488003"
+        },
+        "cancel_separate_fixture": {
+          "code": 0,
+          "message": "已取消收藏",
+          "data": null
+        },
+        "new_pid": "23",
+        "hit_after_republish": {
+          "favoriteId": "111",
+          "productId": "1",
+          "productName": "B031-在售-10",
+          "unitPrice": "12.50",
+          "mainImageUrl": "/api/images/b1d0bc3a-ab1a-49eb-abba-bf8de24c9804.png",
+          "createdAt": "2026-11-20T19:10:43.488003",
+          "valid": false,
+          "invalidLabel": "已下架",
+          "canOpenDetail": false
+        },
+        "screenshots": [
+          "evidence/screenshots/b09ac1-offline-favorite.png",
+          "evidence/screenshots/b09ac1-offline-detail-nobuy.png"
+        ],
+        "ui_tip_rule": {
+          "required": "已下架",
+          "tipOfflineExact": 0,
+          "unavailableEmpty_not_substitute": true,
+          "api_message_not_substitute": true,
+          "rejudgment": "Same unified window evidence; tipOfflineExact=0 on forced detail. Alternate Empty「商品当前不可查看」and API「商品已下架」do not satisfy UI tip「已下架」."
+        },
+        "fail_reason": "期望强制详情 UI tip「已下架」，tipOfflineExact=0；「商品当前不可查看」(unavailableEmpty=1)/API「商品已下架」不能替代"
+      },
+      "criteria": "已收藏商品随后下架或售罄：该项保留，统一标注「已下架」，不自动移除；不并存「无货」与「已下架」两种标注。失效项仍展示名称、价格、主图及「已下架」标注，仍可取消收藏；点击不进入可购买详情，仅提示「已下架」。同一商品身份重新上架或库存恢复后，原收藏恢复有效并清除标注。重新发布成另一件商品时，原收藏仍指向旧商品（已下架并标注），不自动转移到新商品。",
+      "pb_id": "PB-B09"
+    },
+    {
+      "ac_id": "PB-B09-AC2",
+      "verdict": "PASS",
+      "detail": {
+        "before": {
+          "favoriteId": "113",
+          "productId": "2",
+          "productName": "B031-在售-5",
+          "unitPrice": "8.00",
+          "mainImageUrl": "uploads/b031-live.png",
+          "createdAt": "2026-11-20T19:10:46.86363",
+          "valid": true,
+          "invalidLabel": null,
+          "canOpenDetail": true
+        },
+        "mutation": {
+          "admin_api_supports_name_price_image_after_publish": false,
+          "admin_patch_observation": {
+            "http": 400,
+            "body": {
+              "code": 40002,
+              "message": "发布后只允许修改库存和二级类目",
+              "data": null
+            },
+            "name_unchanged": true,
+            "image_unchanged": true
+          },
+          "channel": "fixture_setup_db_copy_from_seed2_admin_created_product",
+          "seed2_donor": {
+            "donor_product_id": "24",
+            "image_path": "/api/images/8f9c3861-6998-4169-a1cf-19caa8ae0f17.png",
+            "name": "B031-SEED2-45d8036a",
+            "http": 201
+          },
+          "before_mainImageUrl": "uploads/b031-live.png",
+          "target_image_path": "/api/images/8f9c3861-6998-4169-a1cf-19caa8ae0f17.png",
+          "after": {
+            "favoriteId": "113",
+            "productId": "2",
+            "productName": "B031-在售-5-LIVE",
+            "unitPrice": "18.88",
+            "mainImageUrl": "/api/images/8f9c3861-6998-4169-a1cf-19caa8ae0f17.png",
+            "createdAt": "2026-11-20T19:10:46.86363",
+            "valid": true,
+            "invalidLabel": null,
+            "canOpenDetail": true
+          }
+        }
+      },
+      "criteria": "收藏绑定商品身份，列表展示实时名称、价格、主图，而不是下单那样的交易快照。失效标注在读取时按当前商品状态实时判断。",
+      "pb_id": "PB-B09"
+    },
+    {
+      "ac_id": "PB-B09-AC3",
+      "verdict": "PASS",
+      "detail": {
+        "first": {
+          "code": 0,
+          "message": "已取消收藏",
+          "data": null
+        },
+        "second": {
+          "code": 0,
+          "message": "未收藏",
+          "data": null
+        }
+      },
+      "criteria": "收藏列表和详情页均可取消收藏，无需二次确认；普通路径下取消成功后立即从列表移除，提示「已取消收藏」。对已不存在的收藏重复取消：幂等成功，提示「未收藏」（仅此一种，不再使用其他成功文案），其他收藏不变。无业务数量上限。",
+      "pb_id": "PB-B09"
+    },
+    {
+      "ac_id": "PB-B09-AC4",
+      "verdict": "PASS",
+      "detail": {
+        "ui": {
+          "ok": true,
+          "emptyText": 1
+        },
+        "created_meta_count": 12,
+        "page_meta": {
+          "page1": {
+            "page": 1,
+            "size": 10,
+            "total": 12,
+            "pages": 2,
+            "count": 10,
+            "createdAts": [
+              "2026-11-20T19:10:49.870352",
+              "2026-11-20T19:10:49.84231",
+              "2026-11-20T19:10:49.81374",
+              "2026-11-20T19:10:49.786168",
+              "2026-11-20T19:10:49.757723",
+              "2026-11-20T19:10:49.729868",
+              "2026-11-20T19:10:49.701275",
+              "2026-11-20T19:10:49.674276",
+              "2026-11-20T19:10:49.646095",
+              "2026-11-20T19:10:49.619653"
+            ],
+            "productIds": [
+              "20",
+              "19",
+              "18",
+              "17",
+              "16",
+              "15",
+              "14",
+              "13",
+              "12",
+              "11"
+            ]
+          },
+          "page2": {
+            "page": 2,
+            "size": 10,
+            "total": 12,
+            "pages": 2,
+            "count": 2,
+            "createdAts": [
+              "2026-11-20T19:10:49.590622",
+              "2026-11-20T19:10:49.561217"
+            ],
+            "productIds": [
+              "10",
+              "9"
+            ]
+          }
+        },
+        "idempotent": {
+          "before_ts": "2026-11-20T19:10:49.870352",
+          "after_ts": "2026-11-20T19:10:49.870352",
+          "resp": {
+            "code": 0,
+            "message": "已收藏",
+            "data": {
+              "favoriteId": "126",
+              "productId": "20",
+              "createdAt": "2026-11-20T19:10:49.870352"
+            }
+          }
+        },
+        "cancel_refavorite": {
+          "old_ts": "2026-11-20T19:10:49.870352",
+          "new_ts": "2026-11-20T19:10:49.958395",
+          "resp": {
+            "code": 0,
+            "message": "已收藏",
+            "data": {
+              "favoriteId": "127",
+              "productId": "20",
+              "createdAt": "2026-11-20T19:10:49.958395"
+            }
+          }
+        },
+        "screenshots": [
+          "evidence/screenshots/b09ac4-empty-favorites.png"
+        ]
+      },
+      "criteria": "收藏列表按收藏时间倒序，分页每页 10 条。幂等重复收藏不改变排序时间；取消后再收藏视为新收藏，时间更新。空列表提示「暂无收藏」。本系统无商品硬删除，「已收藏商品被删除」不适用。",
+      "pb_id": "PB-B09"
+    },
+    {
+      "ac_id": "PB-B09-AC5",
+      "verdict": "PASS",
+      "detail": {
+        "dual_session_payloads": {
+          "session1_total": 1,
+          "session2_total": 1,
+          "both_have_product": true
+        },
+        "ui_refresh_logout": {
+          "ok": true,
+          "before": 1,
+          "afterRefresh": 1,
+          "afterRelogin": 1
+        },
+        "concurrent": {
+          "writes": {
+            "put": {
+              "http": 200,
+              "message": "已收藏",
+              "t": 1795173055.239659,
+              "t_done": 1795173055.249353,
+              "body": {
+                "code": 0,
+                "message": "已收藏",
+                "data": {
+                  "favoriteId": "129",
+                  "productId": "1",
+                  "createdAt": "2026-11-20T19:10:55.245861"
+                }
+              }
+            },
+            "del": {
+              "http": 200,
+              "message": "已取消收藏",
+              "t": 1795173055.390043,
+              "t_done": 1795173055.3996887,
+              "body": {
+                "code": 0,
+                "message": "已取消收藏",
+                "data": null
+              }
+            }
+          },
+          "final_cnt": 0,
+          "final_row": null,
+          "order": "delete_after_put"
+        },
+        "restart_proof": {
+          "feasible": true,
+          "pid_before": "16957",
+          "pid_mid_downtime": null,
+          "pid_after": "17821",
+          "shop_app_pids_after": [
+            "17821"
+          ],
+          "pid_changed": true,
+          "mvnw_pid": 17661,
+          "killed_pids": [
+            "16957",
+            "16797"
+          ],
+          "kill_at": "2026-11-20T11:10:55Z",
+          "start_at": "2026-11-20T11:10:57Z",
+          "ready_at": "2026-11-20T11:11:02Z",
+          "elapsed_kill_to_ready_sec": 6.76,
+          "elapsed_start_to_ready_sec": 4.72,
+          "downtime_observed": true,
+          "health_before": true,
+          "health_during_down": false,
+          "health_after": true,
+          "old_jvm_gone": true,
+          "db": "oxstore_b031_local",
+          "log_path": "/tmp/b031-backend-restart.log",
+          "favorite_before": {
+            "id": "130",
+            "product_id": "2",
+            "created_at": "2026-11-21 03:10:55.437327"
+          },
+          "favorite_after": {
+            "id": "130",
+            "product_id": "2",
+            "created_at": "2026-11-21 03:10:55.437327"
+          },
+          "cart_before": {
+            "id": "86",
+            "quantity": "1",
+            "product_id": "1"
+          },
+          "cart_after": {
+            "id": "86",
+            "quantity": "1",
+            "product_id": "1"
+          },
+          "favorite_persisted": true,
+          "cart_persisted": true
+        },
+        "after_restart_api_has_favorite": true,
+        "restart_proof_path": "evidence/restart-proof.json"
+      },
+      "criteria": "收藏须服务端持久化：刷新、退出后重新登录、服务重启后均保留。同一账号在不同设备看到同一份收藏。同时收藏或取消同一商品，以最后成功写入为准，结果唯一，任何路径不得产生重复收藏记录。",
+      "pb_id": "PB-B09"
+    },
+    {
+      "ac_id": "PB-B10-AC1",
+      "verdict": "PASS",
+      "detail": {
+        "unauth": {
+          "code": 40101,
+          "message": "请先登录",
+          "data": null
+        },
+        "bad": {
+          "code": 40101,
+          "message": "请重新登录",
+          "data": null
+        },
+        "ok": {
+          "code": 0,
+          "message": "已加入购物车",
+          "data": {
+            "cartItemId": "87",
+            "productId": "1",
+            "productName": "B031-在售-10",
+            "unitPrice": "12.50",
+            "mainImageUrl": "/api/images/b1d0bc3a-ab1a-49eb-abba-bf8de24c9804.png",
+            "quantity": "1",
+            "stock": "10",
+            "online": true,
+            "invalidLabel": null,
+            "defaultCheckoutSelected": true,
+            "canCheckoutSelect": true,
+            "canFavoriteSelect": true,
+            "updatedAt": "2026-11-20T19:11:03.041879"
+          }
+        },
+        "cross": {
+          "code": 40302,
+          "message": "无权操作",
+          "data": null
+        },
+        "seller_add": {
+          "code": 40301,
+          "message": "角色无权访问",
+          "data": null
+        },
+        "seller_observed_message": "角色无权访问",
+        "seller_http": 403,
+        "seller_ruling_note": "Authenticated seller refused (observed text recorded). Not subject to PB-B08-AC1 exact「无此权限」PO ruling; 「请先登录」not accepted for authenticated seller."
+      },
+      "criteria": "加购是写操作，必须登录。不允许游客购物车，不做本地暂存，不做登录后合并。未登录点击加购：拒绝，提示「请先登录」，不在任何客户名下生成购物车记录；登录失效：拒绝，提示「请重新登录」。登录成功后回到原页面，由客户重新点击，不自动补做刚才的加购。客户只能查看和修改自己的购物车；操作他人购物车：拒绝，提示「无权操作」，数据不变。本轮不提供商家查看或修改客户购物车的权限；卖家把商品加入客户购物车：拒绝，不支持。",
+      "pb_id": "PB-B10"
+    },
+    {
+      "ac_id": "PB-B10-AC2",
+      "verdict": "PASS",
+      "detail": {
+        "rows": [
+          {
+            "product_id": 1,
+            "quantity": "2"
+          },
+          {
+            "product_id": 2,
+            "quantity": "1"
+          }
+        ],
+        "b1": {
+          "code": 0,
+          "message": "已加入购物车",
+          "data": {
+            "cartItemId": "88",
+            "productId": "1",
+            "productName": "B031-在售-10",
+            "unitPrice": "12.50",
+            "mainImageUrl": "/api/images/b1d0bc3a-ab1a-49eb-abba-bf8de24c9804.png",
+            "quantity": "1",
+            "stock": "10",
+            "online": true,
+            "invalidLabel": null,
+            "defaultCheckoutSelected": true,
+            "canCheckoutSelect": true,
+            "canFavoriteSelect": true,
+            "updatedAt": "2026-11-20T19:11:03.365037"
+          }
+        },
+        "b2": {
+          "code": 0,
+          "message": "已加入购物车",
+          "data": {
+            "cartItemId": "89",
+            "productId": "2",
+            "productName": "B031-在售-5",
+            "unitPrice": "8.00",
+            "mainImageUrl": "uploads/b031-live.png",
+            "quantity": "1",
+            "stock": "5",
+            "online": true,
+            "invalidLabel": null,
+            "defaultCheckoutSelected": true,
+            "canCheckoutSelect": true,
+            "canFavoriteSelect": true,
+            "updatedAt": "2026-11-20T19:11:03.377889"
+          }
+        },
+        "b3": {
+          "code": 0,
+          "message": "已加入购物车",
+          "data": {
+            "cartItemId": "89",
+            "productId": "2",
+            "productName": "B031-在售-5",
+            "unitPrice": "8.00",
+            "mainImageUrl": "uploads/b031-live.png",
+            "quantity": "1",
+            "stock": "5",
+            "online": true,
+            "invalidLabel": null,
+            "defaultCheckoutSelected": true,
+            "canCheckoutSelect": true,
+            "canFavoriteSelect": true,
+            "updatedAt": "2026-11-20T19:11:03.377889"
+          }
+        },
+        "b4": {
+          "code": 0,
+          "message": "已加入购物车",
+          "data": {
+            "cartItemId": "88",
+            "productId": "1",
+            "productName": "B031-在售-10",
+            "unitPrice": "12.50",
+            "mainImageUrl": "/api/images/b1d0bc3a-ab1a-49eb-abba-bf8de24c9804.png",
+            "quantity": "2",
+            "stock": "10",
+            "online": true,
+            "invalidLabel": null,
+            "defaultCheckoutSelected": true,
+            "canCheckoutSelect": true,
+            "canFavoriteSelect": true,
+            "updatedAt": "2026-11-20T19:11:03.398304"
+          }
+        }
+      },
+      "criteria": "一个购物车可同时放多个不同商品，同一客户与同一商品始终只有一行，数量承载在该行上，任何路径不得产生两行。同一商品再次加购时数量累加，不新增多行。同一请求被网络重试或双击重复提交时须幂等，不得把数量加两次，提示「已加入购物车」。",
+      "pb_id": "PB-B10"
+    },
+    {
+      "ac_id": "PB-B10-AC3",
+      "verdict": "PASS",
+      "detail": {
+        "before": "10",
+        "after": "10",
+        "orders": 0
+      },
+      "criteria": "加购、改数量、删除均不创建订单，不预占、不扣减、不锁定库存。加购成功不等于一定能买到；库存校验只在下单时发生（见 `US-B12` / `PB-B12`）。",
+      "pb_id": "PB-B10"
+    },
+    {
+      "ac_id": "PB-B10-AC4",
+      "verdict": "PASS",
+      "detail": {
+        "hi": {
+          "code": 0,
+          "message": "已更新",
+          "data": {
+            "cartItemId": "91",
+            "productId": "1",
+            "productName": "B031-在售-10",
+            "unitPrice": "12.50",
+            "mainImageUrl": "/api/images/b1d0bc3a-ab1a-49eb-abba-bf8de24c9804.png",
+            "quantity": "99",
+            "stock": "10",
+            "online": true,
+            "invalidLabel": null,
+            "defaultCheckoutSelected": false,
+            "canCheckoutSelect": true,
+            "canFavoriteSelect": true,
+            "updatedAt": "2026-11-20T19:11:03.969034"
+          }
+        },
+        "neg": {
+          "code": 40001,
+          "message": "数量无效，请输入正整数",
+          "data": null
+        },
+        "dec": {
+          "code": 40001,
+          "message": "数量无效，请输入正整数",
+          "data": null
+        },
+        "zero": {
+          "code": 0,
+          "message": "已移除",
+          "data": null
+        }
+      },
+      "criteria": "单行数量与购物车总件数均无上限，删除「超限」类提示。首次加购、再次加购、在购物车内改数量，均不校验「数量 ≤ 当前库存」。唯一数量校验：数量必须为正整数；改为 0 则删除该行，提示「已移除」；改为负数或小数则拒绝并保持原数量，提示「数量无效，请输入正整数」。手动删除单行同样提示「已移除」。合法改数量成功提示「已更新」。首次加购成功提示「已加入购物车」。",
+      "pb_id": "PB-B10"
+    },
+    {
+      "ac_id": "PB-B10-AC5",
+      "verdict": "PASS",
+      "detail": {
+        "ui": {
+          "ok": true,
+          "listAdd": 0,
+          "searchAdd": 0,
+          "detailAdd": 1,
+          "qtyInputs": 0
+        },
+        "db_row": {
+          "id": "92",
+          "quantity": "1"
+        },
+        "api_item": {
+          "cartItemId": "92",
+          "productId": "1",
+          "productName": "B031-在售-10",
+          "unitPrice": "12.50",
+          "mainImageUrl": "/api/images/b1d0bc3a-ab1a-49eb-abba-bf8de24c9804.png",
+          "quantity": "1",
+          "stock": "10",
+          "online": true,
+          "invalidLabel": null,
+          "defaultCheckoutSelected": true,
+          "canCheckoutSelect": true,
+          "canFavoriteSelect": true,
+          "updatedAt": "2026-11-20T19:11:07.340883"
+        },
+        "screenshots": [
+          "evidence/screenshots/b10ac5-list.png",
+          "evidence/screenshots/b10ac5-search-results.png",
+          "evidence/screenshots/b10ac5-detail-before-add.png",
+          "evidence/screenshots/b10ac5-detail-after-add.png"
+        ],
+        "note": "Each named screenshot captured in this AC step (not reused from B08)."
+      },
+      "criteria": "加购入口只出现在商品详情页；商品列表、搜索卡片不提供快捷加购。详情页加购默认加入 1 件，再到购物车内改数量，不在详情页先选件数。",
+      "pb_id": "PB-B10"
+    },
+    {
+      "ac_id": "PB-B10-AC6",
+      "verdict": "PASS",
+      "detail": {
+        "off": {
+          "code": 40901,
+          "message": "商品已下架",
+          "data": null
+        },
+        "zero": {
+          "code": 40901,
+          "message": "商品已下架",
+          "data": null
+        },
+        "gone": {
+          "code": 40401,
+          "message": "商品不存在",
+          "data": null
+        }
+      },
+      "criteria": "对已下架（含售罄、零库存自动下架）商品发起新加购：拒绝，提示「商品已下架」，不新增行。对不存在的商品发起新加购：拒绝，提示「商品不存在」，不新增行。不并用「无货」作为另一种拒绝文案。",
+      "pb_id": "PB-B10"
+    },
+    {
+      "ac_id": "PB-B11-AC1",
+      "verdict": "PASS",
+      "detail": {
+        "offline_item": {
+          "cartItemId": "93",
+          "productId": "1",
+          "productName": "B031-在售-10",
+          "unitPrice": "12.50",
+          "mainImageUrl": "/api/images/b1d0bc3a-ab1a-49eb-abba-bf8de24c9804.png",
+          "quantity": "3",
+          "stock": "10",
+          "online": false,
+          "invalidLabel": "已下架",
+          "defaultCheckoutSelected": false,
+          "canCheckoutSelect": false,
+          "canFavoriteSelect": false,
+          "updatedAt": "2026-11-20T19:11:08.874345"
+        },
+        "understock_item": {
+          "cartItemId": "94",
+          "productId": "1",
+          "productName": "B031-在售-10",
+          "unitPrice": "12.50",
+          "mainImageUrl": "/api/images/b1d0bc3a-ab1a-49eb-abba-bf8de24c9804.png",
+          "quantity": "3",
+          "stock": "2",
+          "online": true,
+          "invalidLabel": null,
+          "defaultCheckoutSelected": false,
+          "canCheckoutSelect": true,
+          "canFavoriteSelect": true,
+          "updatedAt": "2026-11-20T19:11:09.116283"
+        },
+        "checkout_probe": {
+          "code": 40910,
+          "message": "所选商品无法下单",
+          "data": {
+            "errors": [
+              {
+                "cartItemId": "94",
+                "productId": "1",
+                "productName": "B031-在售-10",
+                "reason": "INSUFFICIENT_STOCK",
+                "message": "商品「B031-在售-10」库存不足：当前可售 2 件，您选购了 3 件，请减少数量或移除后重试。",
+                "availableStock": "2",
+                "requestedQuantity": "3"
+              }
+            ]
+          }
+        }
+      },
+      "criteria": "已在购物车中的商品随后下架或售罄：该行保留并标注「已下架」，由客户手动删除，不自动删除、不自动调减数量。商品仍在售但库存大于 0 且少于车中数量：该行不标注失效、保持原数量，下单时再因库存不足被拒绝。",
+      "pb_id": "PB-B11"
+    },
+    {
+      "ac_id": "PB-B11-AC2",
+      "verdict": "PASS",
+      "detail": {
+        "empty_api": {
+          "code": 0,
+          "message": "ok",
+          "data": {
+            "items": []
+          }
+        },
+        "ui": {
+          "ok": true,
+          "title": "确定清空购物车？",
+          "emptyVisible": true,
+          "modalLeft": 0
+        },
+        "stock": [
+          "10",
+          "10"
+        ],
+        "screenshots": [
+          "evidence/screenshots/b11ac2-empty-cart.png"
+        ]
+      },
+      "criteria": "空购物车展示「购物车是空的」。提供清空购物车，须二次确认；清空与勾选操作均不创建订单、不影响库存。勾选、全选及默认勾选规则见 `US-B12` / `PB-B12` 与 `US-B14` / `PB-B14`。",
+      "pb_id": "PB-B11"
+    },
+    {
+      "ac_id": "PB-B11-AC3",
+      "verdict": "PASS",
+      "detail": {
+        "dual_session_payloads": {
+          "s1_items": 1,
+          "s2_items": 1,
+          "dual": true
+        },
+        "ui_refresh_logout": {
+          "ok": true,
+          "before": 1,
+          "afterRefresh": 1,
+          "afterRelogin": 1
+        },
+        "shared_restart_proof": {
+          "feasible": true,
+          "pid_before": "16957",
+          "pid_mid_downtime": null,
+          "pid_after": "17821",
+          "shop_app_pids_after": [
+            "17821"
+          ],
+          "pid_changed": true,
+          "mvnw_pid": 17661,
+          "killed_pids": [
+            "16957",
+            "16797"
+          ],
+          "kill_at": "2026-11-20T11:10:55Z",
+          "start_at": "2026-11-20T11:10:57Z",
+          "ready_at": "2026-11-20T11:11:02Z",
+          "elapsed_kill_to_ready_sec": 6.76,
+          "elapsed_start_to_ready_sec": 4.72,
+          "downtime_observed": true,
+          "health_before": true,
+          "health_during_down": false,
+          "health_after": true,
+          "old_jvm_gone": true,
+          "db": "oxstore_b031_local",
+          "log_path": "/tmp/b031-backend-restart.log",
+          "favorite_before": {
+            "id": "130",
+            "product_id": "2",
+            "created_at": "2026-11-21 03:10:55.437327"
+          },
+          "favorite_after": {
+            "id": "130",
+            "product_id": "2",
+            "created_at": "2026-11-21 03:10:55.437327"
+          },
+          "cart_before": {
+            "id": "86",
+            "quantity": "1",
+            "product_id": "1"
+          },
+          "cart_after": {
+            "id": "86",
+            "quantity": "1",
+            "product_id": "1"
+          },
+          "favorite_persisted": true,
+          "cart_persisted": true
+        },
+        "restart_proof_path": "evidence/restart-proof.json",
+        "note": "Single genuine BE restart executed in PB-B09-AC5; cart persistence proven there and referenced here."
+      },
+      "criteria": "已登录客户的购物车必须服务端持久化：刷新、退出后重新登录、服务重启后仍在。同一账号多端看到同一份购物车。",
+      "pb_id": "PB-B11"
+    },
+    {
+      "ac_id": "PB-B11-AC4",
+      "verdict": "PASS",
+      "detail": {
+        "concurrent_qty": {
+          "early": {
+            "http": 200,
+            "body": {
+              "code": 0,
+              "message": "已更新",
+              "data": {
+                "cartItemId": "97",
+                "productId": "1",
+                "productName": "B031-在售-10",
+                "unitPrice": "12.50",
+                "mainImageUrl": "/api/images/b1d0bc3a-ab1a-49eb-abba-bf8de24c9804.png",
+                "quantity": "2",
+                "stock": "10",
+                "online": true,
+                "invalidLabel": null,
+                "defaultCheckoutSelected": true,
+                "canCheckoutSelect": true,
+                "canFavoriteSelect": true,
+                "updatedAt": "2026-11-20T19:11:17.701313"
+              }
+            },
+            "t": 1795173077.7053134,
+            "message": "已更新"
+          },
+          "late": {
+            "http": 200,
+            "body": {
+              "code": 0,
+              "message": "已更新",
+              "data": {
+                "cartItemId": "97",
+                "productId": "1",
+                "productName": "B031-在售-10",
+                "unitPrice": "12.50",
+                "mainImageUrl": "/api/images/b1d0bc3a-ab1a-49eb-abba-bf8de24c9804.png",
+                "quantity": "9",
+                "stock": "10",
+                "online": true,
+                "invalidLabel": null,
+                "defaultCheckoutSelected": true,
+                "canCheckoutSelect": true,
+                "canFavoriteSelect": true,
+                "updatedAt": "2026-11-20T19:11:17.902154"
+              }
+            },
+            "t": 1795173077.9064581,
+            "message": "已更新"
+          }
+        },
+        "final_qty_api": "9",
+        "final_qty_db": "9",
+        "lines_after_qty": 1,
+        "completion_order_qty": "late_9_after_early_2",
+        "delete_race": {
+          "patch": {
+            "http": 200,
+            "body": {
+              "code": 0,
+              "message": "已更新",
+              "data": {
+                "cartItemId": "97",
+                "productId": "1",
+                "productName": "B031-在售-10",
+                "unitPrice": "12.50",
+                "mainImageUrl": "/api/images/b1d0bc3a-ab1a-49eb-abba-bf8de24c9804.png",
+                "quantity": "5",
+                "stock": "10",
+                "online": true,
+                "invalidLabel": null,
+                "defaultCheckoutSelected": true,
+                "canCheckoutSelect": true,
+                "canFavoriteSelect": true,
+                "updatedAt": "2026-11-20T19:11:17.948418"
+              }
+            },
+            "t": 1795173077.9523156,
+            "message": "已更新"
+          },
+          "del": {
+            "http": 200,
+            "body": {
+              "code": 0,
+              "message": "已移除",
+              "data": null
+            },
+            "t": 1795173078.1533844,
+            "message": "已移除"
+          }
+        },
+        "lines_after_delete": 0,
+        "db_after_delete": null,
+        "completion_order_delete": "delete_after_patch"
+      },
+      "criteria": "同一账号两端同时修改同一行数量或同时删除：以服务端最后成功写入为准，按实际落库先后，不按客户端发起时间。最终同一商品仍然只有一行。最后一次成功写入是删除，则该行移除；最后一次成功写入是改数量，则数量等于最后写入值。",
+      "pb_id": "PB-B11"
+    },
+    {
+      "ac_id": "PB-B11-AC5",
+      "verdict": "PASS",
+      "detail": {
+        "patch": {
+          "code": 40912,
+          "message": "该商品已不在购物车，请刷新页面后查看。",
+          "data": null
+        },
+        "lines": 0,
+        "stock": "10"
+      },
+      "criteria": "一端已成功删除某购物车行后，另一端仍用旧页面对该行提交「修改数量」：拒绝该请求，该行保持已删除，不重建；库存与订单不变，其他行不变，提示「该商品已不在购物车，请刷新页面后查看。」该改数量不是一次成功写入，因此「最后成功写入」仍是先前的删除。要让该商品回到购物车，客户必须主动执行「加入购物车」，不得靠旧页面的改数量隐式重建。",
+      "pb_id": "PB-B11"
+    }
+  ]
+}
