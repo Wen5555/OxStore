@@ -19,7 +19,7 @@
       }
     },
     {
-      "name": "ui_has_invalid_or_disabled_offline_rows",
+      "name": "ui_invalid_disabled_and_insufficient_hint",
       "pass": true,
       "disposition_if_fail": "FAIL",
       "evidence": {
@@ -32,12 +32,302 @@
           "disabled": 2,
           "invalidTag": 1,
           "insufHint": 1,
-          "checkedBefore": 0,
-          "checkedAfterToggle": 2
+          "atDefault": {
+            "orderable": {
+              "productName": "B032-在售-5",
+              "present": true,
+              "checked": true,
+              "disabled": false
+            },
+            "insuf": {
+              "productName": "B032-低库存-1",
+              "present": true,
+              "checked": false,
+              "disabled": false
+            },
+            "offline": {
+              "productName": "B032-人工下架-5",
+              "present": true,
+              "checked": false,
+              "disabled": true
+            }
+          },
+          "atSelectAll": {
+            "orderable": {
+              "productName": "B032-在售-5",
+              "present": true,
+              "checked": true,
+              "disabled": false
+            },
+            "insuf": {
+              "productName": "B032-低库存-1",
+              "present": true,
+              "checked": true,
+              "disabled": false
+            },
+            "offline": {
+              "productName": "B032-人工下架-5",
+              "present": true,
+              "checked": false,
+              "disabled": true
+            }
+          },
+          "atDeselectAll": {
+            "orderable": {
+              "productName": "B032-在售-5",
+              "present": true,
+              "checked": false,
+              "disabled": false
+            },
+            "insuf": {
+              "productName": "B032-低库存-1",
+              "present": true,
+              "checked": false,
+              "disabled": false
+            },
+            "offline": {
+              "productName": "B032-人工下架-5",
+              "present": true,
+              "checked": false,
+              "disabled": true
+            }
+          },
+          "atRow": {
+            "orderable": {
+              "productName": "B032-在售-5",
+              "present": true,
+              "checked": true,
+              "disabled": false
+            },
+            "insuf": {
+              "productName": "B032-低库存-1",
+              "present": true,
+              "checked": false,
+              "disabled": false
+            },
+            "offline": {
+              "productName": "B032-人工下架-5",
+              "present": true,
+              "checked": false,
+              "disabled": true
+            }
+          },
+          "checkedDefault": 1,
+          "checkedAfterSelectAll": 2,
+          "checkedAfterDeselectAll": 0,
+          "checkedAfterRow": 1
         },
+        "rowOk": true,
         "stderr_tail": "",
-        "stdout_tail": "{\"ok\":true,\"shots\":[\"b12-cart-selection.png\"],\"ui\":{\"allLabel\":1,\"disabled\":2,\"invalidTag\":1,\"insufHint\":1,\"checkedBefore\":0,\"checkedAfterToggle\":2}}\n",
+        "stdout_tail": "2-低库存-1\",\"present\":true,\"checked\":true,\"disabled\":false},\"offline\":{\"productName\":\"B032-人工下架-5\",\"present\":true,\"checked\":false,\"disabled\":true}},\"atDeselectAll\":{\"orderable\":{\"productName\":\"B032-在售-5\",\"present\":true,\"checked\":false,\"disabled\":false},\"insuf\":{\"productName\":\"B032-低库存-1\",\"present\":true,\"checked\":false,\"disabled\":false},\"offline\":{\"productName\":\"B032-人工下架-5\",\"present\":true,\"checked\":false,\"disabled\":true}},\"atRow\":{\"orderable\":{\"productName\":\"B032-在售-5\",\"present\":true,\"checked\":true,\"disabled\":false},\"insuf\":{\"productName\":\"B032-低库存-1\",\"present\":true,\"checked\":false,\"disabled\":false},\"offline\":{\"productName\":\"B032-人工下架-5\",\"present\":true,\"checked\":false,\"disabled\":true}},\"checkedDefault\":1,\"checkedAfterSelectAll\":2,\"checkedAfterDeselectAll\":0,\"checkedAfterRow\":1},\"rowOk\":true}\n",
         "node_exit": 0
+      }
+    },
+    {
+      "name": "ui_select_all_deselect_and_row_toggle",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "allLabel": 1,
+        "disabled": 2,
+        "invalidTag": 1,
+        "insufHint": 1,
+        "atDefault": {
+          "orderable": {
+            "productName": "B032-在售-5",
+            "present": true,
+            "checked": true,
+            "disabled": false
+          },
+          "insuf": {
+            "productName": "B032-低库存-1",
+            "present": true,
+            "checked": false,
+            "disabled": false
+          },
+          "offline": {
+            "productName": "B032-人工下架-5",
+            "present": true,
+            "checked": false,
+            "disabled": true
+          }
+        },
+        "atSelectAll": {
+          "orderable": {
+            "productName": "B032-在售-5",
+            "present": true,
+            "checked": true,
+            "disabled": false
+          },
+          "insuf": {
+            "productName": "B032-低库存-1",
+            "present": true,
+            "checked": true,
+            "disabled": false
+          },
+          "offline": {
+            "productName": "B032-人工下架-5",
+            "present": true,
+            "checked": false,
+            "disabled": true
+          }
+        },
+        "atDeselectAll": {
+          "orderable": {
+            "productName": "B032-在售-5",
+            "present": true,
+            "checked": false,
+            "disabled": false
+          },
+          "insuf": {
+            "productName": "B032-低库存-1",
+            "present": true,
+            "checked": false,
+            "disabled": false
+          },
+          "offline": {
+            "productName": "B032-人工下架-5",
+            "present": true,
+            "checked": false,
+            "disabled": true
+          }
+        },
+        "atRow": {
+          "orderable": {
+            "productName": "B032-在售-5",
+            "present": true,
+            "checked": true,
+            "disabled": false
+          },
+          "insuf": {
+            "productName": "B032-低库存-1",
+            "present": true,
+            "checked": false,
+            "disabled": false
+          },
+          "offline": {
+            "productName": "B032-人工下架-5",
+            "present": true,
+            "checked": false,
+            "disabled": true
+          }
+        },
+        "checkedDefault": 1,
+        "checkedAfterSelectAll": 2,
+        "checkedAfterDeselectAll": 0,
+        "checkedAfterRow": 1
+      }
+    },
+    {
+      "name": "default_selects_only_orderable_after_valid_removed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "orderable": {
+          "productName": "B032-在售-5",
+          "present": true,
+          "checked": true,
+          "disabled": false
+        },
+        "insuf": {
+          "productName": "B032-低库存-1",
+          "present": true,
+          "checked": false,
+          "disabled": false
+        },
+        "offline": {
+          "productName": "B032-人工下架-5",
+          "present": true,
+          "checked": false,
+          "disabled": true
+        }
+      }
+    },
+    {
+      "name": "row_level_checked_maps_to_orderable",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "atDefault": {
+          "orderable": {
+            "productName": "B032-在售-5",
+            "present": true,
+            "checked": true,
+            "disabled": false
+          },
+          "insuf": {
+            "productName": "B032-低库存-1",
+            "present": true,
+            "checked": false,
+            "disabled": false
+          },
+          "offline": {
+            "productName": "B032-人工下架-5",
+            "present": true,
+            "checked": false,
+            "disabled": true
+          }
+        },
+        "atSelectAll": {
+          "orderable": {
+            "productName": "B032-在售-5",
+            "present": true,
+            "checked": true,
+            "disabled": false
+          },
+          "insuf": {
+            "productName": "B032-低库存-1",
+            "present": true,
+            "checked": true,
+            "disabled": false
+          },
+          "offline": {
+            "productName": "B032-人工下架-5",
+            "present": true,
+            "checked": false,
+            "disabled": true
+          }
+        },
+        "atDeselectAll": {
+          "orderable": {
+            "productName": "B032-在售-5",
+            "present": true,
+            "checked": false,
+            "disabled": false
+          },
+          "insuf": {
+            "productName": "B032-低库存-1",
+            "present": true,
+            "checked": false,
+            "disabled": false
+          },
+          "offline": {
+            "productName": "B032-人工下架-5",
+            "present": true,
+            "checked": false,
+            "disabled": true
+          }
+        },
+        "atRow": {
+          "orderable": {
+            "productName": "B032-在售-5",
+            "present": true,
+            "checked": true,
+            "disabled": false
+          },
+          "insuf": {
+            "productName": "B032-低库存-1",
+            "present": true,
+            "checked": false,
+            "disabled": false
+          },
+          "offline": {
+            "productName": "B032-人工下架-5",
+            "present": true,
+            "checked": false,
+            "disabled": true
+          }
+        }
       }
     },
     {
@@ -45,13 +335,13 @@
       "pass": true,
       "disposition_if_fail": "FAIL",
       "evidence": {
-        "stale_offline_cart_id": "582",
+        "stale_offline_cart_id": "1277",
         "missing_product": null,
         "missing_err": "(1452, 'Cannot add or update a child row: a foreign key constraint fails (`oxstore_b032_local`.`cart_item`, CONSTRAINT `fk_cart_product` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`))')"
       }
     }
   ],
-  "conjunct_pass": 4,
-  "conjunct_total": 4,
+  "conjunct_pass": 7,
+  "conjunct_total": 7,
   "conjunct_fail_names": []
 }

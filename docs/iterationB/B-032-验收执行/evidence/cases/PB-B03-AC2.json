@@ -34,9 +34,67 @@
         "message": "发布后只允许修改库存和二级类目",
         "description_prefix": "<p>P-ON-10</p>"
       }
+    },
+    {
+      "name": "images_immutable_after_replace_attempts",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "before": [
+          {
+            "id": 25,
+            "image_path": "/api/images/ac857481-706f-4eab-870b-f29a14b977f1.png",
+            "sort_order": 0,
+            "content_type": "image/png",
+            "size_bytes": 69
+          }
+        ],
+        "after": [
+          {
+            "id": 25,
+            "image_path": "/api/images/ac857481-706f-4eab-870b-f29a14b977f1.png",
+            "sort_order": 0,
+            "content_type": "image/png",
+            "size_bytes": 69
+          }
+        ],
+        "unchanged": true,
+        "attempts": [
+          {
+            "entry": "PATCH json image fields",
+            "http": 400,
+            "message": "发布后只允许修改库存和二级类目"
+          },
+          {
+            "entry": "POST /admin/products/25",
+            "http": 405,
+            "message": "请求方法不支持：POST"
+          },
+          {
+            "entry": "PUT /admin/products/25",
+            "http": 405,
+            "message": "请求方法不支持：PUT"
+          },
+          {
+            "entry": "PATCH /admin/products/25",
+            "http": 400,
+            "message": "请求体格式不正确或缺失"
+          },
+          {
+            "entry": "POST /admin/products/25/images",
+            "http": 500,
+            "message": "服务器内部错误"
+          },
+          {
+            "entry": "PUT /admin/products/25/images",
+            "http": 500,
+            "message": "服务器内部错误"
+          }
+        ]
+      }
     }
   ],
-  "conjunct_pass": 2,
-  "conjunct_total": 2,
+  "conjunct_pass": 3,
+  "conjunct_total": 3,
   "conjunct_fail_names": []
 }

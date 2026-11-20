@@ -2,6 +2,7 @@
 """B-032: prepare fixtures + execute PB-B01/02/03/12/13 (26 ACs) in ONE unified window."""
 from __future__ import annotations
 
+import hashlib
 import json
 import mimetypes
 import os
@@ -1698,10 +1699,23 @@ def verify_api_db(env) -> dict:
     sha_match = bool(checkout_sha and env_sha and checkout_sha.startswith(str(env_sha)[:7]))
     db_match = db == env["B032_DB_NAME"]
     process_db_match = proc_bind.get("process_db_name") == env["B032_DB_NAME"]
+    login_ok = code == 200
+    classpath_ok = bool(proc_bind.get("cmdline_classpath_hint")) and bool(
+        proc_bind.get("cmdline_has_shop_application")
+    )
+    # match requires ALL of: DB, process DB, SHA, login, classpath — never ignore failures
+    match = db_match and process_db_match and sha_match and login_ok and classpath_ok
     return {
         "db": db,
         "expected": env["B032_DB_NAME"],
-        "match": db_match and process_db_match and bool(proc_bind.get("cmdline_has_shop_application")),
+        "match": match,
+        "match_parts": {
+            "db_match": db_match,
+            "process_db_match": process_db_match,
+            "sut_sha_match": sha_match,
+            "login_http_ok": login_ok,
+            "classpath_ok": classpath_ok,
+        },
         "b032_products": n,
         "login_http": code,
         "be_pid": be_pid,
@@ -1709,8 +1723,179 @@ def verify_api_db(env) -> dict:
         "sut_sha_checkout": checkout_sha,
         "sut_sha_match": sha_match,
         "process_binding": proc_bind,
-        "binding_note": "process environ DB_NAME + develop HEAD + API login; env alone is not sufficient",
+        "binding_note": "process environ DB_NAME + develop HEAD + API login + classpath; env alone insufficient",
     }
+
+
+def _find_conjunct(results: list, ac_id: str, name: str) -> dict:
+    for r in results:
+        if r.get("ac_id") != ac_id:
+            continue
+        for c in (r.get("detail") or {}).get("conjuncts") or []:
+            if c.get("name") == name:
+                return {
+                    "ac_id": ac_id,
+                    "name": name,
+                    "pass": c.get("pass"),
+                    "disposition_if_fail": c.get("disposition_if_fail"),
+                }
+    return {"ac_id": ac_id, "name": name, "pass": None, "missing": True}
+
+
+def write_sha256_and_self_review(totals: dict, env: dict, started: str, ended: str, started_sg, ended_sg):
+    """Bind this unified window: recount + SHA256 of harness/evidence (no git)."""
+    results = totals.get("results") or []
+    conjunct_rows = totals.get("conjunct_table") or []
+    fail_ids = [r["ac_id"] for r in results if r.get("verdict") == "FAIL"]
+    blocked_ids = [r["ac_id"] for r in results if r.get("verdict") == "BLOCKED"]
+    placeholders = sum(
+        1
+        for row in conjunct_rows
+        if str(row.get("conjunct") or "").startswith("(")
+    )
+    seven = {
+        "B13-AC5_lock_before": _find_conjunct(
+            results, "PB-B13-AC5", "lock_before_patch_delete_add_serial_rejects"
+        ),
+        "B12-AC6_ui_confirm_then_submit": _find_conjunct(
+            results, "PB-B12-AC6", "ui_confirm_then_break_then_submit"
+        ),
+        "B03-AC5_real_intent_entries": _find_conjunct(
+            results, "PB-B03-AC5", "archive_real_id_mutations_rejected_no_state_write"
+        ),
+        "B12-AC3_row_level_checkbox": _find_conjunct(
+            results, "PB-B12-AC3", "row_level_checked_maps_to_orderable"
+        ),
+        "B03-AC3_cancel_detail_ui": _find_conjunct(
+            results, "PB-B03-AC3", "cancel_party_and_time_in_ui_modal"
+        ),
+        "B03-AC2_images_immutable": _find_conjunct(
+            results, "PB-B03-AC2", "images_immutable_after_replace_attempts"
+        ),
+    }
+    gap_watch = [
+        (
+            "PB-B13-AC2",
+            "remainder_gt0_via_public_api",
+            "余数 remainder>0 via public API（FAIL 保留）",
+        ),
+        (
+            "PB-B13-AC5",
+            "in_flight_pre_lock_delete_add",
+            "in-flight（submit已启动未获业务锁）DELETE/ADD；锁前串行不是 in-flight",
+        ),
+        (
+            "PB-B13-AC5",
+            "during_hold_delete_final_state",
+            "锁后 DELETE：submit>=400 且无单不算 PASS；须 201+1 单+qty=1",
+        ),
+        (
+            "PB-B13-AC5",
+            "during_hold_add_final_retained",
+            "锁后 ADD：余量准确且订单 qty 不变",
+        ),
+        (
+            "PB-B03-AC3",
+            "merchant_order_pagination_page2_no_overlap_total_desc",
+            "商家 GET page=2：ID/无重叠/倒序/total",
+        ),
+    ]
+    still = []
+    for ac_id, name, label in gap_watch:
+        rec = _find_conjunct(results, ac_id, name)
+        if rec.get("pass") is True:
+            continue
+        still.append(
+            f"{ac_id} {name}: {label} (pass={rec.get('pass')} "
+            f"disposition={rec.get('disposition_if_fail')} missing={rec.get('missing')})"
+        )
+    for key, rec in seven.items():
+        if rec.get("pass") is not True:
+            still.append(f"{key} not proven (pass={rec.get('pass')})")
+    not_executed_ids = [r["ac_id"] for r in results if r.get("verdict") == "NOT_EXECUTED"]
+    review = {
+        "task": "B-032",
+        "round": "third-audit-OF-21-3item-close-local-unpushed",
+        "tracker": "OF-21",
+        "model": "cursor-grok-4.6-high",
+        "acs_total": totals.get("total"),
+        "acs_pass": totals.get("pass"),
+        "acs_fail": totals.get("fail"),
+        "acs_blocked": totals.get("blocked"),
+        "acs_not_executed": totals.get("not_executed"),
+        "conjunct_rows": len(conjunct_rows),
+        "placeholders": placeholders,
+        "fail": fail_ids,
+        "not_executed": not_executed_ids,
+        "blocked": blocked_ids,
+        "fail_notes": {
+            "PB-B13-AC2": "Only conjunct remainder_gt0_via_public_api FAILs: CheckoutService digest includes cart quantity so confirmation.qty ≡ cart.qty on success → remainder always 0 (source-backed real defect). V8/three breakpoints not overturned."
+        },
+        "seven_item_conjuncts": seven,
+        "still_unproven": still,
+        "strict_messages": True,
+        "isolated_db": env.get("B032_DB_NAME"),
+        "sut_sha": env.get("B032_SUT_SHA"),
+        "delivery_baseline": env.get("B032_DELIVERY_BASELINE"),
+        "rejected_tip_still_on_branch": "3a6c975d2d46142cd3ddf5e9305f6e67f4f179a7",
+        "tip_has_waterpromax_trailer": True,
+        "git_ops": "NO commit/push/amend/rebase/reset/force — local working tree only; await user auth",
+        "transaction_breakpoints": ["after_order", "after_stock", "after_cart"],
+        "tx_probe_sql": "fixtures/b032_tx_probes.sql",
+        "hold_barrier": "GET_LOCK/RELEASE_LOCK b032_tx_hold around after_stock SLEEP",
+        "v8_path": "fixtures/V8__close_legacy_fixed_price_intents.sql → CALL upgrade_oxstore_v8()",
+        "screenshots_count": len((totals.get("screenshots") or {}).get("mapping") or []),
+        "business_code_changed": False,
+        "pr_opened": False,
+        "force_push": False,
+        "execution_window_utc": f"{started} → {ended}",
+        "execution_window_sgt": f"{started_sg} → {ended_sg}",
+        "unpushed": True,
+    }
+    (EVID / "self-review.json").write_text(
+        json.dumps(review, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    hash_roots = [
+        ROOT / "scripts" / "second_audit_acs.py",
+        ROOT / "scripts" / "prepare_and_run.py",
+        ROOT / "scripts" / "conjuncts.py",
+        ROOT / "fixtures" / "b032_tx_probes.sql",
+        EVID / "results.json",
+        EVID / "results.md",
+        EVID / "verify-api-db.json",
+        EVID / "screenshots-index.json",
+        EVID / "self-review.json",
+    ]
+    rows = []
+    for path in hash_roots:
+        if path.exists():
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            rel = path.relative_to(ROOT).as_posix()
+            rows.append((rel, path.stat().st_size, digest))
+    for path in sorted((EVID / "screenshots").glob("*.png")):
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        rel = path.relative_to(ROOT).as_posix()
+        rows.append((rel, path.stat().st_size, digest))
+    for path in sorted((EVID / "cases").glob("*.json")):
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        rel = path.relative_to(ROOT).as_posix()
+        rows.append((rel, path.stat().st_size, digest))
+    md = [
+        "# SHA256 (unified window · local unpushed)",
+        "",
+        f"- window UTC: {started} → {ended}",
+        f"- model: cursor-grok-4.6-high",
+        f"- files: {len(rows)}",
+        "",
+        "| Path | bytes | sha256 |",
+        "|---|---:|---|",
+    ]
+    for rel, size, digest in rows:
+        md.append(f"| `{rel}` | {size} | `{digest}` |")
+    (EVID / "SHA256SUMS.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+    txt = "\n".join(f"{digest}  {rel}" for rel, _size, digest in rows) + "\n"
+    (EVID / "SHA256SUMS.txt").write_text(txt, encoding="utf-8")
+    return review
 
 
 def main() -> int:
@@ -1737,22 +1922,22 @@ def main() -> int:
     import second_audit_acs as sa  # noqa: WPS433
 
     runners = [
-        ac_b01_01,
-        audit_acs.ac_b01_02,
+        sa.ac_b01_01,
+        sa.ac_b01_02,
         sa.ac_b01_03,
         sa.ac_b01_04,
         sa.ac_b01_05,
-        ac_b02_01,
-        audit_acs.ac_b02_02,
+        sa.ac_b02_01,
+        sa.ac_b02_02,
         sa.ac_b02_03,
         sa.ac_b02_04,
-        audit_acs.ac_b02_05,
+        sa.ac_b02_05,
         sa.ac_b03_01,
         sa.ac_b03_02,
-        audit_acs.ac_b03_03,
-        ac_b03_04,
+        sa.ac_b03_03,
+        sa.ac_b03_04,
         sa.ac_b03_05,
-        ac_b12_01,
+        sa.ac_b12_01,
         sa.ac_b12_02,
         sa.ac_b12_03,
         sa.ac_b12_04,
@@ -1867,6 +2052,8 @@ def main() -> int:
             "tx_probe_sql": "fixtures/b032_tx_probes.sql",
             "v8_sql": "fixtures/V8__close_legacy_fixed_price_intents.sql",
             "second_audit": "OF-19",
+            "third_audit": "OF-21",
+            "git_ops": "local-only; no commit/push/amend/rebase/reset/force until user auth",
         },
         "sut_sha": env.get("B032_SUT_SHA"),
         "sut_branch": env.get("B032_SUT_BRANCH"),
@@ -1888,7 +2075,7 @@ def main() -> int:
         json.dumps(totals, ensure_ascii=False, indent=2, default=json_default), encoding="utf-8"
     )
     lines = [
-        f"# B-032 results (second audit · OF-19)",
+        f"# B-032 results (third audit · OF-21 · local unpushed)",
         f"",
         f"- window UTC: {started} → {ended}",
         f"- window Asia/Singapore: {started_sg} → {ended_sg}",
@@ -1915,9 +2102,14 @@ def main() -> int:
             f"| {row['ac_id']} | {row['ac_verdict']} | {row['conjunct']} | {row['pass']} | {row['disposition_if_fail'] or ''} |"
         )
     (EVID / "results.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    review = write_sha256_and_self_review(totals, env, started, ended, started_sg, ended_sg)
     print(
         json.dumps(
-            {k: totals[k] for k in ("total", "pass", "fail", "blocked", "not_executed")},
+            {
+                **{k: totals[k] for k in ("total", "pass", "fail", "blocked", "not_executed")},
+                "conjunct_rows": len(conjunct_rows),
+                "seven_unproven": review.get("still_unproven"),
+            },
             ensure_ascii=False,
         )
     )

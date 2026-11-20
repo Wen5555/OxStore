@@ -87,13 +87,20 @@
       "disposition_if_fail": "FAIL",
       "evidence": {
         "ok": true,
+        "steps": [
+          "确认订单",
+          "完成备货"
+        ],
+        "mid": {
+          "hasShip": true,
+          "hasPrepared": true,
+          "url": "http://127.0.0.1:5173/admin/orders"
+        },
         "shots": [
           "b01-merchant-orders-flow.png"
         ],
-        "url": "http://127.0.0.1:5173/admin/orders",
-        "hasOrders": true,
         "stderr_tail": "",
-        "stdout_tail": "{\"ok\":true,\"shots\":[\"b01-merchant-orders-flow.png\"],\"url\":\"http://127.0.0.1:5173/admin/orders\",\"hasOrders\":true}\n",
+        "stdout_tail": "{\"ok\":true,\"steps\":[\"确认订单\",\"完成备货\"],\"mid\":{\"hasShip\":true,\"hasPrepared\":true,\"url\":\"http://127.0.0.1:5173/admin/orders\"},\"shots\":[\"b01-merchant-orders-flow.png\"]}\n",
         "node_exit": 0
       }
     }

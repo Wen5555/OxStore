@@ -7,7 +7,7 @@
       "evidence": {
         "confirm_items": [
           {
-            "cartItemId": "564",
+            "cartItemId": "1258",
             "productId": "25",
             "productName": "B032-在售-10",
             "unitPrice": "12.50",
@@ -15,7 +15,7 @@
             "lineAmount": "25.00"
           },
           {
-            "cartItemId": "565",
+            "cartItemId": "1259",
             "productId": "26",
             "productName": "B032-在售-5",
             "unitPrice": "8.00",
@@ -27,10 +27,66 @@
       }
     },
     {
-      "name": "snapshot_stable_after_republish_mutate",
+      "name": "order_detail_line_by_line",
       "pass": true,
       "disposition_if_fail": "FAIL",
       "evidence": {
+        "http": 200,
+        "detail_items": [
+          {
+            "productId": "25",
+            "productName": "B032-在售-10",
+            "unitPrice": "12.50",
+            "quantity": "2",
+            "lineAmount": "25.00"
+          },
+          {
+            "productId": "26",
+            "productName": "B032-在售-5",
+            "unitPrice": "8.00",
+            "quantity": "1",
+            "lineAmount": "8.00"
+          }
+        ],
+        "db_snap": [
+          {
+            "product_id": 25,
+            "product_name": "B032-在售-10",
+            "quantity": "2",
+            "unit_price": "12.50",
+            "line_amount": "25.00"
+          },
+          {
+            "product_id": 26,
+            "product_name": "B032-在售-5",
+            "quantity": "1",
+            "unit_price": "8.00",
+            "line_amount": "8.00"
+          }
+        ],
+        "detail_total": "33.00"
+      }
+    },
+    {
+      "name": "three_place_amount_consistent_confirm_detail_total",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "confirm_total": "33.00",
+        "detail_total": "33.00",
+        "order_total": "33.00",
+        "calc": "33.00"
+      }
+    },
+    {
+      "name": "new_identity_republish_keeps_old_snapshot",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "create_http": 201,
+        "create_message": "ok",
+        "old_pid": "25",
+        "new_pid": "45",
         "snap": [
           {
             "product_id": 25,
@@ -62,39 +118,21 @@
             "unit_price": "8.00",
             "line_amount": "8.00"
           }
-        ]
-      }
-    },
-    {
-      "name": "detail_lines_match_total",
-      "pass": true,
-      "disposition_if_fail": "FAIL",
-      "evidence": {
-        "total": "33.00",
-        "calc": "33.00"
-      }
-    },
-    {
-      "name": "confirm_detail_total_consistent",
-      "pass": true,
-      "disposition_if_fail": "FAIL",
-      "evidence": {
-        "confirm_total": "33.00",
-        "order_total": "33.00",
-        "lines": [
+        ],
+        "detail_after": [
           {
-            "product_id": 25,
-            "product_name": "B032-在售-10",
+            "productId": "25",
+            "productName": "B032-在售-10",
+            "unitPrice": "12.50",
             "quantity": "2",
-            "unit_price": "12.50",
-            "line_amount": "25.00"
+            "lineAmount": "25.00"
           },
           {
-            "product_id": 26,
-            "product_name": "B032-在售-5",
+            "productId": "26",
+            "productName": "B032-在售-5",
+            "unitPrice": "8.00",
             "quantity": "1",
-            "unit_price": "8.00",
-            "line_amount": "8.00"
+            "lineAmount": "8.00"
           }
         ]
       }
@@ -107,9 +145,24 @@
         "http": 201,
         "message": "下单成功"
       }
+    },
+    {
+      "name": "three_ui_places_list_lines_total",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "ok": true,
+        "listHasTotal": true,
+        "detailHasTotal": true,
+        "detailHasLines": true,
+        "detailSnippet": "订单详情\n订单号\t8cdd4e32-f891-4cdb-8bc9-66050cb426ec\t状态\t客户下单\n下单时间\t2026/11/20 22:19:45\t订单总额\t¥33.00\n取消发起方\t—\t取消时间\t—\n取消原因\t—\n商品快照\t单价\t数量\t小计\nB032-在售-10\t¥12.50\t2\t¥25.00\nB032-在售-5\t¥8.00\t1\t¥8.00\n关 闭",
+        "stderr_tail": "",
+        "stdout_tail": "{\"ok\":true,\"listHasTotal\":true,\"detailHasTotal\":true,\"detailHasLines\":true,\"detailSnippet\":\"订单详情\\n订单号\\t8cdd4e32-f891-4cdb-8bc9-66050cb426ec\\t状态\\t客户下单\\n下单时间\\t2026/11/20 22:19:45\\t订单总额\\t¥33.00\\n取消发起方\\t—\\t取消时间\\t—\\n取消原因\\t—\\n商品快照\\t单价\\t数量\\t小计\\nB032-在售-10\\t¥12.50\\t2\\t¥25.00\\nB032-在售-5\\t¥8.00\\t1\\t¥8.00\\n关 闭\"}\n",
+        "node_exit": 0
+      }
     }
   ],
-  "conjunct_pass": 5,
-  "conjunct_total": 5,
+  "conjunct_pass": 6,
+  "conjunct_total": 6,
   "conjunct_fail_names": []
 }

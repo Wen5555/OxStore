@@ -1,48 +1,75 @@
 {
-  "buyer_seen_stock": "7",
-  "db_stock": "7",
-  "flow_after_offline": [
+  "conjuncts": [
     {
-      "action": "CONFIRM",
-      "http": 200,
-      "message": "ok",
-      "status": "CONFIRMED"
+      "name": "others_see_deducted_stock",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "seen": "7",
+        "db": "7",
+        "http": 200
+      }
     },
     {
-      "action": "PREPARE",
-      "http": 200,
-      "message": "ok",
-      "status": "PREPARED"
+      "name": "offline_keeps_existing_order_to_complete",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "order": {
+          "id": 732,
+          "order_no": "c1e141a1-289f-4d58-98d8-4dd69feb85b4",
+          "status": "COMPLETED",
+          "total_amount": "37.50",
+          "created_at": "2026-11-21T06:19:43.614085",
+          "cancelled_by": null,
+          "cancelled_at": null
+        },
+        "steps": [
+          {
+            "action": "CONFIRM",
+            "http": 200,
+            "message": "ok",
+            "status": "CONFIRMED"
+          },
+          {
+            "action": "PREPARE",
+            "http": 200,
+            "message": "ok",
+            "status": "PREPARED"
+          },
+          {
+            "action": "SHIP",
+            "http": 200,
+            "message": "ok",
+            "status": "SHIPPED"
+          },
+          {
+            "action": "COMPLETE",
+            "http": 200,
+            "message": "ok",
+            "status": "COMPLETED"
+          }
+        ]
+      }
     },
     {
-      "action": "SHIP",
-      "http": 200,
-      "message": "ok",
-      "status": "SHIPPED"
-    },
-    {
-      "action": "COMPLETE",
-      "http": 200,
-      "message": "ok",
-      "status": "COMPLETED"
+      "name": "new_order_refused_while_offline",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "add": {
+          "http": 409,
+          "message": "商品已下架"
+        },
+        "submit": {
+          "http": 409,
+          "message": "所选商品无法下单",
+          "nested": "所选商品无法下单 商品「B032-在售-10」已下架，请从购物车移除后重试。"
+        }
+      }
     }
   ],
-  "final_order": {
-    "id": 304,
-    "order_no": "9a59ea2c-1ec4-41c4-a31d-7824d41d011a",
-    "status": "COMPLETED",
-    "total_amount": "37.50",
-    "created_at": "2026-11-21T04:34:16.636777",
-    "cancelled_by": null,
-    "cancelled_at": null
-  },
-  "new_order_refused": {
-    "http": 409,
-    "message": "所选商品无法下单",
-    "nested": "所选商品无法下单 商品「B032-在售-10」已下架，请从购物车移除后重试。"
-  },
-  "offline_add": {
-    "http": 409,
-    "message": "商品已下架"
-  }
+  "conjunct_pass": 3,
+  "conjunct_total": 3,
+  "conjunct_fail_names": []
 }

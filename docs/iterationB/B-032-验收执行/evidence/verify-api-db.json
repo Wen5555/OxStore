@@ -2,7 +2,14 @@
   "db": "oxstore_b032_local",
   "expected": "oxstore_b032_local",
   "match": true,
-  "b032_products": 6,
+  "match_parts": {
+    "db_match": true,
+    "process_db_match": true,
+    "sut_sha_match": true,
+    "login_http_ok": true,
+    "classpath_ok": true
+  },
+  "b032_products": 20,
   "login_http": 200,
   "be_pid": "19608",
   "sut_sha_env": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
@@ -17,5 +24,5 @@
     "cmdline_has_shop_application": true,
     "cmdline_classpath_hint": true
   },
-  "binding_note": "process environ DB_NAME + develop HEAD + API login; env alone is not sufficient"
+  "binding_note": "process environ DB_NAME + develop HEAD + API login + classpath; env alone insufficient"
 }

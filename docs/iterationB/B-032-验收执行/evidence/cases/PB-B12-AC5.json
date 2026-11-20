@@ -1,10 +1,21 @@
 {
   "conjuncts": [
     {
-      "name": "select_toggle_no_stock_change",
+      "name": "ui_checkbox_toggle_no_stock_change",
       "pass": true,
       "disposition_if_fail": "FAIL",
       "evidence": {
+        "toggle": {
+          "ok": true,
+          "ui": {
+            "before": 3,
+            "mid": 0,
+            "after": 3
+          },
+          "stderr_tail": "",
+          "stdout_tail": "{\"ok\":true,\"ui\":{\"before\":3,\"mid\":0,\"after\":3}}\n",
+          "node_exit": 0
+        },
         "before": {
           "P-ON-10": "10",
           "P-ON-5": "5"

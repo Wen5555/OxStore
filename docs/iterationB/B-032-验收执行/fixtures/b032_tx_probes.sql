@@ -44,19 +44,21 @@ DROP TRIGGER IF EXISTS b032_trg_before_receipt;
 
 DELIMITER $$
 
+-- Hold observability: MyISAM probe rows written inside an open InnoDB TX are NOT
+-- reliably readable by other connections until that TX ends (mixed-engine lock
+-- coupling). Therefore "during hold" is signaled with a MySQL named lock
+-- (IS_USED_LOCK), not with SELECT on b032_tx_probe.
+-- Probe INSERT still records post-facto phases; hold SLEEP runs on after_stock
+-- with GET_LOCK/RELEASE_LOCK bracketing the sleep (no MyISAM write during hold).
 CREATE TRIGGER b032_trg_after_order
 AFTER INSERT ON shop_order FOR EACH ROW
 BEGIN
   DECLARE v_fail VARCHAR(64);
   DECLARE v_probe TINYINT;
-  DECLARE v_hold INT;
-  SELECT fail_phase, probe_enabled, hold_seconds INTO v_fail, v_probe, v_hold
+  SELECT fail_phase, probe_enabled INTO v_fail, v_probe
     FROM b032_tx_control WHERE id=1;
   IF v_probe = 1 THEN
     INSERT INTO b032_tx_probe(phase, note) VALUES ('order_created', CONCAT('order_id=', NEW.id));
-  END IF;
-  IF v_hold > 0 THEN
-    DO SLEEP(v_hold);
   END IF;
   IF v_fail = 'after_order' THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'B032 induced fail after_order';
@@ -68,9 +70,16 @@ AFTER UPDATE ON product FOR EACH ROW
 BEGIN
   DECLARE v_fail VARCHAR(64);
   DECLARE v_probe TINYINT;
+  DECLARE v_hold INT;
   IF OLD.stock <> NEW.stock THEN
-    SELECT fail_phase, probe_enabled INTO v_fail, v_probe FROM b032_tx_control WHERE id=1;
-    IF v_probe = 1 THEN
+    SELECT fail_phase, probe_enabled, hold_seconds INTO v_fail, v_probe, v_hold
+      FROM b032_tx_control WHERE id=1;
+    IF v_hold > 0 THEN
+      -- Named lock is visible to other sessions via IS_USED_LOCK during SLEEP.
+      DO GET_LOCK('b032_tx_hold', 0);
+      DO SLEEP(v_hold);
+      DO RELEASE_LOCK('b032_tx_hold');
+    ELSEIF v_probe = 1 THEN
       INSERT INTO b032_tx_probe(phase, note) VALUES (
         'stock_updated',
         CONCAT('product_id=', NEW.id, ' stock=', OLD.stock, '->', NEW.stock)

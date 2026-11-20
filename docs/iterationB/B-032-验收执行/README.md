@@ -1,34 +1,26 @@
-# B-032 验收执行（结算原子性 / 确认变化 / 并发 · 26 AC）
+# B-032 本地核验包（未推送 · in-flight 已执行）
 
-独立于 B-030/B-031 材料树。仅本目录进入 B-032 分支提交。
+本目录是**当前工作区**副本，不是远端 tip `3a6c975`。  
+核验模型：**cursor-grok-4.6-high**。禁止 git commit/push/amend/rebase/reset/force。
 
-## 范围
+证据窗：`evidence/results.json` → `2026-11-20T14:19:31Z` → `14:20:47Z`。
 
-- PB-B01（5）、PB-B02（5）、PB-B03（5）、PB-B12（6）、PB-B13（5）= **26 AC**
-- 真栈：MySQL `oxstore_b032_*` + BE `:8080` + FE `:5173`
-- 被测：`develop@29c20ea`（与交付分支 tip 分离）
-- 事务三断点：隔离库 test-only 控制表 `b032_tx_control` + MyISAM 探针 `b032_tx_probe`（不改业务代码）
+独立重算：26 AC / **25 PASS** / 1 FAIL（余数）/ **0 NOT_EXECUTED** / 149 合取。
 
-## 一次加载
+PB-B13-AC5 **PASS**。`in_flight_pre_lock_delete_add` 窗口已构成并按观察 **PASS**（禁止 confirm 后串行替代）。
 
-```bash
-cp fixtures/env.example runs/.env.local  # 填隔离库与密码
-set -a; source runs/.env.local; set +a
-python3 scripts/prepare_and_run.py
-```
+## 从这里读
 
-## 证据
-
-| 路径 | 说明 |
+| 文件 | 内容 |
 |---|---|
-| `evidence/results.json` / `results.md` | 统一窗口 totals + **逐合取表** |
-| `evidence/cases/PB-B*.json` | 各 AC 脱敏明细（含 conjuncts） |
-| `evidence/screenshots/` | 真实 Playwright 截图（见同目录 README 映射） |
-| `evidence/verify-api-db.json` | 进程→checkout SHA→隔离库绑定（非仅 env） |
-| `evidence/screenshots-index.json` | 截图索引 |
-| `fixtures/b032_tx_probes.sql` | TX 三断点探针 |
-| `fixtures/V8__close_legacy_fixed_price_intents.sql` | PB-B03-AC5 真迁移路径 |
+| [GAP-12.md](GAP-12.md) | in-flight 窗口 / AC5 判定 / totals |
+| [INDEPENDENT-REVIEW.md](INDEPENDENT-REVIEW.md) | 本窗独立重读摘要 |
+| [evidence/self-review.json](evidence/self-review.json) | `still_unproven` 仅余数 FAIL |
+| [evidence/cases/PB-B13-AC5.json](evidence/cases/PB-B13-AC5.json) | DELETE/ADD 时间线 |
+| [evidence/SHA256SUMS.md](evidence/SHA256SUMS.md) | 统一窗内哈希 |
+| [SHA256SUMS.md](SHA256SUMS.md) | 同上副本（包根） |
+| [evidence/results.json](evidence/results.json) | 统一轮原始结果 |
+| [scripts/second_audit_acs.py](scripts/second_audit_acs.py) | `_http_signal_issued` + 竞态 |
 
-第二次审计：`scripts/second_audit_acs.py` + `conjuncts.py`。禁止 `or True` / 写死 PASS。PB-B03-AC5 走 V8 `CALL upgrade_oxstore_v8()`，不用假 close API。
-
-不开 PR；不改业务；不 force-push。
+工作区同源：`/workspace/docs/iterationB/B-032-验收执行/`。  
+交付：`/cursor/stores/self/docs/b032-round-delivery.md`（**未推送**）。

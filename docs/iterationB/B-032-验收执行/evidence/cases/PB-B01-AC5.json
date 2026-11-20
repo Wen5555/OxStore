@@ -41,7 +41,7 @@
       "disposition_if_fail": "FAIL",
       "evidence": {
         "race": {
-          "B": {
+          "A": {
             "ok": true,
             "result": [
               200,
@@ -49,8 +49,8 @@
                 "code": 0,
                 "message": "ok",
                 "data": {
-                  "orderId": "302",
-                  "orderNo": "8bde3213-ad45-41c3-b185-0877ddfa505e",
+                  "orderId": "730",
+                  "orderNo": "de219e6c-a485-4c64-aa92-671a873e2675",
                   "customerId": "3",
                   "status": "CONFIRMED",
                   "items": [
@@ -63,7 +63,7 @@
                     }
                   ],
                   "totalAmount": "8.00",
-                  "createdAt": "2026-11-20T20:34:16.022879",
+                  "createdAt": "2026-11-20T22:19:42.977906",
                   "cancelledBy": null,
                   "cancelledAt": null,
                   "cancelReason": null,
@@ -76,7 +76,7 @@
             ],
             "elapsed_ms": 3
           },
-          "A": {
+          "B": {
             "ok": true,
             "result": [
               409,

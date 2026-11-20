@@ -28,35 +28,36 @@
       }
     },
     {
-      "name": "merchant_cancel_placed",
+      "name": "merchant_cancel_completed_rejected",
       "pass": true,
       "disposition_if_fail": "FAIL",
       "evidence": {
-        "http": 200,
-        "message": "ok",
+        "http": 409,
+        "message": "订单已完成，不可取消",
         "order": {
-          "id": 298,
-          "order_no": "1416a5ec-40dd-420e-a684-7e7ce08b0de8",
-          "status": "CANCELLED",
+          "id": 724,
+          "order_no": "d4cbc43a-2470-47d2-b842-cd08e07d28fa",
+          "status": "COMPLETED",
           "total_amount": "12.50",
-          "created_at": "2026-11-21T04:34:10.362351",
-          "cancelled_by": "SELLER",
-          "cancelled_at": "2026-11-21T04:34:10.371276"
+          "created_at": "2026-11-21T06:19:34.500963",
+          "cancelled_by": null,
+          "cancelled_at": null
         }
       }
     },
     {
-      "name": "no_timeout_auto_cancel_source_and_wait",
+      "name": "no_timeout_auto_cancel_scheduler_absent_and_wait_placed",
       "pass": true,
       "disposition_if_fail": "FAIL",
       "evidence": {
         "wait_sec": 2,
         "status_after_wait": "PLACED",
-        "source_scan_hits": [
+        "all_scheduled_hits": [
           "/tmp/oxstore-develop/backend/src/main/java/com/team/shop/service/AuctionSettlementService.java:51:    @Scheduled(fixedDelay = 5000)",
           "/tmp/oxstore-develop/backend/src/main/java/com/team/shop/service/AuctionEventHub.java:88:    @Scheduled(fixedRate = 15_000)"
         ],
-        "note": "2s wait alone insufficient; combined with source scan of cancel schedulers"
+        "order_cancel_related_hits": [],
+        "scheduler_absent": true
       }
     }
   ],

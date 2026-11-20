@@ -1,29 +1,84 @@
 {
   "task": "B-032",
-  "round": "independent-audit-fix",
+  "round": "third-audit-OF-21-3item-close-local-unpushed",
+  "tracker": "OF-21",
+  "model": "cursor-grok-4.6-high",
   "acs_total": 26,
-  "acs_pass": 24,
+  "acs_pass": 25,
   "acs_fail": 1,
-  "acs_blocked": 1,
+  "acs_blocked": 0,
   "acs_not_executed": 0,
-  "fail": ["PB-B13-AC2"],
-  "blocked": ["PB-B03-AC5"],
+  "conjunct_rows": 149,
+  "placeholders": 0,
+  "fail": [
+    "PB-B13-AC2"
+  ],
+  "not_executed": [],
+  "blocked": [],
   "fail_notes": {
-    "PB-B13-AC2": "lock-before / lock-after / unselected proven; 余数>0 unreachable via public API because CheckoutService digest includes cart quantity (confirmation.qty always equals cart.qty on success path)."
+    "PB-B13-AC2": "Only conjunct remainder_gt0_via_public_api FAILs: CheckoutService digest includes cart quantity so confirmation.qty ≡ cart.qty on success → remainder always 0 (source-backed real defect). V8/three breakpoints not overturned."
   },
-  "blocked_notes": {
-    "PB-B03-AC5": "legacy rows seeded; archive GET works; close/unfreeze API returns 500 — cannot prove close/not-cancelled/unfreeze/no-stock-restore without business fix."
+  "seven_item_conjuncts": {
+    "B13-AC5_lock_before": {
+      "ac_id": "PB-B13-AC5",
+      "name": "lock_before_patch_delete_add_serial_rejects",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    "B12-AC6_ui_confirm_then_submit": {
+      "ac_id": "PB-B12-AC6",
+      "name": "ui_confirm_then_break_then_submit",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    "B03-AC5_real_intent_entries": {
+      "ac_id": "PB-B03-AC5",
+      "name": "archive_real_id_mutations_rejected_no_state_write",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    "B12-AC3_row_level_checkbox": {
+      "ac_id": "PB-B12-AC3",
+      "name": "row_level_checked_maps_to_orderable",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    "B03-AC3_cancel_detail_ui": {
+      "ac_id": "PB-B03-AC3",
+      "name": "cancel_party_and_time_in_ui_modal",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    "B03-AC2_images_immutable": {
+      "ac_id": "PB-B03-AC2",
+      "name": "images_immutable_after_replace_attempts",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    }
   },
+  "still_unproven": [
+    "PB-B13-AC2 remainder_gt0_via_public_api: 余数 remainder>0 via public API（FAIL 保留） (pass=False disposition=FAIL missing=None)"
+  ],
   "strict_messages": true,
   "isolated_db": "oxstore_b032_local",
   "sut_sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
   "delivery_baseline": "topic/r2@0cef9ec",
-  "transaction_breakpoints": ["after_order", "after_stock", "after_cart"],
-  "tx_probe_sql_committed": "fixtures/b032_tx_probes.sql",
-  "concurrency": ["PB-B01-AC5", "PB-B13-AC5 dual submit + lock mutate"],
-  "screenshots_distinct": true,
+  "rejected_tip_still_on_branch": "3a6c975d2d46142cd3ddf5e9305f6e67f4f179a7",
+  "tip_has_waterpromax_trailer": true,
+  "git_ops": "NO commit/push/amend/rebase/reset/force — local working tree only; await user auth",
+  "transaction_breakpoints": [
+    "after_order",
+    "after_stock",
+    "after_cart"
+  ],
+  "tx_probe_sql": "fixtures/b032_tx_probes.sql",
+  "hold_barrier": "GET_LOCK/RELEASE_LOCK b032_tx_hold around after_stock SLEEP",
+  "v8_path": "fixtures/V8__close_legacy_fixed_price_intents.sql → CALL upgrade_oxstore_v8()",
+  "screenshots_count": 11,
   "business_code_changed": false,
   "pr_opened": false,
   "force_push": false,
-  "co_authored_by_only": "YanPeng240607"
+  "execution_window_utc": "2026-11-20T14:19:31Z → 2026-11-20T14:20:47Z",
+  "execution_window_sgt": "2026-11-20T22:19:31+08:00 → 2026-11-20T22:20:47+08:00",
+  "unpushed": true
 }

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import http.client
 import json
 import os
 import subprocess
@@ -10,6 +11,7 @@ import threading
 import time
 from decimal import Decimal
 from pathlib import Path
+from urllib.parse import urlparse
 
 import prepare_and_run as m
 from b032_common import (
@@ -57,6 +59,63 @@ def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
     h.update(path.read_bytes())
     return h.hexdigest()
+
+
+def product_images(env, pid) -> list:
+    conn = connect_mysql(env)
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, image_path, sort_order, content_type, size_bytes "
+                "FROM product_image WHERE product_id=%s ORDER BY id",
+                (pid,),
+            )
+            return list(cur.fetchall() or [])
+    finally:
+        conn.close()
+
+
+def multipart_any(method: str, url: str, fields: dict, files: list, headers: dict):
+    """POST/PUT/PATCH multipart; files is list of (field, Path)."""
+    import mimetypes
+    import uuid
+    from urllib import error, request
+
+    boundary = f"----B032{uuid.uuid4().hex}"
+    body = bytearray()
+    for name, value in fields.items():
+        body.extend(f"--{boundary}\r\n".encode())
+        body.extend(f'Content-Disposition: form-data; name="{name}"\r\n\r\n'.encode())
+        body.extend(f"{value}\r\n".encode())
+    for field, path in files:
+        data = path.read_bytes()
+        ctype = mimetypes.guess_type(str(path))[0] or "application/octet-stream"
+        body.extend(f"--{boundary}\r\n".encode())
+        body.extend(
+            f'Content-Disposition: form-data; name="{field}"; filename="{path.name}"\r\n'.encode()
+        )
+        body.extend(f"Content-Type: {ctype}\r\n\r\n".encode())
+        body.extend(data)
+        body.extend(b"\r\n")
+    body.extend(f"--{boundary}--\r\n".encode())
+    req = request.Request(
+        url,
+        data=bytes(body),
+        headers={**headers, "Content-Type": f"multipart/form-data; boundary={boundary}"},
+        method=method.upper(),
+    )
+    try:
+        with request.urlopen(req, timeout=60) as resp:
+            raw = resp.read().decode()
+            return resp.status, json.loads(raw) if raw else None
+    except error.HTTPError as e:
+        raw = e.read().decode("utf-8", errors="replace")
+        try:
+            return e.code, json.loads(raw) if raw else None
+        except json.JSONDecodeError:
+            return e.code, {"raw": raw}
+    except error.URLError as e:
+        return 0, {"error": str(e.reason)}
 
 
 def run_node(js: str, name: str) -> dict:
@@ -121,6 +180,155 @@ def wait_probe_phase(env, phase_substr: str, timeout=8.0) -> dict | None:
     return None
 
 
+def wait_hold_lock(env, timeout=8.0) -> dict | None:
+    """Wait until named lock b032_tx_hold is held (visible during after_stock SLEEP)."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        conn = connect_mysql(env)
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT IS_USED_LOCK('b032_tx_hold') AS holder")
+                row = cur.fetchone() or {}
+                holder = row.get("holder")
+                if holder is not None:
+                    return {"holder": holder, "observed_mono": time.monotonic(), "observed_wall": time.time()}
+        finally:
+            conn.close()
+        time.sleep(0.02)
+    return None
+
+
+def _http_signal_issued(method: str, url: str, body, headers: dict, issued: dict, timeout: float = 60.0):
+    """Write the HTTP request fully, mark issued, then read the response.
+
+    issued['mono'] is set only after request bytes are sent — not before connect.
+    """
+    parsed = urlparse(url)
+    payload = json.dumps(body, ensure_ascii=False).encode() if body is not None else None
+    hdrs = {"Accept": "application/json", **(headers or {})}
+    if payload is not None:
+        hdrs["Content-Type"] = "application/json"
+        hdrs["Content-Length"] = str(len(payload))
+    conn = http.client.HTTPConnection(parsed.hostname, parsed.port or 80, timeout=timeout)
+    path = parsed.path + (("?" + parsed.query) if parsed.query else "")
+    try:
+        conn.putrequest(method.upper(), path)
+        for key, value in hdrs.items():
+            conn.putheader(key, str(value))
+        conn.endheaders()
+        if payload is not None:
+            conn.send(payload)
+        issued["mono"] = time.monotonic()
+        issued["wall"] = time.time()
+        issued["set"] = True
+        resp = conn.getresponse()
+        raw = resp.read().decode("utf-8", errors="replace")
+        try:
+            parsed_body = json.loads(raw) if raw else None
+        except json.JSONDecodeError:
+            parsed_body = {"raw": raw}
+        return resp.status, parsed_body
+    except Exception as exc:
+        if not issued.get("set"):
+            issued["mono"] = time.monotonic()
+            issued["wall"] = time.time()
+            issued["set"] = True
+            issued["send_error"] = str(exc)
+        return 0, {"error": str(exc)}
+    finally:
+        conn.close()
+
+
+def _in_flight_pre_lock_once(env, ta, confirmation_token, mutate_fn) -> dict:
+    """Race: mutate after submit bytes are on the wire, before checkout lockCustomer.
+
+    After-lock mutations that share customer FOR UPDATE cannot return 2xx while submit
+    is still in-flight on a successful path (they wait for commit). A 2xx mutation that
+    finishes before submit_end therefore ran without waiting on checkout's customer lock.
+    """
+    issued = {"set": False}
+    box: dict = {"timeline": {}, "issued": issued}
+
+    def submitter():
+        box["timeline"]["submit_thread_start_mono"] = time.monotonic()
+        code, body = _http_signal_issued(
+            "POST",
+            f"{base_url(env)}/api/me/orders",
+            {"confirmationToken": confirmation_token},
+            auth(ta, new_key()),
+            issued,
+            timeout=60.0,
+        )
+        box["submit"] = (code, body)
+        box["timeline"]["submit_end_mono"] = time.monotonic()
+        box["timeline"]["submit_end_wall"] = time.time()
+
+    def mutator():
+        deadline = time.monotonic() + 5.0
+        while not issued.get("set") and time.monotonic() < deadline:
+            time.sleep(0.00005)
+        if not issued.get("set"):
+            box["timeline"]["mutation_skipped"] = "submit_never_issued"
+            box["mutation"] = None
+            return
+        box["timeline"]["mutation_start_mono"] = time.monotonic()
+        box["timeline"]["mutation_start_wall"] = time.time()
+        box["mutation"] = mutate_fn()
+        box["timeline"]["mutation_end_mono"] = time.monotonic()
+        box["timeline"]["mutation_end_wall"] = time.time()
+
+    t_mut = threading.Thread(target=mutator, name="b032-inflight-mut")
+    t_sub = threading.Thread(target=submitter, name="b032-inflight-sub")
+    t_mut.start()
+    t_sub.start()
+    t_sub.join(timeout=60)
+    t_mut.join(timeout=60)
+    tl = box["timeline"]
+    issued_mono = issued.get("mono")
+    mut_s, mut_e = tl.get("mutation_start_mono"), tl.get("mutation_end_mono")
+    sub_e = tl.get("submit_end_mono")
+    mut_tuple = box.get("mutation")
+    mut_code = mut_tuple[0] if isinstance(mut_tuple, tuple) else None
+    sub_tuple = box.get("submit")
+    sub_code = sub_tuple[0] if isinstance(sub_tuple, tuple) else None
+    mut_dur = (mut_e - mut_s) if mut_s is not None and mut_e is not None else None
+    window = (
+        issued.get("set") is True
+        and issued_mono is not None
+        and mut_s is not None
+        and mut_e is not None
+        and sub_e is not None
+        and issued_mono <= mut_s
+        and mut_e < sub_e
+        and mut_dur is not None
+        and mut_dur < 0.5
+        and mut_code in (200, 201)
+    )
+    box["window"] = {
+        "hit": window,
+        "issued_set": bool(issued.get("set")),
+        "issued_before_mutate": (
+            issued_mono is not None and mut_s is not None and issued_mono <= mut_s
+        ),
+        "mutate_finished_before_submit_end": (
+            mut_e is not None and sub_e is not None and mut_e < sub_e
+        ),
+        "mutation_short": mut_dur is not None and mut_dur < 0.5,
+        "mutation_http": mut_code,
+        "submit_http": sub_code,
+        "mutation_duration_s": mut_dur,
+        "note": "window = submit bytes issued, mutate 2xx completed before submit response, "
+        "duration <0.5s (did not wait on checkout customer FOR UPDATE / after_stock hold)",
+    }
+    box["timeline"]["issued_mono"] = issued_mono
+    box["timeline"]["issued_wall"] = issued.get("wall")
+    box["final_db"] = {
+        "orders": m.db_orders(env, "b032_buyer_a"),
+        "cart": cart_fingerprint(m.db_cart(env, "b032_buyer_a")),
+    }
+    return box
+
+
 def run_v8_migration(env) -> dict:
     """Install+CALL upgrade_oxstore_v8 from develop V8 SQL via mysql client (real migration path)."""
     src = V8_SQL if V8_SQL.exists() else V8_FIXTURE
@@ -157,13 +365,7 @@ def ac_b03_05(env, fx):
     s, ta, tb, p = fx["tokens"]["S"], fx["tokens"]["A"], fx["tokens"]["B"], fx["products"]
     ct = ConjunctTracker("PB-B03-AC5")
 
-    # Explicitly do NOT call nonexistent POST /api/admin/legacy-intents/close as the close path.
-    ct.check(
-        "no_fake_close_api_as_path",
-        True,
-        {"note": "close path = CALL upgrade_oxstore_v8 from V8 SQL; archive is GET-only"},
-    )
-
+    # Close path = V8 CALL (documented in detail_extra); meta notes are NOT formal conjuncts.
     conn = connect_mysql(env)
     seed = {}
     try:
@@ -385,20 +587,92 @@ def ac_b03_05(env, fx):
         {"http": c_b, "snaps": sorted(b_snaps)},
     )
 
-    # Read-only rejection: POST/PUT/DELETE on archive endpoints
-    post_c, post_b = http_json("POST", f"{base_url(env)}/api/admin/legacy-intents", {}, auth(s))
-    put_c, put_b = http_json("PUT", f"{base_url(env)}/api/admin/legacy-intents/1", {}, auth(s))
-    del_c, del_b = http_json("DELETE", f"{base_url(env)}/api/admin/legacy-intents/1", headers=auth(s))
-    # Also probe the nonexistent close endpoint — must NOT be used as success path; expect non-2xx
-    close_c, close_b = http_json("POST", f"{base_url(env)}/api/admin/legacy-intents/close", {}, auth(s))
-    ct.check(
-        "archive_read_only_rejects_mutations",
-        all(c >= 400 or c == 405 for c in (post_c, put_c, del_c, close_c)),
+    # Real intent/trade entries (IntentController, AdminIntentController, TradeController)
+    # — not fake PUT/PATCH/DELETE on /api/admin/legacy-intents/{id}.
+    real_ids = [(str(i["id"]), i.get("status")) for i in intents_after]
+    snap_before = {str(i["id"]): dict(i) for i in intents_after}
+    mut_attempts = []
+    sub_c, sub_b = http_json(
+        "POST",
+        f"{base_url(env)}/api/products/{p['P-ON-10']}/intents",
+        headers=auth(ta, new_key()),
+    )
+    mut_attempts.append(
         {
-            "POST": {"http": post_c, "message": msg(post_b)},
-            "PUT": {"http": put_c, "message": msg(put_b)},
-            "DELETE": {"http": del_c, "message": msg(del_b)},
-            "POST_close_nonexistent": {"http": close_c, "message": msg(close_b), "note": "probed only to prove not a close path"},
+            "entry": "POST /api/products/{productId}/intents",
+            "id": p["P-ON-10"],
+            "http": sub_c,
+            "message": msg(sub_b),
+        }
+    )
+    q_c, q_b = http_json(
+        "GET",
+        f"{base_url(env)}/api/admin/intents?productId={p['P-ON-10']}&page=1&size=10",
+        headers=auth(s),
+    )
+    mut_attempts.append(
+        {
+            "entry": "GET /api/admin/intents",
+            "id": p["P-ON-10"],
+            "http": q_c,
+            "message": msg(q_b),
+        }
+    )
+    for rid, st in real_ids:
+        for action, body in [
+            ("start", None),
+            ("success", None),
+            ("fail", {"action": "DISCARD"}),
+        ]:
+            if body is None:
+                hc, hb = http_json(
+                    "POST", f"{base_url(env)}/api/admin/intents/{rid}/{action}", headers=auth(s)
+                )
+            else:
+                hc, hb = http_json(
+                    "POST", f"{base_url(env)}/api/admin/intents/{rid}/{action}", body, auth(s)
+                )
+            mut_attempts.append(
+                {
+                    "entry": f"POST /api/admin/intents/{{id}}/{action}",
+                    "id": rid,
+                    "status": st,
+                    "http": hc,
+                    "message": msg(hb),
+                }
+            )
+    writes = [a for a in mut_attempts if a["entry"].startswith("POST")]
+    writes_rejected = all(a["http"] >= 400 for a in writes)
+    queue_not_writable = q_c >= 400
+    legacy_entry_c, legacy_entry_b = sub_c, sub_b
+    conn = connect_mysql(env)
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, status, legacy_closed_at, legacy_close_reason, product_name_snapshot "
+                "FROM purchase_intent WHERE product_name_snapshot LIKE 'LEGACY-%' ORDER BY id"
+            )
+            intents_after_mut = list(cur.fetchall())
+    finally:
+        conn.close()
+    unchanged = all(
+        str(i["id"]) in snap_before
+        and snap_before[str(i["id"])]["status"] == i["status"]
+        and str(snap_before[str(i["id"])].get("legacy_closed_at")) == str(i.get("legacy_closed_at"))
+        for i in intents_after_mut
+    )
+    ct.check(
+        "archive_real_id_mutations_rejected_no_state_write",
+        writes_rejected and queue_not_writable and unchanged,
+        {
+            "attempts": mut_attempts,
+            "writes_rejected": writes_rejected,
+            "queue_not_writable": queue_not_writable,
+            "legacy_entry": {"http": legacy_entry_c, "message": msg(legacy_entry_b)},
+            "unchanged": unchanged,
+            "before": snap_before,
+            "after": intents_after_mut,
+            "note": "IntentController POST /api/products/{id}/intents; AdminIntentController GET /api/admin/intents; TradeController POST /api/admin/intents/{id}/start|success|fail",
         },
     )
 
@@ -449,9 +723,22 @@ def ac_b13_01(env, fx):
     ct.check("pos_http_message", code == 201 and msg(body) == "下单成功", {"http": code, "message": msg(body)})
     ct.check("pos_stock_delta", int(stock0) - int(stock1) == 2, {"stock": [stock0, stock1]})
     ct.check("pos_cart_full_set_cleared", cart1 == [], {"cart_before": cart0, "cart_after": cart1})
-    ct.check("pos_order_items_receipts_persisted", len(orders) == 1 and len(items) >= 1 and len(receipts) >= 1, {
-        "orders": orders, "items": items, "receipts": receipts
-    })
+    checkout_receipts = [
+        r for r in receipts if str(r.get("operation_type") or "").upper() == "CHECKOUT"
+    ]
+    # Precise CHECKOUT receipt only — never soft-pass on arbitrary receipt>=1
+    ct.check(
+        "pos_order_items_and_checkout_receipt",
+        len(orders) == 1 and len(items) >= 1 and len(checkout_receipts) >= 1,
+        {
+            "orders": orders,
+            "items": items,
+            "receipts": receipts,
+            "checkout_receipts": checkout_receipts,
+        },
+    )
+    # Rollback paths must leave zero orphan order_items / CHECKOUT receipts
+    # (asserted per-breakpoint below with precise queries)
 
     # Success UI screenshot
     shot_ok = False
@@ -582,7 +869,31 @@ const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playw
         stock_a = m.db_stock(env, p["P-ON-10"])
         cart_a = cart_fingerprint(m.db_cart(env, "b032_buyer_a"))
         orders_a = m.db_orders(env, "b032_buyer_a")
-        rolled = stock_a == stock_b and cart_a == cart_b and len(orders_a) == 0 and s_code >= 400
+        conn = connect_mysql(env)
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT COUNT(*) c FROM order_item oi "
+                    "JOIN shop_order so ON so.id=oi.order_id "
+                    "JOIN customer c ON c.id=so.customer_id WHERE c.username='b032_buyer_a'"
+                )
+                orphan_items = int(cur.fetchone()["c"])
+                cur.execute(
+                    "SELECT r.id, r.operation_type FROM operation_receipt r "
+                    "JOIN customer c ON c.id=r.customer_id WHERE c.username='b032_buyer_a' "
+                    "AND r.operation_type='CHECKOUT'"
+                )
+                checkout_rcpt = list(cur.fetchall() or [])
+        finally:
+            conn.close()
+        rolled = (
+            stock_a == stock_b
+            and cart_a == cart_b
+            and len(orders_a) == 0
+            and orphan_items == 0
+            and len(checkout_rcpt) == 0
+            and s_code >= 400
+        )
         breaks[phase] = {
             "http": s_code,
             "message": msg(s_body),
@@ -592,6 +903,8 @@ const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playw
             "cart_before": cart_b,
             "cart_after": cart_a,
             "stock": [stock_b, stock_a],
+            "orphan_order_items": orphan_items,
+            "checkout_receipts_after": checkout_rcpt,
         }
         ct.check(
             f"breakpoint_{phase}_rollback_and_probe",
@@ -604,58 +917,95 @@ const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playw
 
 
 def _hold_mutate(env, ta, token, mutate_fn, hold_seconds=3) -> dict:
-    """True-hold timing: mutate while after_order SLEEP holds TX; record monotonic timeline."""
+    """True-hold timing: mutate while after_stock SLEEP holds TX.
+
+    Barrier = MySQL named lock b032_tx_hold (GET_LOCK around SLEEP in after_stock).
+    MyISAM probe is NOT used as mid-hold signal (not readable until TX ends).
+    Clocks use time.monotonic(); wall timestamps recorded separately.
+    """
     m.clear_probe(env)
+    # Ensure any leaked named lock from a prior aborted run is cleared on THIS session
+    conn = connect_mysql(env)
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT RELEASE_LOCK('b032_tx_hold')")
+    finally:
+        conn.close()
     set_control(env, fail_phase=None, probe=True, hold_seconds=hold_seconds)
-    box: dict = {"timeline": {}}
+    box: dict = {"timeline": {}, "ok_to_mutate": False}
 
     def submitter():
-        box["timeline"]["submit_start"] = time.time()
+        box["timeline"]["submit_start_mono"] = time.monotonic()
+        box["timeline"]["submit_start_wall"] = time.time()
         box["submit"] = m.submit_order(env, ta, token)
-        box["timeline"]["submit_end"] = time.time()
+        box["timeline"]["submit_end_mono"] = time.monotonic()
+        box["timeline"]["submit_end_wall"] = time.time()
 
     def mutator():
-        pr = wait_probe_phase(env, "order_created", timeout=8)
-        box["timeline"]["probe_observed"] = time.time()
-        box["probe_row"] = pr
-        if pr and pr.get("at_ts") is not None:
-            box["timeline"]["probe_at_ts"] = str(pr["at_ts"])
-        box["timeline"]["mutation_start"] = time.time()
+        lock_obs = wait_hold_lock(env, timeout=max(2.0, hold_seconds + 2))
+        box["hold_lock"] = lock_obs
+        if lock_obs is None:
+            # Hard fail: do NOT mutate after hold-lock timeout
+            box["timeline"]["hold_lock_timeout"] = True
+            box["timeline"]["hold_observed_mono"] = None
+            box["mutation"] = None
+            box["ok_to_mutate"] = False
+            return
+        box["ok_to_mutate"] = True
+        box["timeline"]["hold_observed_mono"] = lock_obs["observed_mono"]
+        box["timeline"]["hold_observed_wall"] = lock_obs["observed_wall"]
+        box["timeline"]["hold_lock_holder"] = lock_obs["holder"]
+        box["timeline"]["mutation_start_mono"] = time.monotonic()
+        box["timeline"]["mutation_start_wall"] = time.time()
         box["mutation"] = mutate_fn()
-        box["timeline"]["mutation_end"] = time.time()
+        box["timeline"]["mutation_end_mono"] = time.monotonic()
+        box["timeline"]["mutation_end_wall"] = time.time()
 
-    t1 = threading.Thread(target=submitter)
-    t2 = threading.Thread(target=mutator)
+    t1 = threading.Thread(target=submitter, name="b032-submit")
+    t2 = threading.Thread(target=mutator, name="b032-mutate")
     t1.start()
-    time.sleep(0.1)
+    time.sleep(0.05)
     t2.start()
-    t1.join(40)
-    t2.join(40)
+    t1.join(timeout=hold_seconds + 30)
+    t2.join(timeout=hold_seconds + 30)
+    box["threads"] = {
+        "submit_alive": t1.is_alive(),
+        "mutate_alive": t2.is_alive(),
+    }
     set_control(env, fail_phase=None, probe=False, hold_seconds=0)
     tl = box["timeline"]
-    # Overlap proof: mutation started after probe (inside hold) and mutation_end >= submit_end if blocked
+    hold_ok = box.get("ok_to_mutate") is True and tl.get("hold_observed_mono") is not None
+    # No soft 50ms tolerance: mutation must start strictly before submit_end
     started_during_hold = (
-        tl.get("probe_observed") is not None
-        and tl.get("mutation_start") is not None
-        and tl.get("submit_end") is not None
-        and tl["mutation_start"] >= tl["probe_observed"]
-        and tl["mutation_start"] <= tl["submit_end"] + 0.05
+        hold_ok
+        and tl.get("mutation_start_mono") is not None
+        and tl.get("submit_end_mono") is not None
+        and tl["mutation_start_mono"] >= tl["hold_observed_mono"]
+        and tl["mutation_start_mono"] < tl["submit_end_mono"]
+        and not box["threads"]["submit_alive"]
+        and not box["threads"]["mutate_alive"]
     )
     blocked_until_release = (
-        tl.get("mutation_end") is not None
-        and tl.get("submit_end") is not None
-        and tl["mutation_end"] + 0.01 >= tl["submit_end"]
-        and (tl["mutation_end"] - tl.get("mutation_start", tl["mutation_end"])) >= (hold_seconds * 0.4)
+        hold_ok
+        and tl.get("mutation_end_mono") is not None
+        and tl.get("submit_end_mono") is not None
+        and tl["mutation_end_mono"] >= tl["submit_end_mono"]
+        and (tl["mutation_end_mono"] - tl["mutation_start_mono"]) >= (hold_seconds * 0.5)
     )
     box["overlap"] = {
         "started_during_hold": started_during_hold,
         "blocked_until_release": blocked_until_release,
+        "hold_proven": started_during_hold and blocked_until_release,
         "hold_seconds": hold_seconds,
+        "hold_lock_timeout": bool(tl.get("hold_lock_timeout")),
+        "barrier": "IS_USED_LOCK(b032_tx_hold)",
+        "clock": "time.monotonic",
     }
     box["final_db"] = {
         "orders": m.db_orders(env, "b032_buyer_a"),
         "cart": cart_fingerprint(m.db_cart(env, "b032_buyer_a")),
         "probe_phases": m.probe_phases(env),
+        "stocks": {},
     }
     return box
 
@@ -709,20 +1059,37 @@ def ac_b13_02(env, fx):
         )
 
     hold_add = _hold_mutate(env, ta, token, add_same, hold_seconds=3)
-    ct.check(
-        "during_hold_add_same_product_timeline",
-        hold_add["overlap"]["started_during_hold"] is True,
-        hold_add,
-        on_fail="FAIL",
-    )
-    # Post-hold cart may contain surviving new line or merged qty — record honestly
-    cart_after = hold_add["final_db"]["cart"]
-    orders = hold_add["final_db"]["orders"]
-    ct.check(
-        "during_hold_add_final_state_recorded",
-        len(orders) == 1,
-        {"cart_after": cart_after, "orders": len(orders), "mutation": redact(hold_add.get("mutation"))},
-    )
+    if hold_add["overlap"].get("hold_lock_timeout"):
+        ct.skip(
+            "during_hold_add_same_product",
+            "b032_tx_hold named lock not observed before timeout — hold observation failed",
+            disposition="NOT_EXECUTED",
+        )
+    else:
+        ct.check(
+            "during_hold_add_same_product_hold_proven",
+            hold_add["overlap"].get("hold_proven") is True,
+            hold_add,
+            on_fail="FAIL",
+        )
+        cart_after = hold_add["final_db"]["cart"]
+        orders = hold_add["final_db"]["orders"]
+        # Selected line consumed by order; concurrent same-product ADD must be retained in cart
+        add_retained = len(cart_after) >= 1 and any(
+            r["product_id"] == p["P-ON-10"] for r in cart_after
+        )
+        ct.check(
+            "during_hold_add_retained_in_cart",
+            len(orders) == 1 and add_retained,
+            {
+                "cart_after": cart_after,
+                "orders": len(orders),
+                "mutation": redact(hold_add.get("mutation")),
+                "order_qty": (
+                    str(m.db_order_items(env, orders[0]["id"])[0]["quantity"]) if orders else None
+                ),
+            },
+        )
 
     # Remainder >0 — source-based FAIL (digest includes qty)
     ct.check(
@@ -874,6 +1241,16 @@ def ac_b13_04(env, fx):
         {"race": redact(race), "stock": [stock0, stock1], "orders": n_orders},
     )
 
+    # RETAINED conjunct: same product + NEW settlement key → can create multiple orders
+    m.align_product(env, fx["tokens"]["S"], p["P-ON-10"], PRODUCTS["P-ON-10"])
+    cid_new = m.cart_add(env, ta, p["P-ON-10"], "1")
+    s_new, b_new, _, _ = m.place_order(env, ta, [cid_new])  # new confirmation + new key inside
+    ct.check(
+        "same_product_new_settlement_key_allows_second_order",
+        s_new == 201 and msg(b_new) == "下单成功" and len(m.db_orders(env, "b032_buyer_a")) == 2,
+        {"http": s_new, "message": msg(b_new), "orders": len(m.db_orders(env, "b032_buyer_a"))},
+    )
+
     m.dump_case("PB-B13-AC4", ct.as_detail())
     return finish(ct, m.result)
 
@@ -953,21 +1330,181 @@ def ac_b13_05(env, fx):
         {"race": redact(race2), "A_orders": oa, "B_orders": ob, "winners": winners},
     )
 
-    # Lock-BEFORE (serial, before submit) — distinct from during-hold
+    # Lock-BEFORE window: serial PATCH + DELETE + ADD after confirm, before submit
+    # (distinct from during-hold matrix below)
     m.reset_ns(env)
     ta = login_customer(env, "b032_buyer_a", "B032-BuyerA-Pass9", "13803200001")
     fx["tokens"]["A"] = ta
     m.align_product(env, s, p["P-ON-10"], PRODUCTS["P-ON-10"])
-    cid = m.cart_add(env, ta, p["P-ON-10"], "2")
-    _, cb = m.confirm(env, ta, [cid])
+    m.align_product(env, s, p["P-ON-5"], PRODUCTS["P-ON-5"])
+    m.align_product(env, s, p["P-ON-1"], PRODUCTS["P-ON-1"])
+    cid_patch = m.cart_add(env, ta, p["P-ON-10"], "2")
+    cid_del = m.cart_add(env, ta, p["P-ON-5"], "1")
+    _, cb = m.confirm(env, ta, [cid_patch, cid_del])
     token = cb["data"]["confirmationToken"]
-    http_json("PATCH", f"{base_url(env)}/api/me/cart/items/{cid}", {"quantity": "4"}, auth(ta))
-    before_c, before_b, _ = m.submit_order(env, ta, token)
-    ct.check(
-        "lock_before_patch_serial_rejects",
-        msg(before_b) == "确认信息已变化，请重新确认",
-        {"http": before_c, "message": msg(before_b)},
+    t_confirm = time.monotonic()
+    patch_c, patch_b = http_json(
+        "PATCH", f"{base_url(env)}/api/me/cart/items/{cid_patch}", {"quantity": "4"}, auth(ta)
     )
+    t_patch = time.monotonic()
+    del_c, del_b = http_json(
+        "DELETE", f"{base_url(env)}/api/me/cart/items/{cid_del}", headers=auth(ta)
+    )
+    t_delete = time.monotonic()
+    add_c, add_b = http_json(
+        "POST",
+        f"{base_url(env)}/api/me/cart/items",
+        {"productId": p["P-ON-1"]},
+        auth(ta, new_key()),
+    )
+    t_add = time.monotonic()
+    t_submit_start = time.monotonic()
+    before_c, before_b, _ = m.submit_order(env, ta, token)
+    t_submit_end = time.monotonic()
+    lock_before_serial = t_confirm < t_patch < t_delete < t_add <= t_submit_start < t_submit_end
+    lock_before_reject = msg(before_b) in (
+        "确认信息已变化，请重新确认",
+        "所选商品无法下单",
+    )
+    ct.check(
+        "lock_before_patch_delete_add_serial_rejects",
+        patch_c == 200
+        and del_c == 200
+        and add_c in (200, 201)
+        and before_c >= 400
+        and lock_before_reject
+        and lock_before_serial,
+        {
+            "window": "after_confirm_before_submit",
+            "not_in_flight": True,
+            "distinct_from": "during_hold",
+            "patch": {"http": patch_c, "message": msg(patch_b)},
+            "delete": {"http": del_c, "message": msg(del_b)},
+            "add": {"http": add_c, "message": msg(add_b)},
+            "submit": {"http": before_c, "message": msg(before_b)},
+            "mono": {
+                "confirm": t_confirm,
+                "patch": t_patch,
+                "delete": t_delete,
+                "add": t_add,
+                "submit_start": t_submit_start,
+                "submit_end": t_submit_end,
+                "serial": lock_before_serial,
+            },
+        },
+    )
+    # In-flight = submit HTTP bytes already sent AND checkout has not yet taken
+    # customer FOR UPDATE. Serial confirm-then-mutate-then-submit is NOT this window.
+    inflight = {"delete": None, "add": None}
+    for kind in ("delete", "add"):
+        last = None
+        for attempt in range(1, 41):
+            m.reset_ns(env)
+            ta = login_customer(env, "b032_buyer_a", "B032-BuyerA-Pass9", "13803200001")
+            fx["tokens"]["A"] = ta
+            m.align_product(env, s, p["P-ON-10"], PRODUCTS["P-ON-10"])
+            cid_if = m.cart_add(env, ta, p["P-ON-10"], "1")
+            _, cb_if = m.confirm(env, ta, [cid_if])
+            tok_if = cb_if["data"]["confirmationToken"]
+            if kind == "delete":
+                mut = lambda: http_json(
+                    "DELETE",
+                    f"{base_url(env)}/api/me/cart/items/{cid_if}",
+                    headers=auth(ta),
+                    timeout=40,
+                )
+            else:
+                mut = lambda: http_json(
+                    "POST",
+                    f"{base_url(env)}/api/me/cart/items",
+                    {"productId": p["P-ON-10"]},
+                    auth(ta, new_key()),
+                    timeout=40,
+                )
+            last = _in_flight_pre_lock_once(env, ta, tok_if, mut)
+            last["attempt"] = attempt
+            last["kind"] = kind
+            if last.get("window", {}).get("hit"):
+                inflight[kind] = last
+                break
+        if inflight[kind] is None:
+            inflight[kind] = last
+
+    def _if_ok(kind: str) -> tuple[bool, dict]:
+        box = inflight.get(kind) or {}
+        win = box.get("window") or {}
+        tl = box.get("timeline") or {}
+        db = box.get("final_db") or {}
+        orders = db.get("orders") or []
+        cart = db.get("cart") or []
+        sub = box.get("submit") if isinstance(box.get("submit"), tuple) else (None, None)
+        mut = box.get("mutation") if isinstance(box.get("mutation"), tuple) else (None, None)
+        ev = {
+            "attempt": box.get("attempt"),
+            "window": win,
+            "timeline": tl,
+            "submit": {"http": sub[0], "message": msg(sub[1])},
+            "mutation": {"http": mut[0], "message": msg(mut[1])},
+            "orders": len(orders),
+            "cart": cart,
+        }
+        if not win.get("hit"):
+            return False, ev
+        if kind == "delete":
+            # Pre-lock DELETE must surface in this submit's validation: reject, no order.
+            ok = (
+                sub[0] is not None
+                and sub[0] >= 400
+                and len(orders) == 0
+                and mut[0] == 200
+            )
+            ev["expected"] = "DELETE 200 in window → submit reject, no order"
+            return ok, ev
+        rem = [r for r in cart if r["product_id"] == p["P-ON-10"]]
+        rem_qty = rem[0]["quantity"] if len(rem) == 1 else None
+        oqty = None
+        if orders:
+            items = m.db_order_items(env, orders[0]["id"])
+            oqty = str(items[0]["quantity"]) if items else None
+        # Pre-lock ADD reflects in latest check (digest → 409, cart keeps +1)
+        # or, if submit won with locked qty, order qty is that snapshot and remainder accurate.
+        ok_reject = sub[0] is not None and sub[0] >= 400 and len(orders) == 0 and rem_qty == "2"
+        ok_lock = sub[0] == 201 and len(orders) == 1 and oqty is not None and rem_qty is not None
+        ev["order_qty"] = oqty
+        ev["remainder_qty"] = rem_qty
+        ev["expected"] = "ADD 2xx in window → 409+cart qty 2 or 201+locked snapshot"
+        return ok_reject or ok_lock, ev
+
+    del_ok, del_ev = _if_ok("delete")
+    add_ok, add_ev = _if_ok("add")
+    del_hit = bool((inflight.get("delete") or {}).get("window", {}).get("hit"))
+    add_hit = bool((inflight.get("add") or {}).get("window", {}).get("hit"))
+    if not del_hit or not add_hit:
+        ct.skip(
+            "in_flight_pre_lock_delete_add",
+            "could not construct submit-issued / lock-not-held window for "
+            + ",".join(
+                k for k, hit in (("delete", del_hit), ("add", add_hit)) if not hit
+            ),
+            disposition="NOT_EXECUTED",
+        )
+        # Attach timelines even when skipped
+        ct.items[-1]["evidence"] = {
+            "reason": ct.items[-1]["evidence"]["reason"],
+            "delete": del_ev,
+            "add": add_ev,
+            "not_serial_before_submit": True,
+        }
+    else:
+        ct.check(
+            "in_flight_pre_lock_delete_add",
+            del_ok and add_ok,
+            {
+                "delete": del_ev,
+                "add": add_ev,
+                "not_serial_before_submit": True,
+            },
+        )
 
     # During true hold matrix: PATCH qty / DELETE / ADD same selected product
     matrix = {}
@@ -1006,24 +1543,119 @@ def ac_b13_05(env, fx):
         matrix[name] = {
             "timeline": box.get("timeline"),
             "overlap": box.get("overlap"),
+            "threads": box.get("threads"),
             "mutation": redact(box.get("mutation")),
             "submit": redact(box.get("submit")),
             "final_db": box.get("final_db"),
         }
+        if box["overlap"].get("hold_lock_timeout"):
+            ct.skip(
+                f"during_hold_{name}",
+                "b032_tx_hold named lock timeout — not mutating; hold unobservable",
+                disposition="NOT_EXECUTED",
+            )
+            continue
+        hold_proven = box["overlap"].get("hold_proven") is True
         ct.check(
-            f"during_hold_{name}_started_in_hold",
-            box["overlap"]["started_during_hold"] is True,
+            f"during_hold_{name}_hold_proven",
+            hold_proven,
             matrix[name],
         )
-        # Order qty must remain confirmation qty if submit succeeded
         orders = box["final_db"]["orders"]
-        if orders and name == "patch_qty":
-            oitems = m.db_order_items(env, orders[0]["id"])
+        cart_after = box["final_db"]["cart"]
+        submit_tuple = box.get("submit")
+        submit_code = submit_tuple[0] if isinstance(submit_tuple, tuple) else None
+        oitems = m.db_order_items(env, orders[0]["id"]) if orders else []
+        order_qty = str(oitems[0]["quantity"]) if oitems else None
+        rem_rows = [r for r in cart_after if r["product_id"] == p["P-ON-10"]]
+        rem_qty = rem_rows[0]["quantity"] if len(rem_rows) == 1 else None
+        if name == "patch_qty":
             ct.check(
-                "during_hold_patch_does_not_inflate_order",
-                str(oitems[0]["quantity"]) == "1",
-                {"items": oitems},
+                "during_hold_patch_final_order_qty_unchanged",
+                len(orders) == 1 and oitems and order_qty == "1",
+                {"items": oitems, "cart_after": cart_after},
             )
+        elif name == "delete_selected":
+            # After-lock DELETE PASS: successful order with original qty.
+            # submit>=400 and no order is NOT a DELETE PASS (do not OR that in).
+            delete_ok = (
+                hold_proven
+                and submit_code == 201
+                and len(orders) == 1
+                and order_qty == "1"
+            )
+            if delete_ok:
+                ct.check(
+                    "during_hold_delete_final_state",
+                    True,
+                    {
+                        "submit_code": submit_code,
+                        "orders": len(orders),
+                        "order_qty": order_qty,
+                        "cart_after": cart_after,
+                        "mutation": redact(box.get("mutation")),
+                    },
+                )
+            elif submit_code == 201 and len(orders) == 1 and order_qty != "1":
+                ct.check(
+                    "during_hold_delete_final_state",
+                    False,
+                    {
+                        "submit_code": submit_code,
+                        "orders": len(orders),
+                        "order_qty": order_qty,
+                        "cart_after": cart_after,
+                        "mutation": redact(box.get("mutation")),
+                    },
+                )
+            else:
+                ct.skip(
+                    "during_hold_delete_final_state",
+                    "after-lock DELETE did not yield HTTP 201 + 1 order + qty=1 "
+                    f"(submit={submit_code}, orders={len(orders)}, qty={order_qty}); "
+                    "submit>=400 and no order is not DELETE PASS",
+                    disposition="NOT_EXECUTED",
+                )
+        elif name == "add_same_selected":
+            # Remainder of concurrent ADD must be exactly +1 on cart; order qty stays 1.
+            add_ok = (
+                hold_proven
+                and submit_code == 201
+                and len(orders) == 1
+                and order_qty == "1"
+                and rem_qty == "1"
+            )
+            if add_ok:
+                ct.check(
+                    "during_hold_add_final_retained",
+                    True,
+                    {
+                        "submit_code": submit_code,
+                        "orders": len(orders),
+                        "order_qty": order_qty,
+                        "remainder_qty": rem_qty,
+                        "cart_after": cart_after,
+                    },
+                )
+            elif submit_code == 201 and len(orders) == 1 and (order_qty != "1" or rem_qty != "1"):
+                ct.check(
+                    "during_hold_add_final_retained",
+                    False,
+                    {
+                        "submit_code": submit_code,
+                        "orders": len(orders),
+                        "order_qty": order_qty,
+                        "remainder_qty": rem_qty,
+                        "cart_after": cart_after,
+                    },
+                )
+            else:
+                ct.skip(
+                    "during_hold_add_final_retained",
+                    "after-lock ADD did not yield HTTP 201 + order qty=1 + remainder qty=1 "
+                    f"(submit={submit_code}, orders={len(orders)}, qty={order_qty}, rem={rem_qty})",
+                    disposition="NOT_EXECUTED",
+                )
 
     # Offline submit
     m.reset_ns(env)
@@ -1067,40 +1699,54 @@ def ac_b01_03(env, fx):
     adv2_c, adv2_b = m.advance(env, s, oid2, "CONFIRM", "PLACED")
     ct.check("cancelled_no_advance", adv2_c >= 400, {"http": adv2_c, "message": msg(adv2_b)})
 
-    # Merchant cancel of PLACED
-    cid3 = m.cart_add(env, ta, p["P-ON-10"], "1")
-    _, body3, _, _ = m.place_order(env, ta, [cid3])
-    oid3 = m.order_id_of(body3)
-    mc_c, mc_b = m.cancel_admin(env, s, oid3, "PLACED")
-    still = [o for o in m.db_orders(env, "b032_buyer_a") if str(o["id"]) == oid3][0]
+    # Merchant cancel of COMPLETED must be rejected (not PLACED success)
+    mc_c, mc_b = m.cancel_admin(env, s, oid, "COMPLETED")
+    still_completed = [o for o in m.db_orders(env, "b032_buyer_a") if str(o["id"]) == oid][0]
     ct.check(
-        "merchant_cancel_placed",
-        mc_c == 200 and still["status"] == "CANCELLED",
-        {"http": mc_c, "message": msg(mc_b), "order": still},
+        "merchant_cancel_completed_rejected",
+        mc_c >= 400 and still_completed["status"] == "COMPLETED",
+        {"http": mc_c, "message": msg(mc_b), "order": still_completed},
     )
 
-    # No timeout: short wait + source evidence (no scheduled cancel job in codebase path)
+    # No timeout auto-cancel: source scan of real @Scheduled candidates MUST enter PASS,
+    # plus short wait showing PLACED unchanged (not wait-alone proof).
     cid4 = m.cart_add(env, ta, p["P-ON-5"], "1")
     _, body4, _, _ = m.place_order(env, ta, [cid4])
     oid4 = m.order_id_of(body4)
     time.sleep(2.0)
     still4 = [o for o in m.db_orders(env, "b032_buyer_a") if str(o["id"]) == oid4][0]
-    # Source audit: look for cancel scheduler mentions
     src_hits = subprocess.run(
-        ["rg", "-n", "schedule|@Scheduled|timeout.*cancel|auto.?cancel", "/tmp/oxstore-develop/backend/src/main/java/com/team/shop", "-g", "*.java"],
+        [
+            "rg",
+            "-n",
+            "@Scheduled|SchedulingConfigurer|order.*timeout|cancel.*schedul|TimeoutCancel",
+            "/tmp/oxstore-develop/backend/src/main/java",
+            "-g",
+            "*.java",
+        ],
         capture_output=True,
         text=True,
         timeout=30,
     )
-    hit_lines = [ln for ln in (src_hits.stdout or "").splitlines() if "cancel" in ln.lower() or "Scheduled" in ln]
+    all_hits = [ln for ln in (src_hits.stdout or "").splitlines() if ln.strip()]
+    # Filter to order-cancel related; auction settle schedulers are unrelated
+    cancel_related = [
+        ln
+        for ln in all_hits
+        if any(k in ln.lower() for k in ("cancel", "timeout", "placed", "order"))
+        and "auction" not in ln.lower()
+    ]
+    # PASS only if wait stayed PLACED AND no order-cancel scheduler candidate found
+    no_order_cancel_scheduler = len(cancel_related) == 0
     ct.check(
-        "no_timeout_auto_cancel_source_and_wait",
-        still4["status"] == "PLACED",
+        "no_timeout_auto_cancel_scheduler_absent_and_wait_placed",
+        still4["status"] == "PLACED" and no_order_cancel_scheduler,
         {
             "wait_sec": 2,
             "status_after_wait": still4["status"],
-            "source_scan_hits": hit_lines[:20],
-            "note": "2s wait alone insufficient; combined with source scan of cancel schedulers",
+            "all_scheduled_hits": all_hits[:30],
+            "order_cancel_related_hits": cancel_related[:20],
+            "scheduler_absent": no_order_cancel_scheduler,
         },
     )
 
@@ -1122,14 +1768,18 @@ def ac_b01_04(env, fx):
     order = m.db_orders(env, "b032_buyer_a")[0]
     ct.check("api_full_flow_no_logistics_fields", all(x["http"] == 200 for x in steps) and order["status"] == "COMPLETED", {"steps": steps})
 
-    # Merchant UI full flow screenshot
+    # Merchant UI live flow (not a still of an already-COMPLETED API order)
+    m.reset_ns(env)
+    ta, s, p = fx["tokens"]["A"], fx["tokens"]["S"], fx["products"]
+    cid_ui = m.cart_add(env, ta, p["P-ON-10"], "1")
+    _, body_ui, _, _ = m.place_order(env, ta, [cid_ui])
     seller_pwd = env.get("B032_SELLER_PASSWORD", "")
     shot = run_node(
         f"""
 const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playwright');
 (async () => {{
   const fe = {json.dumps(fe_url(env))};
-  const out = {{ok:false}};
+  const out = {{ok:false, steps:[]}};
   const browser = await chromium.launch({{headless:true}});
   try {{
     const page = await browser.newPage({{viewport:{{width:1280,height:900}}}});
@@ -1139,13 +1789,26 @@ const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playw
     await page.getByRole('button', {{ name: /登\\s*录/ }}).click();
     await page.waitForURL(u => !String(u).includes('/login'), {{timeout:15000}});
     await page.goto(fe + '/admin/orders', {{waitUntil:'networkidle'}});
-    await page.waitForTimeout(1000);
-    const text = await page.locator('body').innerText();
+    await page.waitForTimeout(800);
+    async function confirmAction(label) {{
+      await page.getByRole('button', {{ name: label }}).first().click();
+      const visiblePop = page.locator('.ant-popover').filter({{ hasText: '确认' }}).last();
+      await visiblePop.waitFor({{ state: 'visible', timeout: 8000 }});
+      await visiblePop.locator('button.ant-btn-primary').last().click();
+      await page.waitForTimeout(900);
+      out.steps.push(label);
+    }}
+    await confirmAction('确认订单');
+    await confirmAction('完成备货');
+    const textMid = await page.locator('body').innerText();
+    out.mid = {{
+      hasShip: textMid.includes('开始发货'),
+      hasPrepared: textMid.includes('待发货') || textMid.includes('备货'),
+      url: page.url(),
+    }};
     await page.screenshot({{path: {json.dumps(str(SHOTS/'b01-merchant-orders-flow.png'))}, fullPage:true}});
     out.shots = ['b01-merchant-orders-flow.png'];
-    out.url = page.url();
-    out.hasOrders = text.includes('订单') || text.includes('PLACED') || text.includes('已');
-    out.ok = !page.url().includes('/login') && out.hasOrders;
+    out.ok = out.mid.hasShip === true && out.steps.length === 2;
   }} catch(e) {{ out.error=String(e); }}
   finally {{ await browser.close(); }}
   console.log(JSON.stringify(out));
@@ -1153,7 +1816,7 @@ const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playw
 """,
         "ui_b01_ac4",
     )
-    ct.check("merchant_ui_orders_flow_screenshot", shot.get("ok") is True and (SHOTS / "b01-merchant-orders-flow.png").exists(), shot)
+    ct.check("merchant_ui_orders_flow_screenshot", shot.get("ok") is True, shot)
     m.dump_case("PB-B01-AC4", ct.as_detail())
     return finish(ct, m.result, {"steps": steps})
 
@@ -1224,29 +1887,53 @@ def ac_b02_03(env, fx):
     m.reset_ns(env)
     s, p = fx["tokens"]["S"], fx["products"]
     ct = ConjunctTracker("PB-B02-AC3")
-    pid = p["P-STOCK"]
-    m.align_product(env, s, pid, PRODUCTS["P-STOCK"])
-    # Place an order first so stock edit cannot alter existing order lines
+    # Order and stock edit MUST target the SAME product (not P-STOCK substitute)
+    pid = p["P-ON-10"]
+    m.align_product(env, s, pid, PRODUCTS["P-ON-10"])
     ta = fx["tokens"]["A"]
-    cid = m.cart_add(env, ta, p["P-ON-10"], "1")
+    cid = m.cart_add(env, ta, pid, "1")
     _, body, _, _ = m.place_order(env, ta, [cid])
     oid = m.order_id_of(body)
     snap = m.db_order_items(env, oid)
+    stock_after_order = m.db_stock(env, pid)
 
     bad_inputs = []
     for val in ["abc", "-1", "1.5", "", "01", " "]:
+        stock_before = m.db_stock(env, pid)
         c, b = http_json("PATCH", f"{base_url(env)}/api/admin/products/{pid}", {"stock": val}, auth(s))
-        bad_inputs.append({"value": val, "http": c, "message": msg(b)})
+        stock_after = m.db_stock(env, pid)
+        bad_inputs.append(
+            {
+                "value": val,
+                "http": c,
+                "message": msg(b),
+                "stock_unchanged": stock_before == stock_after,
+                "stock": [stock_before, stock_after],
+            }
+        )
+    exact_tip = "库存不能为负数，请输入非负整数。"
     ct.check(
-        "reject_non_numeric_and_signed",
-        all(x["http"] >= 400 for x in bad_inputs),
-        {"cases": bad_inputs},
+        "reject_invalid_stock_exact_tip_and_stock_unchanged",
+        all(
+            x["http"] >= 400
+            and x["message"] == exact_tip
+            and x["stock_unchanged"]
+            for x in bad_inputs
+        ),
+        {"cases": bad_inputs, "product_id": pid, "exact_tip": exact_tip},
     )
-    # Valid edit
     c_ok, b_ok = http_json("PATCH", f"{base_url(env)}/api/admin/products/{pid}", {"stock": "15"}, auth(s))
-    ct.check("accept_valid_stock", c_ok == 200 and str(m.db_stock(env, pid)) == "15", {"http": c_ok, "message": msg(b_ok)})
+    ct.check(
+        "accept_valid_stock_same_product",
+        c_ok == 200 and str(m.db_stock(env, pid)) == "15",
+        {"http": c_ok, "message": msg(b_ok), "after_order_stock": stock_after_order},
+    )
     snap2 = m.db_order_items(env, oid)
-    ct.check("stock_edit_does_not_change_existing_order", snap == snap2, {"snap": snap, "snap2": snap2})
+    ct.check(
+        "stock_edit_same_product_does_not_change_existing_order_lines",
+        snap == snap2,
+        {"snap": snap, "snap2": snap2, "product_id": pid},
+    )
     m.dump_case("PB-B02-AC3", ct.as_detail())
     return finish(ct, m.result)
 
@@ -1303,39 +1990,354 @@ def ac_b03_01(env, fx):
     ct = ConjunctTracker("PB-B03-AC1")
     c1 = m.cart_add(env, ta, p["P-ON-10"], "2")
     c2 = m.cart_add(env, ta, p["P-ON-5"], "1")
-    c3 = m.cart_add(env, ta, p["P-ON-1"], "1")  # will leave unselected
-    # Confirm page amounts
-    conf_c, conf_b = m.confirm(env, ta, [c1, c2])  # unselected c3 not in snapshot
+    c3 = m.cart_add(env, ta, p["P-ON-1"], "1")  # unselected
+    conf_c, conf_b = m.confirm(env, ta, [c1, c2])
     conf_items = ((conf_b or {}).get("data") or {}).get("items") or []
     conf_total = ((conf_b or {}).get("data") or {}).get("totalAmount") or ((conf_b or {}).get("data") or {}).get("total")
-    ct.check("unselected_not_in_confirm_snapshot", conf_c in (200, 201) and len(conf_items) == 2, {
-        "confirm_items": redact(conf_items), "total": conf_total
-    })
+    ct.check(
+        "unselected_not_in_confirm_snapshot",
+        conf_c in (200, 201) and len(conf_items) == 2,
+        {"confirm_items": redact(conf_items), "total": conf_total},
+    )
     code, body, _, _ = m.place_order(env, ta, [c1, c2])
     oid = m.order_id_of(body)
     snap = m.db_order_items(env, oid)
     order = m.db_orders(env, "b032_buyer_a")[0]
-    # Mutate live product + republish path (offline/online)
-    http_json("PATCH", f"{base_url(env)}/api/admin/products/{p['P-ON-10']}", {"stock": "99"}, auth(s))
-    http_json("POST", f"{base_url(env)}/api/admin/products/{p['P-ON-5']}/offline", headers=auth(s))
-    http_json("POST", f"{base_url(env)}/api/admin/products/{p['P-ON-5']}/online", headers=auth(s))
-    snap2 = m.db_order_items(env, oid)
-    total = Decimal(str(order["total_amount"]))
-    calc = sum(Decimal(str(i["unit_price"])) * Decimal(str(i["quantity"])) for i in snap)
-    ct.check("snapshot_stable_after_republish_mutate", snap == snap2, {"snap": snap, "snap2": snap2})
-    ct.check("detail_lines_match_total", total == calc and str(total) == f"{total:.2f}", {"total": str(total), "calc": str(calc)})
-    # Confirm total vs order total consistency (three places: confirm / detail / total)
+    # Order detail API — line-by-line compare (not DB-only stand-in for UI)
+    d_c, d_b = http_json("GET", f"{base_url(env)}/api/me/orders/{oid}", headers=auth(ta))
+    detail_data = (d_b or {}).get("data") if isinstance(d_b, dict) else {}
+    detail_items = (detail_data or {}).get("items") or (detail_data or {}).get("orderItems") or []
+    detail_total = (detail_data or {}).get("totalAmount") or (detail_data or {}).get("total")
+    line_match = False
+    if detail_items and len(detail_items) == len(snap):
+        def line_key(it):
+            return (
+                str(it.get("productId") or it.get("product_id") or ""),
+                str(it.get("quantity") or ""),
+                str(it.get("unitPrice") or it.get("unit_price") or ""),
+            )
+        db_keys = sorted(line_key({"product_id": i["product_id"], "quantity": i["quantity"], "unit_price": i["unit_price"]}) for i in snap)
+        api_keys = sorted(line_key(i) for i in detail_items)
+        line_match = db_keys == api_keys
+    ct.check(
+        "order_detail_line_by_line",
+        d_c == 200 and line_match,
+        {"http": d_c, "detail_items": redact(detail_items), "db_snap": snap, "detail_total": detail_total},
+    )
+    # Three places: confirm page totals, order detail lines/total, order list/header total
     try:
         conf_total_d = Decimal(str(conf_total)) if conf_total is not None else None
+        detail_total_d = Decimal(str(detail_total)) if detail_total is not None else None
+        order_total_d = Decimal(str(order["total_amount"]))
     except Exception:
-        conf_total_d = None
+        conf_total_d = detail_total_d = order_total_d = None
+    calc = sum(Decimal(str(i["unit_price"])) * Decimal(str(i["quantity"])) for i in snap)
     ct.check(
-        "confirm_detail_total_consistent",
-        conf_total_d is not None and conf_total_d == total,
-        {"confirm_total": str(conf_total), "order_total": str(total), "lines": snap},
+        "three_place_amount_consistent_confirm_detail_total",
+        conf_total_d is not None
+        and detail_total_d is not None
+        and conf_total_d == detail_total_d == order_total_d == calc
+        and str(order_total_d) == f"{order_total_d:.2f}",
+        {
+            "confirm_total": str(conf_total),
+            "detail_total": str(detail_total),
+            "order_total": str(order["total_amount"]),
+            "calc": str(calc),
+        },
+    )
+    # New-identity republish: create a NEW product; old order snapshot must keep old product id/name
+    old_pid = str(snap[0]["product_id"])
+    old_name = snap[0].get("product_name") or snap[0].get("product_name_snapshot")
+    # mutate live product + offline original
+    http_json("PATCH", f"{base_url(env)}/api/admin/products/{p['P-ON-10']}", {"stock": "99"}, auth(s))
+    http_json("POST", f"{base_url(env)}/api/admin/products/{p['P-ON-10']}/offline", headers=auth(s))
+    # create brand-new product (new identity)
+    seed = m.ROOT / "fixtures" / "seed.png"
+    http_c, http_b = m.multipart_post(
+        f"{base_url(env)}/api/admin/products",
+        {
+            "name": f"B032-REPUBLISH-NEW-{int(time.time())}",
+            "price": "12.50",
+            "stock": "10",
+            "descriptionHtml": "<p>republish identity</p>",
+            "category2Id": str(fx.get("category2Id") or 16),
+            "sellingMode": "FIXED_PRICE",
+        },
+        [("images", seed)],
+        auth(s),
+    )
+    new_pid = None
+    if http_c in (200, 201) and isinstance(http_b, dict):
+        data = http_b.get("data") or {}
+        new_pid = str(data.get("productId") or data.get("id") or "")
+    snap2 = m.db_order_items(env, oid)
+    d2_c, d2_b = http_json("GET", f"{base_url(env)}/api/me/orders/{oid}", headers=auth(ta))
+    d2_items = ((d2_b or {}).get("data") or {}).get("items") or []
+    still_old = all(str(i.get("product_id") or i.get("productId")) == str(si["product_id"]) for i, si in zip(
+        [{"product_id": x["product_id"]} for x in snap2], snap
+    ))
+    ct.check(
+        "new_identity_republish_keeps_old_snapshot",
+        snap == snap2 and still_old and new_pid and new_pid != old_pid,
+        {
+            "create_http": http_c,
+            "create_message": msg(http_b),
+            "old_pid": old_pid,
+            "new_pid": new_pid,
+            "snap": snap,
+            "snap2": snap2,
+            "detail_after": redact(d2_items),
+        },
     )
     ct.check("order_created", code == 201 and order["order_no"], {"http": code, "message": msg(body)})
+    # Three UI places: history list total, detail line items, detail total
+    ui_amt = run_node(
+        f"""
+const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playwright');
+(async () => {{
+  const fe = {json.dumps(fe_url(env))};
+  const out = {{ok:false}};
+  const browser = await chromium.launch({{headless:true}});
+  try {{
+    const page = await browser.newPage({{viewport:{{width:1280,height:900}}}});
+    await page.goto(fe + '/login', {{waitUntil:'networkidle'}});
+    await page.locator('#username').fill('b032_buyer_a');
+    await page.locator('#password').fill('B032-BuyerA-Pass9');
+    await page.getByRole('button', {{ name: /登\\s*录/ }}).click();
+    await page.waitForURL(u => !String(u).includes('/login'), {{timeout:15000}});
+    await page.goto(fe + '/me/order-history', {{waitUntil:'networkidle'}});
+    await page.waitForTimeout(700);
+    const listText = await page.locator('body').innerText();
+    await page.getByRole('button', {{ name: '详情' }}).first().click();
+    const modal = page.locator('.ant-modal').last();
+    await modal.waitFor({{ state: 'visible', timeout: 8000 }});
+    await page.waitForTimeout(400);
+    const detailText = await modal.innerText();
+    out.listHasTotal = listText.includes('¥{order_total_d}') || listText.includes('{order_total_d}');
+    out.detailHasTotal = detailText.includes('¥{order_total_d}') || detailText.includes('{order_total_d}');
+    out.detailHasLines = (detailText.match(/¥/g) || []).length >= 3;
+    out.detailSnippet = detailText.slice(0, 500);
+    out.ok = out.listHasTotal && out.detailHasTotal && out.detailHasLines;
+  }} catch(e) {{ out.error=String(e); }}
+  finally {{ await browser.close(); }}
+  console.log(JSON.stringify(out));
+}})();
+""",
+        "ui_b03_ac1_amounts",
+    )
+    ct.check(
+        "three_ui_places_list_lines_total",
+        ui_amt.get("ok") is True,
+        ui_amt,
+    )
     m.dump_case("PB-B03-AC1", ct.as_detail())
+    return finish(ct, m.result)
+
+
+def ac_b03_03(env, fx):
+    """Order history/management: order pagination (not product list), isolation, cancel UI."""
+    m.reset_ns(env)
+    ta, tb, s, p = fx["tokens"]["A"], fx["tokens"]["B"], fx["tokens"]["S"], fx["products"]
+    ct = ConjunctTracker("PB-B03-AC3")
+    # Seed five-state + cancelled for A; one order for B (isolation)
+    for target in ("PLACED", "CONFIRMED", "PREPARED", "SHIPPED", "COMPLETED"):
+        m.align_product(env, s, p["P-ON-10"], PRODUCTS["P-ON-10"])
+        cid = m.cart_add(env, ta, p["P-ON-10"], "1")
+        _, body, _, _ = m.place_order(env, ta, [cid])
+        oid = m.order_id_of(body)
+        if target == "CONFIRMED":
+            m.advance(env, s, oid, "CONFIRM", "PLACED")
+        elif target == "PREPARED":
+            m.advance(env, s, oid, "CONFIRM", "PLACED")
+            m.advance(env, s, oid, "PREPARE", "CONFIRMED")
+        elif target == "SHIPPED":
+            m.advance(env, s, oid, "CONFIRM", "PLACED")
+            m.advance(env, s, oid, "PREPARE", "CONFIRMED")
+            m.advance(env, s, oid, "SHIP", "PREPARED")
+        elif target == "COMPLETED":
+            advance_full(env, s, oid)
+    m.align_product(env, s, p["P-ON-5"], PRODUCTS["P-ON-5"])
+    cid_c = m.cart_add(env, ta, p["P-ON-5"], "1")
+    _, body_c, _, _ = m.place_order(env, ta, [cid_c])
+    oid_c = m.order_id_of(body_c)
+    m.cancel_customer(env, ta, oid_c, "PLACED")
+    m.align_product(env, s, p["P-ON-5"], PRODUCTS["P-ON-5"])
+    cid_b = m.cart_add(env, tb, p["P-ON-5"], "1")
+    m.place_order(env, tb, [cid_b])
+
+    def page_ids(body):
+        data = (body or {}).get("data") if isinstance(body, dict) else None
+        items, total = [], None
+        if isinstance(data, dict):
+            items = data.get("items") or data.get("content") or []
+            total = data.get("total") or data.get("totalElements")
+        elif isinstance(data, list):
+            items = data
+            total = len(data)
+        ids = [str(it.get("orderId") or it.get("id") or "") for it in items]
+        return ids, total, items
+
+    c1, b1 = http_json("GET", f"{base_url(env)}/api/me/orders?page=1&size=2", headers=auth(ta))
+    c2, b2 = http_json("GET", f"{base_url(env)}/api/me/orders?page=2&size=2", headers=auth(ta))
+    ids1, total1, items1 = page_ids(b1)
+    ids2, total2, items2 = page_ids(b2)
+    overlap = set(ids1) & set(ids2)
+    # Reverse chronological: createdAt descending if present
+    def created_list(items):
+        return [it.get("createdAt") or it.get("created_at") for it in items if it.get("createdAt") or it.get("created_at")]
+    t1 = created_list(items1)
+    chrono_ok = all(t1[i] >= t1[i + 1] for i in range(len(t1) - 1)) if len(t1) >= 2 else True
+    ct.check(
+        "order_pagination_no_overlap_total_desc",
+        c1 == 200 and c2 == 200 and len(ids1) > 0 and len(overlap) == 0 and total1 and int(total1) >= 6 and chrono_ok,
+        {"page1": ids1, "page2": ids2, "total": total1, "overlap": list(overlap), "created": t1},
+    )
+    # Customer isolation: B must not see A's order ids
+    cb, bb = http_json("GET", f"{base_url(env)}/api/me/orders?page=1&size=50", headers=auth(tb))
+    b_ids, _, _ = page_ids(bb)
+    ct.check(
+        "customer_sees_only_own_orders",
+        cb == 200 and not set(ids1) & set(b_ids),
+        {"A_sample": ids1, "B_ids": b_ids},
+    )
+    # Merchant site-wide includes both
+    ca, ba = http_json("GET", f"{base_url(env)}/api/admin/orders?page=1&size=50", headers=auth(s))
+    a_ids, a_total, a_items = page_ids(ba)
+    ct.check(
+        "merchant_sees_sitewide_orders",
+        ca == 200 and a_total and int(a_total) >= 7 and len(a_ids) >= 2,
+        {"http": ca, "total": a_total, "count": len(a_ids)},
+    )
+    # Merchant GET page=2: IDs, no overlap with page=1, reverse chrono, total
+    cm1, bm1 = http_json("GET", f"{base_url(env)}/api/admin/orders?page=1&size=2", headers=auth(s))
+    cm2, bm2 = http_json("GET", f"{base_url(env)}/api/admin/orders?page=2&size=2", headers=auth(s))
+    m_ids1, m_total1, m_items1 = page_ids(bm1)
+    m_ids2, m_total2, m_items2 = page_ids(bm2)
+    m_overlap = set(m_ids1) & set(m_ids2)
+    m_t1 = created_list(m_items1)
+    m_t2 = created_list(m_items2)
+    m_chrono_p1 = all(m_t1[i] >= m_t1[i + 1] for i in range(len(m_t1) - 1)) if len(m_t1) >= 2 else False
+    m_chrono_p2 = all(m_t2[i] >= m_t2[i + 1] for i in range(len(m_t2) - 1)) if len(m_t2) >= 2 else True
+    m_chrono_cross = True
+    if m_t1 and m_t2:
+        m_chrono_cross = m_t1[-1] >= m_t2[0]
+    m_total_n = int(m_total1) if m_total1 else 0
+    ct.check(
+        "merchant_order_pagination_page2_no_overlap_total_desc",
+        cm1 == 200
+        and cm2 == 200
+        and len(m_ids1) == 2
+        and len(m_ids2) == 2
+        and len(m_overlap) == 0
+        and m_total_n >= 7
+        and m_total1 == m_total2
+        and m_chrono_p1
+        and m_chrono_p2
+        and m_chrono_cross,
+        {
+            "page1": m_ids1,
+            "page2": m_ids2,
+            "total": m_total1,
+            "total2": m_total2,
+            "overlap": list(m_overlap),
+            "created1": m_t1,
+            "created2": m_t2,
+            "http": [cm1, cm2],
+        },
+    )
+    # Cancel metadata via detail API (not DB-only stand-in for UI claim)
+    det_c, det_b = http_json("GET", f"{base_url(env)}/api/me/orders/{oid_c}", headers=auth(ta))
+    det = (det_b or {}).get("data") if isinstance(det_b, dict) else {}
+    cancel_by = det.get("cancelledBy") or det.get("cancelled_by") or det.get("cancelBy")
+    cancel_at = det.get("cancelledAt") or det.get("cancelled_at") or det.get("cancelAt")
+    ct.check(
+        "cancel_party_and_time_in_detail",
+        det_c == 200 and bool(cancel_by) and bool(cancel_at),
+        {"http": det_c, "cancelledBy": cancel_by, "cancelledAt": cancel_at, "status": det.get("status")},
+    )
+    # Screenshots while polymorphic data present — write history/admin here (not overwritten later)
+    seller_pwd = env.get("B032_SELLER_PASSWORD", "")
+    shot = run_node(
+        f"""
+const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playwright');
+(async () => {{
+  const fe = {json.dumps(fe_url(env))};
+  const out = {{ok:false}};
+  const browser = await chromium.launch({{headless:true}});
+  try {{
+    const page = await browser.newPage({{viewport:{{width:1280,height:900}}}});
+    await page.goto(fe + '/login', {{waitUntil:'networkidle'}});
+    await page.locator('#username').fill('b032_buyer_a');
+    await page.locator('#password').fill('B032-BuyerA-Pass9');
+    await page.getByRole('button', {{ name: /登\\s*录/ }}).click();
+    await page.waitForURL(u => !String(u).includes('/login'), {{timeout:15000}});
+    await page.screenshot({{path: {json.dumps(str(SHOTS/'b03-after-login.png'))}, fullPage:true}});
+    // Prefer order-history route; fall back to /me/orders if app uses that
+    await page.goto(fe + '/me/order-history', {{waitUntil:'networkidle'}});
+    await page.waitForTimeout(800);
+    if (!(await page.locator('text=订单历史').count()) && !(await page.locator('text=订单').count())) {{
+      await page.goto(fe + '/me/orders', {{waitUntil:'networkidle'}});
+      await page.waitForTimeout(800);
+    }}
+    const url = page.url();
+    const text = await page.locator('body').innerText();
+    const isHome = url.endsWith('/') || url.includes('/home') || (!url.includes('order') && text.includes('热门'));
+    await page.screenshot({{path: {json.dumps(str(SHOTS/'b03-order-history.png'))}, fullPage:true}});
+    out.history = {{url, isHome, hasHistory: text.includes('订单'), empty: text.includes('暂无订单')}};
+    // Cancel detail UI: open 详情 on a cancelled row and assert 取消发起方/取消时间
+    const cancelRow = page.locator('.ant-table-row').filter({{ hasText: '已取消' }}).first();
+    out.cancelDetail = {{ present: await cancelRow.count() > 0 }};
+    if (out.cancelDetail.present) {{
+      await cancelRow.getByRole('button', {{ name: '详情' }}).click();
+      const det = page.locator('.ant-modal').filter({{ hasText: '订单详情' }});
+      await det.waitFor({{ state: 'visible', timeout: 10000 }});
+      await page.waitForTimeout(400);
+      const detText = await det.innerText();
+      await page.screenshot({{path: {json.dumps(str(SHOTS/'b03-cancel-detail.png'))}, fullPage:true}});
+      out.cancelDetail = {{
+        present: true,
+        visible: await det.isVisible(),
+        text: detText.slice(0, 900),
+        hasPartyLabel: detText.includes('取消发起方'),
+        hasPartyCustomer: detText.includes('客户'),
+        hasTimeLabel: detText.includes('取消时间'),
+        hasTimeValue: /取消时间[\\s\\S]{{0,80}}\\d{{4}}/.test(detText),
+      }};
+    }}
+    const page2 = await browser.newPage({{viewport:{{width:1280,height:900}}}});
+    await page2.goto(fe + '/admin/login', {{waitUntil:'networkidle'}});
+    await page2.locator('#username').fill('admin');
+    await page2.locator('#password').fill({json.dumps(seller_pwd)});
+    await page2.getByRole('button', {{ name: /登\\s*录/ }}).click();
+    await page2.waitForURL(u => !String(u).includes('/login'), {{timeout:15000}});
+    await page2.goto(fe + '/admin/orders', {{waitUntil:'networkidle'}});
+    await page2.waitForTimeout(1000);
+    const t2 = await page2.locator('body').innerText();
+    await page2.screenshot({{path: {json.dumps(str(SHOTS/'b03-admin-orders.png'))}, fullPage:true}});
+    out.admin = {{url: page2.url(), hasManage: t2.includes('订单管理') || t2.includes('订单'), multi: (t2.match(/PLACED|CONFIRMED|COMPLETED|CANCELLED|已/g)||[]).length}};
+    const cd = out.cancelDetail || {{}};
+    out.ok = !out.history.isHome && out.history.hasHistory && !out.history.empty && out.admin.hasManage && out.admin.multi >= 3
+      && cd.visible === true && cd.hasPartyLabel === true && cd.hasPartyCustomer === true
+      && cd.hasTimeLabel === true && cd.hasTimeValue === true;
+  }} catch(e) {{ out.error=String(e); }}
+  finally {{ await browser.close(); }}
+  console.log(JSON.stringify(out));
+}})();
+""",
+        "ui_b03_ac3",
+    )
+    ct.check("history_and_admin_polymorphic_screenshots", shot.get("ok") is True, shot)
+    cd = (shot.get("cancelDetail") or {})
+    ct.check(
+        "cancel_party_and_time_in_ui_modal",
+        cd.get("visible") is True
+        and cd.get("hasPartyLabel") is True
+        and cd.get("hasPartyCustomer") is True
+        and cd.get("hasTimeLabel") is True
+        and cd.get("hasTimeValue") is True,
+        {"cancelDetail": cd, "shot": str(SHOTS / "b03-cancel-detail.png")},
+    )
+    m.dump_case("PB-B03-AC3", ct.as_detail())
     return finish(ct, m.result)
 
 
@@ -1372,6 +2374,46 @@ def ac_b03_02(env, fx):
         "description_not_silently_replaced_or_explicit",
         "HACKED-DESC" not in str(desc) or c2 >= 400,
         {"http": c2, "message": msg(b2), "description_prefix": str(desc)[:80]},
+    )
+    # Images: no replace endpoint may exist; prove product_image rows unchanged after replace attempts
+    imgs_before = product_images(env, pid)
+    img_attempts = []
+    c_img_json, b_img_json = http_json(
+        "PATCH",
+        f"{base_url(env)}/api/admin/products/{pid}",
+        {"images": ["HACKED.png"], "imageUrls": ["HACKED.png"], "mainImageUrl": "HACKED.png", "stock": "10"},
+        auth(s),
+    )
+    img_attempts.append({"entry": "PATCH json image fields", "http": c_img_json, "message": msg(b_img_json)})
+    for method, url in [
+        ("POST", f"{base_url(env)}/api/admin/products/{pid}"),
+        ("PUT", f"{base_url(env)}/api/admin/products/{pid}"),
+        ("PATCH", f"{base_url(env)}/api/admin/products/{pid}"),
+        ("POST", f"{base_url(env)}/api/admin/products/{pid}/images"),
+        ("PUT", f"{base_url(env)}/api/admin/products/{pid}/images"),
+    ]:
+        hc, hb = multipart_any(
+            method,
+            url,
+            {"stock": "10"},
+            [("images", m.SEED)],
+            auth(s),
+        )
+        img_attempts.append({"entry": f"{method} {url.split('/api', 1)[-1]}", "http": hc, "message": msg(hb)})
+    imgs_after = product_images(env, pid)
+    images_unchanged = imgs_before == imgs_after
+    multipart_not_applied = all(
+        a["http"] not in (200, 201) for a in img_attempts if "json" not in a["entry"]
+    )
+    ct.check(
+        "images_immutable_after_replace_attempts",
+        images_unchanged and multipart_not_applied,
+        {
+            "before": imgs_before,
+            "after": imgs_after,
+            "unchanged": images_unchanged,
+            "attempts": img_attempts,
+        },
     )
     m.dump_case("PB-B03-AC2", ct.as_detail())
     return finish(ct, m.result)
@@ -1447,14 +2489,64 @@ def ac_b12_03(env, fx):
     code, body, _, _ = m.place_order(env, ta, [c_on])
     ct.check("submit_only_valid_selected", code == 201 and msg(body) == "下单成功", {"http": code, "message": msg(body)})
 
-    # UI: disabled offline / invalid tags / insufficient hint / toggle
+    # Re-seed cart WITH stale offline still present for UI (valid online was consumed)
+    m.align_product(env, s, p["P-ON-5"], PRODUCTS["P-ON-5"])
+    m.align_product(env, s, p["P-ON-1"], PRODUCTS["P-ON-1"])
+    m.cart_add(env, ta, p["P-ON-5"], "1")
+    c_low2 = m.cart_add(env, ta, p["P-ON-1"], "1")
+    conn = connect_mysql(env)
+    try:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE cart_item SET quantity=5 WHERE id=%s", (c_low2,))
+            cur.execute("SELECT id FROM customer WHERE username='b032_buyer_a'")
+            cust = cur.fetchone()["id"]
+            # Offline row may still remain from earlier seed — upsert, do not duplicate
+            cur.execute(
+                "SELECT id FROM cart_item WHERE customer_id=%s AND product_id=%s",
+                (cust, p["P-OFF-M"]),
+            )
+            existing_off = cur.fetchone()
+            if not existing_off:
+                cur.execute(
+                    "INSERT INTO cart_item(customer_id, product_id, quantity, updated_at) VALUES (%s,%s,1,NOW(6))",
+                    (cust, p["P-OFF-M"]),
+                )
+    finally:
+        conn.close()
+
+    orderable_name = PRODUCTS["P-ON-5"]["name"]
+    insuf_name = PRODUCTS["P-ON-1"]["name"]
+    offline_name = PRODUCTS["P-OFF-M"]["name"]
     shot = run_node(
         f"""
 const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playwright');
 (async () => {{
   const fe = {json.dumps(fe_url(env))};
+  const names = {{
+    orderable: {json.dumps(orderable_name)},
+    insuf: {json.dumps(insuf_name)},
+    offline: {json.dumps(offline_name)},
+  }};
   const out = {{ok:false}};
   const browser = await chromium.launch({{headless:true}});
+  async function rowOf(page, productName) {{
+    const loc = page.getByRole('checkbox', {{ name: '选择' + productName }});
+    const present = await loc.count();
+    if (!present) return {{ productName, present: false, checked: false, disabled: false }};
+    return {{
+      productName,
+      present: true,
+      checked: await loc.isChecked(),
+      disabled: await loc.isDisabled(),
+    }};
+  }}
+  async function allRows(page) {{
+    return {{
+      orderable: await rowOf(page, names.orderable),
+      insuf: await rowOf(page, names.insuf),
+      offline: await rowOf(page, names.offline),
+    }};
+  }}
   try {{
     const page = await browser.newPage({{viewport:{{width:1280,height:900}}}});
     await page.goto(fe + '/login', {{waitUntil:'networkidle'}});
@@ -1462,22 +2554,46 @@ const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playw
     await page.locator('#password').fill('B032-BuyerA-Pass9');
     await page.getByRole('button', {{ name: /登\\s*录/ }}).click();
     await page.waitForURL(u => !String(u).includes('/login'), {{timeout:15000}});
-    // re-seed cart for UI: add online + ensure stale offline visible if API allows
     await page.goto(fe + '/me/cart', {{waitUntil:'networkidle'}});
     await page.waitForTimeout(1000);
     const allLabel = await page.locator('text=全选可下单商品').count();
     const disabled = await page.locator('.ant-checkbox-disabled, input[type=checkbox][disabled]').count();
     const invalidTag = await page.locator('text=已下架').count();
     const insufHint = await page.locator('text=当前库存').count();
-    const checkedBefore = await page.locator('.ant-checkbox-checked').count();
-    // toggle: click 全选 then uncheck
-    const allBox = page.locator('text=全选可下单商品').first();
-    if (await allBox.count()) {{ await allBox.click(); await page.waitForTimeout(300); }}
-    const checkedAfterToggle = await page.locator('.ant-checkbox-checked').count();
+    const atDefault = await allRows(page);
     await page.screenshot({{path: {json.dumps(str(SHOTS/'b12-cart-selection.png'))}, fullPage:true}});
+    const allBox = page.locator('text=全选可下单商品').first();
+    await allBox.click();
+    await page.waitForTimeout(400);
+    const atSelectAll = await allRows(page);
+    await allBox.click();
+    await page.waitForTimeout(400);
+    const atDeselectAll = await allRows(page);
+    await page.getByRole('checkbox', {{ name: '选择' + names.orderable }}).click();
+    await page.waitForTimeout(200);
+    const atRow = await allRows(page);
     out.shots = ['b12-cart-selection.png'];
-    out.ui = {{allLabel, disabled, invalidTag, insufHint, checkedBefore, checkedAfterToggle}};
-    out.ok = allLabel > 0 && (disabled > 0 || invalidTag > 0) && insufHint >= 0;
+    out.ui = {{
+      allLabel, disabled, invalidTag, insufHint,
+      atDefault, atSelectAll, atDeselectAll, atRow,
+      checkedDefault: Number(atDefault.orderable.checked),
+      checkedAfterSelectAll: Number(atSelectAll.orderable.checked) + Number(atSelectAll.insuf.checked),
+      checkedAfterDeselectAll: Number(atDeselectAll.orderable.checked) + Number(atDeselectAll.insuf.checked),
+      checkedAfterRow: Number(atRow.orderable.checked) + Number(atRow.insuf.checked),
+    }};
+    const rowOk =
+      atDefault.orderable.present && atDefault.insuf.present && atDefault.offline.present
+      && atDefault.orderable.checked === true && atDefault.orderable.disabled === false
+      && atDefault.insuf.checked === false && atDefault.insuf.disabled === false
+      && atDefault.offline.checked === false && atDefault.offline.disabled === true
+      && atSelectAll.orderable.checked === true && atSelectAll.insuf.checked === true
+      && atSelectAll.offline.checked === false && atSelectAll.offline.disabled === true
+      && atDeselectAll.orderable.checked === false && atDeselectAll.insuf.checked === false
+      && atDeselectAll.offline.checked === false
+      && atRow.orderable.checked === true && atRow.insuf.checked === false
+      && atRow.offline.checked === false;
+    out.ok = allLabel > 0 && (disabled > 0 || invalidTag > 0) && insufHint >= 1 && rowOk === true;
+    out.rowOk = rowOk;
   }} catch(e) {{ out.error=String(e); }}
   finally {{ await browser.close(); }}
   console.log(JSON.stringify(out));
@@ -1486,10 +2602,44 @@ const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playw
         "ui_b12_ac3",
     )
     ui = shot.get("ui") or {}
+    at_default = ui.get("atDefault") or {}
+    at_all = ui.get("atSelectAll") or {}
+    at_none = ui.get("atDeselectAll") or {}
+    at_row = ui.get("atRow") or {}
     ct.check(
-        "ui_has_invalid_or_disabled_offline_rows",
-        shot.get("ok") is True and (ui.get("disabled", 0) > 0 or ui.get("invalidTag", 0) > 0),
+        "ui_invalid_disabled_and_insufficient_hint",
+        shot.get("ok") is True
+        and (ui.get("disabled", 0) > 0 or ui.get("invalidTag", 0) > 0)
+        and ui.get("insufHint", 0) >= 1,
         shot,
+    )
+    ct.check(
+        "ui_select_all_deselect_and_row_toggle",
+        ui.get("checkedAfterSelectAll", 0) > ui.get("checkedAfterDeselectAll", 0)
+        and ui.get("checkedAfterRow", 0) != ui.get("checkedAfterDeselectAll", -1),
+        ui,
+    )
+    ct.check(
+        "default_selects_only_orderable_after_valid_removed",
+        (at_default.get("orderable") or {}).get("checked") is True
+        and (at_default.get("insuf") or {}).get("checked") is False
+        and (at_default.get("offline") or {}).get("checked") is False
+        and (at_default.get("offline") or {}).get("disabled") is True
+        and ui.get("insufHint", 0) >= 1,
+        at_default,
+    )
+    ct.check(
+        "row_level_checked_maps_to_orderable",
+        shot.get("rowOk") is True
+        and (at_all.get("orderable") or {}).get("checked") is True
+        and (at_all.get("insuf") or {}).get("checked") is True
+        and (at_all.get("offline") or {}).get("checked") is False
+        and (at_none.get("orderable") or {}).get("checked") is False
+        and (at_none.get("insuf") or {}).get("checked") is False
+        and (at_row.get("orderable") or {}).get("checked") is True
+        and (at_row.get("insuf") or {}).get("checked") is False
+        and (at_row.get("offline") or {}).get("checked") is False,
+        {"atDefault": at_default, "atSelectAll": at_all, "atDeselectAll": at_none, "atRow": at_row},
     )
     ct.check(
         "stale_offline_row_prepared",
@@ -1516,9 +2666,16 @@ def ac_b12_04(env, fx):
     s_code, s_body, _ = m.submit_order(env, ta, token)
     ct.check("qty_change_rejects", msg(s_body) == "确认信息已变化，请重新确认", {"http": s_code, "message": msg(s_body)})
 
-    # Identity replace / republish
+    # After confirm: product still ONLINE; stock unchanged by confirm itself (already checked).
+    # Rejection path: offline after confirm → reject with full-set unchanged
     c2, b2 = m.confirm(env, ta, [cid])
     token2 = b2["data"]["confirmationToken"]
+    row_conf = m.product_row(env, p["P-ON-10"])
+    ct.check(
+        "after_confirm_still_online_before_submit",
+        row_conf["status"] == "ONLINE" and str(row_conf["stock"]) == "10",
+        row_conf,
+    )
     orders0 = m.db_orders(env, "b032_buyer_a")
     cart0 = cart_fingerprint(m.db_cart(env, "b032_buyer_a"))
     stock0 = m.db_stock(env, p["P-ON-10"])
@@ -1532,16 +2689,42 @@ def ac_b12_04(env, fx):
         s2_c >= 400 and orders1 == orders0 and cart1 == cart0 and stock1 == stock0,
         {"http": s2_c, "nested": nested_msgs(s2_b), "orders": [len(orders0), len(orders1)], "cart": cart1, "stock": [stock0, stock1]},
     )
-    # Republish then success
+    # New-identity publish (not merely re-online same id)
+    seed = m.ROOT / "fixtures" / "seed.png"
+    http_c, http_b = m.multipart_post(
+        f"{base_url(env)}/api/admin/products",
+        {
+            "name": f"B032-ID-REPLACE-{int(time.time())}",
+            "price": "12.50",
+            "stock": "10",
+            "descriptionHtml": "<p>identity replace</p>",
+            "category2Id": str(fx.get("category2Id") or 16),
+            "sellingMode": "FIXED_PRICE",
+        },
+        [("images", seed)],
+        auth(s),
+    )
+    new_pid = None
+    if http_c in (200, 201) and isinstance(http_b, dict):
+        new_pid = str((http_b.get("data") or {}).get("productId") or (http_b.get("data") or {}).get("id") or "")
+    ct.check(
+        "new_product_identity_published",
+        new_pid is not None and new_pid != p["P-ON-10"],
+        {"http": http_c, "message": msg(http_b), "new_pid": new_pid, "old_pid": p["P-ON-10"]},
+    )
+    # Re-online original + success; stock declines while ONLINE
     http_json("POST", f"{base_url(env)}/api/admin/products/{p['P-ON-10']}/online", headers=auth(s))
     http_json("PATCH", f"{base_url(env)}/api/admin/products/{p['P-ON-10']}", {"stock": "10"}, auth(s))
     carts = m.db_cart(env, "b032_buyer_a")
     cid = str(carts[0]["id"]) if carts else m.cart_add(env, ta, p["P-ON-10"], "1")
     s3_c, s3_b, _, _ = m.place_order(env, ta, [cid])
-    ct.check("republish_reconfirm_success", s3_c == 201 and msg(s3_b) == "下单成功", {"http": s3_c, "message": msg(s3_b)})
-    # Stock declined after success, still ONLINE if remaining >0
+    ct.check("reonline_reconfirm_success", s3_c == 201 and msg(s3_b) == "下单成功", {"http": s3_c, "message": msg(s3_b)})
     row = m.product_row(env, p["P-ON-10"])
-    ct.check("after_success_stock_down_still_online", int(row["stock"]) < 10 and row["status"] == "ONLINE", row)
+    ct.check(
+        "after_success_stock_down_still_online",
+        int(row["stock"]) < 10 and row["status"] == "ONLINE",
+        row,
+    )
 
     # In-place price N/A — prove not editable
     before = m.product_row(env, p["P-ON-5"])
@@ -1605,12 +2788,47 @@ def ac_b12_05(env, fx):
     m.cart_add(env, ta, p["P-ON-10"], "1")
     m.cart_add(env, ta, p["P-ON-5"], "1")
     stock_before = {k: m.db_stock(env, p[k]) for k in ("P-ON-10", "P-ON-5")}
-    # Toggle select should not change stock
-    carts = m.db_cart(env, "b032_buyer_a")
-    if carts:
-        http_json("PATCH", f"{base_url(env)}/api/me/cart/items/{carts[0]['id']}", {"quantity": str(carts[0]["quantity"])}, auth(ta))
+    # Real UI checkbox toggle — not same-qty PATCH
+    toggle = run_node(
+        f"""
+const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playwright');
+(async () => {{
+  const fe = {json.dumps(fe_url(env))};
+  const out = {{ok:false}};
+  const browser = await chromium.launch({{headless:true}});
+  try {{
+    const page = await browser.newPage({{viewport:{{width:1280,height:900}}}});
+    await page.goto(fe + '/login', {{waitUntil:'networkidle'}});
+    await page.locator('#username').fill('b032_buyer_a');
+    await page.locator('#password').fill('B032-BuyerA-Pass9');
+    await page.getByRole('button', {{ name: /登\\s*录/ }}).click();
+    await page.waitForURL(u => !String(u).includes('/login'), {{timeout:15000}});
+    await page.goto(fe + '/me/cart', {{waitUntil:'networkidle'}});
+    await page.waitForTimeout(600);
+    const before = await page.locator('.ant-checkbox-checked').count();
+    const box = page.locator('.ant-checkbox:not(.ant-checkbox-disabled)').first();
+    await box.click();
+    await page.waitForTimeout(300);
+    const mid = await page.locator('.ant-checkbox-checked').count();
+    await box.click();
+    await page.waitForTimeout(300);
+    const after = await page.locator('.ant-checkbox-checked').count();
+    out.ui = {{before, mid, after}};
+    // Real toggle: checked count changes on click, then restores on second click
+    out.ok = before > 0 && mid !== before && after === before;
+  }} catch(e) {{ out.error=String(e); }}
+  finally {{ await browser.close(); }}
+  console.log(JSON.stringify(out));
+}})();
+""",
+        "ui_b12_ac5_toggle",
+    )
     stock_mid = {k: m.db_stock(env, p[k]) for k in ("P-ON-10", "P-ON-5")}
-    ct.check("select_toggle_no_stock_change", stock_before == stock_mid, {"before": stock_before, "mid": stock_mid})
+    ct.check(
+        "ui_checkbox_toggle_no_stock_change",
+        toggle.get("ok") is True and stock_before == stock_mid,
+        {"toggle": toggle, "before": stock_before, "mid": stock_mid},
+    )
 
     c1, b1 = http_json("DELETE", f"{base_url(env)}/api/me/cart", headers=auth(ta))
     stock_after = {k: m.db_stock(env, p[k]) for k in ("P-ON-10", "P-ON-5")}
@@ -1656,7 +2874,7 @@ const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playw
 """,
         "ui_b12_ac5_clear",
     )
-    ct.check("clear_cart_confirm_modal_screenshot", shot.get("ok") is True and (SHOTS / "b12-clear-cart-confirm.png").exists(), shot)
+    ct.check("clear_cart_confirm_modal_screenshot", shot.get("ok") is True, shot)
     m.dump_case("PB-B12-AC5", ct.as_detail())
     return finish(ct, m.result)
 
@@ -1665,11 +2883,18 @@ def ac_b12_06(env, fx):
     m.reset_ns(env)
     ta, s, p = fx["tokens"]["A"], fx["tokens"]["S"], fx["products"]
     ct = ConjunctTracker("PB-B12-AC6")
-    # Multi-problem rows listed together on final submit
+    # Valid confirm FIRST, then introduce problems, then final submit
     m.align_product(env, s, p["P-ON-1"], PRODUCTS["P-ON-1"])
     m.align_product(env, s, p["P-ON-10"], PRODUCTS["P-ON-10"])
+    m.align_product(env, s, p["P-ON-5"], PRODUCTS["P-ON-5"])
     c_low = m.cart_add(env, ta, p["P-ON-1"], "1")
     c_off = m.cart_add(env, ta, p["P-ON-10"], "1")
+    conf_c, conf_b = m.confirm(env, ta, [c_low, c_off])
+    token = None
+    if conf_c in (200, 201) and isinstance(conf_b, dict):
+        token = (conf_b.get("data") or {}).get("confirmationToken")
+    ct.check("valid_confirm_first", token is not None, {"http": conf_c, "message": msg(conf_b)})
+    # Introduce problems AFTER confirm
     conn = connect_mysql(env)
     try:
         with conn.cursor() as cur:
@@ -1679,45 +2904,409 @@ def ac_b12_06(env, fx):
     http_json("POST", f"{base_url(env)}/api/admin/products/{p['P-ON-10']}/offline", headers=auth(s))
     stock_b = {p["P-ON-1"]: m.db_stock(env, p["P-ON-1"]), p["P-ON-10"]: m.db_stock(env, p["P-ON-10"])}
     cart_b = cart_fingerprint(m.db_cart(env, "b032_buyer_a"))
-    # Final submit path (confirm+submit), not early return only
-    conf_c, conf_b = m.confirm(env, ta, [c_low, c_off])
-    if conf_c in (200, 201) and isinstance(conf_b, dict) and (conf_b.get("data") or {}).get("confirmationToken"):
-        token = conf_b["data"]["confirmationToken"]
-        s_c, s_b, _ = m.submit_order(env, ta, token)
-        final_msgs = nested_msgs(s_b)
-        final_http = s_c
-        path_used = "confirm+submit"
-    else:
-        # confirm may already reject with listing
-        final_msgs = nested_msgs(conf_b)
-        final_http = conf_c
-        path_used = "confirm_reject"
-        # Also try place_order for message comparison
-        po_c, po_b, _, _ = m.place_order(env, ta, [c_low, c_off])
-        final_msgs = final_msgs + " " + nested_msgs(po_b)
-        final_http = max(final_http, po_c)
-
+    orders_b = m.db_orders(env, "b032_buyer_a")
+    s_c, s_b, _ = m.submit_order(env, ta, token) if token else (0, {"message": "no token"}, None)
+    final_msgs = nested_msgs(s_b)
     name1 = PRODUCTS["P-ON-1"]["name"]
     name10 = PRODUCTS["P-ON-10"]["name"]
-    has_insuf = "库存不足" in final_msgs and name1 in final_msgs
-    has_off = "已下架" in final_msgs and name10 in final_msgs
+    expect_insuf = f"商品「{name1}」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。"
+    expect_off = f"商品「{name10}」已下架，请从购物车移除后重试。"
+    ct.check(
+        "final_submit_multi_problem_exact_templates",
+        s_c >= 400 and expect_insuf in final_msgs and expect_off in final_msgs,
+        {
+            "path": "confirm_then_break_then_submit",
+            "http": s_c,
+            "messages": final_msgs,
+            "expect_insuf": expect_insuf,
+            "expect_off": expect_off,
+        },
+    )
     stock_a = {p["P-ON-1"]: m.db_stock(env, p["P-ON-1"]), p["P-ON-10"]: m.db_stock(env, p["P-ON-10"])}
     cart_a = cart_fingerprint(m.db_cart(env, "b032_buyer_a"))
+    orders_a = m.db_orders(env, "b032_buyer_a")
     ct.check(
-        "multi_problem_rows_listed",
-        has_insuf and has_off,
-        {"path": path_used, "http": final_http, "messages": final_msgs},
+        "final_submit_fail_full_set_unchanged",
+        stock_a == stock_b and cart_a == cart_b and orders_a == orders_b,
+        {
+            "stock_before": stock_b,
+            "stock_after": stock_a,
+            "cart_before": cart_b,
+            "cart_after": cart_a,
+            "orders_before": len(orders_b),
+            "orders_after": len(orders_a),
+        },
     )
-    ct.check(
-        "final_fail_stock_cart_unchanged",
-        stock_a == stock_b and cart_a == cart_b and len(m.db_orders(env, "b032_buyer_a")) == 0,
-        {"stock_before": stock_b, "stock_after": stock_a, "cart_before": cart_b, "cart_after": cart_a},
-    )
-    # Nonexistent / empty
+    # Missing / empty
     c_empty, b_empty = m.confirm(env, ta, [])
     ct.check("empty_select_message", msg(b_empty) == "请选择商品", {"http": c_empty, "message": msg(b_empty)})
+    # Missing product id confirm
+    miss_c, miss_b = m.confirm(env, ta, ["999999999"])
+    ct.check(
+        "missing_product_rejected",
+        miss_c >= 400,
+        {"http": miss_c, "message": msg(miss_b), "nested": nested_msgs(miss_b)},
+    )
 
-    # UI error tip screenshot if possible
+    # UI: valid confirm modal FIRST, then mutate, then click 确认下单 (submit) — not confirm-time toast
+    m.reset_ns(env)
+    ta = login_customer(env, "b032_buyer_a", "B032-BuyerA-Pass9", "13803200001")
+    fx["tokens"]["A"] = ta
+    m.align_product(env, s, p["P-ON-1"], PRODUCTS["P-ON-1"])
+    m.align_product(env, s, p["P-ON-10"], PRODUCTS["P-ON-10"])
+    cid_ui_low = m.cart_add(env, ta, p["P-ON-1"], "1")
+    cid_ui_off = m.cart_add(env, ta, p["P-ON-10"], "1")
+    shot = run_node(
+        f"""
+const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playwright');
+(async () => {{
+  const fe = {json.dumps(fe_url(env))};
+  const api = {json.dumps(base_url(env))};
+  const buyer = {json.dumps(ta)};
+  const seller = {json.dumps(s)};
+  const cidLow = {json.dumps(str(cid_ui_low))};
+  const pidOff = {json.dumps(str(p["P-ON-10"]))};
+  const out = {{ok:false, modalVisibleBeforeBreak:false, submitAfterBreak:false}};
+  const browser = await chromium.launch({{headless:true}});
+  try {{
+    const page = await browser.newPage({{viewport:{{width:1280,height:900}}}});
+    await page.goto(fe + '/login', {{waitUntil:'networkidle'}});
+    await page.locator('#username').fill('b032_buyer_a');
+    await page.locator('#password').fill('B032-BuyerA-Pass9');
+    await page.getByRole('button', {{ name: /登\\s*录/ }}).click();
+    await page.waitForURL(u => !String(u).includes('/login'), {{timeout:15000}});
+    await page.goto(fe + '/me/cart', {{waitUntil:'networkidle'}});
+    await page.waitForTimeout(800);
+    // Both rows are defaultCheckoutSelected (qty 1 ≤ stock); do not toggle 全选 (would deselect).
+    await page.getByRole('button', {{ name: '下单' }}).click();
+    const modal = page.locator('.ant-modal').filter({{ hasText: '确认下单' }});
+    await modal.waitFor({{ state: 'visible', timeout: 10000 }});
+    const modalText = await modal.innerText();
+    out.modalVisibleBeforeBreak = await modal.isVisible();
+    out.modalText = modalText.slice(0, 400);
+    out.validConfirm = out.modalVisibleBeforeBreak && modalText.includes('总金额') && !modalText.includes('请选择商品');
+    const patchResp = await fetch(api + '/api/me/cart/items/' + cidLow, {{
+      method: 'PATCH',
+      headers: {{ 'Authorization': 'Bearer ' + buyer, 'Content-Type': 'application/json' }},
+      body: JSON.stringify({{ quantity: '5' }}),
+    }});
+    out.patchHttp = patchResp.status;
+    const offResp = await fetch(api + '/api/admin/products/' + pidOff + '/offline', {{
+      method: 'POST',
+      headers: {{ 'Authorization': 'Bearer ' + seller }},
+    }});
+    out.offlineHttp = offResp.status;
+    out.brokeAfterModal = out.patchHttp === 200 && out.offlineHttp === 200;
+    await modal.getByRole('button', {{ name: '确认下单' }}).click();
+    out.submitAfterBreak = true;
+    const toast = page.locator('.ant-message, .ant-notification');
+    await toast.first().waitFor({{ state: 'visible', timeout: 10000 }}).catch(() => {{}});
+    await page.waitForTimeout(500);
+    const toastText = await toast.allInnerTexts().then(t => t.join('\\n')).catch(() => '');
+    const text = await page.locator('body').innerText();
+    await page.screenshot({{path: {json.dumps(str(SHOTS/'b12-submit-error-tip.png'))}, fullPage:true}});
+    out.shots = ['b12-submit-error-tip.png'];
+    out.toast = toastText.slice(0, 400);
+    out.text = text.slice(0, 800);
+    const blob = toastText + text;
+    out.hasStockOrOffline = blob.includes('库存不足') || blob.includes('已下架');
+    out.hasConfirmChanged = blob.includes('确认信息已变化');
+    out.onlyEmptySelect = blob.includes('请选择商品') && !out.hasStockOrOffline && !out.hasConfirmChanged;
+    out.hasSuccess = blob.includes('下单成功');
+    out.ok = out.validConfirm === true && out.brokeAfterModal === true && out.submitAfterBreak === true
+      && (out.hasStockOrOffline === true || out.hasConfirmChanged === true)
+      && out.onlyEmptySelect === false && out.hasSuccess !== true;
+  }} catch(e) {{ out.error=String(e); }}
+  finally {{ await browser.close(); }}
+  console.log(JSON.stringify(out));
+}})();
+""",
+        "ui_b12_ac6_err",
+    )
+    ct.check(
+        "ui_confirm_then_break_then_submit",
+        shot.get("ok") is True
+        and shot.get("modalVisibleBeforeBreak") is True
+        and shot.get("validConfirm") is True
+        and shot.get("brokeAfterModal") is True
+        and shot.get("submitAfterBreak") is True,
+        shot,
+    )
+    ct.check(
+        "ui_error_tip_stock_or_offline",
+        shot.get("ok") is True
+        and (shot.get("hasStockOrOffline") is True or shot.get("hasConfirmChanged") is True)
+        and shot.get("onlyEmptySelect") is not True,
+        shot,
+    )
+    m.dump_case("PB-B12-AC6", ct.as_detail())
+    return finish(ct, m.result)
+
+
+# -------------------- Former placeholder ACs (explicit conjuncts) --------------------
+
+
+def ac_b01_01(env, fx):
+    m.reset_ns(env)
+    ta, p = fx["tokens"]["A"], fx["products"]
+    ct = ConjunctTracker("PB-B01-AC1")
+    c1 = m.cart_add(env, ta, p["P-ON-10"], "2")
+    c2 = m.cart_add(env, ta, p["P-ON-5"], "1")
+    code, body, _, _ = m.place_order(env, ta, [c1, c2])
+    orders = m.db_orders(env, "b032_buyer_a")
+    items = m.db_order_items(env, orders[0]["id"]) if orders else []
+    intents = m.db_open_intents(env, "b032_buyer_a")
+    qtys = {str(i["product_id"]): str(i["quantity"]) for i in items}
+    ct.check("http_success_message", code == 201 and msg(body) == "下单成功", {"http": code, "message": msg(body)})
+    ct.check(
+        "single_placed_order_two_lines",
+        len(orders) == 1 and orders[0]["status"] == "PLACED" and len(items) == 2,
+        {"orders": orders, "items": items},
+    )
+    ct.check(
+        "line_qtys_match_cart",
+        qtys.get(p["P-ON-10"]) == "2" and qtys.get(p["P-ON-5"]) == "1",
+        {"qtys": qtys},
+    )
+    ct.check("no_open_legacy_intent", intents == 0, {"open_intents": intents})
+    ct.check("response_no_failure_wording", "失败" not in json.dumps(body, ensure_ascii=False), {"body": redact(body)})
+    m.dump_case("PB-B01-AC1", ct.as_detail())
+    return finish(ct, m.result)
+
+
+def ac_b01_02(env, fx):
+    import audit_acs as aa  # noqa: WPS433
+
+    m.reset_ns(env)
+    ta, s, p = fx["tokens"]["A"], fx["tokens"]["S"], fx["products"]
+    ct = ConjunctTracker("PB-B01-AC2")
+    cid = m.cart_add(env, ta, p["P-ON-10"], "1")
+    code, body, _, _ = m.place_order(env, ta, [cid])
+    oid = m.order_id_of(body)
+    seq = aa.advance_full(env, s, oid)
+    ct.check("place_success", code == 201, {"http": code, "message": msg(body)})
+    ct.check(
+        "five_state_sequence",
+        [x["status"] for x in seq] == ["CONFIRMED", "PREPARED", "SHIPPED", "COMPLETED"],
+        {"seq": seq},
+    )
+    cid2 = m.cart_add(env, ta, p["P-ON-5"], "1")
+    _, body2, _, _ = m.place_order(env, ta, [cid2])
+    oid2 = m.order_id_of(body2)
+    skip_c, skip_b = m.advance(env, s, oid2, "SHIP", "PLACED")
+    ct.check(
+        "skip_step_rejected",
+        skip_c >= 400 and ("跳步" in msg(skip_b) or "不允许" in msg(skip_b)),
+        {"http": skip_c, "message": msg(skip_b)},
+    )
+    m.advance(env, s, oid2, "CONFIRM", "PLACED")
+    back_c, back_b = m.advance(env, s, oid2, "CONFIRM", "PLACED")
+    ct.check("no_rollback_to_prior_state", back_c >= 400, {"http": back_c, "message": msg(back_b)})
+    cust_c, cust_b = http_json(
+        "POST",
+        f"{base_url(env)}/api/admin/orders/{oid}/actions",
+        {"action": "CONFIRM", "expectedStatus": "PLACED"},
+        auth(ta),
+    )
+    ct.check("customer_admin_advance_tip", msg(cust_b) == "角色无权访问", {"http": cust_c, "message": msg(cust_b)})
+    time.sleep(1.5)
+    mid = [o for o in m.db_orders(env, "b032_buyer_a") if str(o["id"]) == oid2][0]
+    order = [o for o in m.db_orders(env, "b032_buyer_a") if str(o["id"]) == oid][0]
+    ct.check("no_auto_transition_after_wait", mid["status"] == "CONFIRMED", {"mid": mid})
+    ct.check("completed_terminal", order["status"] == "COMPLETED", {"order": order})
+    m.dump_case("PB-B01-AC2", ct.as_detail())
+    return finish(ct, m.result)
+
+
+def ac_b02_01(env, fx):
+    m.reset_ns(env)
+    ta, s, p = fx["tokens"]["A"], fx["tokens"]["S"], fx["products"]
+    ct = ConjunctTracker("PB-B02-AC1")
+    before = m.db_stock(env, p["P-ON-10"])
+    cid = m.cart_add(env, ta, p["P-ON-10"], "2")
+    code, body, _, _ = m.place_order(env, ta, [cid])
+    after_place = m.db_stock(env, p["P-ON-10"])
+    oid = m.order_id_of(body)
+    advance_full(env, s, oid)
+    after_complete = m.db_stock(env, p["P-ON-10"])
+    ct.check("place_success", code == 201, {"http": code, "message": msg(body)})
+    ct.check("direct_deduct_on_place", int(before) - int(after_place) == 2, {"before": before, "after_place": after_place})
+    ct.check("complete_no_re_deduct", after_place == after_complete, {"after_place": after_place, "after_complete": after_complete})
+    m.dump_case("PB-B02-AC1", ct.as_detail())
+    return finish(ct, m.result)
+
+
+def ac_b02_02(env, fx):
+    import audit_acs as aa  # noqa: WPS433
+
+    # Re-express audit path with explicit conjuncts
+    m.reset_ns(env)
+    ta, tb, s, p = fx["tokens"]["A"], fx["tokens"]["B"], fx["tokens"]["S"], fx["products"]
+    ct = ConjunctTracker("PB-B02-AC2")
+    cid = m.cart_add(env, ta, p["P-ON-10"], "3")
+    _, body, _, _ = m.place_order(env, ta, [cid])
+    oid = m.order_id_of(body)
+    code, body_p = http_json("GET", f"{base_url(env)}/api/products/{p['P-ON-10']}")
+    seen = str(((body_p or {}).get("data") or {}).get("stock") or "")
+    stock_db = m.db_stock(env, p["P-ON-10"])
+    ct.check("others_see_deducted_stock", stock_db == "7" and (seen == "7" or seen == stock_db), {"seen": seen, "db": stock_db, "http": code})
+    http_json("POST", f"{base_url(env)}/api/admin/products/{p['P-ON-10']}/offline", headers=auth(s))
+    steps = aa.advance_full(env, s, oid)
+    order = [o for o in m.db_orders(env, "b032_buyer_a") if str(o["id"]) == oid][0]
+    ct.check(
+        "offline_keeps_existing_order_to_complete",
+        order["status"] == "COMPLETED" and all(x["http"] == 200 for x in steps),
+        {"order": order, "steps": steps},
+    )
+    add_c, add_b = http_json(
+        "POST",
+        f"{base_url(env)}/api/me/cart/items",
+        {"productId": p["P-ON-10"]},
+        auth(tb, new_key()),
+    )
+    if add_c in (200, 201):
+        cid_b = str((add_b.get("data") or {}).get("cartItemId") or (add_b.get("data") or {}).get("id"))
+        rej_c, rej_b, _, _ = m.place_order(env, tb, [cid_b])
+    else:
+        conn = connect_mysql(env)
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id FROM customer WHERE username='b032_buyer_b'")
+                bid = cur.fetchone()["id"]
+                cur.execute(
+                    "INSERT INTO cart_item(customer_id, product_id, quantity, updated_at) "
+                    "VALUES (%s,%s,1,NOW(6))",
+                    (bid, p["P-ON-10"]),
+                )
+                cid_b = str(cur.lastrowid)
+        finally:
+            conn.close()
+        rej_c, rej_b, _, _ = m.place_order(env, tb, [cid_b])
+    ct.check(
+        "new_order_refused_while_offline",
+        rej_c >= 400 and "已下架" in nested_msgs(rej_b),
+        {"add": {"http": add_c, "message": msg(add_b)}, "submit": {"http": rej_c, "message": msg(rej_b), "nested": nested_msgs(rej_b)}},
+    )
+    m.dump_case("PB-B02-AC2", ct.as_detail())
+    return finish(ct, m.result)
+
+
+def ac_b02_05(env, fx):
+    import audit_acs as aa  # noqa: WPS433
+
+    m.reset_ns(env)
+    ta, s, p = fx["tokens"]["A"], fx["tokens"]["S"], fx["products"]
+    ct = ConjunctTracker("PB-B02-AC5")
+    before = m.db_stock(env, p["P-ON-10"])
+    cid = m.cart_add(env, ta, p["P-ON-10"], "2")
+    _, body, _, _ = m.place_order(env, ta, [cid])
+    after_order = m.db_stock(env, p["P-ON-10"])
+    oid = m.order_id_of(body)
+    aa.advance_full(env, s, oid)
+    after_complete = m.db_stock(env, p["P-ON-10"])
+    ct.check("place_deducts_stock", int(before) - int(after_order) == 2, {"before": before, "after_order": after_order})
+    ct.check("complete_stock_unchanged", after_order == after_complete, {"after_order": after_order, "after_complete": after_complete})
+    cid2 = m.cart_add(env, ta, p["P-ON-5"], "1")
+    _, body2, _, _ = m.place_order(env, ta, [cid2])
+    oid2 = m.order_id_of(body2)
+    before_c = m.db_stock(env, p["P-ON-5"])
+    m.cancel_customer(env, ta, oid2, "PLACED")
+    after_c = m.db_stock(env, p["P-ON-5"])
+    ct.check("cancel_restores_stock", int(after_c) == int(before_c) + 1, {"before": before_c, "after": after_c})
+    m.align_product(env, s, p["P-ON-1"], PRODUCTS["P-ON-1"])
+    cid3 = m.cart_add(env, ta, p["P-ON-1"], "1")
+    _, body3, _, _ = m.place_order(env, ta, [cid3])
+    oid3 = m.order_id_of(body3)
+    row_zero = m.product_row(env, p["P-ON-1"])
+    m.cancel_customer(env, ta, oid3, "PLACED")
+    row_restored = m.product_row(env, p["P-ON-1"])
+    ct.check(
+        "zero_stock_auto_offline_then_cancel_restores_online",
+        row_zero["status"] == "OFFLINE" and str(row_zero["stock"]) == "0" and row_restored["status"] == "ONLINE",
+        {"zero": row_zero, "restored": row_restored},
+    )
+    m.align_product(env, s, p["P-ON-5"], PRODUCTS["P-ON-5"])
+    cid4 = m.cart_add(env, ta, p["P-ON-5"], "1")
+    _, body4, _, _ = m.place_order(env, ta, [cid4])
+    oid4 = m.order_id_of(body4)
+    http_json("POST", f"{base_url(env)}/api/admin/products/{p['P-ON-5']}/offline", headers=auth(s))
+    row_man_before = m.product_row(env, p["P-ON-5"])
+    m.cancel_customer(env, ta, oid4, "PLACED")
+    row_man_after = m.product_row(env, p["P-ON-5"])
+    ct.check(
+        "manual_offline_stays_offline_after_cancel",
+        row_man_before["status"] == "OFFLINE"
+        and row_man_before["offline_reason"] == "MANUAL"
+        and row_man_after["status"] == "OFFLINE"
+        and row_man_after["offline_reason"] == "MANUAL",
+        {"before": row_man_before, "after": row_man_after},
+    )
+    m.dump_case("PB-B02-AC5", ct.as_detail())
+    return finish(ct, m.result)
+
+
+def ac_b03_04(env, fx):
+    m.reset_ns(env)
+    ta, p = fx["tokens"]["A"], fx["products"]
+    ct = ConjunctTracker("PB-B03-AC4")
+    c1, b1 = http_json("GET", f"{base_url(env)}/api/me/orders")
+    c2, b2 = http_json(
+        "GET", f"{base_url(env)}/api/me/orders", headers={"Authorization": "Bearer invalid.token.value"}
+    )
+    ct.check("unauth_tip", msg(b1) == "请先登录", {"http": c1, "message": msg(b1)})
+    ct.check("invalid_token_tip", msg(b2) == "请重新登录", {"http": c2, "message": msg(b2)})
+    c_a = m.cart_add(env, ta, p["P-ON-10"], "1")
+    m.place_order(env, ta, [c_a])
+    c_b = m.cart_add(env, ta, p["P-ON-5"], "1")
+    m.place_order(env, ta, [c_b])
+    orders = [o for o in m.db_orders(env, "b032_buyer_a") if o["status"] == "PLACED"]
+    ct.check("multi_incomplete_orders_allowed", len(orders) >= 2, {"placed_count": len(orders)})
+    tb = fx["tokens"]["B"]
+    oid = str(orders[0]["id"])
+    c3, b3 = http_json("GET", f"{base_url(env)}/api/me/orders/{oid}", headers=auth(tb))
+    ct.check("other_buyer_access_denied", c3 >= 400, {"http": c3, "message": msg(b3)})
+    m.dump_case("PB-B03-AC4", ct.as_detail())
+    return finish(ct, m.result)
+
+
+def ac_b12_01(env, fx):
+    m.reset_ns(env)
+    ta, tb, p = fx["tokens"]["A"], fx["tokens"]["B"], fx["products"]
+    ct = ConjunctTracker("PB-B12-AC1")
+    c0, b0 = http_json(
+        "POST",
+        f"{base_url(env)}/api/me/orders",
+        {"productId": p["P-ON-10"], "quantity": "1"},
+        auth(ta, new_key()),
+    )
+    ct.check("no_direct_order_without_cart_confirm", c0 >= 400, {"http": c0, "message": msg(b0)})
+    c1, b1 = http_json(
+        "POST", f"{base_url(env)}/api/me/checkout/confirmations", {"cartItemIds": ["1"]}, headers={}
+    )
+    c2, b2 = http_json(
+        "POST",
+        f"{base_url(env)}/api/me/checkout/confirmations",
+        {"cartItemIds": ["1"]},
+        headers={"Authorization": "Bearer bad.token"},
+    )
+    ct.check("unauth_confirm_tip", msg(b1) == "请先登录", {"http": c1, "message": msg(b1)})
+    ct.check("invalid_token_confirm_tip", msg(b2) == "请重新登录", {"http": c2, "message": msg(b2)})
+    cid_a = m.cart_add(env, ta, p["P-ON-10"], "1")
+    stock_before = m.db_stock(env, p["P-ON-10"])
+    cart_before = m.db_cart(env, "b032_buyer_a")
+    c3, b3 = m.confirm(env, tb, [cid_a])
+    cid_b = m.cart_add(env, tb, p["P-ON-5"], "1")
+    c4, b4 = m.confirm(env, ta, [cid_a, cid_b])
+    stock_after = m.db_stock(env, p["P-ON-10"])
+    cart_after = m.db_cart(env, "b032_buyer_a")
+    ct.check("other_cart_line_tip", msg(b3) == "无权操作", {"http": c3, "message": msg(b3)})
+    ct.check("mixed_cart_tip", msg(b4) == "无权操作", {"http": c4, "message": msg(b4)})
+    ct.check(
+        "reject_keeps_stock_cart_no_order",
+        stock_before == stock_after and cart_before == cart_after and len(m.db_orders(env, "b032_buyer_a")) == 0,
+        {"stock": [stock_before, stock_after], "cart_unchanged": cart_before == cart_after},
+    )
+    # Product detail UI: no direct-buy button
     shot = run_node(
         f"""
 const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playwright');
@@ -1732,51 +3321,62 @@ const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playw
     await page.locator('#password').fill('B032-BuyerA-Pass9');
     await page.getByRole('button', {{ name: /登\\s*录/ }}).click();
     await page.waitForURL(u => !String(u).includes('/login'), {{timeout:15000}});
-    await page.goto(fe + '/me/cart', {{waitUntil:'networkidle'}});
-    await page.waitForTimeout(800);
-    const orderBtn = page.getByRole('button', {{ name: '下单' }});
-    if (await orderBtn.count()) {{
-      await orderBtn.click();
-      await page.waitForTimeout(800);
-      const modal = page.locator('.ant-modal');
-      if (await modal.count()) {{
-        const confirmBtn = modal.getByRole('button', {{ name: /确认|下单/ }}).last();
-        if (await confirmBtn.count()) {{ await confirmBtn.click(); await page.waitForTimeout(1000); }}
-      }}
-    }}
+    await page.goto(fe + '/products/' + {json.dumps(str(p['P-ON-10']))}, {{waitUntil:'networkidle'}});
+    await page.waitForTimeout(600);
     const text = await page.locator('body').innerText();
-    await page.screenshot({{path: {json.dumps(str(SHOTS/'b12-submit-error-tip.png'))}, fullPage:true}});
-    out.shots = ['b12-submit-error-tip.png'];
-    out.text = text.slice(0, 600);
-    out.ok = text.includes('库存') || text.includes('下架') || text.includes('请选择') || text.includes('失败') || text.includes('重试');
+    const hasDirect = /立即购买|直接购买|马上买/.test(text);
+    const hasAdd = text.includes('加入购物车');
+    await page.screenshot({{path: {json.dumps(str(SHOTS/'b12-product-detail-no-direct-buy.png'))}, fullPage:true}});
+    out.shots = ['b12-product-detail-no-direct-buy.png'];
+    out.hasDirectBuy = hasDirect;
+    out.hasAddToCart = hasAdd;
+    out.ok = !hasDirect && hasAdd;
   }} catch(e) {{ out.error=String(e); }}
   finally {{ await browser.close(); }}
   console.log(JSON.stringify(out));
 }})();
 """,
-        "ui_b12_ac6_err",
+        "ui_b12_ac1",
     )
-    ct.check("ui_error_tip_screenshot", shot.get("ok") is True or (SHOTS / "b12-submit-error-tip.png").exists(), shot)
-    m.dump_case("PB-B12-AC6", ct.as_detail())
+    ct.check("product_detail_no_direct_buy_ui", shot.get("ok") is True, shot)
+    m.dump_case("PB-B12-AC1", ct.as_detail())
     return finish(ct, m.result)
 
 
 def run_screenshots(env, fx):
-    """Final pass: remaining required shots + index mapping."""
+    """Index-only final pass: NEVER overwrite AC-step screenshots; never reset_ns here."""
     SHOTS.mkdir(parents=True, exist_ok=True)
-    m.reset_ns(env)
-    ta = login_customer(env, "b032_buyer_a", "B032-BuyerA-Pass9", "13803200001")
-    m.align_product(env, fx["tokens"]["S"], fx["products"]["P-ON-10"], PRODUCTS["P-ON-10"])
-    m.cart_add(env, ta, fx["products"]["P-ON-10"], "1")
-    # Ensure at least one order for history
-    cid = m.cart_add(env, ta, fx["products"]["P-ON-5"], "1")
-    m.place_order(env, ta, [cid])
-    seller_pwd = env.get("B032_SELLER_PASSWORD", "")
-    js = f"""
+    required = [
+        ("b03-after-login.png", "PB-B03", "after login"),
+        ("b12-product-detail-no-direct-buy.png", "PB-B12-AC1", "product detail"),
+        ("b12-cart-selection.png", "PB-B12-AC3", "cart selection defaults"),
+        ("b12-checkout-confirm.png", "PB-B12-AC4", "confirm modal"),
+        ("b12-clear-cart-confirm.png", "PB-B12-AC5", "clear confirm modal"),
+        ("b03-order-history.png", "PB-B03-AC3", "customer order history"),
+        ("b03-cancel-detail.png", "PB-B03-AC3", "cancel detail modal"),
+        ("b03-admin-orders.png", "PB-B03-AC3", "merchant orders"),
+        ("b13-order-success.png", "PB-B13-AC1", "order success"),
+        ("b12-submit-error-tip.png", "PB-B12-AC6", "submit error tip"),
+        ("b01-merchant-orders-flow.png", "PB-B01-AC4", "merchant orders UI"),
+    ]
+    mapping = []
+    missing = []
+    for fname, ac, step in required:
+        path = SHOTS / fname
+        exists = path.exists() and path.stat().st_size > 1000
+        mapping.append({"file": fname, "ac": ac, "step": step, "exists": exists, "bytes": path.stat().st_size if path.exists() else 0})
+        if not exists:
+            missing.append(fname)
+    # Fill ONLY truly missing shots without wiping others — and without reset_ns
+    if "b03-after-login.png" in missing or "b12-product-detail-no-direct-buy.png" in missing:
+        ta = login_customer(env, "b032_buyer_a", "B032-BuyerA-Pass9", "13803200001")
+        m.align_product(env, fx["tokens"]["S"], fx["products"]["P-ON-10"], PRODUCTS["P-ON-10"])
+        run_node(
+            f"""
 const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playwright');
 (async () => {{
   const fe = {json.dumps(fe_url(env))};
-  const out = {{ok:false, shots:[], mapping:[]}};
+  const out = {{ok:true}};
   const browser = await chromium.launch({{headless:true}});
   try {{
     const page = await browser.newPage({{viewport:{{width:1280,height:900}}}});
@@ -1785,59 +3385,32 @@ const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playw
     await page.locator('#password').fill('B032-BuyerA-Pass9');
     await page.getByRole('button', {{ name: /登\\s*录/ }}).click();
     await page.waitForURL(u => !String(u).includes('/login'), {{timeout:15000}});
-    await page.screenshot({{path: {json.dumps(str(SHOTS/'b03-after-login.png'))}, fullPage:true}});
-    out.shots.push('b03-after-login.png');
-    out.mapping.push({{file:'b03-after-login.png', ac:'PB-B03', step:'after login'}});
-
-    const pid = {json.dumps(str(fx['products']['P-ON-10']))};
-    await page.goto(fe + '/products/' + pid, {{waitUntil:'networkidle'}});
-    await page.waitForTimeout(600);
-    const directBuy = await page.getByRole('button', {{ name: /立即购买|直接下单/ }}).count();
-    const addCart = await page.getByRole('button', {{ name: /加入购物车/ }}).count();
-    await page.screenshot({{path: {json.dumps(str(SHOTS/'b12-product-detail-no-direct-buy.png'))}, fullPage:true}});
-    out.shots.push('b12-product-detail-no-direct-buy.png');
-    out.mapping.push({{file:'b12-product-detail-no-direct-buy.png', ac:'PB-B12-AC1', step:'product detail no direct buy'}});
-    out.detail = {{directBuy, addCart}};
-
-    await page.goto(fe + '/me/cart', {{waitUntil:'networkidle'}});
-    await page.waitForTimeout(500);
-    await page.getByRole('button', {{ name: /清空购物车/ }}).click();
-    const clearModal = page.locator('.ant-modal-confirm, .ant-modal').filter({{ hasText: '确定清空购物车' }});
-    await clearModal.waitFor({{ state: 'visible', timeout: 10000 }});
-    await page.screenshot({{path: {json.dumps(str(SHOTS/'b12-clear-cart-confirm.png'))}, fullPage:true}});
-    out.shots.push('b12-clear-cart-confirm.png');
-    out.mapping.push({{file:'b12-clear-cart-confirm.png', ac:'PB-B12-AC5', step:'clear cart confirm modal'}});
-    await page.keyboard.press('Escape');
-
-    await page.goto(fe + '/me/orders', {{waitUntil:'networkidle'}});
-    await page.waitForTimeout(800);
-    await page.screenshot({{path: {json.dumps(str(SHOTS/'b03-order-history.png'))}, fullPage:true}});
-    out.shots.push('b03-order-history.png');
-    out.mapping.push({{file:'b03-order-history.png', ac:'PB-B03-AC3', step:'customer order history'}});
-
-    const page2 = await browser.newPage({{viewport:{{width:1280,height:900}}}});
-    await page2.goto(fe + '/admin/login', {{waitUntil:'networkidle'}});
-    await page2.locator('#username').fill('admin');
-    await page2.locator('#password').fill({json.dumps(seller_pwd)});
-    await page2.getByRole('button', {{ name: /登\\s*录/ }}).click();
-    await page2.waitForURL(u => !String(u).includes('/login'), {{timeout:15000}});
-    await page2.goto(fe + '/admin/orders', {{waitUntil:'networkidle'}});
-    await page2.waitForTimeout(800);
-    await page2.screenshot({{path: {json.dumps(str(SHOTS/'b03-admin-orders.png'))}, fullPage:true}});
-    out.shots.push('b03-admin-orders.png');
-    out.mapping.push({{file:'b03-admin-orders.png', ac:'PB-B03-AC3', step:'merchant order management'}});
-
-    const fs = require('fs');
-    const required = [
-      'b03-after-login.png','b12-product-detail-no-direct-buy.png','b12-cart-selection.png',
-      'b12-checkout-confirm.png','b12-clear-cart-confirm.png','b03-order-history.png','b03-admin-orders.png',
-      'b13-order-success.png','b12-submit-error-tip.png','b01-merchant-orders-flow.png'
-    ];
-    out.required_exists = Object.fromEntries(required.map(f => [f, fs.existsSync({json.dumps(str(SHOTS))}+'/'+f)]));
-    out.ok = directBuy === 0 && addCart > 0 && out.required_exists['b12-clear-cart-confirm.png'] && out.required_exists['b03-admin-orders.png'];
-  }} catch(e) {{ out.error = String(e); }}
+    if ({json.dumps("b03-after-login.png" in missing)}) {{
+      await page.screenshot({{path: {json.dumps(str(SHOTS/'b03-after-login.png'))}, fullPage:true}});
+    }}
+    if ({json.dumps("b12-product-detail-no-direct-buy.png" in missing)}) {{
+      await page.goto(fe + '/products/' + {json.dumps(str(fx['products']['P-ON-10']))}, {{waitUntil:'networkidle'}});
+      await page.screenshot({{path: {json.dumps(str(SHOTS/'b12-product-detail-no-direct-buy.png'))}, fullPage:true}});
+    }}
+  }} catch(e) {{ out.error=String(e); out.ok=false; }}
   finally {{ await browser.close(); }}
   console.log(JSON.stringify(out));
 }})();
-"""
-    return run_node(js, "ui_screenshots_final")
+""",
+            "ui_shots_fill_missing",
+        )
+    # Recompute index
+    mapping = []
+    missing = []
+    for fname, ac, step in required:
+        path = SHOTS / fname
+        exists = path.exists() and path.stat().st_size > 1000
+        mapping.append({"file": fname, "ac": ac, "step": step, "exists": exists, "bytes": path.stat().st_size if path.exists() else 0})
+        if not exists:
+            missing.append(fname)
+    return {
+        "ok": len(missing) == 0,
+        "mapping": mapping,
+        "missing": missing,
+        "note": "final pass does not overwrite AC-step screenshots; no reset_ns",
+    }

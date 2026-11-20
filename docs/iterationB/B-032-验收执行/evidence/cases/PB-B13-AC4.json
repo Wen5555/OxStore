@@ -33,14 +33,14 @@
       "evidence": {
         "cart_before": [
           {
-            "id": "609",
+            "id": "1307",
             "product_id": "26",
             "quantity": "1"
           }
         ],
         "cart_after": [
           {
-            "id": "609",
+            "id": "1307",
             "product_id": "26",
             "quantity": "1"
           }
@@ -57,7 +57,7 @@
       "disposition_if_fail": "FAIL",
       "evidence": {
         "race": {
-          "B": {
+          "A": {
             "ok": true,
             "result": [
               201,
@@ -65,8 +65,8 @@
                 "code": 0,
                 "message": "下单成功",
                 "data": {
-                  "orderId": "336",
-                  "orderNo": "84287fda-905f-42f8-9b73-11247f6d53ca",
+                  "orderId": "765",
+                  "orderNo": "2afced7e-4aa5-4479-a7d8-3812ebc7ea1e",
                   "customerId": "3",
                   "status": "PLACED",
                   "items": [
@@ -79,7 +79,7 @@
                     }
                   ],
                   "totalAmount": "12.50",
-                  "createdAt": "2026-11-20T20:34:52.768284",
+                  "createdAt": "2026-11-20T22:20:30.589584",
                   "cancelledBy": null,
                   "cancelledAt": null,
                   "cancelReason": null,
@@ -88,11 +88,11 @@
                   ]
                 }
               },
-              "054fa59d-f2e9-4632-8088-d0ed4791bf36"
+              "78b9c96e-a9de-4992-ab19-99fa5e1e2692"
             ],
-            "elapsed_ms": 8
+            "elapsed_ms": 11
           },
-          "A": {
+          "B": {
             "ok": true,
             "result": [
               409,
@@ -100,13 +100,13 @@
                 "code": 40909,
                 "message": "订单已提交，请勿重复下单",
                 "data": {
-                  "orderId": "336",
-                  "orderNo": "84287fda-905f-42f8-9b73-11247f6d53ca"
+                  "orderId": "765",
+                  "orderNo": "2afced7e-4aa5-4479-a7d8-3812ebc7ea1e"
                 }
               },
-              "054fa59d-f2e9-4632-8088-d0ed4791bf36"
+              "78b9c96e-a9de-4992-ab19-99fa5e1e2692"
             ],
-            "elapsed_ms": 9
+            "elapsed_ms": 12
           }
         },
         "stock": [
@@ -115,9 +115,19 @@
         ],
         "orders": 1
       }
+    },
+    {
+      "name": "same_product_new_settlement_key_allows_second_order",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 201,
+        "message": "下单成功",
+        "orders": 2
+      }
     }
   ],
-  "conjunct_pass": 5,
-  "conjunct_total": 5,
+  "conjunct_pass": 6,
+  "conjunct_total": 6,
   "conjunct_fail_names": []
 }

@@ -1,16 +1,18 @@
 {
   "execution_window": {
-    "started_at": "2026-11-20T12:34:07Z",
-    "ended_at": "2026-11-20T12:35:11Z",
-    "started_at_asia_singapore": "2026-11-20T20:34:07+08:00",
-    "ended_at_asia_singapore": "2026-11-20T20:35:11+08:00",
+    "started_at": "2026-11-20T14:19:31Z",
+    "ended_at": "2026-11-20T14:20:47Z",
+    "started_at_asia_singapore": "2026-11-20T22:19:31+08:00",
+    "ended_at_asia_singapore": "2026-11-20T22:20:47+08:00",
     "sut_sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
     "sut_branch": "develop",
     "db": "oxstore_b032_local",
     "delivery_baseline": "topic/r2@0cef9ec",
     "tx_probe_sql": "fixtures/b032_tx_probes.sql",
     "v8_sql": "fixtures/V8__close_legacy_fixed_price_intents.sql",
-    "second_audit": "OF-19"
+    "second_audit": "OF-19",
+    "third_audit": "OF-21",
+    "git_ops": "local-only; no commit/push/amend/rebase/reset/force until user auth"
   },
   "sut_sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
   "sut_branch": "develop",
@@ -22,7 +24,14 @@
     "db": "oxstore_b032_local",
     "expected": "oxstore_b032_local",
     "match": true,
-    "b032_products": 6,
+    "match_parts": {
+      "db_match": true,
+      "process_db_match": true,
+      "sut_sha_match": true,
+      "login_http_ok": true,
+      "classpath_ok": true
+    },
+    "b032_products": 20,
     "login_http": 200,
     "be_pid": "19608",
     "sut_sha_env": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
@@ -37,7 +46,7 @@
       "cmdline_has_shop_application": true,
       "cmdline_classpath_hint": true
     },
-    "binding_note": "process environ DB_NAME + develop HEAD + API login; env alone is not sufficient"
+    "binding_note": "process environ DB_NAME + develop HEAD + API login + classpath; env alone insufficient"
   },
   "total": 26,
   "pass": 25,
@@ -46,74 +55,172 @@
   "not_executed": 0,
   "screenshots": {
     "ok": true,
-    "shots": [
-      "b03-after-login.png",
-      "b12-product-detail-no-direct-buy.png",
-      "b12-clear-cart-confirm.png",
-      "b03-order-history.png",
-      "b03-admin-orders.png"
-    ],
     "mapping": [
       {
         "file": "b03-after-login.png",
         "ac": "PB-B03",
-        "step": "after login"
+        "step": "after login",
+        "exists": true,
+        "bytes": 54475
       },
       {
         "file": "b12-product-detail-no-direct-buy.png",
         "ac": "PB-B12-AC1",
-        "step": "product detail no direct buy"
+        "step": "product detail",
+        "exists": true,
+        "bytes": 24851
+      },
+      {
+        "file": "b12-cart-selection.png",
+        "ac": "PB-B12-AC3",
+        "step": "cart selection defaults",
+        "exists": true,
+        "bytes": 45566
+      },
+      {
+        "file": "b12-checkout-confirm.png",
+        "ac": "PB-B12-AC4",
+        "step": "confirm modal",
+        "exists": true,
+        "bytes": 35389
       },
       {
         "file": "b12-clear-cart-confirm.png",
         "ac": "PB-B12-AC5",
-        "step": "clear cart confirm modal"
+        "step": "clear confirm modal",
+        "exists": true,
+        "bytes": 42918
       },
       {
         "file": "b03-order-history.png",
         "ac": "PB-B03-AC3",
-        "step": "customer order history"
+        "step": "customer order history",
+        "exists": true,
+        "bytes": 70395
+      },
+      {
+        "file": "b03-cancel-detail.png",
+        "ac": "PB-B03-AC3",
+        "step": "cancel detail modal",
+        "exists": true,
+        "bytes": 75410
       },
       {
         "file": "b03-admin-orders.png",
         "ac": "PB-B03-AC3",
-        "step": "merchant order management"
+        "step": "merchant orders",
+        "exists": true,
+        "bytes": 116876
+      },
+      {
+        "file": "b13-order-success.png",
+        "ac": "PB-B13-AC1",
+        "step": "order success",
+        "exists": true,
+        "bytes": 26740
+      },
+      {
+        "file": "b12-submit-error-tip.png",
+        "ac": "PB-B12-AC6",
+        "step": "submit error tip",
+        "exists": true,
+        "bytes": 54201
+      },
+      {
+        "file": "b01-merchant-orders-flow.png",
+        "ac": "PB-B01-AC4",
+        "step": "merchant orders UI",
+        "exists": true,
+        "bytes": 57471
       }
     ],
-    "detail": {
-      "directBuy": 0,
-      "addCart": 1
-    },
-    "required_exists": {
-      "b03-after-login.png": true,
-      "b12-product-detail-no-direct-buy.png": true,
-      "b12-cart-selection.png": true,
-      "b12-checkout-confirm.png": true,
-      "b12-clear-cart-confirm.png": true,
-      "b03-order-history.png": true,
-      "b03-admin-orders.png": true,
-      "b13-order-success.png": true,
-      "b12-submit-error-tip.png": true,
-      "b01-merchant-orders-flow.png": true
-    },
-    "stderr_tail": "",
-    "stdout_tail": "\"b03-after-login.png\",\"ac\":\"PB-B03\",\"step\":\"after login\"},{\"file\":\"b12-product-detail-no-direct-buy.png\",\"ac\":\"PB-B12-AC1\",\"step\":\"product detail no direct buy\"},{\"file\":\"b12-clear-cart-confirm.png\",\"ac\":\"PB-B12-AC5\",\"step\":\"clear cart confirm modal\"},{\"file\":\"b03-order-history.png\",\"ac\":\"PB-B03-AC3\",\"step\":\"customer order history\"},{\"file\":\"b03-admin-orders.png\",\"ac\":\"PB-B03-AC3\",\"step\":\"merchant order management\"}],\"detail\":{\"directBuy\":0,\"addCart\":1},\"required_exists\":{\"b03-after-login.png\":true,\"b12-product-detail-no-direct-buy.png\":true,\"b12-cart-selection.png\":true,\"b12-checkout-confirm.png\":true,\"b12-clear-cart-confirm.png\":true,\"b03-order-history.png\":true,\"b03-admin-orders.png\":true,\"b13-order-success.png\":true,\"b12-submit-error-tip.png\":true,\"b01-merchant-orders-flow.png\":true}}\n",
-    "node_exit": 0
+    "missing": [],
+    "note": "final pass does not overwrite AC-step screenshots; no reset_ns"
   },
   "conjunct_table": [
     {
       "ac_id": "PB-B01-AC1",
       "ac_verdict": "PASS",
-      "conjunct": "(legacy single-verdict AC — no explicit conjunct list)",
+      "conjunct": "http_success_message",
       "pass": true,
-      "disposition_if_fail": null
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B01-AC1",
+      "ac_verdict": "PASS",
+      "conjunct": "single_placed_order_two_lines",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B01-AC1",
+      "ac_verdict": "PASS",
+      "conjunct": "line_qtys_match_cart",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B01-AC1",
+      "ac_verdict": "PASS",
+      "conjunct": "no_open_legacy_intent",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B01-AC1",
+      "ac_verdict": "PASS",
+      "conjunct": "response_no_failure_wording",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B01-AC2",
       "ac_verdict": "PASS",
-      "conjunct": "(legacy single-verdict AC — no explicit conjunct list)",
+      "conjunct": "place_success",
       "pass": true,
-      "disposition_if_fail": null
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B01-AC2",
+      "ac_verdict": "PASS",
+      "conjunct": "five_state_sequence",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B01-AC2",
+      "ac_verdict": "PASS",
+      "conjunct": "skip_step_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B01-AC2",
+      "ac_verdict": "PASS",
+      "conjunct": "no_rollback_to_prior_state",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B01-AC2",
+      "ac_verdict": "PASS",
+      "conjunct": "customer_admin_advance_tip",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B01-AC2",
+      "ac_verdict": "PASS",
+      "conjunct": "no_auto_transition_after_wait",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B01-AC2",
+      "ac_verdict": "PASS",
+      "conjunct": "completed_terminal",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B01-AC3",
@@ -139,14 +246,14 @@
     {
       "ac_id": "PB-B01-AC3",
       "ac_verdict": "PASS",
-      "conjunct": "merchant_cancel_placed",
+      "conjunct": "merchant_cancel_completed_rejected",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B01-AC3",
       "ac_verdict": "PASS",
-      "conjunct": "no_timeout_auto_cancel_source_and_wait",
+      "conjunct": "no_timeout_auto_cancel_scheduler_absent_and_wait_placed",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
@@ -188,35 +295,63 @@
     {
       "ac_id": "PB-B02-AC1",
       "ac_verdict": "PASS",
-      "conjunct": "(legacy single-verdict AC — no explicit conjunct list)",
+      "conjunct": "place_success",
       "pass": true,
-      "disposition_if_fail": null
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B02-AC1",
+      "ac_verdict": "PASS",
+      "conjunct": "direct_deduct_on_place",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B02-AC1",
+      "ac_verdict": "PASS",
+      "conjunct": "complete_no_re_deduct",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B02-AC2",
       "ac_verdict": "PASS",
-      "conjunct": "(legacy single-verdict AC — no explicit conjunct list)",
+      "conjunct": "others_see_deducted_stock",
       "pass": true,
-      "disposition_if_fail": null
+      "disposition_if_fail": "FAIL"
     },
     {
-      "ac_id": "PB-B02-AC3",
+      "ac_id": "PB-B02-AC2",
       "ac_verdict": "PASS",
-      "conjunct": "reject_non_numeric_and_signed",
+      "conjunct": "offline_keeps_existing_order_to_complete",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B02-AC2",
+      "ac_verdict": "PASS",
+      "conjunct": "new_order_refused_while_offline",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B02-AC3",
       "ac_verdict": "PASS",
-      "conjunct": "accept_valid_stock",
+      "conjunct": "reject_invalid_stock_exact_tip_and_stock_unchanged",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B02-AC3",
       "ac_verdict": "PASS",
-      "conjunct": "stock_edit_does_not_change_existing_order",
+      "conjunct": "accept_valid_stock_same_product",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B02-AC3",
+      "ac_verdict": "PASS",
+      "conjunct": "stock_edit_same_product_does_not_change_existing_order_lines",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
@@ -258,9 +393,37 @@
     {
       "ac_id": "PB-B02-AC5",
       "ac_verdict": "PASS",
-      "conjunct": "(legacy single-verdict AC — no explicit conjunct list)",
+      "conjunct": "place_deducts_stock",
       "pass": true,
-      "disposition_if_fail": null
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B02-AC5",
+      "ac_verdict": "PASS",
+      "conjunct": "complete_stock_unchanged",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B02-AC5",
+      "ac_verdict": "PASS",
+      "conjunct": "cancel_restores_stock",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B02-AC5",
+      "ac_verdict": "PASS",
+      "conjunct": "zero_stock_auto_offline_then_cancel_restores_online",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B02-AC5",
+      "ac_verdict": "PASS",
+      "conjunct": "manual_offline_stays_offline_after_cancel",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B03-AC1",
@@ -272,21 +435,21 @@
     {
       "ac_id": "PB-B03-AC1",
       "ac_verdict": "PASS",
-      "conjunct": "snapshot_stable_after_republish_mutate",
+      "conjunct": "order_detail_line_by_line",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B03-AC1",
       "ac_verdict": "PASS",
-      "conjunct": "detail_lines_match_total",
+      "conjunct": "three_place_amount_consistent_confirm_detail_total",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B03-AC1",
       "ac_verdict": "PASS",
-      "conjunct": "confirm_detail_total_consistent",
+      "conjunct": "new_identity_republish_keeps_old_snapshot",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
@@ -294,6 +457,13 @@
       "ac_id": "PB-B03-AC1",
       "ac_verdict": "PASS",
       "conjunct": "order_created",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B03-AC1",
+      "ac_verdict": "PASS",
+      "conjunct": "three_ui_places_list_lines_total",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
@@ -312,23 +482,86 @@
       "disposition_if_fail": "FAIL"
     },
     {
+      "ac_id": "PB-B03-AC2",
+      "ac_verdict": "PASS",
+      "conjunct": "images_immutable_after_replace_attempts",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
       "ac_id": "PB-B03-AC3",
       "ac_verdict": "PASS",
-      "conjunct": "(legacy single-verdict AC — no explicit conjunct list)",
+      "conjunct": "order_pagination_no_overlap_total_desc",
       "pass": true,
-      "disposition_if_fail": null
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B03-AC3",
+      "ac_verdict": "PASS",
+      "conjunct": "customer_sees_only_own_orders",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B03-AC3",
+      "ac_verdict": "PASS",
+      "conjunct": "merchant_sees_sitewide_orders",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B03-AC3",
+      "ac_verdict": "PASS",
+      "conjunct": "merchant_order_pagination_page2_no_overlap_total_desc",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B03-AC3",
+      "ac_verdict": "PASS",
+      "conjunct": "cancel_party_and_time_in_detail",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B03-AC3",
+      "ac_verdict": "PASS",
+      "conjunct": "history_and_admin_polymorphic_screenshots",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B03-AC3",
+      "ac_verdict": "PASS",
+      "conjunct": "cancel_party_and_time_in_ui_modal",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B03-AC4",
       "ac_verdict": "PASS",
-      "conjunct": "(legacy single-verdict AC — no explicit conjunct list)",
+      "conjunct": "unauth_tip",
       "pass": true,
-      "disposition_if_fail": null
+      "disposition_if_fail": "FAIL"
     },
     {
-      "ac_id": "PB-B03-AC5",
+      "ac_id": "PB-B03-AC4",
       "ac_verdict": "PASS",
-      "conjunct": "no_fake_close_api_as_path",
+      "conjunct": "invalid_token_tip",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B03-AC4",
+      "ac_verdict": "PASS",
+      "conjunct": "multi_incomplete_orders_allowed",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B03-AC4",
+      "ac_verdict": "PASS",
+      "conjunct": "other_buyer_access_denied",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
@@ -433,16 +666,58 @@
     {
       "ac_id": "PB-B03-AC5",
       "ac_verdict": "PASS",
-      "conjunct": "archive_read_only_rejects_mutations",
+      "conjunct": "archive_real_id_mutations_rejected_no_state_write",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B12-AC1",
       "ac_verdict": "PASS",
-      "conjunct": "(legacy single-verdict AC — no explicit conjunct list)",
+      "conjunct": "no_direct_order_without_cart_confirm",
       "pass": true,
-      "disposition_if_fail": null
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC1",
+      "ac_verdict": "PASS",
+      "conjunct": "unauth_confirm_tip",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC1",
+      "ac_verdict": "PASS",
+      "conjunct": "invalid_token_confirm_tip",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC1",
+      "ac_verdict": "PASS",
+      "conjunct": "other_cart_line_tip",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC1",
+      "ac_verdict": "PASS",
+      "conjunct": "mixed_cart_tip",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC1",
+      "ac_verdict": "PASS",
+      "conjunct": "reject_keeps_stock_cart_no_order",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC1",
+      "ac_verdict": "PASS",
+      "conjunct": "product_detail_no_direct_buy_ui",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B12-AC2",
@@ -482,7 +757,28 @@
     {
       "ac_id": "PB-B12-AC3",
       "ac_verdict": "PASS",
-      "conjunct": "ui_has_invalid_or_disabled_offline_rows",
+      "conjunct": "ui_invalid_disabled_and_insufficient_hint",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC3",
+      "ac_verdict": "PASS",
+      "conjunct": "ui_select_all_deselect_and_row_toggle",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC3",
+      "ac_verdict": "PASS",
+      "conjunct": "default_selects_only_orderable_after_valid_removed",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC3",
+      "ac_verdict": "PASS",
+      "conjunct": "row_level_checked_maps_to_orderable",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
@@ -510,6 +806,13 @@
     {
       "ac_id": "PB-B12-AC4",
       "ac_verdict": "PASS",
+      "conjunct": "after_confirm_still_online_before_submit",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC4",
+      "ac_verdict": "PASS",
       "conjunct": "reject_keeps_orders_stock_cart_full_set",
       "pass": true,
       "disposition_if_fail": "FAIL"
@@ -517,7 +820,14 @@
     {
       "ac_id": "PB-B12-AC4",
       "ac_verdict": "PASS",
-      "conjunct": "republish_reconfirm_success",
+      "conjunct": "new_product_identity_published",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC4",
+      "ac_verdict": "PASS",
+      "conjunct": "reonline_reconfirm_success",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
@@ -545,7 +855,7 @@
     {
       "ac_id": "PB-B12-AC5",
       "ac_verdict": "PASS",
-      "conjunct": "select_toggle_no_stock_change",
+      "conjunct": "ui_checkbox_toggle_no_stock_change",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
@@ -566,14 +876,21 @@
     {
       "ac_id": "PB-B12-AC6",
       "ac_verdict": "PASS",
-      "conjunct": "multi_problem_rows_listed",
+      "conjunct": "valid_confirm_first",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B12-AC6",
       "ac_verdict": "PASS",
-      "conjunct": "final_fail_stock_cart_unchanged",
+      "conjunct": "final_submit_multi_problem_exact_templates",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC6",
+      "ac_verdict": "PASS",
+      "conjunct": "final_submit_fail_full_set_unchanged",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
@@ -587,7 +904,21 @@
     {
       "ac_id": "PB-B12-AC6",
       "ac_verdict": "PASS",
-      "conjunct": "ui_error_tip_screenshot",
+      "conjunct": "missing_product_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC6",
+      "ac_verdict": "PASS",
+      "conjunct": "ui_confirm_then_break_then_submit",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B12-AC6",
+      "ac_verdict": "PASS",
+      "conjunct": "ui_error_tip_stock_or_offline",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
@@ -615,7 +946,7 @@
     {
       "ac_id": "PB-B13-AC1",
       "ac_verdict": "PASS",
-      "conjunct": "pos_order_items_receipts_persisted",
+      "conjunct": "pos_order_items_and_checkout_receipt",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
@@ -685,14 +1016,14 @@
     {
       "ac_id": "PB-B13-AC2",
       "ac_verdict": "FAIL",
-      "conjunct": "during_hold_add_same_product_timeline",
+      "conjunct": "during_hold_add_same_product_hold_proven",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B13-AC2",
       "ac_verdict": "FAIL",
-      "conjunct": "during_hold_add_final_state_recorded",
+      "conjunct": "during_hold_add_retained_in_cart",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
@@ -767,6 +1098,13 @@
       "disposition_if_fail": "FAIL"
     },
     {
+      "ac_id": "PB-B13-AC4",
+      "ac_verdict": "PASS",
+      "conjunct": "same_product_new_settlement_key_allows_second_order",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
       "ac_id": "PB-B13-AC5",
       "ac_verdict": "PASS",
       "conjunct": "no_oversell_single_sku",
@@ -783,35 +1121,56 @@
     {
       "ac_id": "PB-B13-AC5",
       "ac_verdict": "PASS",
-      "conjunct": "lock_before_patch_serial_rejects",
+      "conjunct": "lock_before_patch_delete_add_serial_rejects",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B13-AC5",
       "ac_verdict": "PASS",
-      "conjunct": "during_hold_patch_qty_started_in_hold",
+      "conjunct": "in_flight_pre_lock_delete_add",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B13-AC5",
       "ac_verdict": "PASS",
-      "conjunct": "during_hold_patch_does_not_inflate_order",
+      "conjunct": "during_hold_patch_qty_hold_proven",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B13-AC5",
       "ac_verdict": "PASS",
-      "conjunct": "during_hold_delete_selected_started_in_hold",
+      "conjunct": "during_hold_patch_final_order_qty_unchanged",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
     {
       "ac_id": "PB-B13-AC5",
       "ac_verdict": "PASS",
-      "conjunct": "during_hold_add_same_selected_started_in_hold",
+      "conjunct": "during_hold_delete_selected_hold_proven",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B13-AC5",
+      "ac_verdict": "PASS",
+      "conjunct": "during_hold_delete_final_state",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B13-AC5",
+      "ac_verdict": "PASS",
+      "conjunct": "during_hold_add_same_selected_hold_proven",
+      "pass": true,
+      "disposition_if_fail": "FAIL"
+    },
+    {
+      "ac_id": "PB-B13-AC5",
+      "ac_verdict": "PASS",
+      "conjunct": "during_hold_add_final_retained",
       "pass": true,
       "disposition_if_fail": "FAIL"
     },
@@ -828,93 +1187,226 @@
       "ac_id": "PB-B01-AC1",
       "verdict": "PASS",
       "detail": {
-        "http": 201,
-        "message": "下单成功",
-        "orders": [
+        "conjuncts": [
           {
-            "id": 293,
-            "order_no": "f328fa28-1847-4de0-948a-cf0f0590a516",
-            "status": "PLACED",
-            "total_amount": "33.00",
-            "created_at": "2026-11-21T04:34:08.138286",
-            "cancelled_by": null,
-            "cancelled_at": null
-          }
-        ],
-        "items": [
-          {
-            "product_id": 25,
-            "product_name": "B032-在售-10",
-            "quantity": "2",
-            "unit_price": "12.50",
-            "line_amount": "25.00"
+            "name": "http_success_message",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 201,
+              "message": "下单成功"
+            }
           },
           {
-            "product_id": 26,
-            "product_name": "B032-在售-5",
-            "quantity": "1",
-            "unit_price": "8.00",
-            "line_amount": "8.00"
+            "name": "single_placed_order_two_lines",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "orders": [
+                {
+                  "id": 721,
+                  "order_no": "01ec1111-14c2-46ab-8fb5-7c70893ae52b",
+                  "status": "PLACED",
+                  "total_amount": "33.00",
+                  "created_at": "2026-11-21T06:19:32.334445",
+                  "cancelled_by": null,
+                  "cancelled_at": null
+                }
+              ],
+              "items": [
+                {
+                  "product_id": 25,
+                  "product_name": "B032-在售-10",
+                  "quantity": "2",
+                  "unit_price": "12.50",
+                  "line_amount": "25.00"
+                },
+                {
+                  "product_id": 26,
+                  "product_name": "B032-在售-5",
+                  "quantity": "1",
+                  "unit_price": "8.00",
+                  "line_amount": "8.00"
+                }
+              ]
+            }
+          },
+          {
+            "name": "line_qtys_match_cart",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "qtys": {
+                "25": "2",
+                "26": "1"
+              }
+            }
+          },
+          {
+            "name": "no_open_legacy_intent",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "open_intents": 0
+            }
+          },
+          {
+            "name": "response_no_failure_wording",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "body": {
+                "code": 0,
+                "message": "下单成功",
+                "data": {
+                  "orderId": "721",
+                  "orderNo": "01ec1111-14c2-46ab-8fb5-7c70893ae52b",
+                  "customerId": "3",
+                  "status": "PLACED",
+                  "items": [
+                    {
+                      "productId": "25",
+                      "productName": "B032-在售-10",
+                      "unitPrice": "12.50",
+                      "quantity": "2",
+                      "lineAmount": "25.00"
+                    },
+                    {
+                      "productId": "26",
+                      "productName": "B032-在售-5",
+                      "unitPrice": "8.00",
+                      "quantity": "1",
+                      "lineAmount": "8.00"
+                    }
+                  ],
+                  "totalAmount": "33.00",
+                  "createdAt": "2026-11-20T22:19:32.334445",
+                  "cancelledBy": null,
+                  "cancelledAt": null,
+                  "cancelReason": null,
+                  "allowedActions": [
+                    "CANCEL"
+                  ]
+                }
+              }
+            }
           }
         ],
-        "open_intents": 0,
-        "names": [
-          "B032-在售-5",
-          "B032-在售-10"
-        ]
+        "conjunct_pass": 5,
+        "conjunct_total": 5,
+        "conjunct_fail_names": []
       }
     },
     {
       "ac_id": "PB-B01-AC2",
       "verdict": "PASS",
       "detail": {
-        "seq": [
+        "conjuncts": [
           {
-            "action": "CONFIRM",
-            "http": 200,
-            "message": "ok",
-            "status": "CONFIRMED"
+            "name": "place_success",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 201,
+              "message": "下单成功"
+            }
           },
           {
-            "action": "PREPARE",
-            "http": 200,
-            "message": "ok",
-            "status": "PREPARED"
+            "name": "five_state_sequence",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "seq": [
+                {
+                  "action": "CONFIRM",
+                  "http": 200,
+                  "message": "ok",
+                  "status": "CONFIRMED"
+                },
+                {
+                  "action": "PREPARE",
+                  "http": 200,
+                  "message": "ok",
+                  "status": "PREPARED"
+                },
+                {
+                  "action": "SHIP",
+                  "http": 200,
+                  "message": "ok",
+                  "status": "SHIPPED"
+                },
+                {
+                  "action": "COMPLETE",
+                  "http": 200,
+                  "message": "ok",
+                  "status": "COMPLETED"
+                }
+              ]
+            }
           },
           {
-            "action": "SHIP",
-            "http": 200,
-            "message": "ok",
-            "status": "SHIPPED"
+            "name": "skip_step_rejected",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 409,
+              "message": "订单不允许跳步、回退或重复推进"
+            }
           },
           {
-            "action": "COMPLETE",
-            "http": 200,
-            "message": "ok",
-            "status": "COMPLETED"
+            "name": "no_rollback_to_prior_state",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 409,
+              "message": "订单状态已变化，请刷新后重试"
+            }
+          },
+          {
+            "name": "customer_admin_advance_tip",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 403,
+              "message": "角色无权访问"
+            }
+          },
+          {
+            "name": "no_auto_transition_after_wait",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "mid": {
+                "id": 723,
+                "order_no": "8970799c-db23-4c76-8d99-51edaa91cda3",
+                "status": "CONFIRMED",
+                "total_amount": "8.00",
+                "created_at": "2026-11-21T06:19:32.689878",
+                "cancelled_by": null,
+                "cancelled_at": null
+              }
+            }
+          },
+          {
+            "name": "completed_terminal",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "order": {
+                "id": 722,
+                "order_no": "3a405ad5-c8e8-439a-a2b2-b6582ffb6cd8",
+                "status": "COMPLETED",
+                "total_amount": "12.50",
+                "created_at": "2026-11-21T06:19:32.654153",
+                "cancelled_by": null,
+                "cancelled_at": null
+              }
+            }
           }
         ],
-        "skip_from_placed": {
-          "http": 409,
-          "message": "订单不允许跳步、回退或重复推进"
-        },
-        "no_rollback": {
-          "http": 409,
-          "message": "订单状态已变化，请刷新后重试"
-        },
-        "customer_advance": {
-          "http": 403,
-          "message": "角色无权访问"
-        },
-        "no_auto_after_wait": {
-          "id": 295,
-          "order_no": "413a8c42-121b-468f-82b2-f6e200b56c31",
-          "status": "CONFIRMED",
-          "total_amount": "8.00",
-          "created_at": "2026-11-21T04:34:08.491311",
-          "cancelled_by": null,
-          "cancelled_at": null
-        }
+        "conjunct_pass": 7,
+        "conjunct_total": 7,
+        "conjunct_fail_names": []
       }
     },
     {
@@ -950,35 +1442,36 @@
             }
           },
           {
-            "name": "merchant_cancel_placed",
+            "name": "merchant_cancel_completed_rejected",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
-              "http": 200,
-              "message": "ok",
+              "http": 409,
+              "message": "订单已完成，不可取消",
               "order": {
-                "id": 298,
-                "order_no": "1416a5ec-40dd-420e-a684-7e7ce08b0de8",
-                "status": "CANCELLED",
+                "id": 724,
+                "order_no": "d4cbc43a-2470-47d2-b842-cd08e07d28fa",
+                "status": "COMPLETED",
                 "total_amount": "12.50",
-                "created_at": "2026-11-21T04:34:10.362351",
-                "cancelled_by": "SELLER",
-                "cancelled_at": "2026-11-21T04:34:10.371276"
+                "created_at": "2026-11-21T06:19:34.500963",
+                "cancelled_by": null,
+                "cancelled_at": null
               }
             }
           },
           {
-            "name": "no_timeout_auto_cancel_source_and_wait",
+            "name": "no_timeout_auto_cancel_scheduler_absent_and_wait_placed",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
               "wait_sec": 2,
               "status_after_wait": "PLACED",
-              "source_scan_hits": [
+              "all_scheduled_hits": [
                 "/tmp/oxstore-develop/backend/src/main/java/com/team/shop/service/AuctionSettlementService.java:51:    @Scheduled(fixedDelay = 5000)",
                 "/tmp/oxstore-develop/backend/src/main/java/com/team/shop/service/AuctionEventHub.java:88:    @Scheduled(fixedRate = 15_000)"
               ],
-              "note": "2s wait alone insufficient; combined with source scan of cancel schedulers"
+              "order_cancel_related_hits": [],
+              "scheduler_absent": true
             }
           }
         ],
@@ -1153,13 +1646,20 @@
             "disposition_if_fail": "FAIL",
             "evidence": {
               "ok": true,
+              "steps": [
+                "确认订单",
+                "完成备货"
+              ],
+              "mid": {
+                "hasShip": true,
+                "hasPrepared": true,
+                "url": "http://127.0.0.1:5173/admin/orders"
+              },
               "shots": [
                 "b01-merchant-orders-flow.png"
               ],
-              "url": "http://127.0.0.1:5173/admin/orders",
-              "hasOrders": true,
               "stderr_tail": "",
-              "stdout_tail": "{\"ok\":true,\"shots\":[\"b01-merchant-orders-flow.png\"],\"url\":\"http://127.0.0.1:5173/admin/orders\",\"hasOrders\":true}\n",
+              "stdout_tail": "{\"ok\":true,\"steps\":[\"确认订单\",\"完成备货\"],\"mid\":{\"hasShip\":true,\"hasPrepared\":true,\"url\":\"http://127.0.0.1:5173/admin/orders\"},\"shots\":[\"b01-merchant-orders-flow.png\"]}\n",
               "node_exit": 0
             }
           }
@@ -1215,7 +1715,7 @@
             "disposition_if_fail": "FAIL",
             "evidence": {
               "race": {
-                "B": {
+                "A": {
                   "ok": true,
                   "result": [
                     200,
@@ -1223,8 +1723,8 @@
                       "code": 0,
                       "message": "ok",
                       "data": {
-                        "orderId": "302",
-                        "orderNo": "8bde3213-ad45-41c3-b185-0877ddfa505e",
+                        "orderId": "730",
+                        "orderNo": "de219e6c-a485-4c64-aa92-671a873e2675",
                         "customerId": "3",
                         "status": "CONFIRMED",
                         "items": [
@@ -1237,7 +1737,7 @@
                           }
                         ],
                         "totalAmount": "8.00",
-                        "createdAt": "2026-11-20T20:34:16.022879",
+                        "createdAt": "2026-11-20T22:19:42.977906",
                         "cancelledBy": null,
                         "cancelledAt": null,
                         "cancelReason": null,
@@ -1250,7 +1750,7 @@
                   ],
                   "elapsed_ms": 3
                 },
-                "A": {
+                "B": {
                   "ok": true,
                   "result": [
                     409,
@@ -1276,62 +1776,117 @@
       "ac_id": "PB-B02-AC1",
       "verdict": "PASS",
       "detail": {
-        "before": "10",
-        "after_place": "8",
-        "after_complete": "8",
-        "message": "下单成功"
+        "conjuncts": [
+          {
+            "name": "place_success",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 201,
+              "message": "下单成功"
+            }
+          },
+          {
+            "name": "direct_deduct_on_place",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "before": "10",
+              "after_place": "8"
+            }
+          },
+          {
+            "name": "complete_no_re_deduct",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "after_place": "8",
+              "after_complete": "8"
+            }
+          }
+        ],
+        "conjunct_pass": 3,
+        "conjunct_total": 3,
+        "conjunct_fail_names": []
       }
     },
     {
       "ac_id": "PB-B02-AC2",
       "verdict": "PASS",
       "detail": {
-        "buyer_seen_stock": "7",
-        "db_stock": "7",
-        "flow_after_offline": [
+        "conjuncts": [
           {
-            "action": "CONFIRM",
-            "http": 200,
-            "message": "ok",
-            "status": "CONFIRMED"
+            "name": "others_see_deducted_stock",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "seen": "7",
+              "db": "7",
+              "http": 200
+            }
           },
           {
-            "action": "PREPARE",
-            "http": 200,
-            "message": "ok",
-            "status": "PREPARED"
+            "name": "offline_keeps_existing_order_to_complete",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "order": {
+                "id": 732,
+                "order_no": "c1e141a1-289f-4d58-98d8-4dd69feb85b4",
+                "status": "COMPLETED",
+                "total_amount": "37.50",
+                "created_at": "2026-11-21T06:19:43.614085",
+                "cancelled_by": null,
+                "cancelled_at": null
+              },
+              "steps": [
+                {
+                  "action": "CONFIRM",
+                  "http": 200,
+                  "message": "ok",
+                  "status": "CONFIRMED"
+                },
+                {
+                  "action": "PREPARE",
+                  "http": 200,
+                  "message": "ok",
+                  "status": "PREPARED"
+                },
+                {
+                  "action": "SHIP",
+                  "http": 200,
+                  "message": "ok",
+                  "status": "SHIPPED"
+                },
+                {
+                  "action": "COMPLETE",
+                  "http": 200,
+                  "message": "ok",
+                  "status": "COMPLETED"
+                }
+              ]
+            }
           },
           {
-            "action": "SHIP",
-            "http": 200,
-            "message": "ok",
-            "status": "SHIPPED"
-          },
-          {
-            "action": "COMPLETE",
-            "http": 200,
-            "message": "ok",
-            "status": "COMPLETED"
+            "name": "new_order_refused_while_offline",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "add": {
+                "http": 409,
+                "message": "商品已下架"
+              },
+              "submit": {
+                "http": 409,
+                "message": "所选商品无法下单",
+                "nested": "所选商品无法下单 商品「B032-在售-10」已下架，请从购物车移除后重试。"
+              }
+            }
           }
         ],
-        "final_order": {
-          "id": 304,
-          "order_no": "9a59ea2c-1ec4-41c4-a31d-7824d41d011a",
-          "status": "COMPLETED",
-          "total_amount": "37.50",
-          "created_at": "2026-11-21T04:34:16.636777",
-          "cancelled_by": null,
-          "cancelled_at": null
-        },
-        "new_order_refused": {
-          "http": 409,
-          "message": "所选商品无法下单",
-          "nested": "所选商品无法下单 商品「B032-在售-10」已下架，请从购物车移除后重试。"
-        },
-        "offline_add": {
-          "http": 409,
-          "message": "商品已下架"
-        }
+        "conjunct_pass": 3,
+        "conjunct_total": 3,
+        "conjunct_fail_names": []
       }
     },
     {
@@ -1340,7 +1895,7 @@
       "detail": {
         "conjuncts": [
           {
-            "name": "reject_non_numeric_and_signed",
+            "name": "reject_invalid_stock_exact_tip_and_stock_unchanged",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
@@ -1348,47 +1903,80 @@
                 {
                   "value": "abc",
                   "http": 400,
-                  "message": "库存不能为负数，请输入非负整数。"
+                  "message": "库存不能为负数，请输入非负整数。",
+                  "stock_unchanged": true,
+                  "stock": [
+                    "9",
+                    "9"
+                  ]
                 },
                 {
                   "value": "-1",
                   "http": 400,
-                  "message": "库存不能为负数，请输入非负整数。"
+                  "message": "库存不能为负数，请输入非负整数。",
+                  "stock_unchanged": true,
+                  "stock": [
+                    "9",
+                    "9"
+                  ]
                 },
                 {
                   "value": "1.5",
                   "http": 400,
-                  "message": "库存不能为负数，请输入非负整数。"
+                  "message": "库存不能为负数，请输入非负整数。",
+                  "stock_unchanged": true,
+                  "stock": [
+                    "9",
+                    "9"
+                  ]
                 },
                 {
                   "value": "",
                   "http": 400,
-                  "message": "库存不能为负数，请输入非负整数。"
+                  "message": "库存不能为负数，请输入非负整数。",
+                  "stock_unchanged": true,
+                  "stock": [
+                    "9",
+                    "9"
+                  ]
                 },
                 {
                   "value": "01",
                   "http": 400,
-                  "message": "库存不能为负数，请输入非负整数。"
+                  "message": "库存不能为负数，请输入非负整数。",
+                  "stock_unchanged": true,
+                  "stock": [
+                    "9",
+                    "9"
+                  ]
                 },
                 {
                   "value": " ",
                   "http": 400,
-                  "message": "库存不能为负数，请输入非负整数。"
+                  "message": "库存不能为负数，请输入非负整数。",
+                  "stock_unchanged": true,
+                  "stock": [
+                    "9",
+                    "9"
+                  ]
                 }
-              ]
+              ],
+              "product_id": "25",
+              "exact_tip": "库存不能为负数，请输入非负整数。"
             }
           },
           {
-            "name": "accept_valid_stock",
+            "name": "accept_valid_stock_same_product",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
               "http": 200,
-              "message": "ok"
+              "message": "ok",
+              "after_order_stock": "9"
             }
           },
           {
-            "name": "stock_edit_does_not_change_existing_order",
+            "name": "stock_edit_same_product_does_not_change_existing_order_lines",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
@@ -1409,7 +1997,8 @@
                   "unit_price": "12.50",
                   "line_amount": "12.50"
                 }
-              ]
+              ],
+              "product_id": "25"
             }
           }
         ],
@@ -1430,10 +2019,10 @@
             "evidence": {
               "http": 200,
               "ids": [
-                "30",
-                "27"
+                "44",
+                "43"
               ],
-              "total": 4
+              "total": 18
             }
           },
           {
@@ -1443,10 +2032,10 @@
             "evidence": {
               "http": 200,
               "ids": [
-                "26",
-                "25"
+                "42",
+                "41"
               ],
-              "total": 4
+              "total": 18
             }
           },
           {
@@ -1532,47 +2121,84 @@
       "ac_id": "PB-B02-AC5",
       "verdict": "PASS",
       "detail": {
-        "table": {
-          "下单成功": "10->8",
-          "交易完成成功": "8->8",
-          "完成前取消": "4->5",
-          "零库存自动下架后取消恢复在售": {
-            "before": {
-              "id": 27,
-              "name": "B032-低库存-1",
-              "stock": "0",
-              "status": "OFFLINE",
-              "offline_reason": "AUTO_ZERO",
-              "price": "3.30"
-            },
-            "after": {
-              "id": 27,
-              "name": "B032-低库存-1",
-              "stock": "1",
-              "status": "ONLINE",
-              "offline_reason": null,
-              "price": "3.30"
+        "conjuncts": [
+          {
+            "name": "place_deducts_stock",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "before": "10",
+              "after_order": "8"
             }
           },
-          "人工下架后取消保持下架": {
-            "before": {
-              "id": 26,
-              "name": "B032-在售-5",
-              "stock": "4",
-              "status": "OFFLINE",
-              "offline_reason": "MANUAL",
-              "price": "8.00"
-            },
-            "after": {
-              "id": 26,
-              "name": "B032-在售-5",
-              "stock": "5",
-              "status": "OFFLINE",
-              "offline_reason": "MANUAL",
-              "price": "8.00"
+          {
+            "name": "complete_stock_unchanged",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "after_order": "8",
+              "after_complete": "8"
+            }
+          },
+          {
+            "name": "cancel_restores_stock",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "before": "4",
+              "after": "5"
+            }
+          },
+          {
+            "name": "zero_stock_auto_offline_then_cancel_restores_online",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "zero": {
+                "id": 27,
+                "name": "B032-低库存-1",
+                "stock": "0",
+                "status": "OFFLINE",
+                "offline_reason": "AUTO_ZERO",
+                "price": "3.30"
+              },
+              "restored": {
+                "id": 27,
+                "name": "B032-低库存-1",
+                "stock": "1",
+                "status": "ONLINE",
+                "offline_reason": null,
+                "price": "3.30"
+              }
+            }
+          },
+          {
+            "name": "manual_offline_stays_offline_after_cancel",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "before": {
+                "id": 26,
+                "name": "B032-在售-5",
+                "stock": "4",
+                "status": "OFFLINE",
+                "offline_reason": "MANUAL",
+                "price": "8.00"
+              },
+              "after": {
+                "id": 26,
+                "name": "B032-在售-5",
+                "stock": "5",
+                "status": "OFFLINE",
+                "offline_reason": "MANUAL",
+                "price": "8.00"
+              }
             }
           }
-        }
+        ],
+        "conjunct_pass": 5,
+        "conjunct_total": 5,
+        "conjunct_fail_names": []
       }
     },
     {
@@ -1587,7 +2213,7 @@
             "evidence": {
               "confirm_items": [
                 {
-                  "cartItemId": "564",
+                  "cartItemId": "1258",
                   "productId": "25",
                   "productName": "B032-在售-10",
                   "unitPrice": "12.50",
@@ -1595,7 +2221,7 @@
                   "lineAmount": "25.00"
                 },
                 {
-                  "cartItemId": "565",
+                  "cartItemId": "1259",
                   "productId": "26",
                   "productName": "B032-在售-5",
                   "unitPrice": "8.00",
@@ -1607,10 +2233,66 @@
             }
           },
           {
-            "name": "snapshot_stable_after_republish_mutate",
+            "name": "order_detail_line_by_line",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
+              "http": 200,
+              "detail_items": [
+                {
+                  "productId": "25",
+                  "productName": "B032-在售-10",
+                  "unitPrice": "12.50",
+                  "quantity": "2",
+                  "lineAmount": "25.00"
+                },
+                {
+                  "productId": "26",
+                  "productName": "B032-在售-5",
+                  "unitPrice": "8.00",
+                  "quantity": "1",
+                  "lineAmount": "8.00"
+                }
+              ],
+              "db_snap": [
+                {
+                  "product_id": 25,
+                  "product_name": "B032-在售-10",
+                  "quantity": "2",
+                  "unit_price": "12.50",
+                  "line_amount": "25.00"
+                },
+                {
+                  "product_id": 26,
+                  "product_name": "B032-在售-5",
+                  "quantity": "1",
+                  "unit_price": "8.00",
+                  "line_amount": "8.00"
+                }
+              ],
+              "detail_total": "33.00"
+            }
+          },
+          {
+            "name": "three_place_amount_consistent_confirm_detail_total",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "confirm_total": "33.00",
+              "detail_total": "33.00",
+              "order_total": "33.00",
+              "calc": "33.00"
+            }
+          },
+          {
+            "name": "new_identity_republish_keeps_old_snapshot",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "create_http": 201,
+              "create_message": "ok",
+              "old_pid": "25",
+              "new_pid": "45",
               "snap": [
                 {
                   "product_id": 25,
@@ -1642,39 +2324,21 @@
                   "unit_price": "8.00",
                   "line_amount": "8.00"
                 }
-              ]
-            }
-          },
-          {
-            "name": "detail_lines_match_total",
-            "pass": true,
-            "disposition_if_fail": "FAIL",
-            "evidence": {
-              "total": "33.00",
-              "calc": "33.00"
-            }
-          },
-          {
-            "name": "confirm_detail_total_consistent",
-            "pass": true,
-            "disposition_if_fail": "FAIL",
-            "evidence": {
-              "confirm_total": "33.00",
-              "order_total": "33.00",
-              "lines": [
+              ],
+              "detail_after": [
                 {
-                  "product_id": 25,
-                  "product_name": "B032-在售-10",
+                  "productId": "25",
+                  "productName": "B032-在售-10",
+                  "unitPrice": "12.50",
                   "quantity": "2",
-                  "unit_price": "12.50",
-                  "line_amount": "25.00"
+                  "lineAmount": "25.00"
                 },
                 {
-                  "product_id": 26,
-                  "product_name": "B032-在售-5",
+                  "productId": "26",
+                  "productName": "B032-在售-5",
+                  "unitPrice": "8.00",
                   "quantity": "1",
-                  "unit_price": "8.00",
-                  "line_amount": "8.00"
+                  "lineAmount": "8.00"
                 }
               ]
             }
@@ -1687,10 +2351,25 @@
               "http": 201,
               "message": "下单成功"
             }
+          },
+          {
+            "name": "three_ui_places_list_lines_total",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "ok": true,
+              "listHasTotal": true,
+              "detailHasTotal": true,
+              "detailHasLines": true,
+              "detailSnippet": "订单详情\n订单号\t8cdd4e32-f891-4cdb-8bc9-66050cb426ec\t状态\t客户下单\n下单时间\t2026/11/20 22:19:45\t订单总额\t¥33.00\n取消发起方\t—\t取消时间\t—\n取消原因\t—\n商品快照\t单价\t数量\t小计\nB032-在售-10\t¥12.50\t2\t¥25.00\nB032-在售-5\t¥8.00\t1\t¥8.00\n关 闭",
+              "stderr_tail": "",
+              "stdout_tail": "{\"ok\":true,\"listHasTotal\":true,\"detailHasTotal\":true,\"detailHasLines\":true,\"detailSnippet\":\"订单详情\\n订单号\\t8cdd4e32-f891-4cdb-8bc9-66050cb426ec\\t状态\\t客户下单\\n下单时间\\t2026/11/20 22:19:45\\t订单总额\\t¥33.00\\n取消发起方\\t—\\t取消时间\\t—\\n取消原因\\t—\\n商品快照\\t单价\\t数量\\t小计\\nB032-在售-10\\t¥12.50\\t2\\t¥25.00\\nB032-在售-5\\t¥8.00\\t1\\t¥8.00\\n关 闭\"}\n",
+              "node_exit": 0
+            }
           }
         ],
-        "conjunct_pass": 5,
-        "conjunct_total": 5,
+        "conjunct_pass": 6,
+        "conjunct_total": 6,
         "conjunct_fail_names": []
       }
     },
@@ -1733,10 +2412,68 @@
               "message": "发布后只允许修改库存和二级类目",
               "description_prefix": "<p>P-ON-10</p>"
             }
+          },
+          {
+            "name": "images_immutable_after_replace_attempts",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "before": [
+                {
+                  "id": 25,
+                  "image_path": "/api/images/ac857481-706f-4eab-870b-f29a14b977f1.png",
+                  "sort_order": 0,
+                  "content_type": "image/png",
+                  "size_bytes": 69
+                }
+              ],
+              "after": [
+                {
+                  "id": 25,
+                  "image_path": "/api/images/ac857481-706f-4eab-870b-f29a14b977f1.png",
+                  "sort_order": 0,
+                  "content_type": "image/png",
+                  "size_bytes": 69
+                }
+              ],
+              "unchanged": true,
+              "attempts": [
+                {
+                  "entry": "PATCH json image fields",
+                  "http": 400,
+                  "message": "发布后只允许修改库存和二级类目"
+                },
+                {
+                  "entry": "POST /admin/products/25",
+                  "http": 405,
+                  "message": "请求方法不支持：POST"
+                },
+                {
+                  "entry": "PUT /admin/products/25",
+                  "http": 405,
+                  "message": "请求方法不支持：PUT"
+                },
+                {
+                  "entry": "PATCH /admin/products/25",
+                  "http": 400,
+                  "message": "请求体格式不正确或缺失"
+                },
+                {
+                  "entry": "POST /admin/products/25/images",
+                  "http": 500,
+                  "message": "服务器内部错误"
+                },
+                {
+                  "entry": "PUT /admin/products/25/images",
+                  "http": 500,
+                  "message": "服务器内部错误"
+                }
+              ]
+            }
           }
         ],
-        "conjunct_pass": 2,
-        "conjunct_total": 2,
+        "conjunct_pass": 3,
+        "conjunct_total": 3,
         "conjunct_fail_names": []
       }
     },
@@ -1744,72 +2481,191 @@
       "ac_id": "PB-B03-AC3",
       "verdict": "PASS",
       "detail": {
-        "db_statuses": [
-          "CANCELLED",
-          "COMPLETED",
-          "CONFIRMED",
-          "PLACED",
-          "PREPARED",
-          "SHIPPED"
-        ],
-        "cancelled": [
+        "conjuncts": [
           {
-            "id": 316,
-            "order_no": "3bd50c70-83f6-42d7-9172-47cd03d87f4d",
-            "status": "CANCELLED",
-            "total_amount": "8.00",
-            "created_at": "2026-11-21T04:34:19.247469",
-            "cancelled_by": "CUSTOMER",
-            "cancelled_at": "2026-11-21T04:34:19.253684"
+            "name": "order_pagination_no_overlap_total_desc",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "page1": [
+                "744",
+                "743"
+              ],
+              "page2": [
+                "742",
+                "741"
+              ],
+              "total": 6,
+              "overlap": [],
+              "created": [
+                "2026-11-20T22:19:49.472945",
+                "2026-11-20T22:19:49.411553"
+              ]
+            }
+          },
+          {
+            "name": "customer_sees_only_own_orders",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "A_sample": [
+                "744",
+                "743"
+              ],
+              "B_ids": [
+                "745"
+              ]
+            }
+          },
+          {
+            "name": "merchant_sees_sitewide_orders",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 200,
+              "total": 7,
+              "count": 7
+            }
+          },
+          {
+            "name": "merchant_order_pagination_page2_no_overlap_total_desc",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "page1": [
+                "745",
+                "744"
+              ],
+              "page2": [
+                "743",
+                "742"
+              ],
+              "total": 7,
+              "total2": 7,
+              "overlap": [],
+              "created1": [
+                "2026-11-20T22:19:49.515862",
+                "2026-11-20T22:19:49.472945"
+              ],
+              "created2": [
+                "2026-11-20T22:19:49.411553",
+                "2026-11-20T22:19:49.354259"
+              ],
+              "http": [
+                200,
+                200
+              ]
+            }
+          },
+          {
+            "name": "cancel_party_and_time_in_detail",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 200,
+              "cancelledBy": "CUSTOMER",
+              "cancelledAt": "2026-11-20T22:19:49.480168",
+              "status": "CANCELLED"
+            }
+          },
+          {
+            "name": "history_and_admin_polymorphic_screenshots",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "ok": true,
+              "history": {
+                "url": "http://127.0.0.1:5173/me/order-history",
+                "isHome": false,
+                "hasHistory": true,
+                "empty": false
+              },
+              "cancelDetail": {
+                "present": true,
+                "visible": true,
+                "text": "订单详情\n订单号\t36ae02d5-bc47-460e-84b3-0a32f8f6f14f\t状态\t已取消\n下单时间\t2026/11/20 22:19:49\t订单总额\t¥8.00\n取消发起方\t客户\t取消时间\t2026/11/20 22:19:49\n取消原因\tB032-test-cancel\n商品快照\t单价\t数量\t小计\nB032-在售-5\t¥8.00\t1\t¥8.00\n关 闭",
+                "hasPartyLabel": true,
+                "hasPartyCustomer": true,
+                "hasTimeLabel": true,
+                "hasTimeValue": true
+              },
+              "admin": {
+                "url": "http://127.0.0.1:5173/admin/orders",
+                "hasManage": true,
+                "multi": 3
+              },
+              "stderr_tail": "",
+              "stdout_tail": "{\"ok\":true,\"history\":{\"url\":\"http://127.0.0.1:5173/me/order-history\",\"isHome\":false,\"hasHistory\":true,\"empty\":false},\"cancelDetail\":{\"present\":true,\"visible\":true,\"text\":\"订单详情\\n订单号\\t36ae02d5-bc47-460e-84b3-0a32f8f6f14f\\t状态\\t已取消\\n下单时间\\t2026/11/20 22:19:49\\t订单总额\\t¥8.00\\n取消发起方\\t客户\\t取消时间\\t2026/11/20 22:19:49\\n取消原因\\tB032-test-cancel\\n商品快照\\t单价\\t数量\\t小计\\nB032-在售-5\\t¥8.00\\t1\\t¥8.00\\n关 闭\",\"hasPartyLabel\":true,\"hasPartyCustomer\":true,\"hasTimeLabel\":true,\"hasTimeValue\":true},\"admin\":{\"url\":\"http://127.0.0.1:5173/admin/orders\",\"hasManage\":true,\"multi\":3}}\n",
+              "node_exit": 0
+            }
+          },
+          {
+            "name": "cancel_party_and_time_in_ui_modal",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "cancelDetail": {
+                "present": true,
+                "visible": true,
+                "text": "订单详情\n订单号\t36ae02d5-bc47-460e-84b3-0a32f8f6f14f\t状态\t已取消\n下单时间\t2026/11/20 22:19:49\t订单总额\t¥8.00\n取消发起方\t客户\t取消时间\t2026/11/20 22:19:49\n取消原因\tB032-test-cancel\n商品快照\t单价\t数量\t小计\nB032-在售-5\t¥8.00\t1\t¥8.00\n关 闭",
+                "hasPartyLabel": true,
+                "hasPartyCustomer": true,
+                "hasTimeLabel": true,
+                "hasTimeValue": true
+              },
+              "shot": "/workspace/docs/iterationB/B-032-验收执行/evidence/screenshots/b03-cancel-detail.png"
+            }
           }
         ],
-        "me_page0": {
-          "http": 200,
-          "count": 2
-        },
-        "me_page1": {
-          "http": 200
-        },
-        "admin": {
-          "http": 200,
-          "message": "ok"
-        },
-        "screenshots": {
-          "ok": true,
-          "shots": [
-            "b03-order-history.png",
-            "b03-admin-orders.png"
-          ],
-          "customer": {
-            "title": true,
-            "empty": 0
-          },
-          "admin": {
-            "title": true,
-            "url": "http://127.0.0.1:5173/admin/orders"
-          },
-          "stderr_tail": "",
-          "stdout_tail": "{\"ok\":true,\"shots\":[\"b03-order-history.png\",\"b03-admin-orders.png\"],\"customer\":{\"title\":true,\"empty\":0},\"admin\":{\"title\":true,\"url\":\"http://127.0.0.1:5173/admin/orders\"}}\n"
-        }
+        "conjunct_pass": 7,
+        "conjunct_total": 7,
+        "conjunct_fail_names": []
       }
     },
     {
       "ac_id": "PB-B03-AC4",
       "verdict": "PASS",
       "detail": {
-        "unauth": {
-          "http": 401,
-          "message": "请先登录"
-        },
-        "invalid": {
-          "http": 401,
-          "message": "请重新登录"
-        },
-        "placed_count": 2,
-        "other_access": {
-          "http": 403,
-          "message": "无权操作该订单"
-        }
+        "conjuncts": [
+          {
+            "name": "unauth_tip",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 401,
+              "message": "请先登录"
+            }
+          },
+          {
+            "name": "invalid_token_tip",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 401,
+              "message": "请重新登录"
+            }
+          },
+          {
+            "name": "multi_incomplete_orders_allowed",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "placed_count": 2
+            }
+          },
+          {
+            "name": "other_buyer_access_denied",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 403,
+              "message": "无权操作该订单"
+            }
+          }
+        ],
+        "conjunct_pass": 4,
+        "conjunct_total": 4,
+        "conjunct_fail_names": []
       }
     },
     {
@@ -1828,29 +2684,29 @@
         "seed": {
           "intents": [
             {
-              "id": 21,
+              "id": 53,
               "status": "SUCCESS",
               "product_name_snapshot": "LEGACY-SUCCESS"
             },
             {
-              "id": 22,
+              "id": 54,
               "status": "FAILED",
               "product_name_snapshot": "LEGACY-FAILED"
             },
             {
-              "id": 23,
+              "id": 55,
               "status": "QUEUING",
               "product_name_snapshot": "LEGACY-QUEUING"
             },
             {
-              "id": 24,
+              "id": 56,
               "status": "IN_TRANSACTION",
               "product_name_snapshot": "LEGACY-IN-TX"
             }
           ],
           "attempt": {
-            "id": 3,
-            "intent_id": 24,
+            "id": 11,
+            "intent_id": 56,
             "finished_at": null,
             "result": null,
             "legacy_closed_at": null
@@ -1874,40 +2730,40 @@
         },
         "intents_after": [
           {
-            "id": 21,
+            "id": 53,
             "status": "SUCCESS",
             "legacy_closed_at": null,
             "legacy_close_reason": null,
             "product_name_snapshot": "LEGACY-SUCCESS"
           },
           {
-            "id": 22,
+            "id": 54,
             "status": "FAILED",
             "legacy_closed_at": null,
             "legacy_close_reason": null,
             "product_name_snapshot": "LEGACY-FAILED"
           },
           {
-            "id": 23,
+            "id": 55,
             "status": "QUEUING",
-            "legacy_closed_at": "2026-11-20T20:34:25.601198",
+            "legacy_closed_at": "2026-11-20T22:19:56.179413",
             "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
             "product_name_snapshot": "LEGACY-QUEUING"
           },
           {
-            "id": 24,
+            "id": 56,
             "status": "IN_TRANSACTION",
-            "legacy_closed_at": "2026-11-20T20:34:25.601198",
+            "legacy_closed_at": "2026-11-20T22:19:56.179413",
             "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
             "product_name_snapshot": "LEGACY-IN-TX"
           }
         ],
         "attempt_after": {
-          "id": 3,
-          "intent_id": 24,
+          "id": 11,
+          "intent_id": 56,
           "finished_at": null,
           "result": null,
-          "legacy_closed_at": "2026-11-20T20:34:25.601198"
+          "legacy_closed_at": "2026-11-20T22:19:56.179413"
         },
         "products_after": {
           "25": {
@@ -1927,14 +2783,6 @@
         },
         "revoked_charge": "previous BLOCKED for missing close API — wrong test path; V8 is the close/unfreeze mechanism",
         "conjuncts": [
-          {
-            "name": "no_fake_close_api_as_path",
-            "pass": true,
-            "disposition_if_fail": "FAIL",
-            "evidence": {
-              "note": "close path = CALL upgrade_oxstore_v8 from V8 SQL; archive is GET-only"
-            }
-          },
           {
             "name": "seed_statuses_SUCCESS_FAILED_QUEUING_IN_TRANSACTION",
             "pass": true,
@@ -1972,8 +2820,8 @@
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
-              "id": 3,
-              "intent_id": 24,
+              "id": 11,
+              "intent_id": 56,
               "finished_at": null,
               "result": null,
               "legacy_closed_at": null
@@ -1998,16 +2846,16 @@
             "disposition_if_fail": "FAIL",
             "evidence": {
               "LEGACY-QUEUING": {
-                "id": 23,
+                "id": 55,
                 "status": "QUEUING",
-                "legacy_closed_at": "2026-11-20T20:34:25.601198",
+                "legacy_closed_at": "2026-11-20T22:19:56.179413",
                 "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
                 "product_name_snapshot": "LEGACY-QUEUING"
               },
               "LEGACY-IN-TX": {
-                "id": 24,
+                "id": 56,
                 "status": "IN_TRANSACTION",
-                "legacy_closed_at": "2026-11-20T20:34:25.601198",
+                "legacy_closed_at": "2026-11-20T22:19:56.179413",
                 "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
                 "product_name_snapshot": "LEGACY-IN-TX"
               }
@@ -2019,14 +2867,14 @@
             "disposition_if_fail": "FAIL",
             "evidence": {
               "LEGACY-SUCCESS": {
-                "id": 21,
+                "id": 53,
                 "status": "SUCCESS",
                 "legacy_closed_at": null,
                 "legacy_close_reason": null,
                 "product_name_snapshot": "LEGACY-SUCCESS"
               },
               "LEGACY-FAILED": {
-                "id": 22,
+                "id": 54,
                 "status": "FAILED",
                 "legacy_closed_at": null,
                 "legacy_close_reason": null,
@@ -2039,11 +2887,11 @@
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
-              "id": 3,
-              "intent_id": 24,
+              "id": 11,
+              "intent_id": 56,
               "finished_at": null,
               "result": null,
-              "legacy_closed_at": "2026-11-20T20:34:25.601198"
+              "legacy_closed_at": "2026-11-20T22:19:56.179413"
             }
           },
           {
@@ -2109,24 +2957,24 @@
               ],
               "sample": [
                 {
-                  "legacyIntentId": "24",
+                  "legacyIntentId": "56",
                   "productId": "25",
                   "productNameSnapshot": "LEGACY-IN-TX",
                   "originalStatus": "IN_TRANSACTION",
-                  "submittedAt": "2026-11-20T04:34:25.574098",
+                  "submittedAt": "2026-11-20T06:19:56.144191",
                   "processedAt": null,
-                  "closedAt": "2026-11-20T12:34:25.601198",
+                  "closedAt": "2026-11-20T14:19:56.179413",
                   "displayStatus": "CLOSED",
                   "readOnly": true
                 },
                 {
-                  "legacyIntentId": "23",
+                  "legacyIntentId": "55",
                   "productId": "25",
                   "productNameSnapshot": "LEGACY-QUEUING",
                   "originalStatus": "QUEUING",
-                  "submittedAt": "2026-11-20T04:34:25.574098",
+                  "submittedAt": "2026-11-20T06:19:56.144191",
                   "processedAt": null,
-                  "closedAt": "2026-11-20T12:34:25.601198",
+                  "closedAt": "2026-11-20T14:19:56.179413",
                   "displayStatus": "CLOSED",
                   "readOnly": true
                 }
@@ -2148,24 +2996,24 @@
               ],
               "sample": [
                 {
-                  "legacyIntentId": "24",
+                  "legacyIntentId": "56",
                   "productId": "25",
                   "productNameSnapshot": "LEGACY-IN-TX",
                   "originalStatus": "IN_TRANSACTION",
-                  "submittedAt": "2026-11-20T04:34:25.574098",
+                  "submittedAt": "2026-11-20T06:19:56.144191",
                   "processedAt": null,
-                  "closedAt": "2026-11-20T12:34:25.601198",
+                  "closedAt": "2026-11-20T14:19:56.179413",
                   "displayStatus": "CLOSED",
                   "readOnly": true
                 },
                 {
-                  "legacyIntentId": "23",
+                  "legacyIntentId": "55",
                   "productId": "25",
                   "productNameSnapshot": "LEGACY-QUEUING",
                   "originalStatus": "QUEUING",
-                  "submittedAt": "2026-11-20T04:34:25.574098",
+                  "submittedAt": "2026-11-20T06:19:56.144191",
                   "processedAt": null,
-                  "closedAt": "2026-11-20T12:34:25.601198",
+                  "closedAt": "2026-11-20T14:19:56.179413",
                   "displayStatus": "CLOSED",
                   "readOnly": true
                 }
@@ -2182,32 +3030,181 @@
             }
           },
           {
-            "name": "archive_read_only_rejects_mutations",
+            "name": "archive_real_id_mutations_rejected_no_state_write",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
-              "POST": {
-                "http": 405,
-                "message": "请求方法不支持：POST"
+              "attempts": [
+                {
+                  "entry": "POST /api/products/{productId}/intents",
+                  "id": "25",
+                  "http": 409,
+                  "message": "一口价旧购买意向已关闭，请通过购物车下单"
+                },
+                {
+                  "entry": "GET /api/admin/intents",
+                  "id": "25",
+                  "http": 409,
+                  "message": "一口价旧购买意向已关闭，请查看只读归档"
+                },
+                {
+                  "entry": "POST /api/admin/intents/{id}/start",
+                  "id": "53",
+                  "status": "SUCCESS",
+                  "http": 409,
+                  "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+                },
+                {
+                  "entry": "POST /api/admin/intents/{id}/success",
+                  "id": "53",
+                  "status": "SUCCESS",
+                  "http": 409,
+                  "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+                },
+                {
+                  "entry": "POST /api/admin/intents/{id}/fail",
+                  "id": "53",
+                  "status": "SUCCESS",
+                  "http": 409,
+                  "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+                },
+                {
+                  "entry": "POST /api/admin/intents/{id}/start",
+                  "id": "54",
+                  "status": "FAILED",
+                  "http": 409,
+                  "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+                },
+                {
+                  "entry": "POST /api/admin/intents/{id}/success",
+                  "id": "54",
+                  "status": "FAILED",
+                  "http": 409,
+                  "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+                },
+                {
+                  "entry": "POST /api/admin/intents/{id}/fail",
+                  "id": "54",
+                  "status": "FAILED",
+                  "http": 409,
+                  "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+                },
+                {
+                  "entry": "POST /api/admin/intents/{id}/start",
+                  "id": "55",
+                  "status": "QUEUING",
+                  "http": 409,
+                  "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+                },
+                {
+                  "entry": "POST /api/admin/intents/{id}/success",
+                  "id": "55",
+                  "status": "QUEUING",
+                  "http": 409,
+                  "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+                },
+                {
+                  "entry": "POST /api/admin/intents/{id}/fail",
+                  "id": "55",
+                  "status": "QUEUING",
+                  "http": 409,
+                  "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+                },
+                {
+                  "entry": "POST /api/admin/intents/{id}/start",
+                  "id": "56",
+                  "status": "IN_TRANSACTION",
+                  "http": 409,
+                  "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+                },
+                {
+                  "entry": "POST /api/admin/intents/{id}/success",
+                  "id": "56",
+                  "status": "IN_TRANSACTION",
+                  "http": 409,
+                  "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+                },
+                {
+                  "entry": "POST /api/admin/intents/{id}/fail",
+                  "id": "56",
+                  "status": "IN_TRANSACTION",
+                  "http": 409,
+                  "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+                }
+              ],
+              "writes_rejected": true,
+              "queue_not_writable": true,
+              "legacy_entry": {
+                "http": 409,
+                "message": "一口价旧购买意向已关闭，请通过购物车下单"
               },
-              "PUT": {
-                "http": 500,
-                "message": "服务器内部错误"
+              "unchanged": true,
+              "before": {
+                "53": {
+                  "id": 53,
+                  "status": "SUCCESS",
+                  "legacy_closed_at": null,
+                  "legacy_close_reason": null,
+                  "product_name_snapshot": "LEGACY-SUCCESS"
+                },
+                "54": {
+                  "id": 54,
+                  "status": "FAILED",
+                  "legacy_closed_at": null,
+                  "legacy_close_reason": null,
+                  "product_name_snapshot": "LEGACY-FAILED"
+                },
+                "55": {
+                  "id": 55,
+                  "status": "QUEUING",
+                  "legacy_closed_at": "2026-11-20T22:19:56.179413",
+                  "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+                  "product_name_snapshot": "LEGACY-QUEUING"
+                },
+                "56": {
+                  "id": 56,
+                  "status": "IN_TRANSACTION",
+                  "legacy_closed_at": "2026-11-20T22:19:56.179413",
+                  "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+                  "product_name_snapshot": "LEGACY-IN-TX"
+                }
               },
-              "DELETE": {
-                "http": 500,
-                "message": "服务器内部错误"
-              },
-              "POST_close_nonexistent": {
-                "http": 500,
-                "message": "服务器内部错误",
-                "note": "probed only to prove not a close path"
-              }
+              "after": [
+                {
+                  "id": 53,
+                  "status": "SUCCESS",
+                  "legacy_closed_at": null,
+                  "legacy_close_reason": null,
+                  "product_name_snapshot": "LEGACY-SUCCESS"
+                },
+                {
+                  "id": 54,
+                  "status": "FAILED",
+                  "legacy_closed_at": null,
+                  "legacy_close_reason": null,
+                  "product_name_snapshot": "LEGACY-FAILED"
+                },
+                {
+                  "id": 55,
+                  "status": "QUEUING",
+                  "legacy_closed_at": "2026-11-20T22:19:56.179413",
+                  "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+                  "product_name_snapshot": "LEGACY-QUEUING"
+                },
+                {
+                  "id": 56,
+                  "status": "IN_TRANSACTION",
+                  "legacy_closed_at": "2026-11-20T22:19:56.179413",
+                  "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+                  "product_name_snapshot": "LEGACY-IN-TX"
+                }
+              ],
+              "note": "IntentController POST /api/products/{id}/intents; AdminIntentController GET /api/admin/intents; TradeController POST /api/admin/intents/{id}/start|success|fail"
             }
           }
         ],
-        "conjunct_pass": 16,
-        "conjunct_total": 16,
+        "conjunct_pass": 15,
+        "conjunct_total": 15,
         "conjunct_fail_names": []
       }
     },
@@ -2215,27 +3212,84 @@
       "ac_id": "PB-B12-AC1",
       "verdict": "PASS",
       "detail": {
-        "direct": {
-          "http": 400,
-          "message": "请求包含未知字段"
-        },
-        "unauth": {
-          "http": 401,
-          "message": "请先登录"
-        },
-        "invalid": {
-          "http": 401,
-          "message": "请重新登录"
-        },
-        "other": {
-          "http": 403,
-          "message": "无权操作"
-        },
-        "mixed": {
-          "http": 403,
-          "message": "无权操作"
-        },
-        "stock_unchanged": true
+        "conjuncts": [
+          {
+            "name": "no_direct_order_without_cart_confirm",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 400,
+              "message": "请求包含未知字段"
+            }
+          },
+          {
+            "name": "unauth_confirm_tip",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 401,
+              "message": "请先登录"
+            }
+          },
+          {
+            "name": "invalid_token_confirm_tip",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 401,
+              "message": "请重新登录"
+            }
+          },
+          {
+            "name": "other_cart_line_tip",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 403,
+              "message": "无权操作"
+            }
+          },
+          {
+            "name": "mixed_cart_tip",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 403,
+              "message": "无权操作"
+            }
+          },
+          {
+            "name": "reject_keeps_stock_cart_no_order",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "stock": [
+                "10",
+                "10"
+              ],
+              "cart_unchanged": true
+            }
+          },
+          {
+            "name": "product_detail_no_direct_buy_ui",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "ok": true,
+              "shots": [
+                "b12-product-detail-no-direct-buy.png"
+              ],
+              "hasDirectBuy": false,
+              "hasAddToCart": true,
+              "stderr_tail": "",
+              "stdout_tail": "{\"ok\":true,\"shots\":[\"b12-product-detail-no-direct-buy.png\"],\"hasDirectBuy\":false,\"hasAddToCart\":true}\n",
+              "node_exit": 0
+            }
+          }
+        ],
+        "conjunct_pass": 7,
+        "conjunct_total": 7,
+        "conjunct_fail_names": []
       }
     },
     {
@@ -2274,13 +3328,13 @@
             "disposition_if_fail": "FAIL",
             "evidence": {
               "order": {
-                "id": 319,
-                "order_no": "777e9c4b-b5cc-4ac2-a609-bb2aa210d2b4",
+                "id": 748,
+                "order_no": "a6a4e205-eacb-40bf-9707-6f96765e9f6f",
                 "status": "CANCELLED",
                 "total_amount": "45.50",
-                "created_at": "2026-11-21T04:34:26.318964",
+                "created_at": "2026-11-21T06:19:59.441443",
                 "cancelled_by": "CUSTOMER",
-                "cancelled_at": "2026-11-21T04:34:26.361745"
+                "cancelled_at": "2026-11-21T06:19:59.484940"
               }
             }
           },
@@ -2323,7 +3377,7 @@
             }
           },
           {
-            "name": "ui_has_invalid_or_disabled_offline_rows",
+            "name": "ui_invalid_disabled_and_insufficient_hint",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
@@ -2336,12 +3390,302 @@
                 "disabled": 2,
                 "invalidTag": 1,
                 "insufHint": 1,
-                "checkedBefore": 0,
-                "checkedAfterToggle": 2
+                "atDefault": {
+                  "orderable": {
+                    "productName": "B032-在售-5",
+                    "present": true,
+                    "checked": true,
+                    "disabled": false
+                  },
+                  "insuf": {
+                    "productName": "B032-低库存-1",
+                    "present": true,
+                    "checked": false,
+                    "disabled": false
+                  },
+                  "offline": {
+                    "productName": "B032-人工下架-5",
+                    "present": true,
+                    "checked": false,
+                    "disabled": true
+                  }
+                },
+                "atSelectAll": {
+                  "orderable": {
+                    "productName": "B032-在售-5",
+                    "present": true,
+                    "checked": true,
+                    "disabled": false
+                  },
+                  "insuf": {
+                    "productName": "B032-低库存-1",
+                    "present": true,
+                    "checked": true,
+                    "disabled": false
+                  },
+                  "offline": {
+                    "productName": "B032-人工下架-5",
+                    "present": true,
+                    "checked": false,
+                    "disabled": true
+                  }
+                },
+                "atDeselectAll": {
+                  "orderable": {
+                    "productName": "B032-在售-5",
+                    "present": true,
+                    "checked": false,
+                    "disabled": false
+                  },
+                  "insuf": {
+                    "productName": "B032-低库存-1",
+                    "present": true,
+                    "checked": false,
+                    "disabled": false
+                  },
+                  "offline": {
+                    "productName": "B032-人工下架-5",
+                    "present": true,
+                    "checked": false,
+                    "disabled": true
+                  }
+                },
+                "atRow": {
+                  "orderable": {
+                    "productName": "B032-在售-5",
+                    "present": true,
+                    "checked": true,
+                    "disabled": false
+                  },
+                  "insuf": {
+                    "productName": "B032-低库存-1",
+                    "present": true,
+                    "checked": false,
+                    "disabled": false
+                  },
+                  "offline": {
+                    "productName": "B032-人工下架-5",
+                    "present": true,
+                    "checked": false,
+                    "disabled": true
+                  }
+                },
+                "checkedDefault": 1,
+                "checkedAfterSelectAll": 2,
+                "checkedAfterDeselectAll": 0,
+                "checkedAfterRow": 1
               },
+              "rowOk": true,
               "stderr_tail": "",
-              "stdout_tail": "{\"ok\":true,\"shots\":[\"b12-cart-selection.png\"],\"ui\":{\"allLabel\":1,\"disabled\":2,\"invalidTag\":1,\"insufHint\":1,\"checkedBefore\":0,\"checkedAfterToggle\":2}}\n",
+              "stdout_tail": "2-低库存-1\",\"present\":true,\"checked\":true,\"disabled\":false},\"offline\":{\"productName\":\"B032-人工下架-5\",\"present\":true,\"checked\":false,\"disabled\":true}},\"atDeselectAll\":{\"orderable\":{\"productName\":\"B032-在售-5\",\"present\":true,\"checked\":false,\"disabled\":false},\"insuf\":{\"productName\":\"B032-低库存-1\",\"present\":true,\"checked\":false,\"disabled\":false},\"offline\":{\"productName\":\"B032-人工下架-5\",\"present\":true,\"checked\":false,\"disabled\":true}},\"atRow\":{\"orderable\":{\"productName\":\"B032-在售-5\",\"present\":true,\"checked\":true,\"disabled\":false},\"insuf\":{\"productName\":\"B032-低库存-1\",\"present\":true,\"checked\":false,\"disabled\":false},\"offline\":{\"productName\":\"B032-人工下架-5\",\"present\":true,\"checked\":false,\"disabled\":true}},\"checkedDefault\":1,\"checkedAfterSelectAll\":2,\"checkedAfterDeselectAll\":0,\"checkedAfterRow\":1},\"rowOk\":true}\n",
               "node_exit": 0
+            }
+          },
+          {
+            "name": "ui_select_all_deselect_and_row_toggle",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "allLabel": 1,
+              "disabled": 2,
+              "invalidTag": 1,
+              "insufHint": 1,
+              "atDefault": {
+                "orderable": {
+                  "productName": "B032-在售-5",
+                  "present": true,
+                  "checked": true,
+                  "disabled": false
+                },
+                "insuf": {
+                  "productName": "B032-低库存-1",
+                  "present": true,
+                  "checked": false,
+                  "disabled": false
+                },
+                "offline": {
+                  "productName": "B032-人工下架-5",
+                  "present": true,
+                  "checked": false,
+                  "disabled": true
+                }
+              },
+              "atSelectAll": {
+                "orderable": {
+                  "productName": "B032-在售-5",
+                  "present": true,
+                  "checked": true,
+                  "disabled": false
+                },
+                "insuf": {
+                  "productName": "B032-低库存-1",
+                  "present": true,
+                  "checked": true,
+                  "disabled": false
+                },
+                "offline": {
+                  "productName": "B032-人工下架-5",
+                  "present": true,
+                  "checked": false,
+                  "disabled": true
+                }
+              },
+              "atDeselectAll": {
+                "orderable": {
+                  "productName": "B032-在售-5",
+                  "present": true,
+                  "checked": false,
+                  "disabled": false
+                },
+                "insuf": {
+                  "productName": "B032-低库存-1",
+                  "present": true,
+                  "checked": false,
+                  "disabled": false
+                },
+                "offline": {
+                  "productName": "B032-人工下架-5",
+                  "present": true,
+                  "checked": false,
+                  "disabled": true
+                }
+              },
+              "atRow": {
+                "orderable": {
+                  "productName": "B032-在售-5",
+                  "present": true,
+                  "checked": true,
+                  "disabled": false
+                },
+                "insuf": {
+                  "productName": "B032-低库存-1",
+                  "present": true,
+                  "checked": false,
+                  "disabled": false
+                },
+                "offline": {
+                  "productName": "B032-人工下架-5",
+                  "present": true,
+                  "checked": false,
+                  "disabled": true
+                }
+              },
+              "checkedDefault": 1,
+              "checkedAfterSelectAll": 2,
+              "checkedAfterDeselectAll": 0,
+              "checkedAfterRow": 1
+            }
+          },
+          {
+            "name": "default_selects_only_orderable_after_valid_removed",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "orderable": {
+                "productName": "B032-在售-5",
+                "present": true,
+                "checked": true,
+                "disabled": false
+              },
+              "insuf": {
+                "productName": "B032-低库存-1",
+                "present": true,
+                "checked": false,
+                "disabled": false
+              },
+              "offline": {
+                "productName": "B032-人工下架-5",
+                "present": true,
+                "checked": false,
+                "disabled": true
+              }
+            }
+          },
+          {
+            "name": "row_level_checked_maps_to_orderable",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "atDefault": {
+                "orderable": {
+                  "productName": "B032-在售-5",
+                  "present": true,
+                  "checked": true,
+                  "disabled": false
+                },
+                "insuf": {
+                  "productName": "B032-低库存-1",
+                  "present": true,
+                  "checked": false,
+                  "disabled": false
+                },
+                "offline": {
+                  "productName": "B032-人工下架-5",
+                  "present": true,
+                  "checked": false,
+                  "disabled": true
+                }
+              },
+              "atSelectAll": {
+                "orderable": {
+                  "productName": "B032-在售-5",
+                  "present": true,
+                  "checked": true,
+                  "disabled": false
+                },
+                "insuf": {
+                  "productName": "B032-低库存-1",
+                  "present": true,
+                  "checked": true,
+                  "disabled": false
+                },
+                "offline": {
+                  "productName": "B032-人工下架-5",
+                  "present": true,
+                  "checked": false,
+                  "disabled": true
+                }
+              },
+              "atDeselectAll": {
+                "orderable": {
+                  "productName": "B032-在售-5",
+                  "present": true,
+                  "checked": false,
+                  "disabled": false
+                },
+                "insuf": {
+                  "productName": "B032-低库存-1",
+                  "present": true,
+                  "checked": false,
+                  "disabled": false
+                },
+                "offline": {
+                  "productName": "B032-人工下架-5",
+                  "present": true,
+                  "checked": false,
+                  "disabled": true
+                }
+              },
+              "atRow": {
+                "orderable": {
+                  "productName": "B032-在售-5",
+                  "present": true,
+                  "checked": true,
+                  "disabled": false
+                },
+                "insuf": {
+                  "productName": "B032-低库存-1",
+                  "present": true,
+                  "checked": false,
+                  "disabled": false
+                },
+                "offline": {
+                  "productName": "B032-人工下架-5",
+                  "present": true,
+                  "checked": false,
+                  "disabled": true
+                }
+              }
             }
           },
           {
@@ -2349,14 +3693,14 @@
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
-              "stale_offline_cart_id": "582",
+              "stale_offline_cart_id": "1277",
               "missing_product": null,
               "missing_err": "(1452, 'Cannot add or update a child row: a foreign key constraint fails (`oxstore_b032_local`.`cart_item`, CONSTRAINT `fk_cart_product` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`))')"
             }
           }
         ],
-        "conjunct_pass": 4,
-        "conjunct_total": 4,
+        "conjunct_pass": 7,
+        "conjunct_total": 7,
         "conjunct_fail_names": []
       }
     },
@@ -2383,6 +3727,19 @@
             }
           },
           {
+            "name": "after_confirm_still_online_before_submit",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "id": 25,
+              "name": "B032-在售-10",
+              "stock": "10",
+              "status": "ONLINE",
+              "offline_reason": null,
+              "price": "12.50"
+            }
+          },
+          {
             "name": "reject_keeps_orders_stock_cart_full_set",
             "pass": true,
             "disposition_if_fail": "FAIL",
@@ -2395,7 +3752,7 @@
               ],
               "cart": [
                 {
-                  "id": "584",
+                  "id": "1280",
                   "product_id": "25",
                   "quantity": "3"
                 }
@@ -2407,7 +3764,18 @@
             }
           },
           {
-            "name": "republish_reconfirm_success",
+            "name": "new_product_identity_published",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 201,
+              "message": "ok",
+              "new_pid": "46",
+              "old_pid": "25"
+            }
+          },
+          {
+            "name": "reonline_reconfirm_success",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
@@ -2475,8 +3843,8 @@
             }
           }
         ],
-        "conjunct_pass": 7,
-        "conjunct_total": 7,
+        "conjunct_pass": 9,
+        "conjunct_total": 9,
         "conjunct_fail_names": []
       }
     },
@@ -2486,10 +3854,21 @@
       "detail": {
         "conjuncts": [
           {
-            "name": "select_toggle_no_stock_change",
+            "name": "ui_checkbox_toggle_no_stock_change",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
+              "toggle": {
+                "ok": true,
+                "ui": {
+                  "before": 3,
+                  "mid": 0,
+                  "after": 3
+                },
+                "stderr_tail": "",
+                "stdout_tail": "{\"ok\":true,\"ui\":{\"before\":3,\"mid\":0,\"after\":3}}\n",
+                "node_exit": 0
+              },
               "before": {
                 "P-ON-10": "10",
                 "P-ON-5": "5"
@@ -2543,17 +3922,28 @@
       "detail": {
         "conjuncts": [
           {
-            "name": "multi_problem_rows_listed",
+            "name": "valid_confirm_first",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
-              "path": "confirm_reject",
-              "http": 409,
-              "messages": "所选商品无法下单 商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。 商品「B032-在售-10」已下架，请从购物车移除后重试。 所选商品无法下单 商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。 商品「B032-在售-10」已下架，请从购物车移除后重试。"
+              "http": 200,
+              "message": "ok"
             }
           },
           {
-            "name": "final_fail_stock_cart_unchanged",
+            "name": "final_submit_multi_problem_exact_templates",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "path": "confirm_then_break_then_submit",
+              "http": 409,
+              "messages": "所选商品无法下单 商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。 商品「B032-在售-10」已下架，请从购物车移除后重试。",
+              "expect_insuf": "商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。",
+              "expect_off": "商品「B032-在售-10」已下架，请从购物车移除后重试。"
+            }
+          },
+          {
+            "name": "final_submit_fail_full_set_unchanged",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
@@ -2567,28 +3957,30 @@
               },
               "cart_before": [
                 {
-                  "id": "589",
+                  "id": "1285",
                   "product_id": "27",
                   "quantity": "5"
                 },
                 {
-                  "id": "590",
+                  "id": "1286",
                   "product_id": "25",
                   "quantity": "1"
                 }
               ],
               "cart_after": [
                 {
-                  "id": "589",
+                  "id": "1285",
                   "product_id": "27",
                   "quantity": "5"
                 },
                 {
-                  "id": "590",
+                  "id": "1286",
                   "product_id": "25",
                   "quantity": "1"
                 }
-              ]
+              ],
+              "orders_before": 0,
+              "orders_after": 0
             }
           },
           {
@@ -2601,23 +3993,72 @@
             }
           },
           {
-            "name": "ui_error_tip_screenshot",
+            "name": "missing_product_rejected",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 409,
+              "message": "所选商品无法下单",
+              "nested": "所选商品无法下单 该商品已不在购物车，请刷新页面后查看。"
+            }
+          },
+          {
+            "name": "ui_confirm_then_break_then_submit",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
               "ok": true,
+              "modalVisibleBeforeBreak": true,
+              "submitAfterBreak": true,
+              "modalText": "确认下单\nB032-低库存-1\n¥3.30 × 1\n¥3.30\nB032-在售-10\n¥12.50 × 1\n¥12.50\n总金额：¥15.80\n返回购物车\n确认下单",
+              "validConfirm": true,
+              "patchHttp": 200,
+              "offlineHttp": 200,
+              "brokeAfterModal": true,
               "shots": [
                 "b12-submit-error-tip.png"
               ],
-              "text": "购物车\n返回买家账户\n下单选择\n转收藏选择\n全选可下单商品\n清空购物车\n转为收藏\n下 单\nB032-低库存-1\n单价：¥3.30\n当前库存 1，下单时将重新校验。\n更新数量\n删 除\nB032-在售-10\n单价：¥12.50\n已下架\n更新数量\n删 除\n已选 0 件商品，金额合计：¥0.00\n请选择商品",
+              "toast": "商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\n商品「B032-在售-10」已下架，请从购物车移除后重试。",
+              "text": "购物车\n返回买家账户\n下单选择\n转收藏选择\n全选可下单商品\n清空购物车\n转为收藏\n下 单\nB032-低库存-1\n单价：¥3.30\n更新数量\n删 除\nB032-在售-10\n单价：¥12.50\n更新数量\n删 除\n已选 2 件商品，金额合计：¥15.80\n商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\n商品「B032-在售-10」已下架，请从购物车移除后重试。",
+              "hasStockOrOffline": true,
+              "hasConfirmChanged": false,
+              "onlyEmptySelect": false,
+              "hasSuccess": false,
               "stderr_tail": "",
-              "stdout_tail": "{\"ok\":true,\"shots\":[\"b12-submit-error-tip.png\"],\"text\":\"购物车\\n返回买家账户\\n下单选择\\n转收藏选择\\n全选可下单商品\\n清空购物车\\n转为收藏\\n下 单\\nB032-低库存-1\\n单价：¥3.30\\n当前库存 1，下单时将重新校验。\\n更新数量\\n删 除\\nB032-在售-10\\n单价：¥12.50\\n已下架\\n更新数量\\n删 除\\n已选 0 件商品，金额合计：¥0.00\\n请选择商品\"}\n",
+              "stdout_tail": "{\"ok\":true,\"modalVisibleBeforeBreak\":true,\"submitAfterBreak\":true,\"modalText\":\"确认下单\\nB032-低库存-1\\n¥3.30 × 1\\n¥3.30\\nB032-在售-10\\n¥12.50 × 1\\n¥12.50\\n总金额：¥15.80\\n返回购物车\\n确认下单\",\"validConfirm\":true,\"patchHttp\":200,\"offlineHttp\":200,\"brokeAfterModal\":true,\"shots\":[\"b12-submit-error-tip.png\"],\"toast\":\"商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\\n商品「B032-在售-10」已下架，请从购物车移除后重试。\",\"text\":\"购物车\\n返回买家账户\\n下单选择\\n转收藏选择\\n全选可下单商品\\n清空购物车\\n转为收藏\\n下 单\\nB032-低库存-1\\n单价：¥3.30\\n更新数量\\n删 除\\nB032-在售-10\\n单价：¥12.50\\n更新数量\\n删 除\\n已选 2 件商品，金额合计：¥15.80\\n商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\\n商品「B032-在售-10」已下架，请从购物车移除后重试。\",\"hasStockOrOffline\":true,\"hasConfirmChanged\":false,\"onlyEmptySelect\":false,\"hasSuccess\":false}\n",
+              "node_exit": 0
+            }
+          },
+          {
+            "name": "ui_error_tip_stock_or_offline",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "ok": true,
+              "modalVisibleBeforeBreak": true,
+              "submitAfterBreak": true,
+              "modalText": "确认下单\nB032-低库存-1\n¥3.30 × 1\n¥3.30\nB032-在售-10\n¥12.50 × 1\n¥12.50\n总金额：¥15.80\n返回购物车\n确认下单",
+              "validConfirm": true,
+              "patchHttp": 200,
+              "offlineHttp": 200,
+              "brokeAfterModal": true,
+              "shots": [
+                "b12-submit-error-tip.png"
+              ],
+              "toast": "商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\n商品「B032-在售-10」已下架，请从购物车移除后重试。",
+              "text": "购物车\n返回买家账户\n下单选择\n转收藏选择\n全选可下单商品\n清空购物车\n转为收藏\n下 单\nB032-低库存-1\n单价：¥3.30\n更新数量\n删 除\nB032-在售-10\n单价：¥12.50\n更新数量\n删 除\n已选 2 件商品，金额合计：¥15.80\n商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\n商品「B032-在售-10」已下架，请从购物车移除后重试。",
+              "hasStockOrOffline": true,
+              "hasConfirmChanged": false,
+              "onlyEmptySelect": false,
+              "hasSuccess": false,
+              "stderr_tail": "",
+              "stdout_tail": "{\"ok\":true,\"modalVisibleBeforeBreak\":true,\"submitAfterBreak\":true,\"modalText\":\"确认下单\\nB032-低库存-1\\n¥3.30 × 1\\n¥3.30\\nB032-在售-10\\n¥12.50 × 1\\n¥12.50\\n总金额：¥15.80\\n返回购物车\\n确认下单\",\"validConfirm\":true,\"patchHttp\":200,\"offlineHttp\":200,\"brokeAfterModal\":true,\"shots\":[\"b12-submit-error-tip.png\"],\"toast\":\"商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\\n商品「B032-在售-10」已下架，请从购物车移除后重试。\",\"text\":\"购物车\\n返回买家账户\\n下单选择\\n转收藏选择\\n全选可下单商品\\n清空购物车\\n转为收藏\\n下 单\\nB032-低库存-1\\n单价：¥3.30\\n更新数量\\n删 除\\nB032-在售-10\\n单价：¥12.50\\n更新数量\\n删 除\\n已选 2 件商品，金额合计：¥15.80\\n商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\\n商品「B032-在售-10」已下架，请从购物车移除后重试。\",\"hasStockOrOffline\":true,\"hasConfirmChanged\":false,\"onlyEmptySelect\":false,\"hasSuccess\":false}\n",
               "node_exit": 0
             }
           }
         ],
-        "conjunct_pass": 4,
-        "conjunct_total": 4,
+        "conjunct_pass": 7,
+        "conjunct_total": 7,
         "conjunct_fail_names": []
       }
     },
@@ -2630,20 +4071,20 @@
             "http": 500,
             "message": "服务器内部错误",
             "probe": [
-              "order_created:order_id=326"
+              "order_created:order_id=755"
             ],
             "rolled_back": true,
             "probe_hit": true,
             "cart_before": [
               {
-                "id": "596",
+                "id": "1294",
                 "product_id": "25",
                 "quantity": "1"
               }
             ],
             "cart_after": [
               {
-                "id": "596",
+                "id": "1294",
                 "product_id": "25",
                 "quantity": "1"
               }
@@ -2651,27 +4092,29 @@
             "stock": [
               "10",
               "10"
-            ]
+            ],
+            "orphan_order_items": 0,
+            "checkout_receipts_after": []
           },
           "after_stock": {
             "http": 500,
             "message": "服务器内部错误",
             "probe": [
-              "order_created:order_id=327",
+              "order_created:order_id=756",
               "stock_updated:product_id=25 stock=10->9"
             ],
             "rolled_back": true,
             "probe_hit": true,
             "cart_before": [
               {
-                "id": "597",
+                "id": "1295",
                 "product_id": "25",
                 "quantity": "1"
               }
             ],
             "cart_after": [
               {
-                "id": "597",
+                "id": "1295",
                 "product_id": "25",
                 "quantity": "1"
               }
@@ -2679,28 +4122,30 @@
             "stock": [
               "10",
               "10"
-            ]
+            ],
+            "orphan_order_items": 0,
+            "checkout_receipts_after": []
           },
           "after_cart": {
             "http": 500,
             "message": "服务器内部错误",
             "probe": [
-              "order_created:order_id=328",
+              "order_created:order_id=757",
               "stock_updated:product_id=25 stock=10->9",
-              "cart_deleted:cart_item_id=598"
+              "cart_deleted:cart_item_id=1296"
             ],
             "rolled_back": true,
             "probe_hit": true,
             "cart_before": [
               {
-                "id": "598",
+                "id": "1296",
                 "product_id": "25",
                 "quantity": "1"
               }
             ],
             "cart_after": [
               {
-                "id": "598",
+                "id": "1296",
                 "product_id": "25",
                 "quantity": "1"
               }
@@ -2708,7 +4153,9 @@
             "stock": [
               "10",
               "10"
-            ]
+            ],
+            "orphan_order_items": 0,
+            "checkout_receipts_after": []
           }
         },
         "trigger_sql": "fixtures/b032_tx_probes.sql",
@@ -2740,7 +4187,7 @@
             "evidence": {
               "cart_before": [
                 {
-                  "id": "591",
+                  "id": "1289",
                   "product_id": "25",
                   "quantity": "2"
                 }
@@ -2749,17 +4196,17 @@
             }
           },
           {
-            "name": "pos_order_items_receipts_persisted",
+            "name": "pos_order_items_and_checkout_receipt",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
               "orders": [
                 {
-                  "id": 323,
-                  "order_no": "cb35c8c5-0006-4229-a4f5-b5f91aadf60f",
+                  "id": 752,
+                  "order_no": "f912a031-4877-4d72-b824-a90bb2f389cb",
                   "status": "PLACED",
                   "total_amount": "25.00",
-                  "created_at": "2026-11-21T04:34:41.179794",
+                  "created_at": "2026-11-21T06:20:18.898982",
                   "cancelled_by": null,
                   "cancelled_at": null
                 }
@@ -2775,11 +4222,17 @@
               ],
               "receipts": [
                 {
-                  "id": 886,
+                  "id": 1965,
                   "operation_type": "CART_ADD"
                 },
                 {
-                  "id": 887,
+                  "id": 1966,
+                  "operation_type": "CHECKOUT"
+                }
+              ],
+              "checkout_receipts": [
+                {
+                  "id": 1966,
                   "operation_type": "CHECKOUT"
                 }
               ]
@@ -2794,9 +4247,9 @@
               "shots": [
                 "b13-order-success.png"
               ],
-              "bodySnippet": "购物车\n返回买家账户\n购物车是空的\n下单成功\n下单成功\n订单号：dcc19e24-19d8-4991-8e27-b80814c90f33\n查看订单详情\n关 闭\n下单成功",
+              "bodySnippet": "购物车\n返回买家账户\n购物车是空的\n下单成功\n下单成功\n订单号：304c2227-dc31-4ada-96bc-3e325fdcee41\n查看订单详情\n关 闭\n下单成功",
               "stderr_tail": "",
-              "stdout_tail": "{\"ok\":true,\"shots\":[\"b13-order-success.png\"],\"bodySnippet\":\"购物车\\n返回买家账户\\n购物车是空的\\n下单成功\\n下单成功\\n订单号：dcc19e24-19d8-4991-8e27-b80814c90f33\\n查看订单详情\\n关 闭\\n下单成功\"}\n",
+              "stdout_tail": "{\"ok\":true,\"shots\":[\"b13-order-success.png\"],\"bodySnippet\":\"购物车\\n返回买家账户\\n购物车是空的\\n下单成功\\n下单成功\\n订单号：304c2227-dc31-4ada-96bc-3e325fdcee41\\n查看订单详情\\n关 闭\\n下单成功\"}\n",
               "node_exit": 0
             }
           },
@@ -2809,14 +4262,14 @@
               "message": "所选商品无法下单",
               "cart_before": [
                 {
-                  "id": "593",
+                  "id": "1291",
                   "product_id": "27",
                   "quantity": "5"
                 }
               ],
               "cart_after": [
                 {
-                  "id": "593",
+                  "id": "1291",
                   "product_id": "27",
                   "quantity": "5"
                 }
@@ -2841,24 +4294,24 @@
               "message": "服务器内部错误",
               "cart_before": [
                 {
-                  "id": "594",
+                  "id": "1292",
                   "product_id": "25",
                   "quantity": "1"
                 },
                 {
-                  "id": "595",
+                  "id": "1293",
                   "product_id": "26",
                   "quantity": "1"
                 }
               ],
               "cart_after": [
                 {
-                  "id": "594",
+                  "id": "1292",
                   "product_id": "25",
                   "quantity": "1"
                 },
                 {
-                  "id": "595",
+                  "id": "1293",
                   "product_id": "26",
                   "quantity": "1"
                 }
@@ -2872,7 +4325,7 @@
                 "26": "5"
               },
               "probe": [
-                "order_created:order_id=325"
+                "order_created:order_id=754"
               ]
             }
           },
@@ -2884,20 +4337,20 @@
               "http": 500,
               "message": "服务器内部错误",
               "probe": [
-                "order_created:order_id=326"
+                "order_created:order_id=755"
               ],
               "rolled_back": true,
               "probe_hit": true,
               "cart_before": [
                 {
-                  "id": "596",
+                  "id": "1294",
                   "product_id": "25",
                   "quantity": "1"
                 }
               ],
               "cart_after": [
                 {
-                  "id": "596",
+                  "id": "1294",
                   "product_id": "25",
                   "quantity": "1"
                 }
@@ -2905,7 +4358,9 @@
               "stock": [
                 "10",
                 "10"
-              ]
+              ],
+              "orphan_order_items": 0,
+              "checkout_receipts_after": []
             }
           },
           {
@@ -2916,21 +4371,21 @@
               "http": 500,
               "message": "服务器内部错误",
               "probe": [
-                "order_created:order_id=327",
+                "order_created:order_id=756",
                 "stock_updated:product_id=25 stock=10->9"
               ],
               "rolled_back": true,
               "probe_hit": true,
               "cart_before": [
                 {
-                  "id": "597",
+                  "id": "1295",
                   "product_id": "25",
                   "quantity": "1"
                 }
               ],
               "cart_after": [
                 {
-                  "id": "597",
+                  "id": "1295",
                   "product_id": "25",
                   "quantity": "1"
                 }
@@ -2938,7 +4393,9 @@
               "stock": [
                 "10",
                 "10"
-              ]
+              ],
+              "orphan_order_items": 0,
+              "checkout_receipts_after": []
             }
           },
           {
@@ -2949,22 +4406,22 @@
               "http": 500,
               "message": "服务器内部错误",
               "probe": [
-                "order_created:order_id=328",
+                "order_created:order_id=757",
                 "stock_updated:product_id=25 stock=10->9",
-                "cart_deleted:cart_item_id=598"
+                "cart_deleted:cart_item_id=1296"
               ],
               "rolled_back": true,
               "probe_hit": true,
               "cart_before": [
                 {
-                  "id": "598",
+                  "id": "1296",
                   "product_id": "25",
                   "quantity": "1"
                 }
               ],
               "cart_after": [
                 {
-                  "id": "598",
+                  "id": "1296",
                   "product_id": "25",
                   "quantity": "1"
                 }
@@ -2972,7 +4429,9 @@
               "stock": [
                 "10",
                 "10"
-              ]
+              ],
+              "orphan_order_items": 0,
+              "checkout_receipts_after": []
             }
           }
         ],
@@ -2994,7 +4453,7 @@
             "evidence": {
               "cart": [
                 {
-                  "id": "600",
+                  "id": "1298",
                   "product_id": "26",
                   "quantity": "1"
                 }
@@ -3015,23 +4474,28 @@
             }
           },
           {
-            "name": "during_hold_add_same_product_timeline",
+            "name": "during_hold_add_same_product_hold_proven",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
               "timeline": {
-                "submit_start": 1795178088.7207594,
-                "probe_observed": 1795178091.7285674,
-                "probe_at_ts": "2026-11-20 12:34:48.725674",
-                "mutation_start": 1795178091.72858,
-                "submit_end": 1795178091.7339768,
-                "mutation_end": 1795178091.7365906
+                "submit_start_mono": 19213.310835135,
+                "submit_start_wall": 1795184426.5040863,
+                "hold_observed_mono": 19213.377834357,
+                "hold_observed_wall": 1795184426.5710838,
+                "hold_lock_holder": 4908,
+                "mutation_start_mono": 19213.378258752,
+                "mutation_start_wall": 1795184426.571508,
+                "submit_end_mono": 19216.326513759,
+                "submit_end_wall": 1795184429.5197642,
+                "mutation_end_mono": 19216.330956315,
+                "mutation_end_wall": 1795184429.5242062
               },
-              "probe_row": {
-                "id": 125,
-                "phase": "order_created",
-                "note": "order_id=331",
-                "at_ts": "2026-11-20T12:34:48.725674"
+              "ok_to_mutate": true,
+              "hold_lock": {
+                "holder": 4908,
+                "observed_mono": 19213.377834357,
+                "observed_wall": 1795184426.5710838
               },
               "submit": [
                 201,
@@ -3039,8 +4503,8 @@
                   "code": 0,
                   "message": "下单成功",
                   "data": {
-                    "orderId": "331",
-                    "orderNo": "46d0a958-ba46-4cda-a4db-a486f0f9406b",
+                    "orderId": "760",
+                    "orderNo": "c1486b2e-3d96-4be5-ae82-f806aedb0053",
                     "customerId": "3",
                     "status": "PLACED",
                     "items": [
@@ -3053,7 +4517,7 @@
                       }
                     ],
                     "totalAmount": "12.50",
-                    "createdAt": "2026-11-20T20:34:48.725482",
+                    "createdAt": "2026-11-20T22:20:26.508299",
                     "cancelledBy": null,
                     "cancelledAt": null,
                     "cancelReason": null,
@@ -3062,7 +4526,7 @@
                     ]
                   }
                 },
-                "048ff6f3-651c-4c91-80dc-05c8e90f1af2"
+                "a41f514b-b7e4-4b75-b365-64a0ad6a0965"
               ],
               "mutation": [
                 200,
@@ -3070,7 +4534,7 @@
                   "code": 0,
                   "message": "已加入购物车",
                   "data": {
-                    "cartItemId": "603",
+                    "cartItemId": "1301",
                     "productId": "25",
                     "productName": "B032-在售-10",
                     "unitPrice": "12.50",
@@ -3082,52 +4546,60 @@
                     "defaultCheckoutSelected": true,
                     "canCheckoutSelect": true,
                     "canFavoriteSelect": true,
-                    "updatedAt": "2026-11-20T20:34:51.734395"
+                    "updatedAt": "2026-11-20T22:20:29.520621"
                   }
                 }
               ],
+              "threads": {
+                "submit_alive": false,
+                "mutate_alive": false
+              },
               "overlap": {
                 "started_during_hold": true,
-                "blocked_until_release": false,
-                "hold_seconds": 3
+                "blocked_until_release": true,
+                "hold_proven": true,
+                "hold_seconds": 3,
+                "hold_lock_timeout": false,
+                "barrier": "IS_USED_LOCK(b032_tx_hold)",
+                "clock": "time.monotonic"
               },
               "final_db": {
                 "orders": [
                   {
-                    "id": 331,
-                    "order_no": "46d0a958-ba46-4cda-a4db-a486f0f9406b",
+                    "id": 760,
+                    "order_no": "c1486b2e-3d96-4be5-ae82-f806aedb0053",
                     "status": "PLACED",
                     "total_amount": "12.50",
-                    "created_at": "2026-11-21T04:34:48.725482",
+                    "created_at": "2026-11-21T06:20:26.508299",
                     "cancelled_by": null,
                     "cancelled_at": null
                   }
                 ],
                 "cart": [
                   {
-                    "id": "603",
+                    "id": "1301",
                     "product_id": "25",
                     "quantity": "1"
                   }
                 ],
                 "probe_phases": [
-                  "order_created:order_id=331",
-                  "stock_updated:product_id=25 stock=10->9",
-                  "cart_deleted:cart_item_id=602",
+                  "order_created:order_id=760",
+                  "cart_deleted:cart_item_id=1300",
                   "before_receipt:op=CHECKOUT",
                   "before_receipt:op=CART_ADD"
-                ]
+                ],
+                "stocks": {}
               }
             }
           },
           {
-            "name": "during_hold_add_final_state_recorded",
+            "name": "during_hold_add_retained_in_cart",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
               "cart_after": [
                 {
-                  "id": "603",
+                  "id": "1301",
                   "product_id": "25",
                   "quantity": "1"
                 }
@@ -3139,7 +4611,7 @@
                   "code": 0,
                   "message": "已加入购物车",
                   "data": {
-                    "cartItemId": "603",
+                    "cartItemId": "1301",
                     "productId": "25",
                     "productName": "B032-在售-10",
                     "unitPrice": "12.50",
@@ -3151,10 +4623,11 @@
                     "defaultCheckoutSelected": true,
                     "canCheckoutSelect": true,
                     "canFavoriteSelect": true,
-                    "updatedAt": "2026-11-20T20:34:51.734395"
+                    "updatedAt": "2026-11-20T22:20:29.520621"
                   }
                 }
-              ]
+              ],
+              "order_qty": "1"
             }
           },
           {
@@ -3249,14 +4722,14 @@
             "evidence": {
               "before": [
                 {
-                  "id": "605",
+                  "id": "1303",
                   "product_id": "27",
                   "quantity": "1"
                 }
               ],
               "after": [
                 {
-                  "id": "605",
+                  "id": "1303",
                   "product_id": "27",
                   "quantity": "1"
                 }
@@ -3270,7 +4743,7 @@
             "evidence": {
               "after": [
                 {
-                  "id": "605",
+                  "id": "1303",
                   "product_id": "27",
                   "quantity": "1"
                 }
@@ -3321,14 +4794,14 @@
             "evidence": {
               "cart_before": [
                 {
-                  "id": "609",
+                  "id": "1307",
                   "product_id": "26",
                   "quantity": "1"
                 }
               ],
               "cart_after": [
                 {
-                  "id": "609",
+                  "id": "1307",
                   "product_id": "26",
                   "quantity": "1"
                 }
@@ -3345,7 +4818,7 @@
             "disposition_if_fail": "FAIL",
             "evidence": {
               "race": {
-                "B": {
+                "A": {
                   "ok": true,
                   "result": [
                     201,
@@ -3353,8 +4826,8 @@
                       "code": 0,
                       "message": "下单成功",
                       "data": {
-                        "orderId": "336",
-                        "orderNo": "84287fda-905f-42f8-9b73-11247f6d53ca",
+                        "orderId": "765",
+                        "orderNo": "2afced7e-4aa5-4479-a7d8-3812ebc7ea1e",
                         "customerId": "3",
                         "status": "PLACED",
                         "items": [
@@ -3367,7 +4840,7 @@
                           }
                         ],
                         "totalAmount": "12.50",
-                        "createdAt": "2026-11-20T20:34:52.768284",
+                        "createdAt": "2026-11-20T22:20:30.589584",
                         "cancelledBy": null,
                         "cancelledAt": null,
                         "cancelReason": null,
@@ -3376,11 +4849,11 @@
                         ]
                       }
                     },
-                    "054fa59d-f2e9-4632-8088-d0ed4791bf36"
+                    "78b9c96e-a9de-4992-ab19-99fa5e1e2692"
                   ],
-                  "elapsed_ms": 8
+                  "elapsed_ms": 11
                 },
-                "A": {
+                "B": {
                   "ok": true,
                   "result": [
                     409,
@@ -3388,13 +4861,13 @@
                       "code": 40909,
                       "message": "订单已提交，请勿重复下单",
                       "data": {
-                        "orderId": "336",
-                        "orderNo": "84287fda-905f-42f8-9b73-11247f6d53ca"
+                        "orderId": "765",
+                        "orderNo": "2afced7e-4aa5-4479-a7d8-3812ebc7ea1e"
                       }
                     },
-                    "054fa59d-f2e9-4632-8088-d0ed4791bf36"
+                    "78b9c96e-a9de-4992-ab19-99fa5e1e2692"
                   ],
-                  "elapsed_ms": 9
+                  "elapsed_ms": 12
                 }
               },
               "stock": [
@@ -3403,10 +4876,20 @@
               ],
               "orders": 1
             }
+          },
+          {
+            "name": "same_product_new_settlement_key_allows_second_order",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "http": 201,
+              "message": "下单成功",
+              "orders": 2
+            }
           }
         ],
-        "conjunct_pass": 5,
-        "conjunct_total": 5,
+        "conjunct_pass": 6,
+        "conjunct_total": 6,
         "conjunct_fail_names": []
       }
     },
@@ -3417,17 +4900,30 @@
         "matrix": {
           "patch_qty": {
             "timeline": {
-              "submit_start": 1795178093.796948,
-              "probe_observed": 1795178096.804832,
-              "probe_at_ts": "2026-11-20 12:34:53.802055",
-              "mutation_start": 1795178096.8048441,
-              "submit_end": 1795178096.8124025,
-              "mutation_end": 1795178096.813227
+              "submit_start_mono": 19224.667237288,
+              "submit_start_wall": 1795184437.8604875,
+              "hold_observed_mono": 19224.734846087,
+              "hold_observed_wall": 1795184437.9280956,
+              "hold_lock_holder": 4907,
+              "mutation_start_mono": 19224.735297922,
+              "mutation_start_wall": 1795184437.9285474,
+              "submit_end_mono": 19227.688461592,
+              "submit_end_wall": 1795184440.8817122,
+              "mutation_end_mono": 19227.68965596,
+              "mutation_end_wall": 1795184440.8829055
             },
             "overlap": {
               "started_during_hold": true,
-              "blocked_until_release": false,
-              "hold_seconds": 3
+              "blocked_until_release": true,
+              "hold_proven": true,
+              "hold_seconds": 3,
+              "hold_lock_timeout": false,
+              "barrier": "IS_USED_LOCK(b032_tx_hold)",
+              "clock": "time.monotonic"
+            },
+            "threads": {
+              "submit_alive": false,
+              "mutate_alive": false
             },
             "mutation": [
               409,
@@ -3443,8 +4939,8 @@
                 "code": 0,
                 "message": "下单成功",
                 "data": {
-                  "orderId": "339",
-                  "orderNo": "14702f85-f3c5-44a7-a8b8-16358f7dab59",
+                  "orderId": "801",
+                  "orderNo": "93a4f546-e8a1-4dd3-a3e8-15ebc0e669cb",
                   "customerId": "3",
                   "status": "PLACED",
                   "items": [
@@ -3457,7 +4953,7 @@
                     }
                   ],
                   "totalAmount": "12.50",
-                  "createdAt": "2026-11-20T20:34:53.801811",
+                  "createdAt": "2026-11-20T22:20:37.866024",
                   "cancelledBy": null,
                   "cancelledAt": null,
                   "cancelReason": null,
@@ -3466,42 +4962,55 @@
                   ]
                 }
               },
-              "d1d99b2e-d6ec-4313-bdd9-68d212d0a15a"
+              "f1bc036b-f901-4554-a104-62ef9e27beb4"
             ],
             "final_db": {
               "orders": [
                 {
-                  "id": 339,
-                  "order_no": "14702f85-f3c5-44a7-a8b8-16358f7dab59",
+                  "id": 801,
+                  "order_no": "93a4f546-e8a1-4dd3-a3e8-15ebc0e669cb",
                   "status": "PLACED",
                   "total_amount": "12.50",
-                  "created_at": "2026-11-21T04:34:53.801811",
+                  "created_at": "2026-11-21T06:20:37.866024",
                   "cancelled_by": null,
                   "cancelled_at": null
                 }
               ],
               "cart": [],
               "probe_phases": [
-                "order_created:order_id=339",
-                "stock_updated:product_id=25 stock=10->9",
-                "cart_deleted:cart_item_id=618",
+                "order_created:order_id=801",
+                "cart_deleted:cart_item_id=1384",
                 "before_receipt:op=CHECKOUT"
-              ]
+              ],
+              "stocks": {}
             }
           },
           "delete_selected": {
             "timeline": {
-              "submit_start": 1795178097.1124363,
-              "probe_observed": 1795178100.1222572,
-              "probe_at_ts": "2026-11-20 12:34:57.119280",
-              "mutation_start": 1795178100.1222677,
-              "submit_end": 1795178100.132374,
-              "mutation_end": 1795178100.1326182
+              "submit_start_mono": 19227.95492371,
+              "submit_start_wall": 1795184441.1481743,
+              "hold_observed_mono": 19228.021410911,
+              "hold_observed_wall": 1795184441.2146604,
+              "hold_lock_holder": 4908,
+              "mutation_start_mono": 19228.021831197,
+              "mutation_start_wall": 1795184441.2150805,
+              "submit_end_mono": 19230.973217725,
+              "submit_end_wall": 1795184444.166468,
+              "mutation_end_mono": 19230.974149253,
+              "mutation_end_wall": 1795184444.1673987
             },
             "overlap": {
               "started_during_hold": true,
-              "blocked_until_release": false,
-              "hold_seconds": 3
+              "blocked_until_release": true,
+              "hold_proven": true,
+              "hold_seconds": 3,
+              "hold_lock_timeout": false,
+              "barrier": "IS_USED_LOCK(b032_tx_hold)",
+              "clock": "time.monotonic"
+            },
+            "threads": {
+              "submit_alive": false,
+              "mutate_alive": false
             },
             "mutation": [
               200,
@@ -3517,8 +5026,8 @@
                 "code": 0,
                 "message": "下单成功",
                 "data": {
-                  "orderId": "340",
-                  "orderNo": "edc9b632-8bf1-49cc-ba35-9eaca7349944",
+                  "orderId": "802",
+                  "orderNo": "a7c6ff64-3200-4505-be86-505024ad5aa4",
                   "customerId": "3",
                   "status": "PLACED",
                   "items": [
@@ -3531,7 +5040,7 @@
                     }
                   ],
                   "totalAmount": "12.50",
-                  "createdAt": "2026-11-20T20:34:57.119033",
+                  "createdAt": "2026-11-20T22:20:41.153213",
                   "cancelledBy": null,
                   "cancelledAt": null,
                   "cancelReason": null,
@@ -3540,42 +5049,55 @@
                   ]
                 }
               },
-              "988db573-fbd1-4755-b8e0-4f2a44e51b33"
+              "6ac70c07-dc92-411d-a504-2f3e0b7169d4"
             ],
             "final_db": {
               "orders": [
                 {
-                  "id": 340,
-                  "order_no": "edc9b632-8bf1-49cc-ba35-9eaca7349944",
+                  "id": 802,
+                  "order_no": "a7c6ff64-3200-4505-be86-505024ad5aa4",
                   "status": "PLACED",
                   "total_amount": "12.50",
-                  "created_at": "2026-11-21T04:34:57.119033",
+                  "created_at": "2026-11-21T06:20:41.153213",
                   "cancelled_by": null,
                   "cancelled_at": null
                 }
               ],
               "cart": [],
               "probe_phases": [
-                "order_created:order_id=340",
-                "stock_updated:product_id=25 stock=10->9",
-                "cart_deleted:cart_item_id=619",
+                "order_created:order_id=802",
+                "cart_deleted:cart_item_id=1385",
                 "before_receipt:op=CHECKOUT"
-              ]
+              ],
+              "stocks": {}
             }
           },
           "add_same_selected": {
             "timeline": {
-              "submit_start": 1795178100.362564,
-              "probe_observed": 1795178103.3695686,
-              "probe_at_ts": "2026-11-20 12:35:00.367491",
-              "mutation_start": 1795178103.3695788,
-              "submit_end": 1795178103.3767562,
-              "mutation_end": 1795178103.3804028
+              "submit_start_mono": 19231.234505836,
+              "submit_start_wall": 1795184444.427756,
+              "hold_observed_mono": 19231.299856918,
+              "hold_observed_wall": 1795184444.4931061,
+              "hold_lock_holder": 4908,
+              "mutation_start_mono": 19231.300295623,
+              "mutation_start_wall": 1795184444.493545,
+              "submit_end_mono": 19234.252327807,
+              "submit_end_wall": 1795184447.445578,
+              "mutation_end_mono": 19234.256925364,
+              "mutation_end_wall": 1795184447.4501758
             },
             "overlap": {
               "started_during_hold": true,
-              "blocked_until_release": false,
-              "hold_seconds": 3
+              "blocked_until_release": true,
+              "hold_proven": true,
+              "hold_seconds": 3,
+              "hold_lock_timeout": false,
+              "barrier": "IS_USED_LOCK(b032_tx_hold)",
+              "clock": "time.monotonic"
+            },
+            "threads": {
+              "submit_alive": false,
+              "mutate_alive": false
             },
             "mutation": [
               200,
@@ -3583,7 +5105,7 @@
                 "code": 0,
                 "message": "已加入购物车",
                 "data": {
-                  "cartItemId": "621",
+                  "cartItemId": "1387",
                   "productId": "25",
                   "productName": "B032-在售-10",
                   "unitPrice": "12.50",
@@ -3595,7 +5117,7 @@
                   "defaultCheckoutSelected": true,
                   "canCheckoutSelect": true,
                   "canFavoriteSelect": true,
-                  "updatedAt": "2026-11-20T20:35:03.377096"
+                  "updatedAt": "2026-11-20T22:20:47.446716"
                 }
               }
             ],
@@ -3605,8 +5127,8 @@
                 "code": 0,
                 "message": "下单成功",
                 "data": {
-                  "orderId": "341",
-                  "orderNo": "5a2de928-2644-4e34-9586-6b4a01e2c0f6",
+                  "orderId": "803",
+                  "orderNo": "deef8b48-d1a5-433e-96bb-011b9df514f3",
                   "customerId": "3",
                   "status": "PLACED",
                   "items": [
@@ -3619,7 +5141,7 @@
                     }
                   ],
                   "totalAmount": "12.50",
-                  "createdAt": "2026-11-20T20:35:00.367283",
+                  "createdAt": "2026-11-20T22:20:44.433169",
                   "cancelledBy": null,
                   "cancelledAt": null,
                   "cancelReason": null,
@@ -3628,34 +5150,34 @@
                   ]
                 }
               },
-              "804fd3a0-b991-4017-a7a6-1eb8f7803601"
+              "e461e0ce-1575-402b-9eaa-90c69a9a2247"
             ],
             "final_db": {
               "orders": [
                 {
-                  "id": 341,
-                  "order_no": "5a2de928-2644-4e34-9586-6b4a01e2c0f6",
+                  "id": 803,
+                  "order_no": "deef8b48-d1a5-433e-96bb-011b9df514f3",
                   "status": "PLACED",
                   "total_amount": "12.50",
-                  "created_at": "2026-11-21T04:35:00.367283",
+                  "created_at": "2026-11-21T06:20:44.433169",
                   "cancelled_by": null,
                   "cancelled_at": null
                 }
               ],
               "cart": [
                 {
-                  "id": "621",
+                  "id": "1387",
                   "product_id": "25",
                   "quantity": "1"
                 }
               ],
               "probe_phases": [
-                "order_created:order_id=341",
-                "stock_updated:product_id=25 stock=10->9",
-                "cart_deleted:cart_item_id=620",
+                "order_created:order_id=803",
+                "cart_deleted:cart_item_id=1386",
                 "before_receipt:op=CHECKOUT",
                 "before_receipt:op=CART_ADD"
-              ]
+              ],
+              "stocks": {}
             }
           }
         },
@@ -3674,8 +5196,8 @@
                       "code": 0,
                       "message": "下单成功",
                       "data": {
-                        "orderId": "337",
-                        "orderNo": "24aa562b-cbe7-442d-9042-c95a4641fa85",
+                        "orderId": "767",
+                        "orderNo": "1bd7cc01-f3d6-4496-97ad-7b149e9d200a",
                         "customerId": "3",
                         "status": "PLACED",
                         "items": [
@@ -3688,7 +5210,7 @@
                           }
                         ],
                         "totalAmount": "3.30",
-                        "createdAt": "2026-11-20T20:34:53.084162",
+                        "createdAt": "2026-11-20T22:20:30.994252",
                         "cancelledBy": null,
                         "cancelledAt": null,
                         "cancelReason": null,
@@ -3697,9 +5219,9 @@
                         ]
                       }
                     },
-                    "c7760fef-785b-447d-ab3f-f930e19cc3b1"
+                    "de5ad198-a990-4c0a-b34a-2728845f5c3a"
                   ],
-                  "elapsed_ms": 7
+                  "elapsed_ms": 9
                 },
                 "B": {
                   "ok": true,
@@ -3711,7 +5233,7 @@
                       "data": {
                         "errors": [
                           {
-                            "cartItemId": "612",
+                            "cartItemId": "1311",
                             "productId": "27",
                             "productName": "B032-低库存-1",
                             "reason": "OFFLINE",
@@ -3720,9 +5242,9 @@
                         ]
                       }
                     },
-                    "84e6de2c-8089-402a-ad1a-d99da0ef90be"
+                    "0c3d8f0a-b1ea-4949-a220-1a9723bf0403"
                   ],
-                  "elapsed_ms": 9
+                  "elapsed_ms": 10
                 }
               },
               "stock": "0",
@@ -3747,8 +5269,8 @@
                       "code": 0,
                       "message": "下单成功",
                       "data": {
-                        "orderId": "338",
-                        "orderNo": "e9f3cd70-9671-44fc-901d-af500426b58c",
+                        "orderId": "768",
+                        "orderNo": "d860d1d0-04c7-4e67-b042-f1192aabc5f5",
                         "customerId": "4",
                         "status": "PLACED",
                         "items": [
@@ -3768,7 +5290,7 @@
                           }
                         ],
                         "totalAmount": "20.50",
-                        "createdAt": "2026-11-20T20:34:53.393474",
+                        "createdAt": "2026-11-20T22:20:31.300987",
                         "cancelledBy": null,
                         "cancelledAt": null,
                         "cancelReason": null,
@@ -3777,7 +5299,7 @@
                         ]
                       }
                     },
-                    "bceed370-2269-49dd-abd1-9a2f3d60b2fb"
+                    "90528d7b-0fa4-4af2-ad57-52a7a6710b3a"
                   ],
                   "elapsed_ms": 12
                 },
@@ -3791,14 +5313,14 @@
                       "data": {
                         "errors": [
                           {
-                            "cartItemId": "613",
+                            "cartItemId": "1312",
                             "productId": "25",
                             "productName": "B032-在售-10",
                             "reason": "OFFLINE",
                             "message": "商品「B032-在售-10」已下架，请从购物车移除后重试。"
                           },
                           {
-                            "cartItemId": "614",
+                            "cartItemId": "1313",
                             "productId": "26",
                             "productName": "B032-在售-5",
                             "reason": "OFFLINE",
@@ -3807,7 +5329,7 @@
                         ]
                       }
                     },
-                    "ba29cf67-7278-485c-aad2-7707dd297d73"
+                    "588b8b79-2d02-45c8-ac93-df33ac530679"
                   ],
                   "elapsed_ms": 14
                 }
@@ -3815,11 +5337,11 @@
               "A_orders": [],
               "B_orders": [
                 {
-                  "id": 338,
-                  "order_no": "e9f3cd70-9671-44fc-901d-af500426b58c",
+                  "id": 768,
+                  "order_no": "d860d1d0-04c7-4e67-b042-f1192aabc5f5",
                   "status": "PLACED",
                   "total_amount": "20.50",
-                  "created_at": "2026-11-21T04:34:53.393474",
+                  "created_at": "2026-11-21T06:20:31.300987",
                   "cancelled_by": null,
                   "cancelled_at": null
                 }
@@ -3833,31 +5355,158 @@
             }
           },
           {
-            "name": "lock_before_patch_serial_rejects",
+            "name": "lock_before_patch_delete_add_serial_rejects",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
-              "http": 409,
-              "message": "确认信息已变化，请重新确认"
+              "window": "after_confirm_before_submit",
+              "not_in_flight": true,
+              "distinct_from": "during_hold",
+              "patch": {
+                "http": 200,
+                "message": "已更新"
+              },
+              "delete": {
+                "http": 200,
+                "message": "已移除"
+              },
+              "add": {
+                "http": 200,
+                "message": "已加入购物车"
+              },
+              "submit": {
+                "http": 409,
+                "message": "所选商品无法下单"
+              },
+              "mono": {
+                "confirm": 19218.376460903,
+                "patch": 19218.381991911,
+                "delete": 19218.38652168,
+                "add": 19218.392926402,
+                "submit_start": 19218.392926577,
+                "submit_end": 19218.397812976,
+                "serial": true
+              }
             }
           },
           {
-            "name": "during_hold_patch_qty_started_in_hold",
+            "name": "in_flight_pre_lock_delete_add",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "delete": {
+                "attempt": 2,
+                "window": {
+                  "hit": true,
+                  "issued_set": true,
+                  "issued_before_mutate": true,
+                  "mutate_finished_before_submit_end": true,
+                  "mutation_short": true,
+                  "mutation_http": 200,
+                  "submit_http": 409,
+                  "mutation_duration_s": 0.004924411998217693,
+                  "note": "window = submit bytes issued, mutate 2xx completed before submit response, duration <0.5s (did not wait on checkout customer FOR UPDATE / after_stock hold)"
+                },
+                "timeline": {
+                  "submit_thread_start_mono": 19218.698653653,
+                  "mutation_start_mono": 19218.698900632,
+                  "mutation_start_wall": 1795184431.8921506,
+                  "mutation_end_mono": 19218.703825044,
+                  "mutation_end_wall": 1795184431.8970745,
+                  "submit_end_mono": 19218.706834224,
+                  "submit_end_wall": 1795184431.900084,
+                  "issued_mono": 19218.698849879,
+                  "issued_wall": 1795184431.8920994
+                },
+                "submit": {
+                  "http": 409,
+                  "message": "所选商品无法下单"
+                },
+                "mutation": {
+                  "http": 200,
+                  "message": "已移除"
+                },
+                "orders": 0,
+                "cart": [],
+                "expected": "DELETE 200 in window → submit reject, no order"
+              },
+              "add": {
+                "attempt": 32,
+                "window": {
+                  "hit": true,
+                  "issued_set": true,
+                  "issued_before_mutate": true,
+                  "mutate_finished_before_submit_end": true,
+                  "mutation_short": true,
+                  "mutation_http": 200,
+                  "submit_http": 409,
+                  "mutation_duration_s": 0.005007133000617614,
+                  "note": "window = submit bytes issued, mutate 2xx completed before submit response, duration <0.5s (did not wait on checkout customer FOR UPDATE / after_stock hold)"
+                },
+                "timeline": {
+                  "submit_thread_start_mono": 19224.448441233,
+                  "mutation_start_mono": 19224.4487065,
+                  "mutation_start_wall": 1795184437.641956,
+                  "mutation_end_mono": 19224.453713633,
+                  "mutation_end_wall": 1795184437.646963,
+                  "submit_end_mono": 19224.457876668,
+                  "submit_end_wall": 1795184437.651126,
+                  "issued_mono": 19224.448662733,
+                  "issued_wall": 1795184437.6419132
+                },
+                "submit": {
+                  "http": 409,
+                  "message": "确认信息已变化，请重新确认"
+                },
+                "mutation": {
+                  "http": 200,
+                  "message": "已加入购物车"
+                },
+                "orders": 0,
+                "cart": [
+                  {
+                    "id": "1383",
+                    "product_id": "25",
+                    "quantity": "2"
+                  }
+                ],
+                "order_qty": null,
+                "remainder_qty": "2",
+                "expected": "ADD 2xx in window → 409+cart qty 2 or 201+locked snapshot"
+              },
+              "not_serial_before_submit": true
+            }
+          },
+          {
+            "name": "during_hold_patch_qty_hold_proven",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
               "timeline": {
-                "submit_start": 1795178093.796948,
-                "probe_observed": 1795178096.804832,
-                "probe_at_ts": "2026-11-20 12:34:53.802055",
-                "mutation_start": 1795178096.8048441,
-                "submit_end": 1795178096.8124025,
-                "mutation_end": 1795178096.813227
+                "submit_start_mono": 19224.667237288,
+                "submit_start_wall": 1795184437.8604875,
+                "hold_observed_mono": 19224.734846087,
+                "hold_observed_wall": 1795184437.9280956,
+                "hold_lock_holder": 4907,
+                "mutation_start_mono": 19224.735297922,
+                "mutation_start_wall": 1795184437.9285474,
+                "submit_end_mono": 19227.688461592,
+                "submit_end_wall": 1795184440.8817122,
+                "mutation_end_mono": 19227.68965596,
+                "mutation_end_wall": 1795184440.8829055
               },
               "overlap": {
                 "started_during_hold": true,
-                "blocked_until_release": false,
-                "hold_seconds": 3
+                "blocked_until_release": true,
+                "hold_proven": true,
+                "hold_seconds": 3,
+                "hold_lock_timeout": false,
+                "barrier": "IS_USED_LOCK(b032_tx_hold)",
+                "clock": "time.monotonic"
+              },
+              "threads": {
+                "submit_alive": false,
+                "mutate_alive": false
               },
               "mutation": [
                 409,
@@ -3873,8 +5522,8 @@
                   "code": 0,
                   "message": "下单成功",
                   "data": {
-                    "orderId": "339",
-                    "orderNo": "14702f85-f3c5-44a7-a8b8-16358f7dab59",
+                    "orderId": "801",
+                    "orderNo": "93a4f546-e8a1-4dd3-a3e8-15ebc0e669cb",
                     "customerId": "3",
                     "status": "PLACED",
                     "items": [
@@ -3887,7 +5536,7 @@
                       }
                     ],
                     "totalAmount": "12.50",
-                    "createdAt": "2026-11-20T20:34:53.801811",
+                    "createdAt": "2026-11-20T22:20:37.866024",
                     "cancelledBy": null,
                     "cancelledAt": null,
                     "cancelReason": null,
@@ -3896,32 +5545,32 @@
                     ]
                   }
                 },
-                "d1d99b2e-d6ec-4313-bdd9-68d212d0a15a"
+                "f1bc036b-f901-4554-a104-62ef9e27beb4"
               ],
               "final_db": {
                 "orders": [
                   {
-                    "id": 339,
-                    "order_no": "14702f85-f3c5-44a7-a8b8-16358f7dab59",
+                    "id": 801,
+                    "order_no": "93a4f546-e8a1-4dd3-a3e8-15ebc0e669cb",
                     "status": "PLACED",
                     "total_amount": "12.50",
-                    "created_at": "2026-11-21T04:34:53.801811",
+                    "created_at": "2026-11-21T06:20:37.866024",
                     "cancelled_by": null,
                     "cancelled_at": null
                   }
                 ],
                 "cart": [],
                 "probe_phases": [
-                  "order_created:order_id=339",
-                  "stock_updated:product_id=25 stock=10->9",
-                  "cart_deleted:cart_item_id=618",
+                  "order_created:order_id=801",
+                  "cart_deleted:cart_item_id=1384",
                   "before_receipt:op=CHECKOUT"
-                ]
+                ],
+                "stocks": {}
               }
             }
           },
           {
-            "name": "during_hold_patch_does_not_inflate_order",
+            "name": "during_hold_patch_final_order_qty_unchanged",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
@@ -3933,26 +5582,40 @@
                   "unit_price": "12.50",
                   "line_amount": "12.50"
                 }
-              ]
+              ],
+              "cart_after": []
             }
           },
           {
-            "name": "during_hold_delete_selected_started_in_hold",
+            "name": "during_hold_delete_selected_hold_proven",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
               "timeline": {
-                "submit_start": 1795178097.1124363,
-                "probe_observed": 1795178100.1222572,
-                "probe_at_ts": "2026-11-20 12:34:57.119280",
-                "mutation_start": 1795178100.1222677,
-                "submit_end": 1795178100.132374,
-                "mutation_end": 1795178100.1326182
+                "submit_start_mono": 19227.95492371,
+                "submit_start_wall": 1795184441.1481743,
+                "hold_observed_mono": 19228.021410911,
+                "hold_observed_wall": 1795184441.2146604,
+                "hold_lock_holder": 4908,
+                "mutation_start_mono": 19228.021831197,
+                "mutation_start_wall": 1795184441.2150805,
+                "submit_end_mono": 19230.973217725,
+                "submit_end_wall": 1795184444.166468,
+                "mutation_end_mono": 19230.974149253,
+                "mutation_end_wall": 1795184444.1673987
               },
               "overlap": {
                 "started_during_hold": true,
-                "blocked_until_release": false,
-                "hold_seconds": 3
+                "blocked_until_release": true,
+                "hold_proven": true,
+                "hold_seconds": 3,
+                "hold_lock_timeout": false,
+                "barrier": "IS_USED_LOCK(b032_tx_hold)",
+                "clock": "time.monotonic"
+              },
+              "threads": {
+                "submit_alive": false,
+                "mutate_alive": false
               },
               "mutation": [
                 200,
@@ -3968,8 +5631,8 @@
                   "code": 0,
                   "message": "下单成功",
                   "data": {
-                    "orderId": "340",
-                    "orderNo": "edc9b632-8bf1-49cc-ba35-9eaca7349944",
+                    "orderId": "802",
+                    "orderNo": "a7c6ff64-3200-4505-be86-505024ad5aa4",
                     "customerId": "3",
                     "status": "PLACED",
                     "items": [
@@ -3982,7 +5645,7 @@
                       }
                     ],
                     "totalAmount": "12.50",
-                    "createdAt": "2026-11-20T20:34:57.119033",
+                    "createdAt": "2026-11-20T22:20:41.153213",
                     "cancelledBy": null,
                     "cancelledAt": null,
                     "cancelReason": null,
@@ -3991,47 +5654,79 @@
                     ]
                   }
                 },
-                "988db573-fbd1-4755-b8e0-4f2a44e51b33"
+                "6ac70c07-dc92-411d-a504-2f3e0b7169d4"
               ],
               "final_db": {
                 "orders": [
                   {
-                    "id": 340,
-                    "order_no": "edc9b632-8bf1-49cc-ba35-9eaca7349944",
+                    "id": 802,
+                    "order_no": "a7c6ff64-3200-4505-be86-505024ad5aa4",
                     "status": "PLACED",
                     "total_amount": "12.50",
-                    "created_at": "2026-11-21T04:34:57.119033",
+                    "created_at": "2026-11-21T06:20:41.153213",
                     "cancelled_by": null,
                     "cancelled_at": null
                   }
                 ],
                 "cart": [],
                 "probe_phases": [
-                  "order_created:order_id=340",
-                  "stock_updated:product_id=25 stock=10->9",
-                  "cart_deleted:cart_item_id=619",
+                  "order_created:order_id=802",
+                  "cart_deleted:cart_item_id=1385",
                   "before_receipt:op=CHECKOUT"
-                ]
+                ],
+                "stocks": {}
               }
             }
           },
           {
-            "name": "during_hold_add_same_selected_started_in_hold",
+            "name": "during_hold_delete_final_state",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "submit_code": 201,
+              "orders": 1,
+              "order_qty": "1",
+              "cart_after": [],
+              "mutation": [
+                200,
+                {
+                  "code": 0,
+                  "message": "已移除",
+                  "data": null
+                }
+              ]
+            }
+          },
+          {
+            "name": "during_hold_add_same_selected_hold_proven",
             "pass": true,
             "disposition_if_fail": "FAIL",
             "evidence": {
               "timeline": {
-                "submit_start": 1795178100.362564,
-                "probe_observed": 1795178103.3695686,
-                "probe_at_ts": "2026-11-20 12:35:00.367491",
-                "mutation_start": 1795178103.3695788,
-                "submit_end": 1795178103.3767562,
-                "mutation_end": 1795178103.3804028
+                "submit_start_mono": 19231.234505836,
+                "submit_start_wall": 1795184444.427756,
+                "hold_observed_mono": 19231.299856918,
+                "hold_observed_wall": 1795184444.4931061,
+                "hold_lock_holder": 4908,
+                "mutation_start_mono": 19231.300295623,
+                "mutation_start_wall": 1795184444.493545,
+                "submit_end_mono": 19234.252327807,
+                "submit_end_wall": 1795184447.445578,
+                "mutation_end_mono": 19234.256925364,
+                "mutation_end_wall": 1795184447.4501758
               },
               "overlap": {
                 "started_during_hold": true,
-                "blocked_until_release": false,
-                "hold_seconds": 3
+                "blocked_until_release": true,
+                "hold_proven": true,
+                "hold_seconds": 3,
+                "hold_lock_timeout": false,
+                "barrier": "IS_USED_LOCK(b032_tx_hold)",
+                "clock": "time.monotonic"
+              },
+              "threads": {
+                "submit_alive": false,
+                "mutate_alive": false
               },
               "mutation": [
                 200,
@@ -4039,7 +5734,7 @@
                   "code": 0,
                   "message": "已加入购物车",
                   "data": {
-                    "cartItemId": "621",
+                    "cartItemId": "1387",
                     "productId": "25",
                     "productName": "B032-在售-10",
                     "unitPrice": "12.50",
@@ -4051,7 +5746,7 @@
                     "defaultCheckoutSelected": true,
                     "canCheckoutSelect": true,
                     "canFavoriteSelect": true,
-                    "updatedAt": "2026-11-20T20:35:03.377096"
+                    "updatedAt": "2026-11-20T22:20:47.446716"
                   }
                 }
               ],
@@ -4061,8 +5756,8 @@
                   "code": 0,
                   "message": "下单成功",
                   "data": {
-                    "orderId": "341",
-                    "orderNo": "5a2de928-2644-4e34-9586-6b4a01e2c0f6",
+                    "orderId": "803",
+                    "orderNo": "deef8b48-d1a5-433e-96bb-011b9df514f3",
                     "customerId": "3",
                     "status": "PLACED",
                     "items": [
@@ -4075,7 +5770,7 @@
                       }
                     ],
                     "totalAmount": "12.50",
-                    "createdAt": "2026-11-20T20:35:00.367283",
+                    "createdAt": "2026-11-20T22:20:44.433169",
                     "cancelledBy": null,
                     "cancelledAt": null,
                     "cancelReason": null,
@@ -4084,35 +5779,53 @@
                     ]
                   }
                 },
-                "804fd3a0-b991-4017-a7a6-1eb8f7803601"
+                "e461e0ce-1575-402b-9eaa-90c69a9a2247"
               ],
               "final_db": {
                 "orders": [
                   {
-                    "id": 341,
-                    "order_no": "5a2de928-2644-4e34-9586-6b4a01e2c0f6",
+                    "id": 803,
+                    "order_no": "deef8b48-d1a5-433e-96bb-011b9df514f3",
                     "status": "PLACED",
                     "total_amount": "12.50",
-                    "created_at": "2026-11-21T04:35:00.367283",
+                    "created_at": "2026-11-21T06:20:44.433169",
                     "cancelled_by": null,
                     "cancelled_at": null
                   }
                 ],
                 "cart": [
                   {
-                    "id": "621",
+                    "id": "1387",
                     "product_id": "25",
                     "quantity": "1"
                   }
                 ],
                 "probe_phases": [
-                  "order_created:order_id=341",
-                  "stock_updated:product_id=25 stock=10->9",
-                  "cart_deleted:cart_item_id=620",
+                  "order_created:order_id=803",
+                  "cart_deleted:cart_item_id=1386",
                   "before_receipt:op=CHECKOUT",
                   "before_receipt:op=CART_ADD"
-                ]
+                ],
+                "stocks": {}
               }
+            }
+          },
+          {
+            "name": "during_hold_add_final_retained",
+            "pass": true,
+            "disposition_if_fail": "FAIL",
+            "evidence": {
+              "submit_code": 201,
+              "orders": 1,
+              "order_qty": "1",
+              "remainder_qty": "1",
+              "cart_after": [
+                {
+                  "id": "1387",
+                  "product_id": "25",
+                  "quantity": "1"
+                }
+              ]
             }
           },
           {
@@ -4126,8 +5839,8 @@
             }
           }
         ],
-        "conjunct_pass": 8,
-        "conjunct_total": 8,
+        "conjunct_pass": 11,
+        "conjunct_total": 11,
         "conjunct_fail_names": []
       }
     }

@@ -18,6 +18,19 @@
       }
     },
     {
+      "name": "after_confirm_still_online_before_submit",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "id": 25,
+        "name": "B032-在售-10",
+        "stock": "10",
+        "status": "ONLINE",
+        "offline_reason": null,
+        "price": "12.50"
+      }
+    },
+    {
       "name": "reject_keeps_orders_stock_cart_full_set",
       "pass": true,
       "disposition_if_fail": "FAIL",
@@ -30,7 +43,7 @@
         ],
         "cart": [
           {
-            "id": "584",
+            "id": "1280",
             "product_id": "25",
             "quantity": "3"
           }
@@ -42,7 +55,18 @@
       }
     },
     {
-      "name": "republish_reconfirm_success",
+      "name": "new_product_identity_published",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 201,
+        "message": "ok",
+        "new_pid": "46",
+        "old_pid": "25"
+      }
+    },
+    {
+      "name": "reonline_reconfirm_success",
       "pass": true,
       "disposition_if_fail": "FAIL",
       "evidence": {
@@ -110,7 +134,7 @@
       }
     }
   ],
-  "conjunct_pass": 7,
-  "conjunct_total": 7,
+  "conjunct_pass": 9,
+  "conjunct_total": 9,
   "conjunct_fail_names": []
 }

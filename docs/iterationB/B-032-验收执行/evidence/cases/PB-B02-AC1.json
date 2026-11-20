@@ -1,6 +1,34 @@
 {
-  "before": "10",
-  "after_place": "8",
-  "after_complete": "8",
-  "message": "下单成功"
+  "conjuncts": [
+    {
+      "name": "place_success",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 201,
+        "message": "下单成功"
+      }
+    },
+    {
+      "name": "direct_deduct_on_place",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "before": "10",
+        "after_place": "8"
+      }
+    },
+    {
+      "name": "complete_no_re_deduct",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "after_place": "8",
+        "after_complete": "8"
+      }
+    }
+  ],
+  "conjunct_pass": 3,
+  "conjunct_total": 3,
+  "conjunct_fail_names": []
 }
