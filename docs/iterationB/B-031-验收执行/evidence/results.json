@@ -11,8 +11,8 @@
   "base": "http://127.0.0.1:8080",
   "fe": "http://127.0.0.1:5173",
   "total": 21,
-  "pass": 20,
-  "fail": 1,
+  "pass": 19,
+  "fail": 2,
   "blocked": 0,
   "results": [
     {
@@ -204,7 +204,7 @@
     },
     {
       "ac_id": "PB-B09-AC1",
-      "verdict": "PASS",
+      "verdict": "FAIL",
       "detail": {
         "orig_favorite": {
           "favoriteId": "111",
@@ -275,7 +275,15 @@
         "screenshots": [
           "evidence/screenshots/b09ac1-offline-favorite.png",
           "evidence/screenshots/b09ac1-offline-detail-nobuy.png"
-        ]
+        ],
+        "ui_tip_rule": {
+          "required": "已下架",
+          "tipOfflineExact": 0,
+          "unavailableEmpty_not_substitute": true,
+          "api_message_not_substitute": true,
+          "rejudgment": "Same unified window evidence; tipOfflineExact=0 on forced detail. Alternate Empty「商品当前不可查看」and API「商品已下架」do not satisfy UI tip「已下架」."
+        },
+        "fail_reason": "期望强制详情 UI tip「已下架」，tipOfflineExact=0；「商品当前不可查看」(unavailableEmpty=1)/API「商品已下架」不能替代"
       },
       "criteria": "已收藏商品随后下架或售罄：该项保留，统一标注「已下架」，不自动移除；不并存「无货」与「已下架」两种标注。失效项仍展示名称、价格、主图及「已下架」标注，仍可取消收藏；点击不进入可购买详情，仅提示「已下架」。同一商品身份重新上架或库存恢复后，原收藏恢复有效并清除标注。重新发布成另一件商品时，原收藏仍指向旧商品（已下架并标注），不自动转移到新商品。",
       "pb_id": "PB-B09"

@@ -990,7 +990,7 @@ const {{ chromium }} = require('{PW_DIR}/node_modules/playwright');
     const urlAfterClick = page.url();
     const stillFavorites = urlAfterClick.includes('/me/favorites');
     await page.screenshot({{ path: '{SHOTS}/b09ac1-offline-favorite.png', fullPage: true }});
-    // forced detail: public API returns 商品已下架 → Empty「商品当前不可查看」, no buy CTA
+    // forced detail must surface exact UI tip「已下架」; alternate Empty copy is NOT a substitute
     await page.goto('{fe}/products/{p['P-ON-10']}', {{ waitUntil: 'networkidle' }});
     const unavailableEmpty = await page.getByText('商品当前不可查看').count();
     const tipOfflineExact = await page.getByText('已下架', {{ exact: true }}).count();
@@ -1002,9 +1002,9 @@ const {{ chromium }} = require('{PW_DIR}/node_modules/playwright');
 }})();
 """
         ui = run_node(js, "ui_b09ac1")
-        # API tip when opening offline product
+        # API message observed for documentation only — does NOT substitute UI tip「已下架」
         c_det, b_det = http_json("GET", f"{base}/api/products/{p['P-ON-10']}")
-        api_offline_tip = msg(b_det) == "商品已下架"
+        api_offline_tip = msg(b_det)  # recorded; exact UI tip required separately
         # Re-online SAME original favorite — no cancel/refavorite
         http_json("POST", f"{base}/api/admin/products/{p['P-ON-10']}/online", headers=auth(ts))
         c2, b2 = http_json("GET", f"{base}/api/me/favorites?page=1", headers=auth(ta))
@@ -1058,6 +1058,9 @@ const {{ chromium }} = require('{PW_DIR}/node_modules/playwright');
         )
         # restore P-ON-10 online for later ACs
         http_json("POST", f"{base}/api/admin/products/{p['P-ON-10']}/online", headers=auth(ts))
+        # Exact UI tip「已下架」required on forced-detail path (tipOfflineExact).
+        # Alternate copy「商品当前不可查看」/ API「商品已下架」MUST NOT substitute.
+        tip_exact_ok = ui.get("ok") and ui.get("tipOfflineExact", 0) >= 1
         ok = (
             retained
             and same_identity
@@ -1067,11 +1070,19 @@ const {{ chromium }} = require('{PW_DIR}/node_modules/playwright');
             and ui.get("labelTag", 0) >= 1  # favorites Tag exact「已下架」
             and ui.get("buyableLinks", 1) == 0
             and ui.get("stillFavorites") is True
-            and ui.get("unavailableEmpty", 0) >= 1
+            and tip_exact_ok
             and ui.get("addBtn", 1) == 0
-            and api_offline_tip
             and http in (200, 201)
         )
+        fail_reason = ""
+        if not tip_exact_ok:
+            fail_reason = (
+                f"期望强制详情 UI tip「已下架」，tipOfflineExact={ui.get('tipOfflineExact', 0)}；"
+                f"「商品当前不可查看」(unavailableEmpty={ui.get('unavailableEmpty', 0)})/"
+                f"API「{api_offline_tip}」不能替代"
+            )
+        elif not ok:
+            fail_reason = "offline retain / same-id reonline / cancel-separate / republish"
         return expect(
             ok,
             {
@@ -1079,6 +1090,12 @@ const {{ chromium }} = require('{PW_DIR}/node_modules/playwright');
                 "hit_offline": hit,
                 "api_detail_offline_tip": b_det,
                 "ui_click": ui,
+                "ui_tip_rule": {
+                    "required": "已下架",
+                    "tipOfflineExact": ui.get("tipOfflineExact"),
+                    "unavailableEmpty_not_substitute": True,
+                    "api_message_not_substitute": True,
+                },
                 "hit_reonline_same": hit2,
                 "db_before": {
                     "id": str(db_orig["id"]) if db_orig else None,
@@ -1097,7 +1114,7 @@ const {{ chromium }} = require('{PW_DIR}/node_modules/playwright');
                 ],
             },
             ac_id,
-            "offline retain / same-id reonline / cancel-separate / republish",
+            fail_reason or "offline retain / same-id reonline / cancel-separate / republish",
         )
 
     if ac_id == "PB-B09-AC2":
