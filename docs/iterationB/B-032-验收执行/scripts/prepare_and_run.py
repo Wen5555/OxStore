@@ -220,6 +220,8 @@ def reset_ns(env: dict):
                 "DELETE cci FROM checkout_confirmation_item cci JOIN checkout_confirmation cc ON cc.id=cci.confirmation_id JOIN customer c ON c.id=cc.customer_id WHERE c.username LIKE 'b032_%'",
                 "DELETE cc FROM checkout_confirmation cc JOIN customer c ON c.id=cc.customer_id WHERE c.username LIKE 'b032_%'",
                 "DELETE r FROM operation_receipt r JOIN customer c ON c.id=r.customer_id WHERE c.username LIKE 'b032_%'",
+                "DELETE ta FROM trade_attempt ta JOIN purchase_intent pi ON pi.id=ta.intent_id WHERE pi.product_name_snapshot LIKE 'LEGACY-%' OR pi.product_name_snapshot LIKE 'B032-%'",
+                "DELETE ta FROM trade_attempt ta JOIN purchase_intent pi ON pi.id=ta.intent_id JOIN customer c ON c.id=pi.customer_id WHERE c.username LIKE 'b032_%'",
                 "DELETE FROM purchase_intent WHERE product_name_snapshot LIKE 'LEGACY-%' OR product_name_snapshot LIKE 'B032-%'",
                 "DELETE pi FROM purchase_intent pi JOIN customer c ON c.id=pi.customer_id WHERE c.username LIKE 'b032_%'",
             ]:
@@ -1117,7 +1119,7 @@ def ac_b12_03(env, fx):
         code == 201
         and msg(body) == "下单成功"
         and msg(b_empty) == "请选择商品"
-        and (c_off >= 400 or True)  # offline add may be rejected
+        and c_off >= 400
     )
     detail = {
         "cart_items": items,
@@ -1646,6 +1648,7 @@ const {{ chromium }} = require('/tmp/oxstore-develop/frontend/node_modules/playw
 
 
 def verify_api_db(env) -> dict:
+    """Bind running BE process → checkout SHA → datasource isolation DB (redacted)."""
     conn = connect_mysql(env)
     try:
         with conn.cursor() as cur:
@@ -1660,14 +1663,53 @@ def verify_api_db(env) -> dict:
         f"{base_url(env)}/api/admin/auth/login",
         {"username": "admin", "password": env.get("B032_SELLER_PASSWORD")},
     )
+    be_pid = listen_pid_8080()
+    proc_bind: dict = {"be_pid": be_pid}
+    if be_pid:
+        try:
+            environ_raw = Path(f"/proc/{be_pid}/environ").read_bytes().split(b"\0")
+            env_map = {}
+            for item in environ_raw:
+                if b"=" in item:
+                    k, v = item.split(b"=", 1)
+                    env_map[k.decode(errors="replace")] = v.decode(errors="replace")
+            proc_bind["process_db_name"] = env_map.get("DB_NAME")
+            proc_bind["process_db_host"] = env_map.get("DB_HOST")
+            proc_bind["process_db_port"] = env_map.get("DB_PORT")
+            proc_bind["process_pwd"] = env_map.get("PWD")
+            cmdline = Path(f"/proc/{be_pid}/cmdline").read_bytes().replace(b"\0", b" ").decode(errors="replace")
+            proc_bind["cmdline_has_shop_application"] = "com.team.shop.ShopApplication" in cmdline
+            proc_bind["cmdline_classpath_hint"] = (
+                "/tmp/oxstore-develop/backend/target/classes" in cmdline
+            )
+        except Exception as e:
+            proc_bind["process_read_error"] = str(e)
+    # Checkout SHA from develop worktree (SUT), not merely env claim
+    checkout_sha = None
+    develop_git = Path("/tmp/oxstore-develop")
+    try:
+        checkout_sha = (
+            subprocess.check_output(["git", "-C", str(develop_git), "rev-parse", "HEAD"], text=True)
+            .strip()
+        )
+    except Exception as e:
+        proc_bind["checkout_sha_error"] = str(e)
+    env_sha = env.get("B032_SUT_SHA")
+    sha_match = bool(checkout_sha and env_sha and checkout_sha.startswith(str(env_sha)[:7]))
+    db_match = db == env["B032_DB_NAME"]
+    process_db_match = proc_bind.get("process_db_name") == env["B032_DB_NAME"]
     return {
         "db": db,
         "expected": env["B032_DB_NAME"],
-        "match": db == env["B032_DB_NAME"],
+        "match": db_match and process_db_match and bool(proc_bind.get("cmdline_has_shop_application")),
         "b032_products": n,
         "login_http": code,
-        "be_pid": listen_pid_8080(),
-        "sut_sha": env.get("B032_SUT_SHA"),
+        "be_pid": be_pid,
+        "sut_sha_env": env_sha,
+        "sut_sha_checkout": checkout_sha,
+        "sut_sha_match": sha_match,
+        "process_binding": proc_bind,
+        "binding_note": "process environ DB_NAME + develop HEAD + API login; env alone is not sufficient",
     }
 
 
@@ -1692,34 +1734,35 @@ def main() -> int:
     fx = prepare(env)
     fx["_seller_pwd"] = env.get("B032_SELLER_PASSWORD", "")
     import audit_acs  # noqa: WPS433
+    import second_audit_acs as sa  # noqa: WPS433
 
     runners = [
         ac_b01_01,
         audit_acs.ac_b01_02,
-        audit_acs.ac_b01_03,
-        ac_b01_04,
-        ac_b01_05,
+        sa.ac_b01_03,
+        sa.ac_b01_04,
+        sa.ac_b01_05,
         ac_b02_01,
         audit_acs.ac_b02_02,
-        ac_b02_03,
-        audit_acs.ac_b02_04,
+        sa.ac_b02_03,
+        sa.ac_b02_04,
         audit_acs.ac_b02_05,
-        ac_b03_01,
-        ac_b03_02,
+        sa.ac_b03_01,
+        sa.ac_b03_02,
         audit_acs.ac_b03_03,
         ac_b03_04,
-        audit_acs.ac_b03_05,
+        sa.ac_b03_05,
         ac_b12_01,
-        ac_b12_02,
-        audit_acs.ac_b12_03,
-        audit_acs.ac_b12_04,
-        ac_b12_05,
-        ac_b12_06,
-        audit_acs.ac_b13_01,
-        audit_acs.ac_b13_02,
-        audit_acs.ac_b13_03,
-        audit_acs.ac_b13_04,
-        audit_acs.ac_b13_05,
+        sa.ac_b12_02,
+        sa.ac_b12_03,
+        sa.ac_b12_04,
+        sa.ac_b12_05,
+        sa.ac_b12_06,
+        sa.ac_b13_01,
+        sa.ac_b13_02,
+        sa.ac_b13_03,
+        sa.ac_b13_04,
+        sa.ac_b13_05,
     ]
     ac_names = {
         "ac_b01_01": "PB-B01-AC1",
@@ -1761,7 +1804,7 @@ def main() -> int:
         results.append(r)
         print(r["ac_id"], r["verdict"], flush=True)
 
-    shots = audit_acs.run_screenshots(env, fx)
+    shots = sa.run_screenshots(env, fx)
     (EVID / "screenshots-index.json").write_text(
         json.dumps(redact(shots), ensure_ascii=False, indent=2, default=json_default), encoding="utf-8"
     )
@@ -1783,6 +1826,34 @@ def main() -> int:
         )
     except Exception:
         started_sg = ended_sg = None
+
+    # Flatten conjunct evidence table across all ACs
+    conjunct_rows = []
+    for r in results:
+        detail = r.get("detail") or {}
+        conj = detail.get("conjuncts")
+        if isinstance(conj, list) and conj:
+            for c in conj:
+                conjunct_rows.append(
+                    {
+                        "ac_id": r["ac_id"],
+                        "ac_verdict": r["verdict"],
+                        "conjunct": c.get("name"),
+                        "pass": c.get("pass"),
+                        "disposition_if_fail": c.get("disposition_if_fail"),
+                    }
+                )
+        else:
+            conjunct_rows.append(
+                {
+                    "ac_id": r["ac_id"],
+                    "ac_verdict": r["verdict"],
+                    "conjunct": "(legacy single-verdict AC — no explicit conjunct list)",
+                    "pass": r["verdict"] == "PASS",
+                    "disposition_if_fail": r["verdict"] if r["verdict"] != "PASS" else None,
+                }
+            )
+
     totals = {
         "execution_window": {
             "started_at": started,
@@ -1794,6 +1865,8 @@ def main() -> int:
             "db": env["B032_DB_NAME"],
             "delivery_baseline": env.get("B032_DELIVERY_BASELINE"),
             "tx_probe_sql": "fixtures/b032_tx_probes.sql",
+            "v8_sql": "fixtures/V8__close_legacy_fixed_price_intents.sql",
+            "second_audit": "OF-19",
         },
         "sut_sha": env.get("B032_SUT_SHA"),
         "sut_branch": env.get("B032_SUT_BRANCH"),
@@ -1801,19 +1874,21 @@ def main() -> int:
         "base": base_url(env),
         "fe": fe_url(env),
         "be_pid": listen_pid_8080(),
+        "verify_api_db": verify,
         "total": len(results),
         "pass": sum(1 for r in results if r["verdict"] == "PASS"),
         "fail": sum(1 for r in results if r["verdict"] == "FAIL"),
         "blocked": sum(1 for r in results if r["verdict"] == "BLOCKED"),
         "not_executed": sum(1 for r in results if r["verdict"] == "NOT_EXECUTED"),
         "screenshots": shots,
+        "conjunct_table": conjunct_rows,
         "results": results,
     }
     (EVID / "results.json").write_text(
         json.dumps(totals, ensure_ascii=False, indent=2, default=json_default), encoding="utf-8"
     )
     lines = [
-        f"# B-032 results",
+        f"# B-032 results (second audit · OF-19)",
         f"",
         f"- window UTC: {started} → {ended}",
         f"- window Asia/Singapore: {started_sg} → {ended_sg}",
@@ -1821,11 +1896,24 @@ def main() -> int:
         f"- db: {env['B032_DB_NAME']}",
         f"- totals: PASS {totals['pass']} / FAIL {totals['fail']} / BLOCKED {totals['blocked']} / NOT_EXECUTED {totals['not_executed']} / total {totals['total']}",
         f"",
+        f"## AC verdicts",
+        f"",
         f"| AC | Verdict |",
         f"|---|---|",
     ]
     for r in results:
         lines.append(f"| {r['ac_id']} | {r['verdict']} |")
+    lines += [
+        f"",
+        f"## Conjunct evidence table",
+        f"",
+        f"| AC | AC verdict | Conjunct | Pass | If fail |",
+        f"|---|---|---|---|---|",
+    ]
+    for row in conjunct_rows:
+        lines.append(
+            f"| {row['ac_id']} | {row['ac_verdict']} | {row['conjunct']} | {row['pass']} | {row['disposition_if_fail'] or ''} |"
+        )
     (EVID / "results.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(
         json.dumps(

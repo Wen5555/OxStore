@@ -1,75 +1,355 @@
 {
-  "pos": {
-    "http": 201,
-    "message": "下单成功",
-    "stock": [
-      "10",
-      "8"
-    ]
-  },
-  "neg": {
-    "http": 409,
-    "message": "所选商品无法下单"
-  },
   "breakpoints": {
     "after_order": {
       "http": 500,
       "message": "服务器内部错误",
       "probe": [
-        "order_created:order_id=230"
+        "order_created:order_id=326"
       ],
       "rolled_back": true,
-      "required_probe": "order_created",
       "probe_hit": true,
+      "cart_before": [
+        {
+          "id": "596",
+          "product_id": "25",
+          "quantity": "1"
+        }
+      ],
+      "cart_after": [
+        {
+          "id": "596",
+          "product_id": "25",
+          "quantity": "1"
+        }
+      ],
       "stock": [
         "10",
         "10"
-      ],
-      "cart_len": [
-        1,
-        1
       ]
     },
     "after_stock": {
       "http": 500,
       "message": "服务器内部错误",
       "probe": [
-        "order_created:order_id=231",
+        "order_created:order_id=327",
         "stock_updated:product_id=25 stock=10->9"
       ],
       "rolled_back": true,
-      "required_probe": "stock_updated",
       "probe_hit": true,
+      "cart_before": [
+        {
+          "id": "597",
+          "product_id": "25",
+          "quantity": "1"
+        }
+      ],
+      "cart_after": [
+        {
+          "id": "597",
+          "product_id": "25",
+          "quantity": "1"
+        }
+      ],
       "stock": [
         "10",
         "10"
-      ],
-      "cart_len": [
-        1,
-        1
       ]
     },
     "after_cart": {
       "http": 500,
       "message": "服务器内部错误",
       "probe": [
-        "order_created:order_id=232",
+        "order_created:order_id=328",
         "stock_updated:product_id=25 stock=10->9",
-        "cart_deleted:cart_item_id=447"
+        "cart_deleted:cart_item_id=598"
       ],
       "rolled_back": true,
-      "required_probe": "cart_deleted",
       "probe_hit": true,
+      "cart_before": [
+        {
+          "id": "598",
+          "product_id": "25",
+          "quantity": "1"
+        }
+      ],
+      "cart_after": [
+        {
+          "id": "598",
+          "product_id": "25",
+          "quantity": "1"
+        }
+      ],
       "stock": [
         "10",
         "10"
-      ],
-      "cart_len": [
-        1,
-        1
       ]
     }
   },
-  "trigger_sql": "fixtures/b032_tx_probes.sql",
-  "conjunction": "after_order AND after_stock AND after_cart (no OR)"
+  "conjuncts": [
+    {
+      "name": "pos_http_message",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 201,
+        "message": "下单成功"
+      }
+    },
+    {
+      "name": "pos_stock_delta",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "stock": [
+          "10",
+          "8"
+        ]
+      }
+    },
+    {
+      "name": "pos_cart_full_set_cleared",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "cart_before": [
+          {
+            "id": "591",
+            "product_id": "25",
+            "quantity": "2"
+          }
+        ],
+        "cart_after": []
+      }
+    },
+    {
+      "name": "pos_order_items_receipts_persisted",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "orders": [
+          {
+            "id": 323,
+            "order_no": "cb35c8c5-0006-4229-a4f5-b5f91aadf60f",
+            "status": "PLACED",
+            "total_amount": "25.00",
+            "created_at": "2026-11-21T04:34:41.179794",
+            "cancelled_by": null,
+            "cancelled_at": null
+          }
+        ],
+        "items": [
+          {
+            "product_id": 25,
+            "product_name": "B032-在售-10",
+            "quantity": "2",
+            "unit_price": "12.50",
+            "line_amount": "25.00"
+          }
+        ],
+        "receipts": [
+          {
+            "id": 886,
+            "operation_type": "CART_ADD"
+          },
+          {
+            "id": 887,
+            "operation_type": "CHECKOUT"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pos_success_ui_screenshot",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "ok": true,
+        "shots": [
+          "b13-order-success.png"
+        ],
+        "bodySnippet": "购物车\n返回买家账户\n购物车是空的\n下单成功\n下单成功\n订单号：dcc19e24-19d8-4991-8e27-b80814c90f33\n查看订单详情\n关 闭\n下单成功",
+        "stderr_tail": "",
+        "stdout_tail": "{\"ok\":true,\"shots\":[\"b13-order-success.png\"],\"bodySnippet\":\"购物车\\n返回买家账户\\n购物车是空的\\n下单成功\\n下单成功\\n订单号：dcc19e24-19d8-4991-8e27-b80814c90f33\\n查看订单详情\\n关 闭\\n下单成功\"}\n",
+        "node_exit": 0
+      }
+    },
+    {
+      "name": "neg_no_order_stock_cart_full_set",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 409,
+        "message": "所选商品无法下单",
+        "cart_before": [
+          {
+            "id": "593",
+            "product_id": "27",
+            "quantity": "5"
+          }
+        ],
+        "cart_after": [
+          {
+            "id": "593",
+            "product_id": "27",
+            "quantity": "5"
+          }
+        ]
+      }
+    },
+    {
+      "name": "neg_failure_reason_not_generic_only",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "message": "所选商品无法下单 商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。",
+        "http": 409
+      }
+    },
+    {
+      "name": "multi_product_mid_fault_batch_unchanged",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 500,
+        "message": "服务器内部错误",
+        "cart_before": [
+          {
+            "id": "594",
+            "product_id": "25",
+            "quantity": "1"
+          },
+          {
+            "id": "595",
+            "product_id": "26",
+            "quantity": "1"
+          }
+        ],
+        "cart_after": [
+          {
+            "id": "594",
+            "product_id": "25",
+            "quantity": "1"
+          },
+          {
+            "id": "595",
+            "product_id": "26",
+            "quantity": "1"
+          }
+        ],
+        "stock_before": {
+          "25": "10",
+          "26": "5"
+        },
+        "stock_after": {
+          "25": "10",
+          "26": "5"
+        },
+        "probe": [
+          "order_created:order_id=325"
+        ]
+      }
+    },
+    {
+      "name": "breakpoint_after_order_rollback_and_probe",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 500,
+        "message": "服务器内部错误",
+        "probe": [
+          "order_created:order_id=326"
+        ],
+        "rolled_back": true,
+        "probe_hit": true,
+        "cart_before": [
+          {
+            "id": "596",
+            "product_id": "25",
+            "quantity": "1"
+          }
+        ],
+        "cart_after": [
+          {
+            "id": "596",
+            "product_id": "25",
+            "quantity": "1"
+          }
+        ],
+        "stock": [
+          "10",
+          "10"
+        ]
+      }
+    },
+    {
+      "name": "breakpoint_after_stock_rollback_and_probe",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 500,
+        "message": "服务器内部错误",
+        "probe": [
+          "order_created:order_id=327",
+          "stock_updated:product_id=25 stock=10->9"
+        ],
+        "rolled_back": true,
+        "probe_hit": true,
+        "cart_before": [
+          {
+            "id": "597",
+            "product_id": "25",
+            "quantity": "1"
+          }
+        ],
+        "cart_after": [
+          {
+            "id": "597",
+            "product_id": "25",
+            "quantity": "1"
+          }
+        ],
+        "stock": [
+          "10",
+          "10"
+        ]
+      }
+    },
+    {
+      "name": "breakpoint_after_cart_rollback_and_probe",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 500,
+        "message": "服务器内部错误",
+        "probe": [
+          "order_created:order_id=328",
+          "stock_updated:product_id=25 stock=10->9",
+          "cart_deleted:cart_item_id=598"
+        ],
+        "rolled_back": true,
+        "probe_hit": true,
+        "cart_before": [
+          {
+            "id": "598",
+            "product_id": "25",
+            "quantity": "1"
+          }
+        ],
+        "cart_after": [
+          {
+            "id": "598",
+            "product_id": "25",
+            "quantity": "1"
+          }
+        ],
+        "stock": [
+          "10",
+          "10"
+        ]
+      }
+    }
+  ],
+  "conjunct_pass": 11,
+  "conjunct_total": 11,
+  "conjunct_fail_names": []
 }

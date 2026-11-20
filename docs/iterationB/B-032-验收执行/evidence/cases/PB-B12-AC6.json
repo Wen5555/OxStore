@@ -1,23 +1,80 @@
 {
-  "insufficient": {
-    "http": 409,
-    "messages": [
-      "所选商品无法下单",
-      "商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。"
-    ],
-    "expect": "商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。"
-  },
-  "offline": {
-    "http": 409,
-    "messages": [
-      "所选商品无法下单",
-      "商品「B032-在售-10」已下架，请从购物车移除后重试。"
-    ],
-    "expect": "商品「B032-在售-10」已下架，请从购物车移除后重试。"
-  },
-  "empty": {
-    "http": 400,
-    "message": "请选择商品"
-  },
-  "stock_on1": "1"
+  "conjuncts": [
+    {
+      "name": "multi_problem_rows_listed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "path": "confirm_reject",
+        "http": 409,
+        "messages": "所选商品无法下单 商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。 商品「B032-在售-10」已下架，请从购物车移除后重试。 所选商品无法下单 商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。 商品「B032-在售-10」已下架，请从购物车移除后重试。"
+      }
+    },
+    {
+      "name": "final_fail_stock_cart_unchanged",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "stock_before": {
+          "27": "1",
+          "25": "10"
+        },
+        "stock_after": {
+          "27": "1",
+          "25": "10"
+        },
+        "cart_before": [
+          {
+            "id": "589",
+            "product_id": "27",
+            "quantity": "5"
+          },
+          {
+            "id": "590",
+            "product_id": "25",
+            "quantity": "1"
+          }
+        ],
+        "cart_after": [
+          {
+            "id": "589",
+            "product_id": "27",
+            "quantity": "5"
+          },
+          {
+            "id": "590",
+            "product_id": "25",
+            "quantity": "1"
+          }
+        ]
+      }
+    },
+    {
+      "name": "empty_select_message",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 400,
+        "message": "请选择商品"
+      }
+    },
+    {
+      "name": "ui_error_tip_screenshot",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "ok": true,
+        "shots": [
+          "b12-submit-error-tip.png"
+        ],
+        "text": "购物车\n返回买家账户\n下单选择\n转收藏选择\n全选可下单商品\n清空购物车\n转为收藏\n下 单\nB032-低库存-1\n单价：¥3.30\n当前库存 1，下单时将重新校验。\n更新数量\n删 除\nB032-在售-10\n单价：¥12.50\n已下架\n更新数量\n删 除\n已选 0 件商品，金额合计：¥0.00\n请选择商品",
+        "stderr_tail": "",
+        "stdout_tail": "{\"ok\":true,\"shots\":[\"b12-submit-error-tip.png\"],\"text\":\"购物车\\n返回买家账户\\n下单选择\\n转收藏选择\\n全选可下单商品\\n清空购物车\\n转为收藏\\n下 单\\nB032-低库存-1\\n单价：¥3.30\\n当前库存 1，下单时将重新校验。\\n更新数量\\n删 除\\nB032-在售-10\\n单价：¥12.50\\n已下架\\n更新数量\\n删 除\\n已选 0 件商品，金额合计：¥0.00\\n请选择商品\"}\n",
+        "node_exit": 0
+      }
+    }
+  ],
+  "conjunct_pass": 4,
+  "conjunct_total": 4,
+  "conjunct_fail_names": []
 }

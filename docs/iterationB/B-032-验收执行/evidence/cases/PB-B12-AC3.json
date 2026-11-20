@@ -1,29 +1,57 @@
 {
-  "offline_add": {
-    "http": 409,
-    "message": "商品已下架"
-  },
-  "selected_submit": {
-    "http": 201,
-    "message": "下单成功"
-  },
-  "empty": {
-    "http": 400,
-    "message": "请选择商品"
-  },
-  "ui": {
-    "ok": true,
-    "shots": [
-      "b12-cart-selection.png"
-    ],
-    "ui": {
-      "allLabel": 1,
-      "disabled": 0,
-      "invalidTag": 0,
-      "insufHint": 1,
-      "checked": 1
+  "conjuncts": [
+    {
+      "name": "empty_select_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 400,
+        "message": "请选择商品"
+      }
     },
-    "stderr_tail": "",
-    "stdout_tail": "{\"ok\":true,\"shots\":[\"b12-cart-selection.png\"],\"ui\":{\"allLabel\":1,\"disabled\":0,\"invalidTag\":0,\"insufHint\":1,\"checked\":1}}\n"
-  }
+    {
+      "name": "submit_only_valid_selected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 201,
+        "message": "下单成功"
+      }
+    },
+    {
+      "name": "ui_has_invalid_or_disabled_offline_rows",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "ok": true,
+        "shots": [
+          "b12-cart-selection.png"
+        ],
+        "ui": {
+          "allLabel": 1,
+          "disabled": 2,
+          "invalidTag": 1,
+          "insufHint": 1,
+          "checkedBefore": 0,
+          "checkedAfterToggle": 2
+        },
+        "stderr_tail": "",
+        "stdout_tail": "{\"ok\":true,\"shots\":[\"b12-cart-selection.png\"],\"ui\":{\"allLabel\":1,\"disabled\":2,\"invalidTag\":1,\"insufHint\":1,\"checkedBefore\":0,\"checkedAfterToggle\":2}}\n",
+        "node_exit": 0
+      }
+    },
+    {
+      "name": "stale_offline_row_prepared",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "stale_offline_cart_id": "582",
+        "missing_product": null,
+        "missing_err": "(1452, 'Cannot add or update a child row: a foreign key constraint fails (`oxstore_b032_local`.`cart_item`, CONSTRAINT `fk_cart_product` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`))')"
+      }
+    }
+  ],
+  "conjunct_pass": 4,
+  "conjunct_total": 4,
+  "conjunct_fail_names": []
 }

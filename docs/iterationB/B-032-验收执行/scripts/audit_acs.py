@@ -1002,7 +1002,7 @@ def ac_b13_04(env, fx):
         "lost_response_replay": {"http": s2, "message": msg(b2)},
         "recovered_in_history": found,
         "cart_after_replay": cart,
-        "idempotency_not_cart_clear": True,
+        "idempotency_not_cart_clear": "DEPRECATED_RUNNER — see second_audit_acs.ac_b13_04 measured conjunct",
         "new_purchase": {"http": s3, "message": msg(b3)},
     }
     m.dump_case("PB-B13-AC4", detail)

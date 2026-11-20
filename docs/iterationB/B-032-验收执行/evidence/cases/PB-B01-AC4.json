@@ -1,86 +1,104 @@
 {
-  "steps": [
+  "conjuncts": [
     {
-      "action": "CONFIRM",
-      "http": 200,
-      "message": "ok",
-      "body_keys": [
-        "orderId",
-        "orderNo",
-        "customerId",
-        "status",
-        "items",
-        "totalAmount",
-        "createdAt",
-        "cancelledBy",
-        "cancelledAt",
-        "cancelReason",
-        "allowedActions"
-      ]
+      "name": "api_full_flow_no_logistics_fields",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "steps": [
+          {
+            "action": "CONFIRM",
+            "http": 200,
+            "message": "ok",
+            "body_keys": [
+              "orderId",
+              "orderNo",
+              "customerId",
+              "status",
+              "items",
+              "totalAmount",
+              "createdAt",
+              "cancelledBy",
+              "cancelledAt",
+              "cancelReason",
+              "allowedActions"
+            ]
+          },
+          {
+            "action": "PREPARE",
+            "http": 200,
+            "message": "ok",
+            "body_keys": [
+              "orderId",
+              "orderNo",
+              "customerId",
+              "status",
+              "items",
+              "totalAmount",
+              "createdAt",
+              "cancelledBy",
+              "cancelledAt",
+              "cancelReason",
+              "allowedActions"
+            ]
+          },
+          {
+            "action": "SHIP",
+            "http": 200,
+            "message": "ok",
+            "body_keys": [
+              "orderId",
+              "orderNo",
+              "customerId",
+              "status",
+              "items",
+              "totalAmount",
+              "createdAt",
+              "cancelledBy",
+              "cancelledAt",
+              "cancelReason",
+              "allowedActions"
+            ]
+          },
+          {
+            "action": "COMPLETE",
+            "http": 200,
+            "message": "ok",
+            "body_keys": [
+              "orderId",
+              "orderNo",
+              "customerId",
+              "status",
+              "items",
+              "totalAmount",
+              "createdAt",
+              "cancelledBy",
+              "cancelledAt",
+              "cancelReason",
+              "allowedActions"
+            ]
+          }
+        ]
+      }
     },
     {
-      "action": "PREPARE",
-      "http": 200,
-      "message": "ok",
-      "body_keys": [
-        "orderId",
-        "orderNo",
-        "customerId",
-        "status",
-        "items",
-        "totalAmount",
-        "createdAt",
-        "cancelledBy",
-        "cancelledAt",
-        "cancelReason",
-        "allowedActions"
-      ]
-    },
-    {
-      "action": "SHIP",
-      "http": 200,
-      "message": "ok",
-      "body_keys": [
-        "orderId",
-        "orderNo",
-        "customerId",
-        "status",
-        "items",
-        "totalAmount",
-        "createdAt",
-        "cancelledBy",
-        "cancelledAt",
-        "cancelReason",
-        "allowedActions"
-      ]
-    },
-    {
-      "action": "COMPLETE",
-      "http": 200,
-      "message": "ok",
-      "body_keys": [
-        "orderId",
-        "orderNo",
-        "customerId",
-        "status",
-        "items",
-        "totalAmount",
-        "createdAt",
-        "cancelledBy",
-        "cancelledAt",
-        "cancelReason",
-        "allowedActions"
-      ]
+      "name": "merchant_ui_orders_flow_screenshot",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "ok": true,
+        "shots": [
+          "b01-merchant-orders-flow.png"
+        ],
+        "url": "http://127.0.0.1:5173/admin/orders",
+        "hasOrders": true,
+        "stderr_tail": "",
+        "stdout_tail": "{\"ok\":true,\"shots\":[\"b01-merchant-orders-flow.png\"],\"url\":\"http://127.0.0.1:5173/admin/orders\",\"hasOrders\":true}\n",
+        "node_exit": 0
+      }
     }
   ],
-  "final": {
-    "id": 207,
-    "order_no": "40ff8b0e-c10c-4526-a417-dafad92fe6bd",
-    "status": "COMPLETED",
-    "total_amount": "12.50",
-    "created_at": "2026-11-21T04:12:31.383289",
-    "cancelled_by": null,
-    "cancelled_at": null
-  },
-  "note": "actions body only action+expectedStatus"
+  "conjunct_pass": 2,
+  "conjunct_total": 2,
+  "conjunct_fail_names": []
 }

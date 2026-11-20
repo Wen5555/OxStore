@@ -1,26 +1,57 @@
 {
-  "multi": {
-    "http": 201,
-    "message": "下单成功",
-    "items": [
-      {
-        "product_id": 25,
-        "product_name": "B032-在售-10",
-        "quantity": "3",
-        "unit_price": "12.50",
-        "line_amount": "37.50"
-      },
-      {
-        "product_id": 26,
-        "product_name": "B032-在售-5",
-        "quantity": "1",
-        "unit_price": "8.00",
-        "line_amount": "8.00"
+  "conjuncts": [
+    {
+      "name": "multi_product_one_order_placed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 201,
+        "message": "下单成功",
+        "items": [
+          {
+            "product_id": 25,
+            "product_name": "B032-在售-10",
+            "quantity": "3",
+            "unit_price": "12.50",
+            "line_amount": "37.50"
+          },
+          {
+            "product_id": 26,
+            "product_name": "B032-在售-5",
+            "quantity": "1",
+            "unit_price": "8.00",
+            "line_amount": "8.00"
+          }
+        ]
       }
-    ]
-  },
-  "single": {
-    "http": 201,
-    "message": "下单成功"
-  }
+    },
+    {
+      "name": "multi_product_whole_order_cancel",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "order": {
+          "id": 319,
+          "order_no": "777e9c4b-b5cc-4ac2-a609-bb2aa210d2b4",
+          "status": "CANCELLED",
+          "total_amount": "45.50",
+          "created_at": "2026-11-21T04:34:26.318964",
+          "cancelled_by": "CUSTOMER",
+          "cancelled_at": "2026-11-21T04:34:26.361745"
+        }
+      }
+    },
+    {
+      "name": "single_qty_order",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 201,
+        "message": "下单成功"
+      }
+    }
+  ],
+  "conjunct_pass": 3,
+  "conjunct_total": 3,
+  "conjunct_fail_names": []
 }

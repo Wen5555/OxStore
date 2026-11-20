@@ -3,19 +3,54 @@
   "shots": [
     "b03-after-login.png",
     "b12-product-detail-no-direct-buy.png",
-    "b12-clear-cart-confirm.png"
+    "b12-clear-cart-confirm.png",
+    "b03-order-history.png",
+    "b03-admin-orders.png"
+  ],
+  "mapping": [
+    {
+      "file": "b03-after-login.png",
+      "ac": "PB-B03",
+      "step": "after login"
+    },
+    {
+      "file": "b12-product-detail-no-direct-buy.png",
+      "ac": "PB-B12-AC1",
+      "step": "product detail no direct buy"
+    },
+    {
+      "file": "b12-clear-cart-confirm.png",
+      "ac": "PB-B12-AC5",
+      "step": "clear cart confirm modal"
+    },
+    {
+      "file": "b03-order-history.png",
+      "ac": "PB-B03-AC3",
+      "step": "customer order history"
+    },
+    {
+      "file": "b03-admin-orders.png",
+      "ac": "PB-B03-AC3",
+      "step": "merchant order management"
+    }
   ],
   "detail": {
     "directBuy": 0,
     "addCart": 1
   },
-  "required": {
-    "cart": true,
-    "confirm": true,
-    "history": true,
-    "admin": true,
-    "cart_confirm_distinct": true
+  "required_exists": {
+    "b03-after-login.png": true,
+    "b12-product-detail-no-direct-buy.png": true,
+    "b12-cart-selection.png": true,
+    "b12-checkout-confirm.png": true,
+    "b12-clear-cart-confirm.png": true,
+    "b03-order-history.png": true,
+    "b03-admin-orders.png": true,
+    "b13-order-success.png": true,
+    "b12-submit-error-tip.png": true,
+    "b01-merchant-orders-flow.png": true
   },
   "stderr_tail": "",
-  "stdout_tail": "{\"ok\":true,\"shots\":[\"b03-after-login.png\",\"b12-product-detail-no-direct-buy.png\",\"b12-clear-cart-confirm.png\"],\"detail\":{\"directBuy\":0,\"addCart\":1},\"required\":{\"cart\":true,\"confirm\":true,\"history\":true,\"admin\":true,\"cart_confirm_distinct\":true}}\n"
+  "stdout_tail": "\"b03-after-login.png\",\"ac\":\"PB-B03\",\"step\":\"after login\"},{\"file\":\"b12-product-detail-no-direct-buy.png\",\"ac\":\"PB-B12-AC1\",\"step\":\"product detail no direct buy\"},{\"file\":\"b12-clear-cart-confirm.png\",\"ac\":\"PB-B12-AC5\",\"step\":\"clear cart confirm modal\"},{\"file\":\"b03-order-history.png\",\"ac\":\"PB-B03-AC3\",\"step\":\"customer order history\"},{\"file\":\"b03-admin-orders.png\",\"ac\":\"PB-B03-AC3\",\"step\":\"merchant order management\"}],\"detail\":{\"directBuy\":0,\"addCart\":1},\"required_exists\":{\"b03-after-login.png\":true,\"b12-product-detail-no-direct-buy.png\":true,\"b12-cart-selection.png\":true,\"b12-checkout-confirm.png\":true,\"b12-clear-cart-confirm.png\":true,\"b03-order-history.png\":true,\"b03-admin-orders.png\":true,\"b13-order-success.png\":true,\"b12-submit-error-tip.png\":true,\"b01-merchant-orders-flow.png\":true}}\n",
+  "node_exit": 0
 }

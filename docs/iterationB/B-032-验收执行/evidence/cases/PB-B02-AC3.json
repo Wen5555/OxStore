@@ -1,35 +1,80 @@
 {
-  "cases": [
+  "conjuncts": [
     {
-      "case": "neg",
-      "http": 400,
-      "message": "库存不能为负数，请输入非负整数。",
-      "stock": "20"
-    },
-    {
-      "case": "decimal",
-      "http": 400,
-      "message": "库存不能为负数，请输入非负整数。",
-      "stock": "20"
-    },
-    {
-      "case": "zero",
-      "http": 200,
-      "message": "ok",
-      "row": {
-        "id": 30,
-        "name": "B032-库存编辑",
-        "stock": "0",
-        "status": "OFFLINE",
-        "offline_reason": "AUTO_ZERO",
-        "price": "7.00"
+      "name": "reject_non_numeric_and_signed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "cases": [
+          {
+            "value": "abc",
+            "http": 400,
+            "message": "库存不能为负数，请输入非负整数。"
+          },
+          {
+            "value": "-1",
+            "http": 400,
+            "message": "库存不能为负数，请输入非负整数。"
+          },
+          {
+            "value": "1.5",
+            "http": 400,
+            "message": "库存不能为负数，请输入非负整数。"
+          },
+          {
+            "value": "",
+            "http": 400,
+            "message": "库存不能为负数，请输入非负整数。"
+          },
+          {
+            "value": "01",
+            "http": 400,
+            "message": "库存不能为负数，请输入非负整数。"
+          },
+          {
+            "value": " ",
+            "http": 400,
+            "message": "库存不能为负数，请输入非负整数。"
+          }
+        ]
       }
     },
     {
-      "case": "large",
-      "http": 200,
-      "message": "ok",
-      "stock": "999"
+      "name": "accept_valid_stock",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 200,
+        "message": "ok"
+      }
+    },
+    {
+      "name": "stock_edit_does_not_change_existing_order",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "snap": [
+          {
+            "product_id": 25,
+            "product_name": "B032-在售-10",
+            "quantity": "1",
+            "unit_price": "12.50",
+            "line_amount": "12.50"
+          }
+        ],
+        "snap2": [
+          {
+            "product_id": 25,
+            "product_name": "B032-在售-10",
+            "quantity": "1",
+            "unit_price": "12.50",
+            "line_amount": "12.50"
+          }
+        ]
+      }
     }
-  ]
+  ],
+  "conjunct_pass": 3,
+  "conjunct_total": 3,
+  "conjunct_fail_names": []
 }

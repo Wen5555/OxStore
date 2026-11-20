@@ -38,11 +38,11 @@
     "message": "角色无权访问"
   },
   "no_auto_after_wait": {
-    "id": 203,
-    "order_no": "f5884c44-c3c5-412b-9ee7-223c553a7ba2",
+    "id": 295,
+    "order_no": "413a8c42-121b-468f-82b2-f6e200b56c31",
     "status": "CONFIRMED",
     "total_amount": "8.00",
-    "created_at": "2026-11-21T04:12:27.159319",
+    "created_at": "2026-11-21T04:34:08.491311",
     "cancelled_by": null,
     "cancelled_at": null
   }

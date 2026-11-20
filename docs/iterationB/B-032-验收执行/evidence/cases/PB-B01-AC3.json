@@ -1,48 +1,66 @@
 {
-  "complete_advance": {
-    "http": 409,
-    "message": "订单已完成，不可推进"
-  },
-  "complete_cancel": {
-    "http": 409,
-    "message": "订单已完成，不可取消"
-  },
-  "cancelled_advance": {
-    "http": 409,
-    "message": "订单已取消，不可推进"
-  },
-  "no_timeout_auto_cancel": {
-    "wait_sec": 2,
-    "status_after_wait": "PLACED",
-    "note": "no cancel-timer API; short wait shows status stayed PLACED"
-  },
-  "orders": [
+  "conjuncts": [
     {
-      "id": 204,
-      "order_no": "b4daf9a5-ccbe-4021-afc0-ef7dbe1e6484",
-      "status": "COMPLETED",
-      "total_amount": "12.50",
-      "created_at": "2026-11-21T04:12:29.001069",
-      "cancelled_by": null,
-      "cancelled_at": null
+      "name": "completed_no_advance",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 409,
+        "message": "订单已完成，不可推进"
+      }
     },
     {
-      "id": 205,
-      "order_no": "36bfb1a5-aed2-4624-af94-389d7aefc910",
-      "status": "CANCELLED",
-      "total_amount": "8.00",
-      "created_at": "2026-11-21T04:12:29.051099",
-      "cancelled_by": "CUSTOMER",
-      "cancelled_at": "2026-11-21T04:12:29.058023"
+      "name": "completed_no_customer_cancel",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 409,
+        "message": "订单已完成，不可取消"
+      }
     },
     {
-      "id": 206,
-      "order_no": "93a85e65-2ba6-4afc-a87a-3bbb3cf2ef64",
-      "status": "PLACED",
-      "total_amount": "12.50",
-      "created_at": "2026-11-21T04:12:29.078596",
-      "cancelled_by": null,
-      "cancelled_at": null
+      "name": "cancelled_no_advance",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 409,
+        "message": "订单已取消，不可推进"
+      }
+    },
+    {
+      "name": "merchant_cancel_placed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 200,
+        "message": "ok",
+        "order": {
+          "id": 298,
+          "order_no": "1416a5ec-40dd-420e-a684-7e7ce08b0de8",
+          "status": "CANCELLED",
+          "total_amount": "12.50",
+          "created_at": "2026-11-21T04:34:10.362351",
+          "cancelled_by": "SELLER",
+          "cancelled_at": "2026-11-21T04:34:10.371276"
+        }
+      }
+    },
+    {
+      "name": "no_timeout_auto_cancel_source_and_wait",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "wait_sec": 2,
+        "status_after_wait": "PLACED",
+        "source_scan_hits": [
+          "/tmp/oxstore-develop/backend/src/main/java/com/team/shop/service/AuctionSettlementService.java:51:    @Scheduled(fixedDelay = 5000)",
+          "/tmp/oxstore-develop/backend/src/main/java/com/team/shop/service/AuctionEventHub.java:88:    @Scheduled(fixedRate = 15_000)"
+        ],
+        "note": "2s wait alone insufficient; combined with source scan of cancel schedulers"
+      }
     }
-  ]
+  ],
+  "conjunct_pass": 5,
+  "conjunct_total": 5,
+  "conjunct_fail_names": []
 }

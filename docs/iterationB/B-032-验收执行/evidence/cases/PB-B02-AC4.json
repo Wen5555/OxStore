@@ -1,51 +1,106 @@
 {
-  "zero": {
-    "id": 30,
-    "name": "B032-库存编辑",
-    "stock": "0",
-    "status": "OFFLINE",
-    "offline_reason": "AUTO_ZERO",
-    "price": "7.00"
-  },
-  "list_has_product": false,
-  "detail": {
-    "http": 404,
-    "message": "商品已下架"
-  },
-  "add": {
-    "http": 409,
-    "message": "商品已下架"
-  },
-  "restock_no_auto": {
-    "id": 30,
-    "name": "B032-库存编辑",
-    "stock": "5",
-    "status": "OFFLINE",
-    "offline_reason": "AUTO_ZERO",
-    "price": "7.00"
-  },
-  "manual_online": {
-    "id": 30,
-    "name": "B032-库存编辑",
-    "stock": "5",
-    "status": "ONLINE",
-    "offline_reason": null,
-    "price": "7.00"
-  },
-  "manual_offline": {
-    "id": 30,
-    "name": "B032-库存编辑",
-    "stock": "5",
-    "status": "OFFLINE",
-    "offline_reason": "MANUAL",
-    "price": "7.00"
-  },
-  "reonline": {
-    "id": 30,
-    "name": "B032-库存编辑",
-    "stock": "5",
-    "status": "ONLINE",
-    "offline_reason": null,
-    "price": "7.00"
-  }
+  "conjuncts": [
+    {
+      "name": "list_page1_ok",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 200,
+        "ids": [
+          "30",
+          "27"
+        ],
+        "total": 4
+      }
+    },
+    {
+      "name": "list_page2_boundary",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 200,
+        "ids": [
+          "26",
+          "25"
+        ],
+        "total": 4
+      }
+    },
+    {
+      "name": "list_pages_no_id_overlap_when_both_nonempty",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "overlap": []
+      }
+    },
+    {
+      "name": "list_page0_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 400,
+        "message": "分页参数必须满足 page>=1 且 1<=size<=100"
+      }
+    },
+    {
+      "name": "base_offline_invisible_cycles",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "zero": {
+          "id": 30,
+          "name": "B032-库存编辑",
+          "stock": "0",
+          "status": "OFFLINE",
+          "offline_reason": "AUTO_ZERO",
+          "price": "7.00"
+        },
+        "list_has_product": false,
+        "detail": {
+          "http": 404,
+          "message": "商品已下架"
+        },
+        "add": {
+          "http": 409,
+          "message": "商品已下架"
+        },
+        "restock_no_auto": {
+          "id": 30,
+          "name": "B032-库存编辑",
+          "stock": "5",
+          "status": "OFFLINE",
+          "offline_reason": "AUTO_ZERO",
+          "price": "7.00"
+        },
+        "manual_online": {
+          "id": 30,
+          "name": "B032-库存编辑",
+          "stock": "5",
+          "status": "ONLINE",
+          "offline_reason": null,
+          "price": "7.00"
+        },
+        "manual_offline": {
+          "id": 30,
+          "name": "B032-库存编辑",
+          "stock": "5",
+          "status": "OFFLINE",
+          "offline_reason": "MANUAL",
+          "price": "7.00"
+        },
+        "reonline": {
+          "id": 30,
+          "name": "B032-库存编辑",
+          "stock": "5",
+          "status": "ONLINE",
+          "offline_reason": null,
+          "price": "7.00"
+        }
+      }
+    }
+  ],
+  "conjunct_pass": 5,
+  "conjunct_total": 5,
+  "conjunct_fail_names": []
 }

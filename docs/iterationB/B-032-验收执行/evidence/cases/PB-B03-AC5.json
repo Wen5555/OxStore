@@ -1,47 +1,395 @@
 {
-  "archive_get": {
-    "admin": {
-      "http": 200,
-      "message": "ok"
+  "path": "fixtures/V8__close_legacy_fixed_price_intents.sql → CALL upgrade_oxstore_v8()",
+  "migration": {
+    "ok": true,
+    "returncode": 0,
+    "stdout": "closed_intents\tclosed_attempts\tunfrozen_products\tpaused_products\n2\t1\t1\t1\n",
+    "stderr": "mysql: [Warning] Using a password on the command line interface can be insecure.\n",
+    "sql_path": "/tmp/oxstore-develop/backend/src/main/resources/db/migrations/V8__close_legacy_fixed_price_intents.sql",
+    "sql_sha256": "afc64e7913e23dae52a4651c1d1ee146ef57f0b582accb48be8b5097fde17306"
+  },
+  "seed": {
+    "intents": [
+      {
+        "id": 21,
+        "status": "SUCCESS",
+        "product_name_snapshot": "LEGACY-SUCCESS"
+      },
+      {
+        "id": 22,
+        "status": "FAILED",
+        "product_name_snapshot": "LEGACY-FAILED"
+      },
+      {
+        "id": 23,
+        "status": "QUEUING",
+        "product_name_snapshot": "LEGACY-QUEUING"
+      },
+      {
+        "id": 24,
+        "status": "IN_TRANSACTION",
+        "product_name_snapshot": "LEGACY-IN-TX"
+      }
+    ],
+    "attempt": {
+      "id": 3,
+      "intent_id": 24,
+      "finished_at": null,
+      "result": null,
+      "legacy_closed_at": null
     },
-    "me": {
-      "http": 200,
-      "message": "ok"
-    }
+    "products_before": {
+      "25": {
+        "id": 25,
+        "stock": "10",
+        "status": "FROZEN",
+        "freeze_source": "TRADE"
+      },
+      "26": {
+        "id": 26,
+        "stock": "5",
+        "status": "FROZEN",
+        "freeze_source": "MANUAL"
+      }
+    },
+    "orders_before": 0,
+    "customer_b_id": 4
   },
-  "close_attempt": {
-    "http": 500,
-    "message": "服务器内部错误"
-  },
-  "seeded_rows": [
+  "intents_after": [
     {
-      "id": 9,
+      "id": 21,
       "status": "SUCCESS",
       "legacy_closed_at": null,
       "legacy_close_reason": null,
       "product_name_snapshot": "LEGACY-SUCCESS"
     },
     {
-      "id": 10,
+      "id": 22,
       "status": "FAILED",
       "legacy_closed_at": null,
       "legacy_close_reason": null,
       "product_name_snapshot": "LEGACY-FAILED"
     },
     {
-      "id": 11,
+      "id": 23,
       "status": "QUEUING",
-      "legacy_closed_at": null,
-      "legacy_close_reason": null,
+      "legacy_closed_at": "2026-11-20T20:34:25.601198",
+      "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
       "product_name_snapshot": "LEGACY-QUEUING"
     },
     {
-      "id": 12,
+      "id": 24,
       "status": "IN_TRANSACTION",
-      "legacy_closed_at": null,
-      "legacy_close_reason": null,
+      "legacy_closed_at": "2026-11-20T20:34:25.601198",
+      "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
       "product_name_snapshot": "LEGACY-IN-TX"
     }
   ],
-  "note": "seeded legacy rows exist; no close/unfreeze API succeeded — cannot prove close/unfreeze/restore"
+  "attempt_after": {
+    "id": 3,
+    "intent_id": 24,
+    "finished_at": null,
+    "result": null,
+    "legacy_closed_at": "2026-11-20T20:34:25.601198"
+  },
+  "products_after": {
+    "25": {
+      "id": 25,
+      "stock": "10",
+      "status": "ONLINE",
+      "freeze_source": null,
+      "offline_reason": null
+    },
+    "26": {
+      "id": 26,
+      "stock": "5",
+      "status": "OFFLINE",
+      "freeze_source": null,
+      "offline_reason": "MANUAL"
+    }
+  },
+  "revoked_charge": "previous BLOCKED for missing close API — wrong test path; V8 is the close/unfreeze mechanism",
+  "conjuncts": [
+    {
+      "name": "no_fake_close_api_as_path",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "note": "close path = CALL upgrade_oxstore_v8 from V8 SQL; archive is GET-only"
+      }
+    },
+    {
+      "name": "seed_statuses_SUCCESS_FAILED_QUEUING_IN_TRANSACTION",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "statuses": [
+          "SUCCESS",
+          "FAILED",
+          "QUEUING",
+          "IN_TRANSACTION"
+        ]
+      }
+    },
+    {
+      "name": "seed_FROZEN_TRADE_and_MANUAL_products",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "25": {
+          "id": 25,
+          "stock": "10",
+          "status": "FROZEN",
+          "freeze_source": "TRADE"
+        },
+        "26": {
+          "id": 26,
+          "stock": "5",
+          "status": "FROZEN",
+          "freeze_source": "MANUAL"
+        }
+      }
+    },
+    {
+      "name": "seed_unfinished_trade_attempt",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "id": 3,
+        "intent_id": 24,
+        "finished_at": null,
+        "result": null,
+        "legacy_closed_at": null
+      }
+    },
+    {
+      "name": "v8_migration_executed",
+      "pass": true,
+      "disposition_if_fail": "NOT_EXECUTED",
+      "evidence": {
+        "ok": true,
+        "returncode": 0,
+        "stdout": "closed_intents\tclosed_attempts\tunfrozen_products\tpaused_products\n2\t1\t1\t1\n",
+        "stderr": "mysql: [Warning] Using a password on the command line interface can be insecure.\n",
+        "sql_path": "/tmp/oxstore-develop/backend/src/main/resources/db/migrations/V8__close_legacy_fixed_price_intents.sql",
+        "sql_sha256": "afc64e7913e23dae52a4651c1d1ee146ef57f0b582accb48be8b5097fde17306"
+      }
+    },
+    {
+      "name": "migration_closes_QUEUING_IN_TRANSACTION_keep_status",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "LEGACY-QUEUING": {
+          "id": 23,
+          "status": "QUEUING",
+          "legacy_closed_at": "2026-11-20T20:34:25.601198",
+          "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+          "product_name_snapshot": "LEGACY-QUEUING"
+        },
+        "LEGACY-IN-TX": {
+          "id": 24,
+          "status": "IN_TRANSACTION",
+          "legacy_closed_at": "2026-11-20T20:34:25.601198",
+          "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+          "product_name_snapshot": "LEGACY-IN-TX"
+        }
+      }
+    },
+    {
+      "name": "SUCCESS_FAILED_history_untouched",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "LEGACY-SUCCESS": {
+          "id": 21,
+          "status": "SUCCESS",
+          "legacy_closed_at": null,
+          "legacy_close_reason": null,
+          "product_name_snapshot": "LEGACY-SUCCESS"
+        },
+        "LEGACY-FAILED": {
+          "id": 22,
+          "status": "FAILED",
+          "legacy_closed_at": null,
+          "legacy_close_reason": null,
+          "product_name_snapshot": "LEGACY-FAILED"
+        }
+      }
+    },
+    {
+      "name": "trade_attempt_legacy_closed_unfinished",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "id": 3,
+        "intent_id": 24,
+        "finished_at": null,
+        "result": null,
+        "legacy_closed_at": "2026-11-20T20:34:25.601198"
+      }
+    },
+    {
+      "name": "TRADE_product_unfrozen_ONLINE",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "id": 25,
+        "stock": "10",
+        "status": "ONLINE",
+        "freeze_source": null,
+        "offline_reason": null
+      }
+    },
+    {
+      "name": "MANUAL_frozen_becomes_OFFLINE_MANUAL",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "id": 26,
+        "stock": "5",
+        "status": "OFFLINE",
+        "freeze_source": null,
+        "offline_reason": "MANUAL"
+      }
+    },
+    {
+      "name": "stock_not_replenished",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "trade": [
+          "10",
+          "10"
+        ],
+        "manual": [
+          "5",
+          "5"
+        ]
+      }
+    },
+    {
+      "name": "no_new_order_from_migration",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "before": 0,
+        "after": 0
+      }
+    },
+    {
+      "name": "archive_admin_response_content",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 200,
+        "message": "ok",
+        "snaps": [
+          "LEGACY-FAILED",
+          "LEGACY-IN-TX",
+          "LEGACY-QUEUING",
+          "LEGACY-SUCCESS"
+        ],
+        "sample": [
+          {
+            "legacyIntentId": "24",
+            "productId": "25",
+            "productNameSnapshot": "LEGACY-IN-TX",
+            "originalStatus": "IN_TRANSACTION",
+            "submittedAt": "2026-11-20T04:34:25.574098",
+            "processedAt": null,
+            "closedAt": "2026-11-20T12:34:25.601198",
+            "displayStatus": "CLOSED",
+            "readOnly": true
+          },
+          {
+            "legacyIntentId": "23",
+            "productId": "25",
+            "productNameSnapshot": "LEGACY-QUEUING",
+            "originalStatus": "QUEUING",
+            "submittedAt": "2026-11-20T04:34:25.574098",
+            "processedAt": null,
+            "closedAt": "2026-11-20T12:34:25.601198",
+            "displayStatus": "CLOSED",
+            "readOnly": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "archive_customer_own_response_content",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 200,
+        "message": "ok",
+        "snaps": [
+          "LEGACY-FAILED",
+          "LEGACY-IN-TX",
+          "LEGACY-QUEUING",
+          "LEGACY-SUCCESS"
+        ],
+        "sample": [
+          {
+            "legacyIntentId": "24",
+            "productId": "25",
+            "productNameSnapshot": "LEGACY-IN-TX",
+            "originalStatus": "IN_TRANSACTION",
+            "submittedAt": "2026-11-20T04:34:25.574098",
+            "processedAt": null,
+            "closedAt": "2026-11-20T12:34:25.601198",
+            "displayStatus": "CLOSED",
+            "readOnly": true
+          },
+          {
+            "legacyIntentId": "23",
+            "productId": "25",
+            "productNameSnapshot": "LEGACY-QUEUING",
+            "originalStatus": "QUEUING",
+            "submittedAt": "2026-11-20T04:34:25.574098",
+            "processedAt": null,
+            "closedAt": "2026-11-20T12:34:25.601198",
+            "displayStatus": "CLOSED",
+            "readOnly": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "archive_customer_isolation",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 200,
+        "snaps": []
+      }
+    },
+    {
+      "name": "archive_read_only_rejects_mutations",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "POST": {
+          "http": 405,
+          "message": "请求方法不支持：POST"
+        },
+        "PUT": {
+          "http": 500,
+          "message": "服务器内部错误"
+        },
+        "DELETE": {
+          "http": 500,
+          "message": "服务器内部错误"
+        },
+        "POST_close_nonexistent": {
+          "http": 500,
+          "message": "服务器内部错误",
+          "note": "probed only to prove not a close path"
+        }
+      }
+    }
+  ],
+  "conjunct_pass": 16,
+  "conjunct_total": 16,
+  "conjunct_fail_names": []
 }

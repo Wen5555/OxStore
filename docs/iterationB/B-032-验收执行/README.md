@@ -21,10 +21,14 @@ python3 scripts/prepare_and_run.py
 
 | 路径 | 说明 |
 |---|---|
-| `evidence/results.json` / `results.md` | 统一窗口 totals + 逐 AC |
-| `evidence/cases/PB-B*.json` | 各 AC 脱敏明细 |
-| `evidence/screenshots/` | 真实 Playwright 截图 |
-| `evidence/verify-api-db.json` | API→隔离库证明 |
+| `evidence/results.json` / `results.md` | 统一窗口 totals + **逐合取表** |
+| `evidence/cases/PB-B*.json` | 各 AC 脱敏明细（含 conjuncts） |
+| `evidence/screenshots/` | 真实 Playwright 截图（见同目录 README 映射） |
+| `evidence/verify-api-db.json` | 进程→checkout SHA→隔离库绑定（非仅 env） |
 | `evidence/screenshots-index.json` | 截图索引 |
+| `fixtures/b032_tx_probes.sql` | TX 三断点探针 |
+| `fixtures/V8__close_legacy_fixed_price_intents.sql` | PB-B03-AC5 真迁移路径 |
+
+第二次审计：`scripts/second_audit_acs.py` + `conjuncts.py`。禁止 `or True` / 写死 PASS。PB-B03-AC5 走 V8 `CALL upgrade_oxstore_v8()`，不用假 close API。
 
 不开 PR；不改业务；不 force-push。

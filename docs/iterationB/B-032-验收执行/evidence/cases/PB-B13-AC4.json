@@ -1,17 +1,123 @@
 {
-  "first": {
-    "http": 201,
-    "message": "下单成功"
-  },
-  "lost_response_replay": {
-    "http": 409,
-    "message": "订单已提交，请勿重复下单"
-  },
-  "recovered_in_history": true,
-  "cart_after_replay": [],
-  "idempotency_not_cart_clear": true,
-  "new_purchase": {
-    "http": 201,
-    "message": "下单成功"
-  }
+  "conjuncts": [
+    {
+      "name": "first_success",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 201,
+        "message": "下单成功"
+      }
+    },
+    {
+      "name": "lost_response_replay",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 409,
+        "message": "订单已提交，请勿重复下单"
+      }
+    },
+    {
+      "name": "recovered_in_history",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "found": true
+      }
+    },
+    {
+      "name": "idempotency_not_cart_clear_after_new_add",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "cart_before": [
+          {
+            "id": "609",
+            "product_id": "26",
+            "quantity": "1"
+          }
+        ],
+        "cart_after": [
+          {
+            "id": "609",
+            "product_id": "26",
+            "quantity": "1"
+          }
+        ],
+        "replay": {
+          "http": 409,
+          "message": "订单已提交，请勿重复下单"
+        }
+      }
+    },
+    {
+      "name": "concurrent_same_key_one_order_stock_once",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "race": {
+          "B": {
+            "ok": true,
+            "result": [
+              201,
+              {
+                "code": 0,
+                "message": "下单成功",
+                "data": {
+                  "orderId": "336",
+                  "orderNo": "84287fda-905f-42f8-9b73-11247f6d53ca",
+                  "customerId": "3",
+                  "status": "PLACED",
+                  "items": [
+                    {
+                      "productId": "25",
+                      "productName": "B032-在售-10",
+                      "unitPrice": "12.50",
+                      "quantity": "1",
+                      "lineAmount": "12.50"
+                    }
+                  ],
+                  "totalAmount": "12.50",
+                  "createdAt": "2026-11-20T20:34:52.768284",
+                  "cancelledBy": null,
+                  "cancelledAt": null,
+                  "cancelReason": null,
+                  "allowedActions": [
+                    "CANCEL"
+                  ]
+                }
+              },
+              "054fa59d-f2e9-4632-8088-d0ed4791bf36"
+            ],
+            "elapsed_ms": 8
+          },
+          "A": {
+            "ok": true,
+            "result": [
+              409,
+              {
+                "code": 40909,
+                "message": "订单已提交，请勿重复下单",
+                "data": {
+                  "orderId": "336",
+                  "orderNo": "84287fda-905f-42f8-9b73-11247f6d53ca"
+                }
+              },
+              "054fa59d-f2e9-4632-8088-d0ed4791bf36"
+            ],
+            "elapsed_ms": 9
+          }
+        },
+        "stock": [
+          "10",
+          "9"
+        ],
+        "orders": 1
+      }
+    }
+  ],
+  "conjunct_pass": 5,
+  "conjunct_total": 5,
+  "conjunct_fail_names": []
 }

@@ -1,20 +1,42 @@
 {
-  "http": 400,
-  "message": "发布后只允许修改库存和二级类目",
-  "before": {
-    "id": 25,
-    "name": "B032-在售-10",
-    "stock": "10",
-    "status": "ONLINE",
-    "offline_reason": null,
-    "price": "12.50"
-  },
-  "after": {
-    "id": 25,
-    "name": "B032-在售-10",
-    "stock": "10",
-    "status": "ONLINE",
-    "offline_reason": null,
-    "price": "12.50"
-  }
+  "conjuncts": [
+    {
+      "name": "name_price_immutable",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 400,
+        "message": "发布后只允许修改库存和二级类目",
+        "before": {
+          "id": 25,
+          "name": "B032-在售-10",
+          "stock": "10",
+          "status": "ONLINE",
+          "offline_reason": null,
+          "price": "12.50"
+        },
+        "after": {
+          "id": 25,
+          "name": "B032-在售-10",
+          "stock": "10",
+          "status": "ONLINE",
+          "offline_reason": null,
+          "price": "12.50"
+        }
+      }
+    },
+    {
+      "name": "description_not_silently_replaced_or_explicit",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 400,
+        "message": "发布后只允许修改库存和二级类目",
+        "description_prefix": "<p>P-ON-10</p>"
+      }
+    }
+  ],
+  "conjunct_pass": 2,
+  "conjunct_total": 2,
+  "conjunct_fail_names": []
 }
