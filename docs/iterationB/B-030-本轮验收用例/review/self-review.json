@@ -1,0 +1,8 @@
+{
+  "ac_count": 79,
+  "case_count": 148,
+  "errors": [],
+  "warnings": [],
+  "result": "PASS_STATIC_REVIEW",
+  "note": "PASS_STATIC_REVIEW ≠ business acceptance. Unrun cases stay 待执行."
+}

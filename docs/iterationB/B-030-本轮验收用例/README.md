@@ -1,33 +1,42 @@
-# B-030 本轮验收用例（收窄交付）
+# B-030 本轮验收材料（打回重写 · 可执行）
+
+旧模板交付（占位步骤 / 机械摘引号 / 仅静态 79 计数）**作废**。本目录为按方法基线重写后的可执行验收材料。
 
 ## 范围
 
-- 任务：B-030「建立 AC 用例、测试数据与并发时序」
-- **不是**长期回归平台；无 `tests/regression` suites/历史归集体系。
-- 覆盖：**79** 条 AC → 展开为 **176** 条可执行用例编号（每 AC 含正向，并按正文需要补充反例/边界/并发）。
-- 全部用例状态：**待执行**（本轮不跑业务验收）。
+- 79 AC 全部语义审查并展开为可直接执行用例（角色/会话/fixture 数值/真实 API/响应·页面·DB 断言/清理）
+- 可运行：准备、重置、并发栅栏、自审、代表性演练脚本
+- B031–B037 直接执行入口
+- **不建**长期回归平台；**不开 PR**；仅 push fork 分支
 
-## 材料清单
+## 目录
 
-| 文件 | 用途 |
+| 路径 | 用途 |
 |---|---|
-| [00-索引.md](./00-索引.md) | 79 AC ↔ 用例编号覆盖表 |
-| [PB-B01.md](./PB-B01.md) … [PB-B15.md](./PB-B15.md) | 分 PB 可执行步骤与预期 |
-| [数据准备与清理.md](./数据准备与清理.md) | 测试数据准备/清理 |
-| [并发时序.md](./并发时序.md) | 跨 AC 并发操作顺序 |
-| [validate_b030_coverage.py](./validate_b030_coverage.py) | 静态覆盖校验（无需业务环境） |
-| [acs-79.json](./acs-79.json) | 本轮 79 AC 机读快照（自产品待办抽取） |
+| [00-索引.md](./00-索引.md) | AC ↔ case_id |
+| [cases/](./cases/) | 分 PB 可执行用例 |
+| [fixtures/catalog.json](./fixtures/catalog.json) | 账号/商品数值与 API 目录 |
+| [fixtures/env.example](./fixtures/env.example) | 独立测试环境变量 |
+| [scripts/](./scripts/) | prepare / reset / barrier / self_review / dry_run / generator |
+| [concurrency/SEQ.md](./concurrency/SEQ.md) | 并发 SEQ + 高风险三例 |
+| [execution/B031.md](./execution/B031.md) … [B037.md](./execution/B037.md) | 后续任务执行入口 |
+| [review/](./review/) | 纠错清单、自审与演练记录 |
+| [runs/](./runs/) | 本地证据（勿提交密钥） |
 
-## 权威来源
+## 快速命令
 
-- 《迭代3·产品待办》v1.1、`需求规格说明书V3`
-- 仓库 `docs/iterationB/B-000-公共开发约定.md` 与接口契约 JSON
-- 任务表 Sprint Backlog B-030 完成标准
+```bash
+cd docs/iterationB/B-030-本轮验收用例
+python3 scripts/self_review.py
+python3 scripts/dry_run_representative.py
+# 有独立测试环境时：
+cp fixtures/env.example runs/.env.local  # 编辑
+python3 scripts/prepare_fixtures.py --dry-check
+python3 scripts/reset_namespace.py --dry-run
+```
 
-## 审阅入口（fork）
+## 状态纪律
 
-推送后见分支 `cursor/b030-acceptance-cases-392f` 下本目录。
-
-## 未执行声明
-
-本轮 **未执行** 任何挑战 B 业务用例；不得将本材料视为验收通过。
+- 用例默认 **待执行**
+- 静态自审通过 ≠ 业务验收通过
+- 未跑不标通过；阻塞如实写入 `review/dry-run-log.md`

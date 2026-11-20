@@ -1,0 +1,162 @@
+{
+  "namespace": "B030",
+  "safety": {
+    "require_db_name_prefix": ["oxstore_b030_", "oxstore_test_"],
+    "product_name_prefix": "B030-",
+    "username_prefix": "b030_",
+    "forbid_drop_database": true,
+    "forbid_truncate_without_namespace": true
+  },
+  "accounts": {
+    "CUSTOMER_A": {
+      "username": "b030_buyer_a",
+      "password": "B030-BuyerA-Pass9",
+      "phone": "13803000001",
+      "location": "测试交易点A",
+      "role": "CUSTOMER",
+      "login": {"method": "POST", "path": "/api/auth/login", "body": {"username": "b030_buyer_a", "password": "B030-BuyerA-Pass9"}},
+      "register": {"method": "POST", "path": "/api/auth/register", "body": {"username": "b030_buyer_a", "password": "B030-BuyerA-Pass9", "phone": "13803000001", "location": "测试交易点A"}}
+    },
+    "CUSTOMER_B": {
+      "username": "b030_buyer_b",
+      "password": "B030-BuyerB-Pass9",
+      "phone": "13803000002",
+      "location": "测试交易点B",
+      "role": "CUSTOMER",
+      "login": {"method": "POST", "path": "/api/auth/login", "body": {"username": "b030_buyer_b", "password": "B030-BuyerB-Pass9"}},
+      "register": {"method": "POST", "path": "/api/auth/register", "body": {"username": "b030_buyer_b", "password": "B030-BuyerB-Pass9", "phone": "13803000002", "location": "测试交易点B"}}
+    },
+    "SELLER": {
+      "username": "admin",
+      "password_env": "B030_SELLER_PASSWORD",
+      "password_default_note": "使用被测环境商家初始密码；develop 集成测试曾用 Checkout-Password8，以环境实际为准",
+      "role": "SELLER",
+      "login": {"method": "POST", "path": "/api/admin/auth/login", "body": {"username": "admin", "password": "${B030_SELLER_PASSWORD}"}}
+    }
+  },
+  "products": {
+    "P-ON-10": {
+      "code": "P-ON-10",
+      "name": "B030-在售足库存-10",
+      "selling_mode": "FIXED_PRICE",
+      "price": "12.50",
+      "stock": "10",
+      "status": "ONLINE",
+      "offline_reason": null,
+      "purpose": "常规加购/下单/收藏"
+    },
+    "P-ON-5": {
+      "code": "P-ON-5",
+      "name": "B030-在售足库存-5",
+      "selling_mode": "FIXED_PRICE",
+      "price": "8.00",
+      "stock": "5",
+      "status": "ONLINE",
+      "offline_reason": null,
+      "purpose": "多商品同单第二行"
+    },
+    "P-ON-1": {
+      "code": "P-ON-1",
+      "name": "B030-低库存-1",
+      "selling_mode": "FIXED_PRICE",
+      "price": "3.30",
+      "stock": "1",
+      "status": "ONLINE",
+      "offline_reason": null,
+      "purpose": "双客户抢购/超卖防护"
+    },
+    "P-ON-0": {
+      "code": "P-ON-0",
+      "name": "B030-零库存自动下架",
+      "selling_mode": "FIXED_PRICE",
+      "price": "9.90",
+      "stock": "0",
+      "status": "OFFLINE",
+      "offline_reason": "AUTO_ZERO",
+      "purpose": "新收藏/新加购拒绝；取消自动恢复对照"
+    },
+    "P-OFF-M": {
+      "code": "P-OFF-M",
+      "name": "B030-人工下架-库存5",
+      "selling_mode": "FIXED_PRICE",
+      "price": "15.00",
+      "stock": "5",
+      "status": "OFFLINE",
+      "offline_reason": "MANUAL",
+      "purpose": "取消不自动恢复；下架后新下单拒绝"
+    },
+    "P-BIG": {
+      "code": "P-BIG",
+      "name": "B030-大整数库存",
+      "selling_mode": "FIXED_PRICE",
+      "price": "1.00",
+      "stock": "9007199254740993",
+      "status": "ONLINE",
+      "offline_reason": null,
+      "purpose": "超 JS 安全整数边界"
+    },
+    "P-AUC": {
+      "code": "P-AUC",
+      "name": "B030-拍卖对照",
+      "selling_mode": "AUCTION",
+      "price": null,
+      "stock": "1",
+      "status": "ONLINE",
+      "offline_reason": null,
+      "purpose": "拍卖回归单列；不得进入新购物车结算"
+    }
+  },
+  "derived_states": {
+    "ORDER_PLACED": "客户 A 对 P-ON-10×2 下单成功后的 PLACED 单",
+    "ORDER_CONFIRMED": "在 PLACED 上商家 CONFIRM",
+    "ORDER_PREPARED": "在 CONFIRMED 上商家 PREPARE",
+    "ORDER_SHIPPED": "在 PREPARED 上商家 SHIP",
+    "ORDER_COMPLETED": "在 SHIPPED 上商家 COMPLETE",
+    "ORDER_CANCELLED_CUSTOMER": "PLACED/CONFIRMED/PREPARED 上客户取消",
+    "ORDER_CANCELLED_SELLER": "任意非终态上商家取消",
+    "CART_MIXED": "A 车含 P-ON-10×3、P-ON-5×1、P-OFF-M 失效行（若先加购后下架）",
+    "FAV_ACTIVE": "A 已收藏 P-ON-10",
+    "LEGACY_INTENT": "FIXED_PRICE 旧 QUEUING/IN_TRANSACTION 经 V8 关闭标记的只读记录"
+  },
+  "apis": {
+    "customer_login": "POST /api/auth/login",
+    "seller_login": "POST /api/admin/auth/login",
+    "favorite_put": "PUT /api/me/favorites/{productId}",
+    "favorite_delete": "DELETE /api/me/favorites/{productId}",
+    "favorite_list": "GET /api/me/favorites?page=1",
+    "favorite_state": "GET /api/me/favorites/{productId}",
+    "cart_add": "POST /api/me/cart/items",
+    "cart_patch": "PATCH /api/me/cart/items/{cartItemId}",
+    "cart_delete_item": "DELETE /api/me/cart/items/{cartItemId}",
+    "cart_get": "GET /api/me/cart",
+    "cart_clear": "DELETE /api/me/cart",
+    "checkout_confirm": "POST /api/me/checkout/confirmations",
+    "order_submit": "POST /api/me/orders",
+    "order_list_me": "GET /api/me/orders?page=1&size=10",
+    "order_get_me": "GET /api/me/orders/{orderId}",
+    "order_cancel_me": "POST /api/me/orders/{orderId}/cancel",
+    "order_list_admin": "GET /api/admin/orders?page=1&size=10",
+    "order_get_admin": "GET /api/admin/orders/{orderId}",
+    "order_action_admin": "POST /api/admin/orders/{orderId}/actions",
+    "order_cancel_admin": "POST /api/admin/orders/{orderId}/cancel",
+    "move_to_favorites": "POST /api/me/cart/move-to-favorites",
+    "legacy_me": "GET /api/me/legacy-intents?page=1&size=10",
+    "legacy_admin": "GET /api/admin/legacy-intents?page=1&size=10",
+    "product_patch_stock": "PATCH /api/admin/products/{productId}",
+    "product_offline": "POST /api/admin/products/{productId}/offline",
+    "product_online": "POST /api/admin/products/{productId}/online"
+  },
+  "db_tables": [
+    "shop_order",
+    "order_item",
+    "favorite",
+    "favorite_mutation",
+    "cart_item",
+    "cart_item_tombstone",
+    "checkout_confirmation",
+    "operation_receipt",
+    "product",
+    "purchase_intent",
+    "trade_attempt"
+  ]
+}
