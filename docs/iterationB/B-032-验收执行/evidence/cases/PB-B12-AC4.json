@@ -1,0 +1,140 @@
+{
+  "conjuncts": [
+    {
+      "name": "confirm_keeps_stock_online",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "stock": "10"
+      }
+    },
+    {
+      "name": "qty_change_rejects",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 409,
+        "message": "确认信息已变化，请重新确认"
+      }
+    },
+    {
+      "name": "after_confirm_still_online_before_submit",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "id": 25,
+        "name": "B032-在售-10",
+        "stock": "10",
+        "status": "ONLINE",
+        "offline_reason": null,
+        "price": "12.50"
+      }
+    },
+    {
+      "name": "reject_keeps_orders_stock_cart_full_set",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 409,
+        "nested": "所选商品无法下单 商品「B032-在售-10」已下架，请从购物车移除后重试。",
+        "orders": [
+          0,
+          0
+        ],
+        "cart": [
+          {
+            "id": "1280",
+            "product_id": "25",
+            "quantity": "3"
+          }
+        ],
+        "stock": [
+          "10",
+          "10"
+        ]
+      }
+    },
+    {
+      "name": "new_product_identity_published",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 201,
+        "message": "ok",
+        "new_pid": "46",
+        "old_pid": "25"
+      }
+    },
+    {
+      "name": "reonline_reconfirm_success",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 201,
+        "message": "下单成功"
+      }
+    },
+    {
+      "name": "after_success_stock_down_still_online",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "id": 25,
+        "name": "B032-在售-10",
+        "stock": "7",
+        "status": "ONLINE",
+        "offline_reason": null,
+        "price": "12.50"
+      }
+    },
+    {
+      "name": "inplace_price_N_A_immutable",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 400,
+        "message": "发布后只允许修改库存和二级类目",
+        "before": {
+          "id": 26,
+          "name": "B032-在售-5",
+          "stock": "5",
+          "status": "ONLINE",
+          "offline_reason": null,
+          "price": "8.00"
+        },
+        "after": {
+          "id": 26,
+          "name": "B032-在售-5",
+          "stock": "5",
+          "status": "ONLINE",
+          "offline_reason": null,
+          "price": "8.00"
+        },
+        "disposition": "N/A proven immutable"
+      }
+    },
+    {
+      "name": "confirm_ui_modal_distinct",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "shot": {
+          "ok": true,
+          "shots": [
+            "b12-checkout-confirm.png"
+          ],
+          "ui": {
+            "bodyText": "确认下单\nB032-在售-5\n¥8.00 × 1\n¥8.00\n总金额：¥8.00\n返回购物车\n确认下单"
+          },
+          "stderr_tail": "",
+          "stdout_tail": "{\"ok\":true,\"shots\":[\"b12-checkout-confirm.png\"],\"ui\":{\"bodyText\":\"确认下单\\nB032-在售-5\\n¥8.00 × 1\\n¥8.00\\n总金额：¥8.00\\n返回购物车\\n确认下单\"}}\n",
+          "node_exit": 0
+        },
+        "distinct": true
+      }
+    }
+  ],
+  "conjunct_pass": 9,
+  "conjunct_total": 9,
+  "conjunct_fail_names": []
+}

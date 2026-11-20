@@ -1,0 +1,103 @@
+{
+  "conjuncts": [
+    {
+      "name": "snapshot_stable_through_complete",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "snap": [
+          {
+            "product_id": 25,
+            "product_name": "B032-在售-10",
+            "quantity": "1",
+            "unit_price": "12.50",
+            "line_amount": "12.50"
+          }
+        ],
+        "snap2": [
+          {
+            "product_id": 25,
+            "product_name": "B032-在售-10",
+            "quantity": "1",
+            "unit_price": "12.50",
+            "line_amount": "12.50"
+          }
+        ],
+        "steps": [
+          {
+            "action": "CONFIRM",
+            "http": 200,
+            "message": "ok",
+            "status": "CONFIRMED"
+          },
+          {
+            "action": "PREPARE",
+            "http": 200,
+            "message": "ok",
+            "status": "PREPARED"
+          },
+          {
+            "action": "SHIP",
+            "http": 200,
+            "message": "ok",
+            "status": "SHIPPED"
+          },
+          {
+            "action": "COMPLETE",
+            "http": 200,
+            "message": "ok",
+            "status": "COMPLETED"
+          }
+        ]
+      }
+    },
+    {
+      "name": "stock0_existing_cart_submit_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 409,
+        "message": "所选商品无法下单",
+        "nested": "所选商品无法下单 商品「B032-低库存-1」已下架，请从购物车移除后重试。"
+      }
+    },
+    {
+      "name": "customer_cancel_no_cart_restore",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "before": [
+          {
+            "id": "1303",
+            "product_id": "27",
+            "quantity": "1"
+          }
+        ],
+        "after": [
+          {
+            "id": "1303",
+            "product_id": "27",
+            "quantity": "1"
+          }
+        ]
+      }
+    },
+    {
+      "name": "merchant_cancel_no_cart_restore",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "after": [
+          {
+            "id": "1303",
+            "product_id": "27",
+            "quantity": "1"
+          }
+        ]
+      }
+    }
+  ],
+  "conjunct_pass": 4,
+  "conjunct_total": 4,
+  "conjunct_fail_names": []
+}

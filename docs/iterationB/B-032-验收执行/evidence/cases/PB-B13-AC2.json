@@ -1,0 +1,203 @@
+{
+  "conjuncts": [
+    {
+      "name": "unselected_kept_full_set",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "cart": [
+          {
+            "id": "1298",
+            "product_id": "26",
+            "quantity": "1"
+          }
+        ],
+        "message": "下单成功"
+      }
+    },
+    {
+      "name": "pre_lock_patch_then_submit_rejects",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "pre": {
+          "http": 409,
+          "message": "确认信息已变化，请重新确认"
+        },
+        "reconfirm_qty": "3"
+      }
+    },
+    {
+      "name": "during_hold_add_same_product_hold_proven",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "timeline": {
+          "submit_start_mono": 19213.310835135,
+          "submit_start_wall": 1795184426.5040863,
+          "hold_observed_mono": 19213.377834357,
+          "hold_observed_wall": 1795184426.5710838,
+          "hold_lock_holder": 4908,
+          "mutation_start_mono": 19213.378258752,
+          "mutation_start_wall": 1795184426.571508,
+          "submit_end_mono": 19216.326513759,
+          "submit_end_wall": 1795184429.5197642,
+          "mutation_end_mono": 19216.330956315,
+          "mutation_end_wall": 1795184429.5242062
+        },
+        "ok_to_mutate": true,
+        "hold_lock": {
+          "holder": 4908,
+          "observed_mono": 19213.377834357,
+          "observed_wall": 1795184426.5710838
+        },
+        "submit": [
+          201,
+          {
+            "code": 0,
+            "message": "下单成功",
+            "data": {
+              "orderId": "760",
+              "orderNo": "c1486b2e-3d96-4be5-ae82-f806aedb0053",
+              "customerId": "3",
+              "status": "PLACED",
+              "items": [
+                {
+                  "productId": "25",
+                  "productName": "B032-在售-10",
+                  "unitPrice": "12.50",
+                  "quantity": "1",
+                  "lineAmount": "12.50"
+                }
+              ],
+              "totalAmount": "12.50",
+              "createdAt": "2026-11-20T22:20:26.508299",
+              "cancelledBy": null,
+              "cancelledAt": null,
+              "cancelReason": null,
+              "allowedActions": [
+                "CANCEL"
+              ]
+            }
+          },
+          "a41f514b-b7e4-4b75-b365-64a0ad6a0965"
+        ],
+        "mutation": [
+          200,
+          {
+            "code": 0,
+            "message": "已加入购物车",
+            "data": {
+              "cartItemId": "1301",
+              "productId": "25",
+              "productName": "B032-在售-10",
+              "unitPrice": "12.50",
+              "mainImageUrl": "/api/images/ac857481-706f-4eab-870b-f29a14b977f1.png",
+              "quantity": "1",
+              "stock": "9",
+              "online": true,
+              "invalidLabel": null,
+              "defaultCheckoutSelected": true,
+              "canCheckoutSelect": true,
+              "canFavoriteSelect": true,
+              "updatedAt": "2026-11-20T22:20:29.520621"
+            }
+          }
+        ],
+        "threads": {
+          "submit_alive": false,
+          "mutate_alive": false
+        },
+        "overlap": {
+          "started_during_hold": true,
+          "blocked_until_release": true,
+          "hold_proven": true,
+          "hold_seconds": 3,
+          "hold_lock_timeout": false,
+          "barrier": "IS_USED_LOCK(b032_tx_hold)",
+          "clock": "time.monotonic"
+        },
+        "final_db": {
+          "orders": [
+            {
+              "id": 760,
+              "order_no": "c1486b2e-3d96-4be5-ae82-f806aedb0053",
+              "status": "PLACED",
+              "total_amount": "12.50",
+              "created_at": "2026-11-21T06:20:26.508299",
+              "cancelled_by": null,
+              "cancelled_at": null
+            }
+          ],
+          "cart": [
+            {
+              "id": "1301",
+              "product_id": "25",
+              "quantity": "1"
+            }
+          ],
+          "probe_phases": [
+            "order_created:order_id=760",
+            "cart_deleted:cart_item_id=1300",
+            "before_receipt:op=CHECKOUT",
+            "before_receipt:op=CART_ADD"
+          ],
+          "stocks": {}
+        }
+      }
+    },
+    {
+      "name": "during_hold_add_retained_in_cart",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "cart_after": [
+          {
+            "id": "1301",
+            "product_id": "25",
+            "quantity": "1"
+          }
+        ],
+        "orders": 1,
+        "mutation": [
+          200,
+          {
+            "code": 0,
+            "message": "已加入购物车",
+            "data": {
+              "cartItemId": "1301",
+              "productId": "25",
+              "productName": "B032-在售-10",
+              "unitPrice": "12.50",
+              "mainImageUrl": "/api/images/ac857481-706f-4eab-870b-f29a14b977f1.png",
+              "quantity": "1",
+              "stock": "9",
+              "online": true,
+              "invalidLabel": null,
+              "defaultCheckoutSelected": true,
+              "canCheckoutSelect": true,
+              "canFavoriteSelect": true,
+              "updatedAt": "2026-11-20T22:20:29.520621"
+            }
+          }
+        ],
+        "order_qty": "1"
+      }
+    },
+    {
+      "name": "remainder_gt0_via_public_api",
+      "pass": false,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "proven": false,
+        "source": "CheckoutService digest includes cart quantity; confirmation.qty == cart.qty on success → remainder always 0",
+        "disposition": "FAIL"
+      }
+    }
+  ],
+  "conjunct_pass": 4,
+  "conjunct_total": 5,
+  "conjunct_fail_names": [
+    "remainder_gt0_via_public_api"
+  ]
+}

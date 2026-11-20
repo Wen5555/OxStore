@@ -1,0 +1,114 @@
+{
+  "conjuncts": [
+    {
+      "name": "reject_invalid_stock_exact_tip_and_stock_unchanged",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "cases": [
+          {
+            "value": "abc",
+            "http": 400,
+            "message": "库存不能为负数，请输入非负整数。",
+            "stock_unchanged": true,
+            "stock": [
+              "9",
+              "9"
+            ]
+          },
+          {
+            "value": "-1",
+            "http": 400,
+            "message": "库存不能为负数，请输入非负整数。",
+            "stock_unchanged": true,
+            "stock": [
+              "9",
+              "9"
+            ]
+          },
+          {
+            "value": "1.5",
+            "http": 400,
+            "message": "库存不能为负数，请输入非负整数。",
+            "stock_unchanged": true,
+            "stock": [
+              "9",
+              "9"
+            ]
+          },
+          {
+            "value": "",
+            "http": 400,
+            "message": "库存不能为负数，请输入非负整数。",
+            "stock_unchanged": true,
+            "stock": [
+              "9",
+              "9"
+            ]
+          },
+          {
+            "value": "01",
+            "http": 400,
+            "message": "库存不能为负数，请输入非负整数。",
+            "stock_unchanged": true,
+            "stock": [
+              "9",
+              "9"
+            ]
+          },
+          {
+            "value": " ",
+            "http": 400,
+            "message": "库存不能为负数，请输入非负整数。",
+            "stock_unchanged": true,
+            "stock": [
+              "9",
+              "9"
+            ]
+          }
+        ],
+        "product_id": "25",
+        "exact_tip": "库存不能为负数，请输入非负整数。"
+      }
+    },
+    {
+      "name": "accept_valid_stock_same_product",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 200,
+        "message": "ok",
+        "after_order_stock": "9"
+      }
+    },
+    {
+      "name": "stock_edit_same_product_does_not_change_existing_order_lines",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "snap": [
+          {
+            "product_id": 25,
+            "product_name": "B032-在售-10",
+            "quantity": "1",
+            "unit_price": "12.50",
+            "line_amount": "12.50"
+          }
+        ],
+        "snap2": [
+          {
+            "product_id": 25,
+            "product_name": "B032-在售-10",
+            "quantity": "1",
+            "unit_price": "12.50",
+            "line_amount": "12.50"
+          }
+        ],
+        "product_id": "25"
+      }
+    }
+  ],
+  "conjunct_pass": 3,
+  "conjunct_total": 3,
+  "conjunct_fail_names": []
+}
