@@ -1,0 +1,14 @@
+{
+  "configured_db": "oxstore_b030_local",
+  "connection_database": "oxstore_b030_local",
+  "api_product_id": "9",
+  "api_product_name": "B030-CANARY-e051ea23",
+  "row_in_db": {
+    "id": 9,
+    "name": "B030-CANARY-e051ea23"
+  },
+  "ok": true,
+  "sut_sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
+  "base_url": "http://127.0.0.1:8080",
+  "ts": 1795161756.5992568
+}

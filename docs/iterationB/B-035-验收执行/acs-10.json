@@ -1,0 +1,56 @@
+{
+  "task": "B-035",
+  "name": "旧意向归档、基础能力与拍卖回归",
+  "pb_scope": ["PB-B02", "PB-B03"],
+  "sut": {
+    "branch": "develop",
+    "sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
+    "note": "被测候选；V8 迁移脚本取自 develop 同 SHA"
+  },
+  "plan_source": [
+    "docs/iterationB/B-030-本轮验收用例/execution/B035.md",
+    "docs/iterationB/B-030-本轮验收用例/cases/PB-B02.md",
+    "docs/iterationB/B-030-本轮验收用例/cases/PB-B03.md"
+  ],
+  "migration": {
+    "file": "backend/src/main/resources/db/migrations/V8__close_legacy_fixed_price_intents.sql",
+    "mode": "真实执行（mysql CLI，DELIMITER 客户端指令），并在拍卖存在后重复执行一次验证幂等"
+  },
+  "acs": [
+    {"ac": "PB-B02-AC1", "pb": "PB-B02", "title": "口径A仍生效；关闭旧意向不扣/不回补库存", "status": "PASS",
+     "checks": ["legacy_close_does_not_touch_stock", "new_order_deducts_stock",
+                "new_order_not_in_legacy_queue", "legacy_intents_not_orders"]},
+    {"ac": "PB-B02-AC2", "pb": "PB-B02", "title": "下单即扣保证防超卖，旧意向不干扰", "status": "PASS",
+     "checks": ["first_buyer_deducts", "second_buyer_rejected", "stock_never_negative", "no_half_order"]},
+    {"ac": "PB-B02-AC3", "pb": "PB-B02", "title": "库存非负整数无上限；V8 不夹取库存", "status": "PASS",
+     "checks": ["v8_keeps_large_stock", "negative_rejected", "decimal_rejected",
+                "zero_triggers_auto_offline", "big_integer_accepted"]},
+    {"ac": "PB-B02-AC4", "pb": "PB-B02", "title": "V8 解冻规则：TRADE→在售，MANUAL→已下架待手动上架", "status": "PASS",
+     "checks": ["trade_frozen_returns_online", "manual_frozen_becomes_offline_manual",
+                "stock_positive_does_not_auto_online", "manual_online_works"]},
+    {"ac": "PB-B02-AC5", "pb": "PB-B02", "title": "库存矩阵：V8 不回补，取消回补规则不变", "status": "PASS",
+     "checks": ["v8_no_restock", "order_deducts", "cancel_restocks_once"]},
+    {"ac": "PB-B03-AC1", "pb": "PB-B03", "title": "旧快照不改写；新订单按当前商品固化快照", "status": "PASS",
+     "checks": ["legacy_snapshot_preserved", "legacy_status_not_rewritten",
+                "product_not_mutated_by_v8", "new_order_snapshot_name"]},
+    {"ac": "PB-B03-AC2", "pb": "PB-B03", "title": "旧记录只读，无原地改写接口", "status": "PASS",
+     "checks": ["legacy_write_api_absent", "no_legacy_row_changed", "product_edit_api_absent"]},
+    {"ac": "PB-B03-AC3", "pb": "PB-B03", "title": "旧归档与订单历史分离，按来源/客户可查", "status": "PASS",
+     "checks": ["customer_archive_lists_own", "seller_archive_lists_all",
+                "seller_filter_by_product", "new_orders_endpoint_separate"]},
+    {"ac": "PB-B03-AC4", "pb": "PB-B03", "title": "归档需登录且按客户隔离", "status": "PASS",
+     "checks": ["archive_requires_login", "customer_sees_only_own", "no_cross_customer_leak"]},
+    {"ac": "PB-B03-AC5", "pb": "PB-B03", "title": "旧记录只读关闭、不迁取消、解冻不补库存", "status": "PASS",
+     "checks": ["status_preserved_not_cancelled", "legacy_closed_metadata", "attempt_closed_without_result",
+                "products_unfrozen", "no_stock_restock", "success_history_untouched",
+                "archive_marks_closed_readonly", "no_legacy_cancel_path",
+                "old_fixed_price_entry_closed", "old_queue_readonly"]},
+    {"ac": "AUCTION-REG", "pb": "PB-B02", "title": "拍卖发布/出价/SSE/结拍/提醒回归（不计 PB-B 新故事）", "status": "PASS",
+     "checks": ["auction_publish", "auction_publish_unsold", "auction_live_snapshot", "two_bids_accepted",
+                "below_minimum_rejected", "leader_and_price", "auction_sse_snapshot", "auction_settles_sold",
+                "winner_status_won", "loser_status_lost", "winner_notification", "seller_sold_notification",
+                "auction_winner_intent_created", "auction_not_cartable", "auction_unsold",
+                "unsold_product_offline", "unsold_notification", "v8_rerun_idempotent",
+                "v8_does_not_touch_auction"]}
+  ]
+}

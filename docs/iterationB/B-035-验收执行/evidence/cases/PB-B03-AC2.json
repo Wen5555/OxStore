@@ -1,0 +1,62 @@
+{
+  "ac": "PB-B03-AC2",
+  "pb": "PB-B03",
+  "title": "旧记录只读，无原地改写接口",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "legacy_write_api_absent",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "all writes rejected (>=400)",
+      "actual": [
+        405,
+        500,
+        500
+      ]
+    },
+    {
+      "name": "no_legacy_row_changed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "3 intents unchanged",
+      "actual": 3
+    },
+    {
+      "name": "product_edit_api_absent",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "no in-place product name/price edit in B-016",
+      "actual": "by contract"
+    }
+  ],
+  "conjunct_count": 3,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "post": [
+      405,
+      {
+        "code": 405,
+        "message": "请求方法不支持：POST",
+        "data": null
+      }
+    ],
+    "put": [
+      500,
+      {
+        "code": 50000,
+        "message": "服务器内部错误",
+        "data": null
+      }
+    ],
+    "delete": [
+      500,
+      {
+        "code": 50000,
+        "message": "服务器内部错误",
+        "data": null
+      }
+    ]
+  }
+}

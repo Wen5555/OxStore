@@ -1,0 +1,52 @@
+{
+  "ac": "PB-B03-AC4",
+  "pb": "PB-B03",
+  "title": "归档需登录且按客户隔离",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "archive_requires_login",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "401 for both",
+      "actual": [
+        401,
+        401
+      ]
+    },
+    {
+      "name": "customer_sees_only_own",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "B sees only IN_TRANSACTION",
+      "actual": "{'B030-在售足库存-5'}"
+    },
+    {
+      "name": "no_cross_customer_leak",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "no overlap",
+      "actual": [
+        [
+          "B030-在售足库存-10",
+          "B030-大整数库存"
+        ],
+        [
+          "B030-在售足库存-5"
+        ]
+      ]
+    }
+  ],
+  "conjunct_count": 3,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "a": [
+      "B030-在售足库存-10",
+      "B030-大整数库存"
+    ],
+    "b": [
+      "B030-在售足库存-5"
+    ]
+  }
+}

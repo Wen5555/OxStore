@@ -1,0 +1,67 @@
+{
+  "ac": "PB-B02-AC5",
+  "pb": "PB-B02",
+  "title": "库存矩阵：V8 不回补，取消回补规则不变",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "v8_no_restock",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "10 (not 11)",
+      "actual": "10"
+    },
+    {
+      "name": "order_deducts",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "9",
+      "actual": "9"
+    },
+    {
+      "name": "cancel_restocks_once",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "back to 10",
+      "actual": "10"
+    }
+  ],
+  "conjunct_count": 3,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "stock": [
+      "10",
+      "9",
+      "10"
+    ],
+    "cancel": [
+      200,
+      {
+        "code": 0,
+        "message": "ok",
+        "data": {
+          "orderId": "17",
+          "orderNo": "bc9e0bea-d9c9-4438-a14c-ccbaf67f4799",
+          "customerId": "1",
+          "status": "CANCELLED",
+          "items": [
+            {
+              "productId": "1",
+              "productName": "B030-在售足库存-10",
+              "unitPrice": "12.50",
+              "quantity": "1",
+              "lineAmount": "12.50"
+            }
+          ],
+          "totalAmount": "12.50",
+          "createdAt": "2026-11-21T22:00:49.748851",
+          "cancelledBy": "CUSTOMER",
+          "cancelledAt": "2026-11-21T22:00:49.822074",
+          "cancelReason": "B033-test",
+          "allowedActions": []
+        }
+      }
+    ]
+  }
+}

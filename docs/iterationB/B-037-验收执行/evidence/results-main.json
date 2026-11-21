@@ -1,0 +1,774 @@
+{
+  "window": {
+    "phase": "main",
+    "started_at": "2026-11-21T14:43:06Z",
+    "ended_at": "2026-11-21T14:43:09Z",
+    "started_at_cst": "2026-11-21T22:43:06+08:00",
+    "ended_at_cst": "2026-11-21T22:43:09+08:00",
+    "sut_sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
+    "sut_branch": "develop",
+    "db": "oxstore_test_b037",
+    "base": "http://127.0.0.1:8083"
+  },
+  "checks": [
+    {
+      "check": "FIXED-PROMPTS",
+      "title": "固定提示原文与零副作用",
+      "status": "PASS",
+      "conjuncts": [
+        {
+          "name": "anonymous_401",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(401,) / 请先登录",
+          "actual": [
+            401,
+            "请先登录"
+          ]
+        },
+        {
+          "name": "invalid_token_401",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(401,) / 请重新登录",
+          "actual": [
+            401,
+            "请重新登录"
+          ]
+        },
+        {
+          "name": "seller_customer_api_403",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(403,) / 角色无权访问",
+          "actual": [
+            403,
+            "角色无权访问"
+          ]
+        },
+        {
+          "name": "customer_admin_403",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(403,) / 角色无权访问",
+          "actual": [
+            403,
+            "角色无权访问"
+          ]
+        },
+        {
+          "name": "admin_anonymous_401",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(401,) / 请先登录",
+          "actual": [
+            401,
+            "请先登录"
+          ]
+        },
+        {
+          "name": "add_offline_409",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(409,) / 商品已下架",
+          "actual": [
+            409,
+            "商品已下架"
+          ]
+        },
+        {
+          "name": "add_missing_404",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(404, 409) / 商品不存在",
+          "actual": [
+            404,
+            "商品不存在"
+          ]
+        },
+        {
+          "name": "negative_qty_400",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(400,) / 数量无效，请输入正整数",
+          "actual": [
+            400,
+            "数量无效，请输入正整数"
+          ]
+        },
+        {
+          "name": "zero_qty_removed",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(200,) / 已移除",
+          "actual": [
+            200,
+            "已移除"
+          ]
+        },
+        {
+          "name": "deleted_row_409",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(409,) / 该商品已不在购物车，请刷新页面后查看。",
+          "actual": [
+            409,
+            "该商品已不在购物车，请刷新页面后查看。"
+          ]
+        },
+        {
+          "name": "empty_confirm_400",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(400,) / 请选择商品",
+          "actual": [
+            400,
+            "请选择商品"
+          ]
+        },
+        {
+          "name": "insufficient_stock_409",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "409 / 库存不足：当前可售 1 件",
+          "actual": "{\"http\": 409, \"message\": \"所选商品无法下单\", \"body\": {\"code\": 40910, \"message\": \"所选商品无法下单\", \"data\": {\"errors\": [{\"cartItemId\": \"43\", \"productId\": \"3\", \"productName\": \"B030-低库存-1\", \"reason\": \"INSUFFICIENT_STOCK\", \"message\": \"商品「B030-低库存-1」库存不足：当前可售 1 件，您选购了 2 件，请减少数量或移除后重试。\", \"availableStock\": \"1\", \"requeste"
+        },
+        {
+          "name": "duplicate_submit_409",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(409,) / 订单已提交，请勿重复下单",
+          "actual": [
+            409,
+            "订单已提交，请勿重复下单"
+          ]
+        },
+        {
+          "name": "wrong_expected_409",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(409,) / 订单状态已变化，请刷新后重试",
+          "actual": [
+            409,
+            "订单状态已变化，请刷新后重试"
+          ]
+        },
+        {
+          "name": "partial_cancel_400",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(400,) / 不支持部分取消",
+          "actual": [
+            400,
+            "不支持部分取消"
+          ]
+        },
+        {
+          "name": "other_order_403",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(403,) / 无权操作该订单",
+          "actual": [
+            403,
+            "无权操作该订单"
+          ]
+        },
+        {
+          "name": "missing_order_404",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(404,) / 订单不存在",
+          "actual": [
+            404,
+            "订单不存在"
+          ]
+        },
+        {
+          "name": "shipped_409",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(409,) / 订单已开始发货，不可取消",
+          "actual": [
+            409,
+            "订单已开始发货，不可取消"
+          ]
+        },
+        {
+          "name": "completed_409",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(409,) / 订单已完成，不可取消",
+          "actual": [
+            409,
+            "订单已完成，不可取消"
+          ]
+        },
+        {
+          "name": "already_cancelled_409",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(409,) / 订单已取消",
+          "actual": [
+            409,
+            "订单已取消"
+          ]
+        },
+        {
+          "name": "move_empty_400",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(400,) / 请选择商品",
+          "actual": [
+            400,
+            "请选择商品"
+          ]
+        },
+        {
+          "name": "move_retry_409",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(409,) / 请勿重复操作",
+          "actual": [
+            409,
+            "请勿重复操作"
+          ]
+        },
+        {
+          "name": "inventory_negative_400",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(400,) / 库存不能为负数，请输入非负整数。",
+          "actual": [
+            400,
+            "库存不能为负数，请输入非负整数。"
+          ]
+        },
+        {
+          "name": "legacy_submit_409",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "(409,) / 一口价旧购买意向已关闭，请通过购物车下单",
+          "actual": [
+            409,
+            "一口价旧购买意向已关闭，请通过购物车下单"
+          ]
+        },
+        {
+          "name": "legacy_queue_closed",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "405（旧 GET 已移除）或 409 只读归档",
+          "actual": {
+            "http": 405,
+            "message": "请求方法不支持：GET",
+            "body": {
+              "code": 405,
+              "message": "请求方法不支持：GET",
+              "data": null
+            }
+          }
+        },
+        {
+          "name": "no_deprecated_wording",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": [],
+          "actual": []
+        }
+      ],
+      "conjunct_count": 26,
+      "failed": [],
+      "evidence": {
+        "anon_fav": {
+          "http": 401,
+          "message": "请先登录",
+          "body": {
+            "code": 40101,
+            "message": "请先登录",
+            "data": null
+          }
+        },
+        "bad_fav": {
+          "http": 401,
+          "message": "请重新登录",
+          "body": {
+            "code": 40101,
+            "message": "请重新登录",
+            "data": null
+          }
+        },
+        "seller_cart": {
+          "http": 403,
+          "message": "角色无权访问",
+          "body": {
+            "code": 40301,
+            "message": "角色无权访问",
+            "data": null
+          }
+        },
+        "customer_admin": {
+          "http": 403,
+          "message": "角色无权访问",
+          "body": {
+            "code": 40301,
+            "message": "角色无权访问",
+            "data": null
+          }
+        },
+        "anon_admin": {
+          "http": 401,
+          "message": "请先登录",
+          "body": {
+            "code": 40101,
+            "message": "请先登录",
+            "data": null
+          }
+        },
+        "cart_offline": {
+          "http": 409,
+          "message": "商品已下架",
+          "body": {
+            "code": 40901,
+            "message": "商品已下架",
+            "data": null
+          }
+        },
+        "cart_missing": {
+          "http": 404,
+          "message": "商品不存在",
+          "body": {
+            "code": 40401,
+            "message": "商品不存在",
+            "data": null
+          }
+        },
+        "qty_negative": {
+          "http": 400,
+          "message": "数量无效，请输入正整数",
+          "body": {
+            "code": 40001,
+            "message": "数量无效，请输入正整数",
+            "data": null
+          }
+        },
+        "qty_zero": {
+          "http": 200,
+          "message": "已移除",
+          "body": {
+            "code": 0,
+            "message": "已移除",
+            "data": null
+          }
+        },
+        "qty_deleted_row": {
+          "http": 409,
+          "message": "该商品已不在购物车，请刷新页面后查看。",
+          "body": {
+            "code": 40912,
+            "message": "该商品已不在购物车，请刷新页面后查看。",
+            "data": null
+          }
+        },
+        "empty_confirm": {
+          "http": 400,
+          "message": "请选择商品",
+          "body": {
+            "code": 40005,
+            "message": "请选择商品",
+            "data": null
+          }
+        },
+        "insufficient": {
+          "http": 409,
+          "message": "所选商品无法下单",
+          "body": {
+            "code": 40910,
+            "message": "所选商品无法下单",
+            "data": {
+              "errors": [
+                {
+                  "cartItemId": "43",
+                  "productId": "3",
+                  "productName": "B030-低库存-1",
+                  "reason": "INSUFFICIENT_STOCK",
+                  "message": "商品「B030-低库存-1」库存不足：当前可售 1 件，您选购了 2 件，请减少数量或移除后重试。",
+                  "availableStock": "1",
+                  "requestedQuantity": "2"
+                }
+              ]
+            }
+          }
+        },
+        "dup_first": [
+          201,
+          "下单成功"
+        ],
+        "dup_second": [
+          409,
+          "订单已提交，请勿重复下单"
+        ],
+        "wrong_expected": {
+          "http": 409,
+          "message": "订单状态已变化，请刷新后重试",
+          "body": {
+            "code": 40904,
+            "message": "订单状态已变化，请刷新后重试",
+            "data": null
+          }
+        },
+        "partial_cancel": {
+          "http": 400,
+          "message": "不支持部分取消",
+          "body": {
+            "code": 40004,
+            "message": "不支持部分取消",
+            "data": null
+          }
+        },
+        "other_order": {
+          "http": 403,
+          "message": "无权操作该订单",
+          "body": {
+            "code": 40302,
+            "message": "无权操作该订单",
+            "data": null
+          }
+        },
+        "missing_order": {
+          "http": 404,
+          "message": "订单不存在",
+          "body": {
+            "code": 40405,
+            "message": "订单不存在",
+            "data": null
+          }
+        },
+        "cancel_shipped": {
+          "http": 409,
+          "message": "订单已开始发货，不可取消",
+          "body": {
+            "code": 40911,
+            "message": "订单已开始发货，不可取消",
+            "data": null
+          }
+        },
+        "cancel_completed": {
+          "http": 409,
+          "message": "订单已完成，不可取消",
+          "body": {
+            "code": 40911,
+            "message": "订单已完成，不可取消",
+            "data": null
+          }
+        },
+        "cancel_again": {
+          "http": 409,
+          "message": "订单已取消",
+          "body": {
+            "code": 40911,
+            "message": "订单已取消",
+            "data": null
+          }
+        },
+        "move_empty": {
+          "http": 400,
+          "message": "请选择商品",
+          "body": {
+            "code": 40005,
+            "message": "请选择商品",
+            "data": null
+          }
+        },
+        "move_retry": {
+          "http": 409,
+          "message": "请勿重复操作",
+          "body": {
+            "code": 40915,
+            "message": "请勿重复操作",
+            "data": null
+          }
+        },
+        "stock_negative": {
+          "http": 400,
+          "message": "库存不能为负数，请输入非负整数。",
+          "body": {
+            "code": 40001,
+            "message": "库存不能为负数，请输入非负整数。",
+            "data": null
+          }
+        },
+        "legacy_submit": {
+          "http": 409,
+          "message": "一口价旧购买意向已关闭，请通过购物车下单",
+          "body": {
+            "code": 40917,
+            "message": "一口价旧购买意向已关闭，请通过购物车下单",
+            "data": null
+          }
+        },
+        "legacy_queue": {
+          "http": 405,
+          "message": "请求方法不支持：GET",
+          "body": {
+            "code": 405,
+            "message": "请求方法不支持：GET",
+            "data": null
+          }
+        }
+      }
+    },
+    {
+      "check": "B08-AC1-REVERIFY",
+      "title": "收藏鉴权与跨客户隔离复验",
+      "status": "PASS",
+      "conjuncts": [
+        {
+          "name": "anonymous_favorite_401",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": 401,
+          "actual": {
+            "http": 401,
+            "message": "请先登录",
+            "body": {
+              "code": 40101,
+              "message": "请先登录",
+              "data": null
+            }
+          }
+        },
+        {
+          "name": "invalid_token_401",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": 401,
+          "actual": {
+            "http": 401,
+            "message": "请重新登录",
+            "body": {
+              "code": 40101,
+              "message": "请重新登录",
+              "data": null
+            }
+          }
+        },
+        {
+          "name": "seller_favorite_403",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": 403,
+          "actual": [
+            403,
+            {
+              "code": 40301,
+              "message": "角色无权访问",
+              "data": null
+            }
+          ]
+        },
+        {
+          "name": "cross_customer_cannot_delete",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "A delete on own namespace does not touch B",
+          "actual": {
+            "a_del": [
+              200,
+              {
+                "code": 0,
+                "message": "未收藏",
+                "data": null
+              }
+            ],
+            "b_rows": 1
+          }
+        },
+        {
+          "name": "customer_list_isolated",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "A list has no B favorite row",
+          "actual": [
+            "12"
+          ]
+        }
+      ],
+      "conjunct_count": 5,
+      "failed": [],
+      "evidence": {
+        "seller_fav": [
+          403,
+          {
+            "code": 40301,
+            "message": "角色无权访问",
+            "data": null
+          }
+        ],
+        "a_del": [
+          200,
+          {
+            "code": 0,
+            "message": "未收藏",
+            "data": null
+          }
+        ]
+      }
+    },
+    {
+      "check": "B09-AC1-REVERIFY",
+      "title": "收藏失效标注与恢复复验",
+      "status": "PASS",
+      "conjuncts": [
+        {
+          "name": "offline_favorite_marked_invalid",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "valid=false / 已下架",
+          "actual": {
+            "valid": false,
+            "invalidLabel": "已下架"
+          }
+        },
+        {
+          "name": "favorite_kept_not_removed",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "still listed",
+          "actual": 1
+        },
+        {
+          "name": "online_restores_validity",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "valid=true / no label",
+          "actual": {
+            "valid": true,
+            "invalidLabel": null
+          }
+        },
+        {
+          "name": "same_product_identity",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "1",
+          "actual": "1"
+        }
+      ],
+      "conjunct_count": 4,
+      "failed": [],
+      "evidence": {
+        "offline_item": {
+          "favoriteId": "12",
+          "productId": "1",
+          "productName": "B030-在售足库存-10",
+          "unitPrice": "12.50",
+          "mainImageUrl": "/api/images/6c6081e6-890d-4596-a019-0c874f436ac0.png",
+          "createdAt": "2026-11-21T22:43:08.799534",
+          "valid": false,
+          "invalidLabel": "已下架",
+          "canOpenDetail": false
+        },
+        "online_item": {
+          "favoriteId": "12",
+          "productId": "1",
+          "productName": "B030-在售足库存-10",
+          "unitPrice": "12.50",
+          "mainImageUrl": "/api/images/6c6081e6-890d-4596-a019-0c874f436ac0.png",
+          "createdAt": "2026-11-21T22:43:08.799534",
+          "valid": true,
+          "invalidLabel": null,
+          "canOpenDetail": true
+        }
+      }
+    },
+    {
+      "check": "B13-AC2-REVERIFY",
+      "title": "结算余数复验（公开 API）",
+      "status": "FAIL",
+      "conjuncts": [
+        {
+          "name": "remainder_observable_via_public_api",
+          "pass": false,
+          "disposition_if_fail": "FAIL",
+          "expected": "order qty < cart qty with a kept remainder line",
+          "actual": {
+            "submit": 409,
+            "order_qty": null,
+            "cart_left": [
+              "3",
+              "2"
+            ],
+            "note": "B-032 已判 FAIL（remainder_gt0_via_public_api）；本轮用公开 API 串行/并发重试"
+          }
+        }
+      ],
+      "conjunct_count": 1,
+      "failed": [
+        "remainder_observable_via_public_api"
+      ],
+      "evidence": {
+        "submit": {
+          "http": 409,
+          "body": {
+            "code": 40913,
+            "message": "确认信息已变化，请重新确认",
+            "data": {
+              "errors": [
+                {
+                  "cartItemId": "50",
+                  "productId": "1",
+                  "productName": "B030-在售足库存-10",
+                  "reason": "CONFIRMATION_CHANGED",
+                  "message": "商品「B030-在售足库存-10」的确认信息已变化，请重新确认"
+                }
+              ]
+            }
+          },
+          "idempotencyKey": "988dec32-7b94-4f51-9aa2-0d51c2c774f7",
+          "confirmationToken": "7a09d7ee-52e6-4780-bee1-d8778e658e69",
+          "orderId": null,
+          "orderNo": null,
+          "message": "确认信息已变化，请重新确认"
+        },
+        "cart_left": [
+          {
+            "quantity": "3"
+          },
+          {
+            "quantity": "2"
+          }
+        ]
+      }
+    },
+    {
+      "check": "PERSISTENCE-SETUP",
+      "title": "重启前持久化数据准备",
+      "status": "PASS",
+      "conjuncts": [
+        {
+          "name": "state_saved",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "state.json",
+          "actual": {
+            "token": "<jwt-redacted>",
+            "favoriteId": "14",
+            "cartItemId": "51",
+            "orderId": "29",
+            "stock": "10",
+            "username": "b030_buyer_a",
+            "base": null
+          }
+        }
+      ],
+      "conjunct_count": 1,
+      "failed": [],
+      "evidence": {
+        "favoriteId": "14",
+        "cartItemId": "51",
+        "orderId": "29",
+        "stock": "10"
+      }
+    }
+  ]
+}

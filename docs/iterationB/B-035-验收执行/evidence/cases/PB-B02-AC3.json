@@ -1,0 +1,80 @@
+{
+  "ac": "PB-B02-AC3",
+  "pb": "PB-B02",
+  "title": "库存非负整数无上限；V8 不夹取库存",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "v8_keeps_large_stock",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "unchanged",
+      "actual": "9007199254740993"
+    },
+    {
+      "name": "negative_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "400 / 库存不能为负数，请输入非负整数。",
+      "actual": [
+        400,
+        {
+          "code": 40001,
+          "message": "库存不能为负数，请输入非负整数。",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "decimal_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "400",
+      "actual": [
+        400,
+        {
+          "code": 40001,
+          "message": "库存不能为负数，请输入非负整数。",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "zero_triggers_auto_offline",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "0/OFFLINE/AUTO_ZERO",
+      "actual": {
+        "stock": "0",
+        "status": "OFFLINE",
+        "offline_reason": "AUTO_ZERO"
+      }
+    },
+    {
+      "name": "big_integer_accepted",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "accepted without JS-safe cap",
+      "actual": "9007199254740994"
+    }
+  ],
+  "conjunct_count": 5,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "neg": [
+      400,
+      {
+        "code": 40001,
+        "message": "库存不能为负数，请输入非负整数。",
+        "data": null
+      }
+    ],
+    "zero": {
+      "stock": "0",
+      "status": "OFFLINE",
+      "offline_reason": "AUTO_ZERO"
+    },
+    "big": "9007199254740994"
+  }
+}

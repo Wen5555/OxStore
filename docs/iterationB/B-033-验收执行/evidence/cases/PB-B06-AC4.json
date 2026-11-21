@@ -1,0 +1,84 @@
+{
+  "ac": "PB-B06-AC4",
+  "pb": "PB-B06",
+  "title": "重复取消/完成取消拒绝，不二次回补",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "repeat_seller_cancel_409",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409 / 订单已取消",
+      "actual": [
+        409,
+        {
+          "code": 40911,
+          "message": "订单已取消",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "no_second_restock",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "10",
+      "actual": {
+        "first": "10",
+        "again": "10"
+      }
+    },
+    {
+      "name": "completed_cannot_cancel",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409 / 订单已完成，不可取消",
+      "actual": [
+        409,
+        {
+          "code": 40911,
+          "message": "订单已完成，不可取消",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "completed_stock_unchanged",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "9",
+      "actual": {
+        "before": "9",
+        "after": "9"
+      }
+    },
+    {
+      "name": "terminal_no_cancel_entry",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "allowedActions=[] for CANCELLED/COMPLETED",
+      "actual": "deferred UI to B-036"
+    }
+  ],
+  "conjunct_count": 5,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "repeat": [
+      409,
+      {
+        "code": 40911,
+        "message": "订单已取消",
+        "data": null
+      }
+    ],
+    "completed": [
+      409,
+      {
+        "code": 40911,
+        "message": "订单已完成，不可取消",
+        "data": null
+      }
+    ]
+  }
+}
