@@ -1,0 +1,164 @@
+{
+  "ac": "PB-B04-AC4",
+  "pb": "PB-B04",
+  "title": "取消后终态与元数据可追溯，出现在订单历史",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "cancel_ok",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "200",
+      "actual": [
+        200,
+        {
+          "code": 0,
+          "message": "ok",
+          "data": {
+            "orderId": "7",
+            "orderNo": "3613ef47-17a3-4fdc-8afb-437c6e4b54a1",
+            "customerId": "1",
+            "status": "CANCELLED",
+            "items": [
+              {
+                "productId": "1",
+                "productName": "B030-在售足库存-10",
+                "unitPrice": "12.50",
+                "quantity": "2",
+                "lineAmount": "25.00"
+              }
+            ],
+            "totalAmount": "25.00",
+            "createdAt": "2026-11-21T15:31:30.368936",
+            "cancelledBy": "CUSTOMER",
+            "cancelledAt": "2026-11-21T15:31:30.440667",
+            "cancelReason": "客户取消测试",
+            "allowedActions": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "status_cancelled",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "CANCELLED",
+      "actual": "CANCELLED"
+    },
+    {
+      "name": "cancelled_by_customer",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "CUSTOMER",
+      "actual": "CUSTOMER"
+    },
+    {
+      "name": "cancelled_at_set",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "not null",
+      "actual": "2026-11-21 15:31:30.440667"
+    },
+    {
+      "name": "reason_kept",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "客户取消测试",
+      "actual": "客户取消测试"
+    },
+    {
+      "name": "total_amount_unchanged",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "25.00",
+      "actual": "25.00"
+    },
+    {
+      "name": "history_list_shows_cancelled",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "listed with cancelledBy/At",
+      "actual": {
+        "orderId": "7",
+        "orderNo": "3613ef47-17a3-4fdc-8afb-437c6e4b54a1",
+        "customerId": "1",
+        "status": "CANCELLED",
+        "items": [
+          {
+            "productId": "1",
+            "productName": "B030-在售足库存-10",
+            "unitPrice": "12.50",
+            "quantity": "2",
+            "lineAmount": "25.00"
+          }
+        ],
+        "totalAmount": "25.00",
+        "createdAt": "2026-11-21T15:31:30.368936",
+        "cancelledBy": "CUSTOMER",
+        "cancelledAt": "2026-11-21T15:31:30.440667",
+        "cancelReason": "客户取消测试",
+        "allowedActions": []
+      }
+    }
+  ],
+  "conjunct_count": 7,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "db": {
+      "id": 7,
+      "customer_id": 1,
+      "status": "CANCELLED",
+      "cancelled_by": "CUSTOMER",
+      "cancelled_at": "2026-11-21 15:31:30.440667",
+      "cancel_reason": "客户取消测试",
+      "total_amount": "25.00"
+    },
+    "detail": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "orderId": "7",
+        "orderNo": "3613ef47-17a3-4fdc-8afb-437c6e4b54a1",
+        "customerId": "1",
+        "status": "CANCELLED",
+        "items": [
+          {
+            "productId": "1",
+            "productName": "B030-在售足库存-10",
+            "unitPrice": "12.50",
+            "quantity": "2",
+            "lineAmount": "25.00"
+          }
+        ],
+        "totalAmount": "25.00",
+        "createdAt": "2026-11-21T15:31:30.368936",
+        "cancelledBy": "CUSTOMER",
+        "cancelledAt": "2026-11-21T15:31:30.440667",
+        "cancelReason": "客户取消测试",
+        "allowedActions": []
+      }
+    },
+    "listed": {
+      "orderId": "7",
+      "orderNo": "3613ef47-17a3-4fdc-8afb-437c6e4b54a1",
+      "customerId": "1",
+      "status": "CANCELLED",
+      "items": [
+        {
+          "productId": "1",
+          "productName": "B030-在售足库存-10",
+          "unitPrice": "12.50",
+          "quantity": "2",
+          "lineAmount": "25.00"
+        }
+      ],
+      "totalAmount": "25.00",
+      "createdAt": "2026-11-21T15:31:30.368936",
+      "cancelledBy": "CUSTOMER",
+      "cancelledAt": "2026-11-21T15:31:30.440667",
+      "cancelReason": "客户取消测试",
+      "allowedActions": []
+    }
+  }
+}
