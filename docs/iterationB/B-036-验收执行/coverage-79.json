@@ -1,0 +1,1155 @@
+{
+  "scope": "PB-B01..PB-B15 / 79 AC",
+  "generated_at": "2026-11-21",
+  "totals": {
+    "acs": 79,
+    "pass": 76,
+    "fail": 3
+  },
+  "evidence_packages": {
+    "B-031": "branch cursor/b031-favorites-cart-392f: 21 AC / 19 PASS / 2 FAIL (B08-AC1, B09-AC1)",
+    "B-032": "branch cursor/b032-checkout-atomicity-392f: 26 AC / 25 PASS / 1 FAIL (B13-AC2 remainder)",
+    "B-033": "b-030 branch docs/iterationB/B-033-验收执行: 19 AC PASS",
+    "B-034": "b-030 branch docs/iterationB/B-034-验收执行: 13 AC PASS",
+    "B-035": "b-030 branch docs/iterationB/B-035-验收执行: 10 AC PASS + auction regression",
+    "B-036": "b-030 branch docs/iterationB/B-036-验收执行: 12 real-browser flows PASS"
+  },
+  "ui_flows": {
+    "V01-LIST": "列表无快捷收藏/加购",
+    "V01-DETAIL": "详情加购 1 件/收藏切换/无立即购买",
+    "V03-CART": "两行、改数量、勾选规则",
+    "V09-MOVE": "转收藏二次确认「所选 N 件商品...」与成功提示 N=2",
+    "V02-FAVORITES": "收藏列表取消收藏无需确认",
+    "V04-CHECKOUT": "确认下单弹窗、成功单号",
+    "V05-HISTORY": "订单历史/取消二次确认/已取消/交易完成无取消入口",
+    "V06-SELLER-FLOW": "商家确认→备货→发货→完成",
+    "V07-INVENTORY": "库存负数校验、保存、手动上下架入口",
+    "V10-ARCHIVE": "客户/商家旧意向归档只读页"
+  },
+  "acs": [
+    {
+      "ac": "PB-B01-AC1",
+      "pb": "PB-B01",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V06-SELLER-FLOW",
+        "V05-HISTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-032、B-033、B-036"
+    },
+    {
+      "ac": "PB-B01-AC2",
+      "pb": "PB-B01",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V06-SELLER-FLOW",
+        "V05-HISTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-032、B-033、B-036"
+    },
+    {
+      "ac": "PB-B01-AC3",
+      "pb": "PB-B01",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V06-SELLER-FLOW",
+        "V05-HISTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-032、B-033、B-036"
+    },
+    {
+      "ac": "PB-B01-AC4",
+      "pb": "PB-B01",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V06-SELLER-FLOW",
+        "V05-HISTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-032、B-033、B-036"
+    },
+    {
+      "ac": "PB-B01-AC5",
+      "pb": "PB-B01",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V06-SELLER-FLOW",
+        "V05-HISTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-032、B-033、B-036"
+    },
+    {
+      "ac": "PB-B02-AC1",
+      "pb": "PB-B02",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-035",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V07-INVENTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-032、B-033、B-035"
+    },
+    {
+      "ac": "PB-B02-AC2",
+      "pb": "PB-B02",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-035",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V07-INVENTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-032、B-033、B-035"
+    },
+    {
+      "ac": "PB-B02-AC3",
+      "pb": "PB-B02",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-035",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V07-INVENTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-032、B-033、B-035"
+    },
+    {
+      "ac": "PB-B02-AC4",
+      "pb": "PB-B02",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-035",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V07-INVENTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-032、B-033、B-035"
+    },
+    {
+      "ac": "PB-B02-AC5",
+      "pb": "PB-B02",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-035",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V07-INVENTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-032、B-033、B-035"
+    },
+    {
+      "ac": "PB-B03-AC1",
+      "pb": "PB-B03",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-035",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V05-HISTORY",
+        "V10-ARCHIVE"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-032、B-033、B-035、B-036"
+    },
+    {
+      "ac": "PB-B03-AC2",
+      "pb": "PB-B03",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-035",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V05-HISTORY",
+        "V10-ARCHIVE"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-032、B-033、B-035、B-036"
+    },
+    {
+      "ac": "PB-B03-AC3",
+      "pb": "PB-B03",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-035",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V05-HISTORY",
+        "V10-ARCHIVE"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-032、B-033、B-035、B-036"
+    },
+    {
+      "ac": "PB-B03-AC4",
+      "pb": "PB-B03",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-035",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V05-HISTORY",
+        "V10-ARCHIVE"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-032、B-033、B-035、B-036"
+    },
+    {
+      "ac": "PB-B03-AC5",
+      "pb": "PB-B03",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-035",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V05-HISTORY",
+        "V10-ARCHIVE"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-032、B-033、B-035、B-036"
+    },
+    {
+      "ac": "PB-B04-AC1",
+      "pb": "PB-B04",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V05-HISTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-033、B-036、B-037"
+    },
+    {
+      "ac": "PB-B04-AC2",
+      "pb": "PB-B04",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V05-HISTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-033、B-036、B-037"
+    },
+    {
+      "ac": "PB-B04-AC3",
+      "pb": "PB-B04",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V05-HISTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-033、B-036、B-037"
+    },
+    {
+      "ac": "PB-B04-AC4",
+      "pb": "PB-B04",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V05-HISTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-033、B-036、B-037"
+    },
+    {
+      "ac": "PB-B04-AC5",
+      "pb": "PB-B04",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V05-HISTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-033、B-036、B-037"
+    },
+    {
+      "ac": "PB-B04-AC6",
+      "pb": "PB-B04",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V05-HISTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-033、B-036、B-037"
+    },
+    {
+      "ac": "PB-B04-AC7",
+      "pb": "PB-B04",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V05-HISTORY"
+      ],
+      "note": "",
+      "test_tasks": "B-033、B-036、B-037"
+    },
+    {
+      "ac": "PB-B05-AC1",
+      "pb": "PB-B05",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033"
+      ],
+      "ui_flows": [],
+      "note": "",
+      "test_tasks": "B-028、B-033"
+    },
+    {
+      "ac": "PB-B05-AC2",
+      "pb": "PB-B05",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033"
+      ],
+      "ui_flows": [],
+      "note": "",
+      "test_tasks": "B-028、B-033"
+    },
+    {
+      "ac": "PB-B05-AC3",
+      "pb": "PB-B05",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033"
+      ],
+      "ui_flows": [],
+      "note": "",
+      "test_tasks": "B-028、B-033"
+    },
+    {
+      "ac": "PB-B05-AC4",
+      "pb": "PB-B05",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033"
+      ],
+      "ui_flows": [],
+      "note": "",
+      "test_tasks": "B-028、B-033"
+    },
+    {
+      "ac": "PB-B06-AC1",
+      "pb": "PB-B06",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V06-SELLER-FLOW"
+      ],
+      "note": "",
+      "test_tasks": "B-033、B-036、B-037"
+    },
+    {
+      "ac": "PB-B06-AC2",
+      "pb": "PB-B06",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V06-SELLER-FLOW"
+      ],
+      "note": "",
+      "test_tasks": "B-033、B-036、B-037"
+    },
+    {
+      "ac": "PB-B06-AC3",
+      "pb": "PB-B06",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V06-SELLER-FLOW"
+      ],
+      "note": "",
+      "test_tasks": "B-033、B-036、B-037"
+    },
+    {
+      "ac": "PB-B06-AC4",
+      "pb": "PB-B06",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V06-SELLER-FLOW"
+      ],
+      "note": "",
+      "test_tasks": "B-033、B-036、B-037"
+    },
+    {
+      "ac": "PB-B06-AC5",
+      "pb": "PB-B06",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V06-SELLER-FLOW"
+      ],
+      "note": "",
+      "test_tasks": "B-033、B-036、B-037"
+    },
+    {
+      "ac": "PB-B06-AC6",
+      "pb": "PB-B06",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V06-SELLER-FLOW"
+      ],
+      "note": "",
+      "test_tasks": "B-033、B-036、B-037"
+    },
+    {
+      "ac": "PB-B07-AC1",
+      "pb": "PB-B07",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033"
+      ],
+      "ui_flows": [],
+      "note": "",
+      "test_tasks": "B-028、B-033"
+    },
+    {
+      "ac": "PB-B07-AC2",
+      "pb": "PB-B07",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-033"
+      ],
+      "ui_flows": [],
+      "note": "",
+      "test_tasks": "B-028、B-033"
+    },
+    {
+      "ac": "PB-B08-AC1",
+      "pb": "PB-B08",
+      "status": "FAIL",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V01-LIST",
+        "V01-DETAIL",
+        "V02-FAVORITES"
+      ],
+      "note": "B-031 verdict FAIL；B-036 只验证页面登录/入口，未证明服务端对他人收藏的拒绝；B-037 复验",
+      "test_tasks": "B-031、B-036、B-037"
+    },
+    {
+      "ac": "PB-B08-AC2",
+      "pb": "PB-B08",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V01-LIST",
+        "V01-DETAIL",
+        "V02-FAVORITES"
+      ],
+      "note": "",
+      "test_tasks": "B-031、B-036、B-037"
+    },
+    {
+      "ac": "PB-B08-AC3",
+      "pb": "PB-B08",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V01-LIST",
+        "V01-DETAIL",
+        "V02-FAVORITES"
+      ],
+      "note": "",
+      "test_tasks": "B-031、B-036、B-037"
+    },
+    {
+      "ac": "PB-B08-AC4",
+      "pb": "PB-B08",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V01-LIST",
+        "V01-DETAIL",
+        "V02-FAVORITES"
+      ],
+      "note": "",
+      "test_tasks": "B-031、B-036、B-037"
+    },
+    {
+      "ac": "PB-B08-AC5",
+      "pb": "PB-B08",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V01-LIST",
+        "V01-DETAIL",
+        "V02-FAVORITES"
+      ],
+      "note": "",
+      "test_tasks": "B-031、B-036、B-037"
+    },
+    {
+      "ac": "PB-B09-AC1",
+      "pb": "PB-B09",
+      "status": "FAIL",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V02-FAVORITES"
+      ],
+      "note": "B-031 verdict FAIL（tipOfflineExact）；需 B-037 复验失效标注",
+      "test_tasks": "B-029、B-031、B-037"
+    },
+    {
+      "ac": "PB-B09-AC2",
+      "pb": "PB-B09",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V02-FAVORITES"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-031、B-037"
+    },
+    {
+      "ac": "PB-B09-AC3",
+      "pb": "PB-B09",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V02-FAVORITES"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-031、B-037"
+    },
+    {
+      "ac": "PB-B09-AC4",
+      "pb": "PB-B09",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V02-FAVORITES"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-031、B-037"
+    },
+    {
+      "ac": "PB-B09-AC5",
+      "pb": "PB-B09",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V02-FAVORITES"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-031、B-037"
+    },
+    {
+      "ac": "PB-B10-AC1",
+      "pb": "PB-B10",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V01-DETAIL",
+        "V03-CART"
+      ],
+      "note": "",
+      "test_tasks": "B-031、B-036、B-037"
+    },
+    {
+      "ac": "PB-B10-AC2",
+      "pb": "PB-B10",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V01-DETAIL",
+        "V03-CART"
+      ],
+      "note": "",
+      "test_tasks": "B-031、B-036、B-037"
+    },
+    {
+      "ac": "PB-B10-AC3",
+      "pb": "PB-B10",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V01-DETAIL",
+        "V03-CART"
+      ],
+      "note": "",
+      "test_tasks": "B-031、B-036、B-037"
+    },
+    {
+      "ac": "PB-B10-AC4",
+      "pb": "PB-B10",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V01-DETAIL",
+        "V03-CART"
+      ],
+      "note": "",
+      "test_tasks": "B-031、B-036、B-037"
+    },
+    {
+      "ac": "PB-B10-AC5",
+      "pb": "PB-B10",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V01-DETAIL",
+        "V03-CART"
+      ],
+      "note": "",
+      "test_tasks": "B-031、B-036、B-037"
+    },
+    {
+      "ac": "PB-B10-AC6",
+      "pb": "PB-B10",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V01-DETAIL",
+        "V03-CART"
+      ],
+      "note": "",
+      "test_tasks": "B-031、B-036、B-037"
+    },
+    {
+      "ac": "PB-B11-AC1",
+      "pb": "PB-B11",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V03-CART"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-031、B-037"
+    },
+    {
+      "ac": "PB-B11-AC2",
+      "pb": "PB-B11",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V03-CART"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-031、B-037"
+    },
+    {
+      "ac": "PB-B11-AC3",
+      "pb": "PB-B11",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V03-CART"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-031、B-037"
+    },
+    {
+      "ac": "PB-B11-AC4",
+      "pb": "PB-B11",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V03-CART"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-031、B-037"
+    },
+    {
+      "ac": "PB-B11-AC5",
+      "pb": "PB-B11",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-031",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V03-CART"
+      ],
+      "note": "",
+      "test_tasks": "B-029、B-031、B-037"
+    },
+    {
+      "ac": "PB-B12-AC1",
+      "pb": "PB-B12",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V04-CHECKOUT"
+      ],
+      "note": "",
+      "test_tasks": "B-032、B-036、B-037"
+    },
+    {
+      "ac": "PB-B12-AC2",
+      "pb": "PB-B12",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V04-CHECKOUT"
+      ],
+      "note": "",
+      "test_tasks": "B-032、B-036、B-037"
+    },
+    {
+      "ac": "PB-B12-AC3",
+      "pb": "PB-B12",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V04-CHECKOUT"
+      ],
+      "note": "",
+      "test_tasks": "B-032、B-036、B-037"
+    },
+    {
+      "ac": "PB-B12-AC4",
+      "pb": "PB-B12",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V04-CHECKOUT"
+      ],
+      "note": "",
+      "test_tasks": "B-032、B-036、B-037"
+    },
+    {
+      "ac": "PB-B12-AC5",
+      "pb": "PB-B12",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V04-CHECKOUT"
+      ],
+      "note": "",
+      "test_tasks": "B-032、B-036、B-037"
+    },
+    {
+      "ac": "PB-B12-AC6",
+      "pb": "PB-B12",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V04-CHECKOUT"
+      ],
+      "note": "",
+      "test_tasks": "B-032、B-036、B-037"
+    },
+    {
+      "ac": "PB-B13-AC1",
+      "pb": "PB-B13",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V04-CHECKOUT"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-032、B-037"
+    },
+    {
+      "ac": "PB-B13-AC2",
+      "pb": "PB-B13",
+      "status": "FAIL",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V04-CHECKOUT"
+      ],
+      "note": "B-032 合取 remainder_gt0_via_public_api FAIL；余数保留待 B-037 用锁前/锁后窗口复验",
+      "test_tasks": "B-028、B-032、B-037"
+    },
+    {
+      "ac": "PB-B13-AC3",
+      "pb": "PB-B13",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V04-CHECKOUT"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-032、B-037"
+    },
+    {
+      "ac": "PB-B13-AC4",
+      "pb": "PB-B13",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V04-CHECKOUT"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-032、B-037"
+    },
+    {
+      "ac": "PB-B13-AC5",
+      "pb": "PB-B13",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-032",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V04-CHECKOUT"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-032、B-037"
+    },
+    {
+      "ac": "PB-B14-AC1",
+      "pb": "PB-B14",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-034",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V09-MOVE"
+      ],
+      "note": "",
+      "test_tasks": "B-034、B-036、B-037"
+    },
+    {
+      "ac": "PB-B14-AC2",
+      "pb": "PB-B14",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-034",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V09-MOVE"
+      ],
+      "note": "",
+      "test_tasks": "B-034、B-036、B-037"
+    },
+    {
+      "ac": "PB-B14-AC3",
+      "pb": "PB-B14",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-034",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V09-MOVE"
+      ],
+      "note": "",
+      "test_tasks": "B-034、B-036、B-037"
+    },
+    {
+      "ac": "PB-B14-AC4",
+      "pb": "PB-B14",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-034",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V09-MOVE"
+      ],
+      "note": "",
+      "test_tasks": "B-034、B-036、B-037"
+    },
+    {
+      "ac": "PB-B14-AC5",
+      "pb": "PB-B14",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-034",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V09-MOVE"
+      ],
+      "note": "",
+      "test_tasks": "B-034、B-036、B-037"
+    },
+    {
+      "ac": "PB-B14-AC6",
+      "pb": "PB-B14",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-034",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V09-MOVE"
+      ],
+      "note": "",
+      "test_tasks": "B-034、B-036、B-037"
+    },
+    {
+      "ac": "PB-B14-AC7",
+      "pb": "PB-B14",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-034",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V09-MOVE"
+      ],
+      "note": "",
+      "test_tasks": "B-034、B-036、B-037"
+    },
+    {
+      "ac": "PB-B15-AC1",
+      "pb": "PB-B15",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-034",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V09-MOVE"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-034、B-037"
+    },
+    {
+      "ac": "PB-B15-AC2",
+      "pb": "PB-B15",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-034",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V09-MOVE"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-034、B-037"
+    },
+    {
+      "ac": "PB-B15-AC3",
+      "pb": "PB-B15",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-034",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V09-MOVE"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-034、B-037"
+    },
+    {
+      "ac": "PB-B15-AC4",
+      "pb": "PB-B15",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-034",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V09-MOVE"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-034、B-037"
+    },
+    {
+      "ac": "PB-B15-AC5",
+      "pb": "PB-B15",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-034",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V09-MOVE"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-034、B-037"
+    },
+    {
+      "ac": "PB-B15-AC6",
+      "pb": "PB-B15",
+      "status": "PASS",
+      "evidence_packages": [
+        "B-034",
+        "B-036"
+      ],
+      "ui_flows": [
+        "V09-MOVE"
+      ],
+      "note": "",
+      "test_tasks": "B-028、B-034、B-037"
+    }
+  ]
+}
