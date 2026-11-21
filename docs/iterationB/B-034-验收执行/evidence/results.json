@@ -1,0 +1,119 @@
+{
+  "task": "B-034",
+  "execution_window": {
+    "started_at": "2026-11-21T07:27:37Z",
+    "ended_at": "2026-11-21T07:27:44Z",
+    "started_at_cst": "2026-11-21T15:27:37+08:00",
+    "ended_at_cst": "2026-11-21T15:27:44+08:00",
+    "sut_sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
+    "sut_branch": "develop",
+    "db": "oxstore_test_b034",
+    "base": "http://127.0.0.1:8080",
+    "delivery_baseline": "topic/r2@0cef9ec2764486651037479f2f94e881691791a9",
+    "plan": "docs/iterationB/B-030-本轮验收用例/cases/PB-B14.md, PB-B15.md, concurrency/SEQ.md",
+    "git_ops": "local-only; no commit/push during execution"
+  },
+  "totals": {
+    "acs": 13,
+    "pass": 13,
+    "fail": 0,
+    "blocked": 0,
+    "conjuncts": 63,
+    "failed_conjuncts": 0
+  },
+  "acs": [
+    {
+      "ac": "PB-B14-AC1",
+      "status": "PASS",
+      "conjuncts": 7,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B14-AC2",
+      "status": "PASS",
+      "conjuncts": 6,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B14-AC3",
+      "status": "PASS",
+      "conjuncts": 5,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B14-AC4",
+      "status": "PASS_API_UI_DEFERRED",
+      "conjuncts": 3,
+      "failed": [],
+      "deferred": [
+        "ui_confirm_text"
+      ]
+    },
+    {
+      "ac": "PB-B14-AC5",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B14-AC6",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B14-AC7",
+      "status": "PASS",
+      "conjuncts": 6,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B15-AC1",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B15-AC2",
+      "status": "PASS",
+      "conjuncts": 5,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B15-AC3",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B15-AC4",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B15-AC5",
+      "status": "PASS",
+      "conjuncts": 6,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B15-AC6",
+      "status": "PASS",
+      "conjuncts": 5,
+      "failed": [],
+      "deferred": []
+    }
+  ]
+}

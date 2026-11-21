@@ -1,0 +1,137 @@
+{
+  "task": "B-034",
+  "name": "转收藏整批回滚与并发特殊结果验收",
+  "pb_scope": ["PB-B14", "PB-B15"],
+  "sut": {
+    "branch": "develop",
+    "sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
+    "note": "被测候选；交付基线仍为 topic/r2@0cef9ec"
+  },
+  "plan_source": [
+    "docs/iterationB/B-030-本轮验收用例/cases/PB-B14.md",
+    "docs/iterationB/B-030-本轮验收用例/cases/PB-B15.md",
+    "docs/iterationB/B-030-本轮验收用例/concurrency/SEQ.md"
+  ],
+  "acs": [
+    {
+      "ac": "PB-B14-AC1",
+      "pb": "PB-B14",
+      "title": "转为收藏是移动不是复制；N 按商品行数",
+      "cases": ["PB-B14-AC1-POS"],
+      "checks": ["http_and_message", "moved_line_count_is_line_count", "cart_rows_removed",
+                 "favorites_two_distinct_rows", "qty5_yields_one_favorite", "no_order_created",
+                 "stock_unchanged"],
+      "status": "PASS"
+    },
+    {
+      "ac": "PB-B14-AC2",
+      "pb": "PB-B14",
+      "title": "登录/归属校验；商家无代操作权限",
+      "cases": ["PB-B14-AC2-POS"],
+      "checks": ["anonymous_401_please_login", "expired_401_relogin", "foreign_row_403",
+                 "mixed_foreign_whole_batch_rejected", "seller_403_no_permission", "no_data_changed"],
+      "status": "PASS"
+    },
+    {
+      "ac": "PB-B14-AC3",
+      "pb": "PB-B14",
+      "title": "可收藏=在售；空选拒绝；未选行不受影响",
+      "cases": ["PB-B14-AC3-POS"],
+      "checks": ["empty_selection_400", "partial_selection_leaves_other_row",
+                 "stock_below_qty_still_movable", "offline_row_rejected",
+                 "unselected_offline_row_not_processed"],
+      "status": "PASS"
+    },
+    {
+      "ac": "PB-B14-AC4",
+      "pb": "PB-B14",
+      "title": "N=所选商品行数；成功提示「已收藏 N 件商品」",
+      "cases": ["PB-B14-AC4-POS"],
+      "checks": ["two_lines_message_n2", "single_line_message_n1", "ui_confirm_text"],
+      "status": "PASS_API_UI_DEFERRED"
+    },
+    {
+      "ac": "PB-B14-AC5",
+      "pb": "PB-B14",
+      "title": "已收藏商品再转收藏：保持原收藏、不刷新时间、仍移车",
+      "cases": ["PB-B14-AC5-POS"],
+      "checks": ["existing_favorite_move_succeeds", "favorite_not_duplicated",
+                 "favorite_time_unchanged", "cart_row_still_removed"],
+      "status": "PASS"
+    },
+    {
+      "ac": "PB-B14-AC6",
+      "pb": "PB-B14",
+      "title": "仅在售可新建收藏；已有失效收藏不因本次操作转成功",
+      "cases": ["PB-B14-AC6-POS"],
+      "checks": ["offline_product_rejected", "invalid_favorite_not_revived",
+                 "no_favorite_added", "cart_row_kept_on_batch_failure"],
+      "status": "PASS"
+    },
+    {
+      "ac": "PB-B14-AC7",
+      "pb": "PB-B14",
+      "title": "混合批次全成或全败；逐项原因",
+      "cases": ["PB-B14-AC7-POS"],
+      "checks": ["mixed_batch_rejected", "per_item_offline_reason", "whole_batch_rollback",
+                 "no_partial_success_message", "missing_product_reason", "missing_batch_rollback"],
+      "status": "PASS"
+    },
+    {
+      "ac": "PB-B15-AC1",
+      "pb": "PB-B15",
+      "title": "收藏写入与移车同事务，无中间结果",
+      "cases": ["PB-B15-AC1-POS"],
+      "checks": ["success_writes_both_sides", "tombstones_created",
+                 "no_order_no_stock_change", "failure_rolls_back_favorite_and_cart"],
+      "status": "PASS"
+    },
+    {
+      "ac": "PB-B15-AC2",
+      "pb": "PB-B15",
+      "title": "同键重放拦截，不重复收藏/清车",
+      "cases": ["PB-B15-AC2-POS"],
+      "checks": ["first_submit_success", "same_key_blocked", "no_double_processing",
+                 "single_receipt", "new_key_new_request_allowed"],
+      "status": "PASS"
+    },
+    {
+      "ac": "PB-B15-AC3",
+      "pb": "PB-B15",
+      "title": "整行移动；数量与收藏无关；提交期改数量",
+      "cases": ["PB-B15-AC3-POS"],
+      "checks": ["qty5_whole_row_moved", "favorite_has_no_quantity",
+                 "late_add_creates_new_cart_row", "qty_change_race_final_state"],
+      "status": "PASS"
+    },
+    {
+      "ac": "PB-B15-AC4",
+      "pb": "PB-B15",
+      "title": "提交期删行：跳过已删；全删=请选择商品",
+      "cases": ["PB-B15-AC4-POS"],
+      "checks": ["deleted_row_skipped_not_failed", "other_row_moved",
+                 "all_deleted_400_select_goods", "concurrent_delete_race_no_partial"],
+      "status": "PASS"
+    },
+    {
+      "ac": "PB-B15-AC5",
+      "pb": "PB-B15",
+      "title": "转收藏成功后取消收藏；同键重试返回原结果不复活",
+      "cases": ["PB-B15-AC5-POS"],
+      "checks": ["move_first_success", "late_cancel_success", "final_favorite_cancelled",
+                 "cart_row_still_removed", "same_key_returns_original_result",
+                 "no_revival_after_replay"],
+      "status": "PASS"
+    },
+    {
+      "ac": "PB-B15-AC6",
+      "pb": "PB-B15",
+      "title": "提交期下架/不存在：整批失败回滚",
+      "cases": ["PB-B15-AC6-POS"],
+      "checks": ["offline_row_rejects_batch", "whole_batch_rollback",
+                 "missing_row_rejects_batch", "missing_batch_rollback",
+                 "in_flight_offline_no_partial"],
+      "status": "PASS"
+    }
+  ]
+}
