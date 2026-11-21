@@ -3,8 +3,8 @@
   "generated_at": "2026-11-21",
   "totals": {
     "acs": 79,
-    "pass": 76,
-    "fail": 3
+    "pass": 78,
+    "fail": 1
   },
   "evidence_packages": {
     "B-031": "branch cursor/b031-favorites-cart-392f: 21 AC / 19 PASS / 2 FAIL (B08-AC1, B09-AC1)",
@@ -12,7 +12,8 @@
     "B-033": "b-030 branch docs/iterationB/B-033-验收执行: 19 AC PASS",
     "B-034": "b-030 branch docs/iterationB/B-034-验收执行: 13 AC PASS",
     "B-035": "b-030 branch docs/iterationB/B-035-验收执行: 10 AC PASS + auction regression",
-    "B-036": "b-030 branch docs/iterationB/B-036-验收执行: 12 real-browser flows PASS"
+    "B-036": "b-030 branch docs/iterationB/B-036-验收执行: 12 real-browser flows PASS",
+    "B-037": "b-030 branch docs/iterationB/B-037-验收执行: 固定提示 26 合取、持久化重启、安全负例；B08/B09 复验通过，B13-AC2 仍开放"
   },
   "ui_flows": {
     "V01-LIST": "列表无快捷收藏/加购",
@@ -508,7 +509,7 @@
     {
       "ac": "PB-B08-AC1",
       "pb": "PB-B08",
-      "status": "FAIL",
+      "status": "PASS",
       "evidence_packages": [
         "B-031",
         "B-036"
@@ -518,7 +519,7 @@
         "V01-DETAIL",
         "V02-FAVORITES"
       ],
-      "note": "B-031 verdict FAIL；B-036 只验证页面登录/入口，未证明服务端对他人收藏的拒绝；B-037 复验",
+      "note": "B-037 复验通过",
       "test_tasks": "B-031、B-036、B-037"
     },
     {
@@ -588,7 +589,7 @@
     {
       "ac": "PB-B09-AC1",
       "pb": "PB-B09",
-      "status": "FAIL",
+      "status": "PASS",
       "evidence_packages": [
         "B-031",
         "B-036"
@@ -596,7 +597,7 @@
       "ui_flows": [
         "V02-FAVORITES"
       ],
-      "note": "B-031 verdict FAIL（tipOfflineExact）；需 B-037 复验失效标注",
+      "note": "B-037 复验通过",
       "test_tasks": "B-029、B-031、B-037"
     },
     {
@@ -924,7 +925,7 @@
       "ui_flows": [
         "V04-CHECKOUT"
       ],
-      "note": "B-032 合取 remainder_gt0_via_public_api FAIL；余数保留待 B-037 用锁前/锁后窗口复验",
+      "note": "B-032 + B-037 均无法通过公开 API 复现余数；开放缺陷，B-040 记录并交 B-011",
       "test_tasks": "B-028、B-032、B-037"
     },
     {
