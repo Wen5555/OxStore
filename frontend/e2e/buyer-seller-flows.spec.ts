@@ -759,6 +759,8 @@ test('收藏列表将失效商品设为只读并支持取消收藏', async ({ pa
   await page.goto('/me/favorites')
   await expect(page.getByRole('link', { name: '在售商品' })).toHaveAttribute('href', '/products/42')
   await expect(page.getByRole('link', { name: '下架商品' })).toHaveCount(0)
+  await page.getByRole('button', { name: '下架商品（已下架）' }).click()
+  await expect(page.locator('.ant-message-notice').filter({ hasText: '已下架' })).toBeVisible()
   await page.getByRole('button', { name: '取消收藏' }).nth(1).click()
   await expect(page.getByText('下架商品')).toHaveCount(0)
   await expect(page.locator('.ant-message-notice').filter({ hasText: '已取消收藏' })).toBeVisible()
