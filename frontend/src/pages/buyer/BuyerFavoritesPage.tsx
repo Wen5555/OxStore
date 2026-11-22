@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Alert, Button, Card, Empty, Pagination, Space, Spin, Table, Tag, Typography, message } from 'antd'
+import { Alert, Button, Card, Empty, Pagination, Space, Spin, Table, Tag, Tooltip, Typography, message } from 'antd'
 import { Link } from 'react-router-dom'
 import { getMyFavorites, removeFavorite } from '../../api/challengeB'
 import type { FavoriteItem, FavoritePage } from '../../types/challengeB'
@@ -72,9 +72,32 @@ export default function BuyerFavoritesPage() {
                       title: '商品',
                       dataIndex: 'productName',
                       key: 'productName',
-                      render: (name: string, item) => item.canOpenDetail
-                        ? <Link to={`/products/${item.productId}`}>{name}</Link>
-                        : <span>{name}</span>,
+                      render: (name: string, item) => {
+                        if (item.canOpenDetail) {
+                          return <Link to={`/products/${item.productId}`}>{name}</Link>
+                        }
+                        const invalidLabel = item.invalidLabel || '已下架'
+                        const showInvalidNotice = () => message.warning(invalidLabel)
+                        return (
+                          <Tooltip title={invalidLabel}>
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              aria-label={`${name}（${invalidLabel}）`}
+                              style={{ color: 'rgba(0, 0, 0, 0.45)', cursor: 'pointer' }}
+                              onClick={showInvalidNotice}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                  event.preventDefault()
+                                  showInvalidNotice()
+                                }
+                              }}
+                            >
+                              {name}
+                            </span>
+                          </Tooltip>
+                        )
+                      },
                     },
                     { title: '价格', dataIndex: 'unitPrice', key: 'unitPrice', render: (price: string) => `¥${price}` },
                     {
