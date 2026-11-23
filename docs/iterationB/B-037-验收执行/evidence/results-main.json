@@ -682,62 +682,181 @@
       }
     },
     {
-      "check": "B13-AC2-REVERIFY",
-      "title": "结算余数复验（公开 API）",
-      "status": "FAIL",
+      "check": "B13-AC2-CONTROLLED",
+      "title": "结算锁后加购受控复验（R2 独立执行 R1 测试钩子）",
+      "status": "PASS",
       "conjuncts": [
         {
-          "name": "remainder_observable_via_public_api",
-          "pass": false,
+          "name": "locked_add_waits_for_commit",
+          "pass": true,
           "disposition_if_fail": "FAIL",
-          "expected": "order qty < cart qty with a kept remainder line",
+          "expected": "add reaches service before release and waits",
           "actual": {
-            "submit": 409,
-            "order_qty": null,
-            "cart_left": [
-              "3",
-              "2"
-            ],
-            "note": "B-032 已判 FAIL（remainder_gt0_via_public_api）；本轮用公开 API 串行/并发重试"
+            "addWaitedForCheckout": true,
+            "addReachedServiceBeforeRelease": true
           }
+        },
+        {
+          "name": "order_keeps_locked_qty",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "201 & qty=2",
+          "actual": [
+            201,
+            "2"
+          ]
+        },
+        {
+          "name": "post_lock_add_survives_as_new_row",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "one new row qty=1",
+          "actual": [
+            {
+              "cartItemId": "2",
+              "productId": "1",
+              "productName": "http-e7dd464a-4fcc-423a-aeda-c8294646cffa",
+              "unitPrice": "1.25",
+              "mainImageUrl": null,
+              "quantity": "1",
+              "stock": "3",
+              "online": true,
+              "invalidLabel": null,
+              "defaultCheckoutSelected": true,
+              "canCheckoutSelect": true,
+              "canFavoriteSelect": true,
+              "updatedAt": "2026-11-23T22:23:40.831428"
+            }
+          ]
+        },
+        {
+          "name": "stock_after_locked_add",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "3",
+          "actual": "3"
+        },
+        {
+          "name": "retry_same_key_40909",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "40909",
+          "actual": 40909
+        },
+        {
+          "name": "pre_lock_change_requires_reconfirm",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "409/40913, no order, cart=3",
+          "actual": {
+            "http": 409,
+            "code": 40913,
+            "orders": 0,
+            "cart": [
+              "3"
+            ]
+          }
+        },
+        {
+          "name": "contract_interpretation",
+          "pass": true,
+          "disposition_if_fail": "FAIL",
+          "expected": "B-000 §8：锁时 c-q=0；锁后加购串行至提交后，新增量保留（同商品最终 1 件）",
+          "actual": "按 B-000 §8 判定，不要求沿用旧 cartItemId"
         }
       ],
-      "conjunct_count": 1,
-      "failed": [
-        "remainder_observable_via_public_api"
-      ],
+      "conjunct_count": 7,
+      "failed": [],
       "evidence": {
-        "submit": {
-          "http": 409,
-          "body": {
+        "db": "oxstore_test_d001",
+        "command": "mvn -Dtest=ChallengeBCheckoutPublicApiConcurrencyTest test (MySQL)",
+        "sut": "develop@ebe3f32",
+        "locked_add": {
+          "cartAfter": [
+            {
+              "cartItemId": "2",
+              "productId": "1",
+              "productName": "http-e7dd464a-4fcc-423a-aeda-c8294646cffa",
+              "unitPrice": "1.25",
+              "mainImageUrl": null,
+              "quantity": "1",
+              "stock": "3",
+              "online": true,
+              "invalidLabel": null,
+              "defaultCheckoutSelected": true,
+              "canCheckoutSelect": true,
+              "canFavoriteSelect": true,
+              "updatedAt": "2026-11-23T22:23:40.831428"
+            }
+          ],
+          "addHttp": 200,
+          "addReachedServiceBeforeRelease": true,
+          "addWaitedForCheckout": true,
+          "duplicateCheckoutCode": 40909,
+          "originalCartItemId": "1",
+          "stockAfter": "3",
+          "checkoutHttp": 201,
+          "order": {
+            "orderId": "1",
+            "orderNo": "6e445bc3-131d-48e6-a2b1-83389ce66234",
+            "customerId": "1",
+            "status": "PLACED",
+            "items": [
+              {
+                "productId": "1",
+                "productName": "http-e7dd464a-4fcc-423a-aeda-c8294646cffa",
+                "unitPrice": "1.25",
+                "quantity": "2",
+                "lineAmount": "2.50"
+              }
+            ],
+            "totalAmount": "2.50",
+            "createdAt": "2026-11-23T22:23:40.476939",
+            "cancelledBy": null,
+            "cancelledAt": null,
+            "cancelReason": null,
+            "allowedActions": [
+              "CANCEL"
+            ]
+          }
+        },
+        "before_lock_change": {
+          "orderCount": 0,
+          "cartAfter": [
+            {
+              "cartItemId": "3",
+              "productId": "2",
+              "productName": "http-a4cda4f8-3152-4e00-a284-ef5cb99a1099",
+              "unitPrice": "1.25",
+              "mainImageUrl": null,
+              "quantity": "3",
+              "stock": "5",
+              "online": true,
+              "invalidLabel": null,
+              "defaultCheckoutSelected": true,
+              "canCheckoutSelect": true,
+              "canFavoriteSelect": true,
+              "updatedAt": "2026-11-23T22:23:41.062185"
+            }
+          ],
+          "stockAfter": "5",
+          "submitHttp": 409,
+          "response": {
             "code": 40913,
             "message": "确认信息已变化，请重新确认",
             "data": {
               "errors": [
                 {
-                  "cartItemId": "50",
-                  "productId": "1",
-                  "productName": "B030-在售足库存-10",
+                  "cartItemId": "3",
+                  "productId": "2",
+                  "productName": "http-a4cda4f8-3152-4e00-a284-ef5cb99a1099",
                   "reason": "CONFIRMATION_CHANGED",
-                  "message": "商品「B030-在售足库存-10」的确认信息已变化，请重新确认"
+                  "message": "商品「http-a4cda4f8-3152-4e00-a284-ef5cb99a1099」的确认信息已变化，请重新确认"
                 }
               ]
             }
-          },
-          "idempotencyKey": "988dec32-7b94-4f51-9aa2-0d51c2c774f7",
-          "confirmationToken": "7a09d7ee-52e6-4780-bee1-d8778e658e69",
-          "orderId": null,
-          "orderNo": null,
-          "message": "确认信息已变化，请重新确认"
-        },
-        "cart_left": [
-          {
-            "quantity": "3"
-          },
-          {
-            "quantity": "2"
           }
-        ]
+        }
       }
     },
     {

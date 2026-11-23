@@ -1,15 +1,15 @@
 # B-036 独立验收包 · 真实前后端 V01～V09 界面与主链路
 
-> 结论（2026-11-21，SUT `develop@29c20ea`）：**12 个真实浏览器流程全部通过**，截图 14 张；
-> 79 AC 汇总见 [coverage-79.json](./coverage-79.json)：**76 PASS / 3 FAIL**。
-> 3 条 FAIL 是 B-031/B-032 已发现、尚未关闭的缺陷（B08-AC1、B09-AC1、B13-AC2），
-> 本包不掩盖，交由 B-037 复验、B-040 收口。
+> 结论（2026-11-23 缺陷复验后，SUT `develop@ebe3f32`）：**12 个真实浏览器流程全部通过**，
+> 截图 15 张；79 AC 汇总见 [coverage-79.json](./coverage-79.json)：**79 PASS / 0 FAIL**。
+> D-001（B13-AC2）由受控测试钩子复验通过；D-002（B09-AC1 失效收藏点击提示）由 PR #35 修复后
+> 在真实 Chrome 复验通过（[d002-ui-retest.json](./evidence/d002-ui-retest.json)）。
 
 ## 被测栈
 
 | 项 | 值 |
 |---|---|
-| SUT | `develop@29c20ea0927528a98f873f4a1a0e169a6fa12281` |
+| SUT | `develop@ebe3f32`（PR #35 前端修复 + PR #36 测试钩子） |
 | 前端 | Vite dev server `http://127.0.0.1:5173`（代理 `/api` → `:8080`） |
 | 后端 | Spring Boot `:8080`，DB `oxstore_test_b036` |
 | 浏览器 | 系统 Chrome（Playwright `channel=chrome`，headless），非 Mock |
@@ -20,12 +20,13 @@
 | 证据 | 内容 |
 |---|---|
 | [evidence/ui-steps.json](./evidence/ui-steps.json) | 12 步的 PASS/FAIL、耗时、关键断言 |
-| [evidence/screenshots/](./evidence/screenshots/) | 01 列表、02 详情、03 购物车、04 转收藏确认、05 收藏、06 下单确认、07 下单成功、08 取消后历史、09/10 商家商品/库存、11 商家订单、12 交易完成历史、13/14 旧意向归档 |
-| [coverage-79.json](./coverage-79.json) | 79 AC ↔ 证据包（B-031～B-036）↔ UI 流程 |
+| [evidence/screenshots/](./evidence/screenshots/) | 01～15 截图（含 D-002 失效收藏点击提示） |
+| [evidence/d002-ui-retest.json](./evidence/d002-ui-retest.json) | 点击失效收藏 toast=「已下架」、URL 不变 |
+| [coverage-79.json](./coverage-79.json) | 79 AC ↔ 证据包（B-031～B-037）↔ UI 流程 |
 
 ## 12 个真实流程
 
-1. **V01 列表**：搜索框存在；商品卡片无「加入购物车/收藏」快捷入口（断言为 false）。
+1. **V01 列表**：搜索框存在；商品卡片无「加入购物车/收藏」快捷入口。
 2. **V01 登录**：买家 UI 登录成功自动回首页。
 3. **V01 详情**：加入购物车 1 件、收藏→按钮变「取消收藏」；无「立即购买」。
 4. **V03 购物车**：两行；按数量输入框改 2 并「更新数量」提示「已更新」。
@@ -38,10 +39,16 @@
 11. **V07 库存**：`-1` 触发表单校验「库存不能为负数，请输入非负整数。」；改正 5 保存提示「商品信息已更新」；有「手动下架」入口。
 12. **V10 旧意向归档**：客户/商家两页均为「旧意向归档」，客户页含「只读归档」列。
 
+## D-002 复验（PR #35）
+
+- 修复：失效收藏商品名改为可点击 `span`，点击 `message.warning(已下架)`（`BuyerFavoritesPage.tsx`）。
+- 复验：真实 Chrome 点击失效行 → toast `["已下架"]`，URL 保持在 `/me/favorites`；
+  截图 `evidence/screenshots/15-d002-invalid-favorite-notice.png`。
+
 ## 复现
 
 ```powershell
-# 1) 后端 :8080 指向 oxstore_test_b036；前端 5173
+# 1) 后端 :8080 指向 oxstore_test_b036；前端 5173（SUT ebe3f32）
 cd docs/iterationB/B-030-本轮验收用例
 $env:B030_BASE_URL="http://127.0.0.1:8080"; $env:B030_DB_NAME="oxstore_test_b036"
 python scripts/prepare_fixtures.py

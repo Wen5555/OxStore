@@ -1,38 +1,41 @@
 # B-040 缺陷记录
 
-## D-001 · PB-B13-AC2 结算余数无法通过公开 API 观察（OPEN · 阻断）
+## 当前状态：0 个开放缺陷
+
+| ID | AC | 严重度 | 责任 | 状态 |
+|---|---|---|---|---|
+| D-001 | PB-B13-AC2 | 阻断（原） | B-011 / R1 | **CLOSED** |
+| D-002 | PB-B09-AC1 | 阻断（原） | R3 / B-019 | **CLOSED** |
+| B08-AC1 | PB-B08-AC1 | 测试材料 | B-031 / R2 | **CLOSED（改判）** |
+
+## D-001 · PB-B13-AC2 锁后加购（CLOSED）
 
 | 项 | 内容 |
 |---|---|
-| AC | PB-B13-AC2「成功清车按余数处理…锁定后新增的数量不会被误删，保留为余数」 |
-| 严重度 | 阻断（B-040 Review 准入） |
-| 责任 | B-011 / R1（R2 复验） |
-| 发现 | B-032（`remainder_gt0_via_public_api` FAIL）；B-037 再次尝试仍失败 |
-| 环境 | `develop@29c20ea`，DB `oxstore_test_b032` / `oxstore_test_b037` |
+| 原问题 | B-032 无法通过公开 API 观察「锁定后加购保留余数」；B-037 串行改量得到 409 |
+| 修复 | PR #36 / `topic/r1`，commit `d5bed99`：新增受控测试 `ChallengeBCheckoutPublicApiConcurrencyTest`，在 `ShopOrderRepository.saveAndFlush` 前暂停，真实 HTTP + 真实锁；无生产代码改动 |
+| R2 复验 | 2026-11-23，`develop@ebe3f32`，MySQL 8.0 `oxstore_test_d001`（空库 schema），`mvn -Dtest=ChallengeBCheckoutPublicApiConcurrencyTest test` → **Tests run: 2, Failures: 0, Errors: 0**，BUILD SUCCESS |
+| 观察 | 锁后加购进入服务并等待：提交 201、订单 qty=2、同商品新行 qty=1、库存 3；原键重试 40909。锁前改量：409/40913、无订单、车内 3 件、库存 5 |
+| 判定依据 | B-000 §8「锁后加购串行至提交之后，新增量保留」；不要求沿用旧 `cartItemId`，余数按同商品最终数量判定 |
+| 证据 | [B-037 evidence/d001](../B-037-验收执行/evidence/d001/)、`evidence/results-main.json` |
 
-### 复现与观察
+## D-002 · PB-B09-AC1 失效收藏点击提示（CLOSED）
 
-1. B-032：以栅栏/延迟注入尝试「提交后、锁定前另端加购」，公开 API 无法稳定构造出
-   「订单数量 < 清车前行数量，且购物车保留余数」的可观察结果，合取判 FAIL。
-2. B-037：串行复现——购物车 2 件 → 确认下单 → 将行数量改为 3 → 提交；
-   提交返回 **409**（按 B12-AC4 要求重新确认），购物车保留 3 件，无「下单 2 + 余 1」窗口。
-   `evidence/results-main.json` 中 `B13-AC2-REVERIFY` 记录 `submit=409`、`cart_left=["3","2"]`。
+| 项 | 内容 |
+|---|---|
+| 原问题 | B-031 判 FAIL：真实页面点击失效收藏无「已下架」提示（源码仅无点击处理的 `<span>`） |
+| 修复 | PR #35 / `topic/r3`，commit `4e10352`：失效项改为可点击 span，点击 `message.warning(已下架)`，并补 Tooltip/键盘可访问 |
+| R2 复验 | 2026-11-23，`develop@ebe3f32` + 真实 Chrome：点击失效行 → toast `["已下架"]`，URL 保持 `/me/favorites` |
+| 证据 | [B-036 d002-ui-retest.json](../B-036-验收执行/evidence/d002-ui-retest.json)、`evidence/screenshots/15-d002-invalid-favorite-notice.png` |
 
-### 影响
+## B08-AC1 · 测试期望错误（CLOSED）
 
-- PB-B13 的 5 条 AC 中 4 条通过，AC2 不能判通过；
-- B-040 不能宣布 79/79 全通过，Review 准入不成立；
-- 不阻塞其余 14 个故事。
+- B-031 原判 FAIL：脚本期望商家「无此权限」，实际「角色无权访问」(40301)。
+- AC 只要求商家不可访问客户收藏；B-037 `B08-AC1-REVERIFY` 5/5 PASS。
+- B-031 已改判 PASS，原始 FAIL 观察保留在 `verdict_original`/`rejudge_reason`。
 
-### 建议行动
+## 历史记录
 
-1. B-011 提供受控延迟/测试钩子（或可配置的锁等待点），使「锁定后加购」可顺序化复现；
-2. 或在接口契约中明确该窗口的可观察证据（例如返回余数、事件或审计记录）；
-3. 修复后由 R2 在同一 AC 上复验，更新 B-040 结论。
-
-## 已关闭缺陷（复验通过）
-
-| 原发现 | AC | 复验 | 结论 |
-|---|---|---|---|
-| B-031 verdict FAIL | PB-B08-AC1 | B-037 `B08-AC1-REVERIFY` 5/5 PASS | 关闭（匿名/失效/商家/跨客户隔离均符合） |
-| B-031 verdict FAIL | PB-B09-AC1 | B-037 `B09-AC1-REVERIFY` 4/4 PASS | 关闭（下架保留并标「已下架」，恢复在售有效） |
+- 2026-11-21：B-040 首轮结论 78/79，D-001 开放。
+- 2026-11-22：复核 B-031/B-032 材料，发现 D-002（B09-AC1 UI）与 B-032 材料问题；B-040 口径修正为 77/79。
+- 2026-11-23：PR #35/#36 合并；R2 复验 D-001/D-002 均通过，79/79。

@@ -26,10 +26,10 @@
   ],
   "totals": {
     "checks": 6,
-    "pass": 5,
-    "fail": 1,
+    "pass": 6,
+    "fail": 0,
     "blocked": 0,
-    "conjuncts": 42
+    "conjuncts": 48
   },
   "checks": [
     {
@@ -51,12 +51,10 @@
       "failed": []
     },
     {
-      "check": "B13-AC2-REVERIFY",
-      "status": "FAIL",
-      "conjuncts": 1,
-      "failed": [
-        "remainder_observable_via_public_api"
-      ]
+      "check": "B13-AC2-CONTROLLED",
+      "status": "PASS",
+      "conjuncts": 7,
+      "failed": []
     },
     {
       "check": "PERSISTENCE-SETUP",

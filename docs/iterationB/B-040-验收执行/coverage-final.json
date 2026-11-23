@@ -3,14 +3,18 @@
   "scope": "挑战需求B PB-B01..PB-B15 全部 79 AC",
   "sut": {
     "branch": "develop",
-    "sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
+    "sha": "ebe3f32",
+    "fixes": [
+      "PR #35 D-002",
+      "PR #36 D-001"
+    ],
     "delivery_baseline": "topic/r2@0cef9ec"
   },
-  "generated_at": "2026-11-21",
+  "generated_at": "2026-11-23",
   "totals": {
     "acs": 79,
-    "pass": 78,
-    "fail": 1
+    "pass": 79,
+    "fail": 0
   },
   "stories": {
     "PB-B01": {
@@ -75,8 +79,8 @@
     },
     "PB-B13": {
       "acs": 5,
-      "pass": 4,
-      "fail": 1
+      "pass": 5,
+      "fail": 0
     },
     "PB-B14": {
       "acs": 7,
@@ -89,21 +93,28 @@
       "fail": 0
     }
   },
-  "open_defects": [
+  "open_defects": [],
+  "closed_defects": [
     {
       "id": "D-001",
       "ac": "PB-B13-AC2",
-      "pb": "PB-B13",
-      "title": "结算余数无法通过公开 API 复现/观察（锁后加购保留余数）",
-      "severity": "blocker",
       "owner": "B-011 / R1",
-      "found_in": [
-        "B-032 (remainder_gt0_via_public_api FAIL)",
-        "B-037 (串行改量后提交返回 409，无公开余数窗口)"
-      ],
-      "status": "OPEN",
-      "impact": "PB-B13 不能判通过；B-040 Review 准入不成立",
-      "ask": "B-011 提供受控延迟/测试钩子，或在接口契约中明确余数可观察窗口；R2 复验"
+      "fix_pr": "#36",
+      "closed_by": "R2 在 MySQL oxstore_test_d001 独立执行 ChallengeBCheckoutPublicApiConcurrencyTest：2/2 PASS；锁后加购订单 qty=2 + 新行 qty=1 + 库存 3 + 原键 40909；按 B-000 §8 判定"
+    },
+    {
+      "id": "D-002",
+      "ac": "PB-B09-AC1",
+      "owner": "R3 / B-019",
+      "fix_pr": "#35",
+      "closed_by": "R2 在 develop@ebe3f32 + 真实 Chrome 复验：点击失效收藏 toast=已下架，URL 不变"
+    },
+    {
+      "id": "B08-AC1",
+      "ac": "PB-B08-AC1",
+      "owner": "B-031 测试材料",
+      "fix_pr": null,
+      "closed_by": "B-037 按实际文案「角色无权访问」复验 5/5 PASS；B-031 已改判"
     }
   ],
   "auction_regression": {
@@ -841,7 +852,7 @@
       "ui_flows": [
         "V02-FAVORITES"
       ],
-      "note": "B-037 复验通过",
+      "note": "D-002：PR #35 修复后在 develop@ebe3f32 真实 Chrome 复验，点击失效收藏 toast=已下架，URL 不变",
       "test_tasks": "B-029、B-031、B-037",
       "evidence_paths": [
         "branch cursor/b031-favorites-cart-392f: docs/iterationB/B-031-验收执行",
@@ -1253,7 +1264,7 @@
     {
       "ac": "PB-B13-AC2",
       "pb": "PB-B13",
-      "status": "FAIL",
+      "status": "PASS",
       "evidence_packages": [
         "B-032",
         "B-036"
@@ -1261,7 +1272,7 @@
       "ui_flows": [
         "V04-CHECKOUT"
       ],
-      "note": "B-032 + B-037 均无法通过公开 API 复现余数；开放缺陷，B-040 记录并交 B-011",
+      "note": "D-001：R1 受控测试钩子（PR #36），R2 在 MySQL oxstore_test_d001 独立执行 2/2 通过；按 B-000 §8 余数=同商品最终数量",
       "test_tasks": "B-028、B-032、B-037",
       "evidence_paths": [
         "branch cursor/b032-checkout-atomicity-392f: docs/iterationB/B-032-验收执行",

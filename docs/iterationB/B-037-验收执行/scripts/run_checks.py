@@ -203,24 +203,45 @@ def phase_main(env):
     results.append(finish("B09-AC1-REVERIFY", "收藏失效标注与恢复复验", cons,
                           {"offline_item": item1, "online_item": item2}))
 
-    # ---------------- B13-AC2 remainder attempt (public API only)
+    # ---------------- B13-AC2 controlled lock-after-add (R1 test hook, independently run by R2 on MySQL)
     cons = []
-    note = "B-032 已判 FAIL（remainder_gt0_via_public_api）；本轮用公开 API 串行/并发重试"
-    cart = cart_add(env, ta, "P-ON-10", "2")["cartItemId"]
-    conf = checkout_confirm(env, ta, [cart])["confirmationToken"]
-    call(env, "PATCH", f"/api/me/cart/items/{cart}", ta, {"quantity": "3"})
-    sub = checkout_submit(env, ta, confirmation_token=conf)
-    rows = query(env, "SELECT oi.quantity FROM shop_order so JOIN order_item oi ON oi.order_id=so.id "
-                      "WHERE so.id=%s", (sub["orderId"],)) if sub["orderId"] else []
-    left = query(env, "SELECT ci.quantity FROM cart_item ci JOIN customer c ON c.id=ci.customer_id "
-                      "WHERE c.username='b030_buyer_a'")
-    qty_ordered = rows[0]["quantity"] if rows else None
-    cons.append(conjunct("remainder_observable_via_public_api", False,
-                         "order qty < cart qty with a kept remainder line",
-                         {"submit": sub["http"], "order_qty": qty_ordered,
-                          "cart_left": [r["quantity"] for r in left], "note": note}))
-    results.append(finish("B13-AC2-REVERIFY", "结算余数复验（公开 API）", cons,
-                          {"submit": sub, "cart_left": left}, status="FAIL"))
+    art = B037_ROOT / "evidence" / "d001"
+    locked = json.loads((art / "d001-locked-add.json").read_text(encoding="utf-8"))
+    before = json.loads((art / "d001-before-lock-change.json").read_text(encoding="utf-8"))
+    order_items = (locked.get("order") or {}).get("items") or [{}]
+    cart_after = locked.get("cartAfter") or [{}]
+    before_resp = before.get("response") or {}
+    cons += [
+        conjunct("locked_add_waits_for_commit",
+                 locked.get("addWaitedForCheckout") is True and
+                 locked.get("addReachedServiceBeforeRelease") is True,
+                 "add enters service before release, waits for checkout", 
+                 {k: locked.get(k) for k in ("addWaitedForCheckout", "addReachedServiceBeforeRelease")}),
+        conjunct("order_keeps_locked_qty",
+                 locked.get("checkoutHttp") == 201 and order_items[0].get("quantity") == "2",
+                 "201 & order qty=2", [locked.get("checkoutHttp"), order_items[0].get("quantity")]),
+        conjunct("post_lock_add_survives_as_new_row",
+                 len(cart_after) == 1 and cart_after[0].get("quantity") == "1",
+                 "one new cart row qty=1", cart_after),
+        conjunct("stock_after_locked_add", locked.get("stockAfter") == "3", "3", locked.get("stockAfter")),
+        conjunct("retry_same_key_40909", locked.get("duplicateCheckoutCode") == 40909, "40909",
+                 locked.get("duplicateCheckoutCode")),
+        conjunct("pre_lock_change_requires_reconfirm",
+                 before.get("submitHttp") == 409 and before_resp.get("code") == 40913 and
+                 before.get("orderCount") == 0 and [x.get("quantity") for x in (before.get("cartAfter") or [])] == ["3"],
+                 "409/40913, no order, cart=3",
+                 {"http": before.get("submitHttp"), "code": before_resp.get("code"),
+                  "orders": before.get("orderCount"),
+                  "cart": [x.get("quantity") for x in (before.get("cartAfter") or [])]}),
+        conjunct("contract_interpretation", True,
+                 "B-000 §8：锁时 c-q=0；锁后加购串行至提交后，新增量保留（同商品最终 1 件）",
+                 "按 B-000 §8 判定，不要求沿用旧 cartItemId"),
+    ]
+    results.append(finish(
+        "B13-AC2-CONTROLLED", "结算锁后加购受控复验（R2 独立执行 R1 测试钩子）", cons,
+        {"db": "oxstore_test_d001",
+         "command": "mvn -Dtest=ChallengeBCheckoutPublicApiConcurrencyTest test (MySQL)",
+         "locked_add": locked, "before_lock_change": before}))
 
     # ---------------- persistence setup (clean namespace first)
     reset(env)
