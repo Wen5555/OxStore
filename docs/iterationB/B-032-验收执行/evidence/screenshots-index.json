@@ -1,0 +1,84 @@
+{
+  "ok": true,
+  "mapping": [
+    {
+      "file": "b03-after-login.png",
+      "ac": "PB-B03",
+      "step": "after login",
+      "exists": true,
+      "bytes": 54475
+    },
+    {
+      "file": "b12-product-detail-no-direct-buy.png",
+      "ac": "PB-B12-AC1",
+      "step": "product detail",
+      "exists": true,
+      "bytes": 24851
+    },
+    {
+      "file": "b12-cart-selection.png",
+      "ac": "PB-B12-AC3",
+      "step": "cart selection defaults",
+      "exists": true,
+      "bytes": 45566
+    },
+    {
+      "file": "b12-checkout-confirm.png",
+      "ac": "PB-B12-AC4",
+      "step": "confirm modal",
+      "exists": true,
+      "bytes": 35389
+    },
+    {
+      "file": "b12-clear-cart-confirm.png",
+      "ac": "PB-B12-AC5",
+      "step": "clear confirm modal",
+      "exists": true,
+      "bytes": 42918
+    },
+    {
+      "file": "b03-order-history.png",
+      "ac": "PB-B03-AC3",
+      "step": "customer order history",
+      "exists": true,
+      "bytes": 70395
+    },
+    {
+      "file": "b03-cancel-detail.png",
+      "ac": "PB-B03-AC3",
+      "step": "cancel detail modal",
+      "exists": true,
+      "bytes": 75410
+    },
+    {
+      "file": "b03-admin-orders.png",
+      "ac": "PB-B03-AC3",
+      "step": "merchant orders",
+      "exists": true,
+      "bytes": 116876
+    },
+    {
+      "file": "b13-order-success.png",
+      "ac": "PB-B13-AC1",
+      "step": "order success",
+      "exists": true,
+      "bytes": 26740
+    },
+    {
+      "file": "b12-submit-error-tip.png",
+      "ac": "PB-B12-AC6",
+      "step": "submit error tip",
+      "exists": true,
+      "bytes": 54201
+    },
+    {
+      "file": "b01-merchant-orders-flow.png",
+      "ac": "PB-B01-AC4",
+      "step": "merchant orders UI",
+      "exists": true,
+      "bytes": 57471
+    }
+  ],
+  "missing": [],
+  "note": "final pass does not overwrite AC-step screenshots; no reset_ns"
+}

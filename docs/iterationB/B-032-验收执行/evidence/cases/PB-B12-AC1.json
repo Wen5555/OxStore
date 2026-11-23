@@ -1,0 +1,80 @@
+{
+  "conjuncts": [
+    {
+      "name": "no_direct_order_without_cart_confirm",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 400,
+        "message": "请求包含未知字段"
+      }
+    },
+    {
+      "name": "unauth_confirm_tip",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 401,
+        "message": "请先登录"
+      }
+    },
+    {
+      "name": "invalid_token_confirm_tip",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 401,
+        "message": "请重新登录"
+      }
+    },
+    {
+      "name": "other_cart_line_tip",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 403,
+        "message": "无权操作"
+      }
+    },
+    {
+      "name": "mixed_cart_tip",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 403,
+        "message": "无权操作"
+      }
+    },
+    {
+      "name": "reject_keeps_stock_cart_no_order",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "stock": [
+          "10",
+          "10"
+        ],
+        "cart_unchanged": true
+      }
+    },
+    {
+      "name": "product_detail_no_direct_buy_ui",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "ok": true,
+        "shots": [
+          "b12-product-detail-no-direct-buy.png"
+        ],
+        "hasDirectBuy": false,
+        "hasAddToCart": true,
+        "stderr_tail": "",
+        "stdout_tail": "{\"ok\":true,\"shots\":[\"b12-product-detail-no-direct-buy.png\"],\"hasDirectBuy\":false,\"hasAddToCart\":true}\n",
+        "node_exit": 0
+      }
+    }
+  ],
+  "conjunct_pass": 7,
+  "conjunct_total": 7,
+  "conjunct_fail_names": []
+}

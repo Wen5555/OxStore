@@ -1,0 +1,64 @@
+{
+  "conjuncts": [
+    {
+      "name": "ui_checkbox_toggle_no_stock_change",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "toggle": {
+          "ok": true,
+          "ui": {
+            "before": 3,
+            "mid": 0,
+            "after": 3
+          },
+          "stderr_tail": "",
+          "stdout_tail": "{\"ok\":true,\"ui\":{\"before\":3,\"mid\":0,\"after\":3}}\n",
+          "node_exit": 0
+        },
+        "before": {
+          "P-ON-10": "10",
+          "P-ON-5": "5"
+        },
+        "mid": {
+          "P-ON-10": "10",
+          "P-ON-5": "5"
+        }
+      }
+    },
+    {
+      "name": "clear_cart_api_no_order_stock_change",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 200,
+        "message": "ok",
+        "stock_after": {
+          "P-ON-10": "10",
+          "P-ON-5": "5"
+        }
+      }
+    },
+    {
+      "name": "clear_cart_confirm_modal_screenshot",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "ok": true,
+        "shots": [
+          "b12-clear-cart-confirm.png"
+        ],
+        "ui": {
+          "visible": true,
+          "text": "确定清空购物车？\n清空后购物车中的商品行将被移除。\n取 消\n清空购物车"
+        },
+        "stderr_tail": "",
+        "stdout_tail": "{\"ok\":true,\"shots\":[\"b12-clear-cart-confirm.png\"],\"ui\":{\"visible\":true,\"text\":\"确定清空购物车？\\n清空后购物车中的商品行将被移除。\\n取 消\\n清空购物车\"}}\n",
+        "node_exit": 0
+      }
+    }
+  ],
+  "conjunct_pass": 3,
+  "conjunct_total": 3,
+  "conjunct_fail_names": []
+}

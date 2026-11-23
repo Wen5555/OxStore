@@ -1,0 +1,53 @@
+# SHA256 (final tree · 6d37086)
+
+- files: 46
+- 说明：旧清单为过期工作区产物，已按最终树重生成。
+
+| Path | bytes | sha256 |
+|---|---:|---|
+| `scripts/second_audit_acs.py` | 154314 | `8e312e3e9b59300efcfba36cb8794f6528ccb5098698d9730b5ade70fe48aa6a` |
+| `scripts/prepare_and_run.py` | 85131 | `5fc60f554d853f59c3bb41018fbf8fb572e3a839c4b02da5ac0e62005ca1559e` |
+| `scripts/conjuncts.py` | 2710 | `3e9f4f3d01c3725e224bf8cdcd33d521f8e6b9ebad20f1ce7aaafb6ad59f62bd` |
+| `fixtures/b032_tx_probes.sql` | 5056 | `c378da00438585f6f7119b41f1ff7aa4df1873d8825903ffef2a9beab6ad1884` |
+| `evidence/results.json` | 194021 | `2b406fd5a466d335560d0be90b0e55dce42e3cbd4c83ead266d175f5789686ac` |
+| `evidence/results.md` | 11627 | `ea349dec6d2479508b69233604f55329eed09e1ea2c2e294eab3a38112fb91b5` |
+| `evidence/verify-api-db.json` | 883 | `84eea80fb4f095cb69da3a73ef37a813212244157bed21ba1328bba7d3ab020b` |
+| `evidence/screenshots-index.json` | 1951 | `526b0c2c6ae1a9223785e90ca1d7c5f4af279b59fcb3d36b18bcfed926133f18` |
+| `evidence/self-review.json` | 2998 | `f0b8d4769645bdf2cacdc828ddc4ec0a946f8616560094522ca2cf85fefad6b7` |
+| `evidence/screenshots/b01-merchant-orders-flow.png` | 57471 | `7e984f57ec3900caea0c356af19228539af4e37a9d0b2bb5e7a500067ed3bb11` |
+| `evidence/screenshots/b03-admin-orders.png` | 116876 | `a26799b70b92b8be077499be87248c49d89c3a4a1cc9f80a505145cf5399cabe` |
+| `evidence/screenshots/b03-after-login.png` | 54475 | `6397d200f0457719610b773d58a5898da737ad16baae8f02e0e9300a5fc323b4` |
+| `evidence/screenshots/b03-cancel-detail.png` | 75410 | `971e412ae9f109da0096b7c8d8c4d18c9c65db30dcb56f0d023759f0e0c00e3c` |
+| `evidence/screenshots/b03-order-history.png` | 70395 | `a90aceadac0d762c59238d8018442b59c381b6f04528f715772a339e2f08bbee` |
+| `evidence/screenshots/b12-cart-selection.png` | 45566 | `5c181c941cec492263383f26ab41b57303068ffbd4fba44c538bb2f285f767e9` |
+| `evidence/screenshots/b12-checkout-confirm.png` | 35389 | `0408d9fce4a2702edcdae8371d289f3df96f9add44caad1bb2e6ca2827360c20` |
+| `evidence/screenshots/b12-clear-cart-confirm.png` | 42918 | `9d86f9aa76b0b72c0618b60b4d4ceb0d965584e67e17792d695a6a3bdb47a996` |
+| `evidence/screenshots/b12-product-detail-no-direct-buy.png` | 24851 | `aa937caa0ba48bf0314d5e886d2e64de0b4759f85756321774fdb831c5372c39` |
+| `evidence/screenshots/b12-submit-error-tip.png` | 54201 | `2ff5d43c0e8d8280c6002a18072a9f639ddb026d45a948e4d8b4d2a630d1a73a` |
+| `evidence/screenshots/b13-order-success.png` | 26740 | `e886240e133cc7343691382d3fbb9fafcb1000eff26a8250e8b157feafdd4458` |
+| `evidence/cases/PB-B01-AC1.json` | 2832 | `cefbde9ae34c695e338a65927942fae3d40fb3f24b8f70abeb9cf827b6bd3e52` |
+| `evidence/cases/PB-B01-AC2.json` | 2650 | `a90c0756e0f250c1b60ad98c9c4eecadca5c9a4a60b07fcca2d71066baf53f30` |
+| `evidence/cases/PB-B01-AC3.json` | 1950 | `9d445b0e8558ed87831c768269f26110d427a5bc5a9e4e931b965adc586efa25` |
+| `evidence/cases/PB-B01-AC4.json` | 2934 | `06c4d07a54190b4d2013c4b6fcff023062f3df2b1e080c11b59a2ddcf46f4e26` |
+| `evidence/cases/PB-B01-AC5.json` | 2602 | `5e3339e642f3ebbaebbc6b09b2c9406e6f2cb381e1f5f3780d7b1912e85eb74c` |
+| `evidence/cases/PB-B02-AC1.json` | 698 | `62a09bcfbc407b23ba3db5a1d132df73ccd58d29b1fa5dac56fa665dc7e8505b` |
+| `evidence/cases/PB-B02-AC2.json` | 1891 | `40859b5f3e18ba204221ce82a8229d1eca943e0bffe92e4e07bd1752b918269d` |
+| `evidence/cases/PB-B02-AC3.json` | 2968 | `978d7bd63ce76ce65acdeb531df0f39fd70041a8a2faca1360fc967d33f5e0c2` |
+| `evidence/cases/PB-B02-AC4.json` | 2501 | `37a80ef22598573c973c9b0339d79ee4d5b2ff2ae11b3ee9688cb592c09a9d45` |
+| `evidence/cases/PB-B02-AC5.json` | 1886 | `62ee0003d48405dbec73e9f1dd10b45fff054dbfcd94379206cfd5f75fa1c4c3` |
+| `evidence/cases/PB-B03-AC1.json` | 5148 | `1b63a942c84da2a2f10545625b1baf50d5ff4b52c10997a1dbaf1bf1f0c8d9bd` |
+| `evidence/cases/PB-B03-AC2.json` | 2782 | `1c813277c45c9b5c82d32fc33c2141679c410bd813cc4ad3b2e9f5f1811af43c` |
+| `evidence/cases/PB-B03-AC3.json` | 4690 | `ef37467f853a4a007a87e0a4b06708856a5e1a3ffa374682e9d6a8f442223b0a` |
+| `evidence/cases/PB-B03-AC4.json` | 888 | `9a75b34e59d48a153a6eb5c323c0b9d665f4b2ccfa9508c4a2ae67a511f9ee43` |
+| `evidence/cases/PB-B03-AC5.json` | 16375 | `a77257d785b3f3d965a5e0499579831eb74ca85bf43580e9a8c20a80623f5daa` |
+| `evidence/cases/PB-B12-AC1.json` | 1895 | `4eb54b85d599c63eaea5dae4bd5b398d6dfdf3c207e8db84b28d2d38e3444afd` |
+| `evidence/cases/PB-B12-AC2.json` | 1442 | `fdee4ce2292d1bf245cd4b318b2f1c550bc1068d7332773f68142a7bbfdcc17b` |
+| `evidence/cases/PB-B12-AC3.json` | 10742 | `9651dd712de8ac954cb2f0158ef146c5a6fe765e95b7541e08f5c796c5e30a6e` |
+| `evidence/cases/PB-B12-AC4.json` | 3626 | `9dd19a080002208853665c566f06c999006d241d33de29155b9e68bdf0fb845b` |
+| `evidence/cases/PB-B12-AC5.json` | 1743 | `f90b50ff883088503fd1ec39748c5aecc64304a67e082c507701601f04e5d46c` |
+| `evidence/cases/PB-B12-AC6.json` | 7937 | `fc84701574c46b91e8ca0ecec40d1536b39f4f8752b33a88f511fe5dfe374eea` |
+| `evidence/cases/PB-B13-AC1.json` | 9158 | `61c1a8848e3186cfcff5181342323bca921ff77716b09c3844686c02834f6832` |
+| `evidence/cases/PB-B13-AC2.json` | 6070 | `af31e7de6244e27b3f8c21671517b9e1004c655f3b73b9c77d331821b861def1` |
+| `evidence/cases/PB-B13-AC3.json` | 2463 | `b7406345f193b4441b6f1d229406188fb1f25def98ad681bd6133e098e4a85b3` |
+| `evidence/cases/PB-B13-AC4.json` | 3472 | `9bc18ee2dd3bbdc235aa357d95b29342fc67e69d625fef7891d345f8662c46c8` |
+| `evidence/cases/PB-B13-AC5.json` | 29503 | `f53b733f99781126cf86a3499790e275127e3120fe52dfd7f83f55a93912a762` |

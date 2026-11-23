@@ -1,0 +1,111 @@
+{
+  "conjuncts": [
+    {
+      "name": "api_full_flow_no_logistics_fields",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "steps": [
+          {
+            "action": "CONFIRM",
+            "http": 200,
+            "message": "ok",
+            "body_keys": [
+              "orderId",
+              "orderNo",
+              "customerId",
+              "status",
+              "items",
+              "totalAmount",
+              "createdAt",
+              "cancelledBy",
+              "cancelledAt",
+              "cancelReason",
+              "allowedActions"
+            ]
+          },
+          {
+            "action": "PREPARE",
+            "http": 200,
+            "message": "ok",
+            "body_keys": [
+              "orderId",
+              "orderNo",
+              "customerId",
+              "status",
+              "items",
+              "totalAmount",
+              "createdAt",
+              "cancelledBy",
+              "cancelledAt",
+              "cancelReason",
+              "allowedActions"
+            ]
+          },
+          {
+            "action": "SHIP",
+            "http": 200,
+            "message": "ok",
+            "body_keys": [
+              "orderId",
+              "orderNo",
+              "customerId",
+              "status",
+              "items",
+              "totalAmount",
+              "createdAt",
+              "cancelledBy",
+              "cancelledAt",
+              "cancelReason",
+              "allowedActions"
+            ]
+          },
+          {
+            "action": "COMPLETE",
+            "http": 200,
+            "message": "ok",
+            "body_keys": [
+              "orderId",
+              "orderNo",
+              "customerId",
+              "status",
+              "items",
+              "totalAmount",
+              "createdAt",
+              "cancelledBy",
+              "cancelledAt",
+              "cancelReason",
+              "allowedActions"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "merchant_ui_orders_flow_screenshot",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "ok": true,
+        "steps": [
+          "确认订单",
+          "完成备货"
+        ],
+        "mid": {
+          "hasShip": true,
+          "hasPrepared": true,
+          "url": "http://127.0.0.1:5173/admin/orders"
+        },
+        "shots": [
+          "b01-merchant-orders-flow.png"
+        ],
+        "stderr_tail": "",
+        "stdout_tail": "{\"ok\":true,\"steps\":[\"确认订单\",\"完成备货\"],\"mid\":{\"hasShip\":true,\"hasPrepared\":true,\"url\":\"http://127.0.0.1:5173/admin/orders\"},\"shots\":[\"b01-merchant-orders-flow.png\"]}\n",
+        "node_exit": 0
+      }
+    }
+  ],
+  "conjunct_pass": 2,
+  "conjunct_total": 2,
+  "conjunct_fail_names": []
+}

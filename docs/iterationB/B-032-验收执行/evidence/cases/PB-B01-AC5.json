@@ -1,0 +1,99 @@
+{
+  "conjuncts": [
+    {
+      "name": "dup_confirm_rejected_stock_unchanged",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "stock": [
+          "9",
+          "9"
+        ],
+        "dup": "订单状态已变化，请刷新后重试"
+      }
+    },
+    {
+      "name": "dup_ship_complete_stock_unchanged",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "dup_ship": {
+          "http": 409,
+          "message": "订单状态已变化，请刷新后重试"
+        },
+        "dup_complete": {
+          "http": 409,
+          "message": "订单已完成，不可推进"
+        },
+        "stock_ship": [
+          "9",
+          "9"
+        ],
+        "stock_complete": [
+          "9",
+          "9"
+        ]
+      }
+    },
+    {
+      "name": "concurrent_confirm_one_success",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "race": {
+          "A": {
+            "ok": true,
+            "result": [
+              200,
+              {
+                "code": 0,
+                "message": "ok",
+                "data": {
+                  "orderId": "730",
+                  "orderNo": "de219e6c-a485-4c64-aa92-671a873e2675",
+                  "customerId": "3",
+                  "status": "CONFIRMED",
+                  "items": [
+                    {
+                      "productId": "26",
+                      "productName": "B032-在售-5",
+                      "unitPrice": "8.00",
+                      "quantity": "1",
+                      "lineAmount": "8.00"
+                    }
+                  ],
+                  "totalAmount": "8.00",
+                  "createdAt": "2026-11-20T22:19:42.977906",
+                  "cancelledBy": null,
+                  "cancelledAt": null,
+                  "cancelReason": null,
+                  "allowedActions": [
+                    "PREPARE",
+                    "CANCEL"
+                  ]
+                }
+              }
+            ],
+            "elapsed_ms": 3
+          },
+          "B": {
+            "ok": true,
+            "result": [
+              409,
+              {
+                "code": 40904,
+                "message": "订单状态已变化，请刷新后重试",
+                "data": null
+              }
+            ],
+            "elapsed_ms": 3
+          }
+        },
+        "status": "CONFIRMED"
+      }
+    }
+  ],
+  "conjunct_pass": 3,
+  "conjunct_total": 3,
+  "conjunct_fail_names": []
+}
