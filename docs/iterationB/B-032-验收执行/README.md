@@ -1,13 +1,15 @@
-# B-032 本地核验包（未推送 · in-flight 已执行）
+# B-032 核验包（最终态已推送 · in-flight 已执行）
 
-本目录是**当前工作区**副本，不是远端 tip `3a6c975`。  
-核验模型：**cursor-grok-4.6-high**。禁止 git commit/push/amend/rebase/reset/force。
+本目录对应分支 `cursor/b032-checkout-atomicity-392f` 的最终提交 `6d37086`；`3a6c975` 是中间审计提交，不是本包。  
+核验模型：**cursor-grok-4.6-high**。最终态已推送，历史提交保留不改写。
 
 证据窗：`evidence/results.json` → `2026-11-20T14:19:31Z` → `14:20:47Z`。
 
 独立重算：26 AC / **25 PASS** / 1 FAIL（余数）/ **0 NOT_EXECUTED** / 149 合取。
 
 PB-B13-AC5 **PASS**。`in_flight_pre_lock_delete_add` 窗口已构成并按观察 **PASS**（禁止 confirm 后串行替代）。
+
+**最终态说明**：历史提交 `69c2e2b` 的 26/26 已被 `ce286c9`/`3a6c975`/`6d37086` 修正，以当前 25/1 为准。D-001 现定性为契约冲突：确认摘要绑定 cart qty，成功时 `confirmation.qty == cart.qty`，余数结构性为 0；B-037 串行复现也只能得到 409/整行保留，无法观察余数。
 
 ## 从这里读
 
@@ -22,5 +24,5 @@ PB-B13-AC5 **PASS**。`in_flight_pre_lock_delete_add` 窗口已构成并按观�
 | [evidence/results.json](evidence/results.json) | 统一轮原始结果 |
 | [scripts/second_audit_acs.py](scripts/second_audit_acs.py) | `_http_signal_issued` + 竞态 |
 
-工作区同源：`/workspace/docs/iterationB/B-032-验收执行/`。  
-交付：`/cursor/stores/self/docs/b032-round-delivery.md`（**未推送**）。
+本目录即分支内 `docs/iterationB/B-032-验收执行/`。  
+交付说明：以本目录 README 与 evidence 为准（早期本地便签未入库）。

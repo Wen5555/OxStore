@@ -1,8 +1,8 @@
 # B-032 in-flight 锁前 DELETE/ADD（本窗执行）
 
 核验模型：**cursor-grok-4.6-high**  
-Git：**未 commit / push / amend / rebase / reset / force**  
-远端 tip `3a6c975` **不是**本包。  
+Git：历史执行窗内未提交；最终态由 `6d37086` 推送（不改写历史）。  
+远端最终提交 `6d37086`；`3a6c975` 为中间审计提交。  
 证据窗：`evidence/results.json` `execution_window` **2026-11-20T14:19:31Z → 14:20:47Z**（SGT 22:19:31–22:20:47）  
 独立重算：26 AC / **25 PASS / 1 FAIL / 0 NOT_EXECUTED** / 149 合取 / 0 占位。
 

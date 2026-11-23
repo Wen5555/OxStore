@@ -2613,7 +2613,7 @@
                 "hasTimeLabel": true,
                 "hasTimeValue": true
               },
-              "shot": "/workspace/docs/iterationB/B-032-验收执行/evidence/screenshots/b03-cancel-detail.png"
+              "shot": "docs/iterationB/B-032-验收执行/evidence/screenshots/b03-cancel-detail.png"
             }
           }
         ],
@@ -5844,5 +5844,11 @@
         "conjunct_fail_names": []
       }
     }
-  ]
+  ],
+  "final_state": {
+    "branch": "cursor/b032-checkout-atomicity-392f",
+    "sha": "6d370864ba79391bc51776cef3fbf436c0de9469",
+    "pushed": true,
+    "note": "历史 mid-run 结论以 6d37086 为准；SHA256SUMS 已按最终树重生成。"
+  }
 }
