@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.team.shop.ChallengeBCheckoutPublicApiConcurrencyTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.40 s -- in com.team.shop.ChallengeBCheckoutPublicApiConcurrencyTest

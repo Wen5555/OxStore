@@ -1,0 +1,106 @@
+{
+  "ac": "PB-B06-AC5",
+  "pb": "PB-B06",
+  "title": "仅整单取消；入口与二次确认属 UI",
+  "status": "PASS_API_DEFERRED",
+  "conjuncts": [
+    {
+      "name": "partial_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "400 / 不支持部分取消",
+      "actual": [
+        400,
+        {
+          "code": 40004,
+          "message": "不支持部分取消",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "whole_cancel_ok",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "200 & CANCELLED",
+      "actual": [
+        200,
+        {
+          "code": 0,
+          "message": "ok",
+          "data": {
+            "orderId": "26",
+            "orderNo": "2e9a7e08-c635-4d1e-9056-36d601009b66",
+            "customerId": "1",
+            "status": "CANCELLED",
+            "items": [
+              {
+                "productId": "1",
+                "productName": "B030-在售足库存-10",
+                "unitPrice": "12.50",
+                "quantity": "1",
+                "lineAmount": "12.50"
+              }
+            ],
+            "totalAmount": "12.50",
+            "createdAt": "2026-11-21T15:31:38.099138",
+            "cancelledBy": "SELLER",
+            "cancelledAt": "2026-11-21T15:31:38.143183",
+            "cancelReason": "B033-test",
+            "allowedActions": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "entry_and_confirm_ui",
+      "pass": false,
+      "disposition_if_fail": "DEFER_TO_B036",
+      "expected": "订单管理入口、二次确认、旧页面只读",
+      "actual": "deferred to B-036"
+    }
+  ],
+  "conjunct_count": 3,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [
+    "entry_and_confirm_ui"
+  ],
+  "evidence": {
+    "partial": [
+      400,
+      {
+        "code": 40004,
+        "message": "不支持部分取消",
+        "data": null
+      }
+    ],
+    "whole": [
+      200,
+      {
+        "code": 0,
+        "message": "ok",
+        "data": {
+          "orderId": "26",
+          "orderNo": "2e9a7e08-c635-4d1e-9056-36d601009b66",
+          "customerId": "1",
+          "status": "CANCELLED",
+          "items": [
+            {
+              "productId": "1",
+              "productName": "B030-在售足库存-10",
+              "unitPrice": "12.50",
+              "quantity": "1",
+              "lineAmount": "12.50"
+            }
+          ],
+          "totalAmount": "12.50",
+          "createdAt": "2026-11-21T15:31:38.099138",
+          "cancelledBy": "SELLER",
+          "cancelledAt": "2026-11-21T15:31:38.143183",
+          "cancelReason": "B033-test",
+          "allowedActions": []
+        }
+      }
+    ]
+  }
+}

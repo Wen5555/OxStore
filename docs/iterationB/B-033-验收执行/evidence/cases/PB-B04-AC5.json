@@ -1,0 +1,108 @@
+{
+  "ac": "PB-B04-AC5",
+  "pb": "PB-B04",
+  "title": "重复/发货后/完成后取消拒绝；不可取消状态不显示入口",
+  "status": "PASS_API_DEFERRED",
+  "conjuncts": [
+    {
+      "name": "repeat_cancel_409",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409 / 订单已取消",
+      "actual": [
+        409,
+        {
+          "code": 40911,
+          "message": "订单已取消",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "no_second_restock",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "10",
+      "actual": {
+        "first": "10",
+        "again": "10"
+      }
+    },
+    {
+      "name": "shipped_cancel_409",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409 / 已开始发货",
+      "actual": [
+        409,
+        {
+          "code": 40911,
+          "message": "订单已开始发货，不可取消",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "completed_cancel_409",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409 / 已完成",
+      "actual": [
+        409,
+        {
+          "code": 40911,
+          "message": "订单已完成，不可取消",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "no_cancel_action_on_shipped_or_terminal",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "SHIPPED allowedActions has no CANCEL; CANCELLED empty",
+      "actual": {
+        "shipped": [],
+        "cancelled": []
+      }
+    },
+    {
+      "name": "cancel_entry_ui",
+      "pass": false,
+      "disposition_if_fail": "DEFER_TO_B036",
+      "expected": "UI 仅可取消状态显示/启用取消入口（含二次确认）",
+      "actual": "deferred to B-036"
+    }
+  ],
+  "conjunct_count": 6,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [
+    "cancel_entry_ui"
+  ],
+  "evidence": {
+    "repeat": [
+      409,
+      {
+        "code": 40911,
+        "message": "订单已取消",
+        "data": null
+      }
+    ],
+    "shipped": [
+      409,
+      {
+        "code": 40911,
+        "message": "订单已开始发货，不可取消",
+        "data": null
+      }
+    ],
+    "completed": [
+      409,
+      {
+        "code": 40911,
+        "message": "订单已完成，不可取消",
+        "data": null
+      }
+    ]
+  }
+}

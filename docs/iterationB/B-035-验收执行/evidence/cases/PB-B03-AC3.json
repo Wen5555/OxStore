@@ -1,0 +1,66 @@
+{
+  "ac": "PB-B03-AC3",
+  "pb": "PB-B03",
+  "title": "旧归档与订单历史分离，按来源/客户可查",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "customer_archive_lists_own",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "2 records (QUEUING closed + SUCCESS)",
+      "actual": 2
+    },
+    {
+      "name": "seller_archive_lists_all",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "3 records",
+      "actual": 3
+    },
+    {
+      "name": "seller_filter_by_product",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "1 record for P-ON-5",
+      "actual": 1
+    },
+    {
+      "name": "new_orders_endpoint_separate",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "0 new orders, legacy not mixed",
+      "actual": 0
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "customer_items": [
+      {
+        "legacyIntentId": "29",
+        "productId": "1",
+        "productNameSnapshot": "B030-在售足库存-10",
+        "originalStatus": "QUEUING",
+        "submittedAt": "2026-11-21T21:57:47.491306",
+        "processedAt": null,
+        "closedAt": "2026-11-21T22:00:47.63241",
+        "displayStatus": "CLOSED",
+        "readOnly": true
+      },
+      {
+        "legacyIntentId": "31",
+        "productId": "6",
+        "productNameSnapshot": "B030-大整数库存",
+        "originalStatus": "SUCCESS",
+        "submittedAt": "2026-11-20T22:00:47.497462",
+        "processedAt": null,
+        "closedAt": null,
+        "displayStatus": "SUCCESS",
+        "readOnly": true
+      }
+    ],
+    "seller_total": 3
+  }
+}

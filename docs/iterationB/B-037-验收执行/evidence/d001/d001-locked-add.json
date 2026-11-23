@@ -1,0 +1,43 @@
+{
+  "cartAfter" : [ {
+    "cartItemId" : "2",
+    "productId" : "1",
+    "productName" : "http-e7dd464a-4fcc-423a-aeda-c8294646cffa",
+    "unitPrice" : "1.25",
+    "mainImageUrl" : null,
+    "quantity" : "1",
+    "stock" : "3",
+    "online" : true,
+    "invalidLabel" : null,
+    "defaultCheckoutSelected" : true,
+    "canCheckoutSelect" : true,
+    "canFavoriteSelect" : true,
+    "updatedAt" : "2026-11-23T22:23:40.831428"
+  } ],
+  "addHttp" : 200,
+  "addReachedServiceBeforeRelease" : true,
+  "addWaitedForCheckout" : true,
+  "duplicateCheckoutCode" : 40909,
+  "originalCartItemId" : "1",
+  "stockAfter" : "3",
+  "checkoutHttp" : 201,
+  "order" : {
+    "orderId" : "1",
+    "orderNo" : "6e445bc3-131d-48e6-a2b1-83389ce66234",
+    "customerId" : "1",
+    "status" : "PLACED",
+    "items" : [ {
+      "productId" : "1",
+      "productName" : "http-e7dd464a-4fcc-423a-aeda-c8294646cffa",
+      "unitPrice" : "1.25",
+      "quantity" : "2",
+      "lineAmount" : "2.50"
+    } ],
+    "totalAmount" : "2.50",
+    "createdAt" : "2026-11-23T22:23:40.476939",
+    "cancelledBy" : null,
+    "cancelledAt" : null,
+    "cancelReason" : null,
+    "allowedActions" : [ "CANCEL" ]
+  }
+}

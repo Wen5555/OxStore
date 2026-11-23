@@ -1,0 +1,33 @@
+{
+  "orderCount" : 0,
+  "cartAfter" : [ {
+    "cartItemId" : "3",
+    "productId" : "2",
+    "productName" : "http-a4cda4f8-3152-4e00-a284-ef5cb99a1099",
+    "unitPrice" : "1.25",
+    "mainImageUrl" : null,
+    "quantity" : "3",
+    "stock" : "5",
+    "online" : true,
+    "invalidLabel" : null,
+    "defaultCheckoutSelected" : true,
+    "canCheckoutSelect" : true,
+    "canFavoriteSelect" : true,
+    "updatedAt" : "2026-11-23T22:23:41.062185"
+  } ],
+  "stockAfter" : "5",
+  "submitHttp" : 409,
+  "response" : {
+    "code" : 40913,
+    "message" : "确认信息已变化，请重新确认",
+    "data" : {
+      "errors" : [ {
+        "cartItemId" : "3",
+        "productId" : "2",
+        "productName" : "http-a4cda4f8-3152-4e00-a284-ef5cb99a1099",
+        "reason" : "CONFIRMATION_CHANGED",
+        "message" : "商品「http-a4cda4f8-3152-4e00-a284-ef5cb99a1099」的确认信息已变化，请重新确认"
+      } ]
+    }
+  }
+}

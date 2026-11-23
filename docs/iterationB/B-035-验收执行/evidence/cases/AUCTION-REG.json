@@ -1,0 +1,255 @@
+{
+  "ac": "AUCTION-REG",
+  "pb": "PB-B02",
+  "title": "拍卖发布/出价/SSE/结拍/提醒回归",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "auction_publish",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "201 + productId",
+      "actual": [
+        201,
+        {
+          "code": 0,
+          "message": "ok",
+          "data": {
+            "productId": 17,
+            "name": "B035-拍卖-中标",
+            "price": 100,
+            "category2Id": 2,
+            "category2Name": "手机数码",
+            "stock": "1",
+            "descriptionHtml": "<p>B035-拍卖-中标</p>",
+            "images": [
+              "/api/images/2555b568-a43d-4db3-aaf1-4d3627f3b498.png"
+            ],
+            "mainImagePath": "/api/images/2555b568-a43d-4db3-aaf1-4d3627f3b498.png",
+            "status": "ONLINE",
+            "canPurchase": false,
+            "publishedAt": "2026-11-21T22:00:51.292027",
+            "statusUpdatedAt": "2026-11-21T22:00:51.292027",
+            "sellingMode": "AUCTION",
+            "auction": {
+              "auctionStatus": "LIVE",
+              "currentPrice": null,
+              "nextMinBid": 100.0,
+              "endsAt": "2026-11-21T22:01:56",
+              "bidCount": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "auction_publish_unsold",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "201 + productId",
+      "actual": [
+        201,
+        {
+          "code": 0,
+          "message": "ok",
+          "data": {
+            "productId": 18,
+            "name": "B035-拍卖-流拍",
+            "price": 50,
+            "category2Id": 2,
+            "category2Name": "手机数码",
+            "stock": "1",
+            "descriptionHtml": "<p>B035-拍卖-流拍</p>",
+            "images": [
+              "/api/images/e0a5bdad-a128-4b5a-95c8-f5cc867797e5.png"
+            ],
+            "mainImagePath": "/api/images/e0a5bdad-a128-4b5a-95c8-f5cc867797e5.png",
+            "status": "ONLINE",
+            "canPurchase": false,
+            "publishedAt": "2026-11-21T22:00:51.4188694",
+            "statusUpdatedAt": "2026-11-21T22:00:51.4188694",
+            "sellingMode": "AUCTION",
+            "auction": {
+              "auctionStatus": "LIVE",
+              "currentPrice": null,
+              "nextMinBid": 50.0,
+              "endsAt": "2026-11-21T22:01:56",
+              "bidCount": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "auction_live_snapshot",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "LIVE",
+      "actual": "LIVE"
+    },
+    {
+      "name": "two_bids_accepted",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "201/201",
+      "actual": [
+        201,
+        201
+      ]
+    },
+    {
+      "name": "below_minimum_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409",
+      "actual": [
+        409,
+        {
+          "code": 40907,
+          "message": "出价低于当前最低可出价 130.00",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "leader_and_price",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "2 bids / 120 / OUTBID",
+      "actual": {
+        "bidCount": 2,
+        "currentPrice": 120.0,
+        "myStatus": "OUTBID",
+        "leaderAlias": "b***b"
+      }
+    },
+    {
+      "name": "auction_sse_snapshot",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "event snapshot",
+      "actual": {
+        "status": 200,
+        "chunk": "event:snapshot\ndata:{\"productId\":17,\"productName\":\"B035-拍卖-中标\",\"sellingMode\":\"AUCTION\",\"auctionStatus\":\"LIVE\",\"startPrice\":100.00,\"minIncrement\":10.00,\"currentPrice\":120.00,\"nextMinBid\":130.00,\"bidCount\":2,\"endsAt\":\"2026-11-21T22:01:56\",\"settledAt\":null,\"serverTime\":\"2026-11-21T22:00:51.5584065\",\"leaderAlias\":\"b***b\",\"lastBidSeq\":2,\"recentBids\":[{\"bidSeq\":2,\"amount\":120.00,\"bidderAlias\":\"b***b\",\"bidAt\":\"2026-11-21T22:00:51.488089\"},{\"bidSeq\":1,\"amount\":100.00,\"bidderAlias\":\"b***a\",\"bidAt\":\"2026-11-21T22:00:51.467622\"}],\"canBid\":true,\"myStatus\":\"OUTBID\"}\n\n"
+      }
+    },
+    {
+      "name": "auction_settles_sold",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "ENDED_SOLD",
+      "actual": "ENDED_SOLD"
+    },
+    {
+      "name": "winner_status_won",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "WON",
+      "actual": "WON"
+    },
+    {
+      "name": "loser_status_lost",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "LOST",
+      "actual": "LOST"
+    },
+    {
+      "name": "winner_notification",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "AUCTION_WON",
+      "actual": "present"
+    },
+    {
+      "name": "seller_sold_notification",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "AUCTION_SOLD",
+      "actual": "present"
+    },
+    {
+      "name": "auction_winner_intent_created",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "IN_TRANSACTION, not legacy-closed",
+      "actual": [
+        {
+          "status": "IN_TRANSACTION",
+          "legacy_closed_at": null
+        }
+      ]
+    },
+    {
+      "name": "auction_not_cartable",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409 / 拍卖商品不能加入购物车",
+      "actual": [
+        409,
+        {
+          "code": 40908,
+          "message": "拍卖商品不能加入购物车",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "auction_unsold",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "ENDED_UNSOLD",
+      "actual": "ENDED_UNSOLD"
+    },
+    {
+      "name": "unsold_product_offline",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "OFFLINE",
+      "actual": "OFFLINE"
+    },
+    {
+      "name": "unsold_notification",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "AUCTION_UNSOLD",
+      "actual": "checked"
+    },
+    {
+      "name": "v8_rerun_idempotent",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "closed_intents/attempts/unfrozen/paused all 0",
+      "actual": "0\t0\t0\t0"
+    },
+    {
+      "name": "v8_does_not_touch_auction",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "auction tables unchanged; intents not closed",
+      "actual": {
+        "before": {
+          "s": 2,
+          "b": 2,
+          "n": 3
+        },
+        "after": {
+          "s": 2,
+          "b": 2,
+          "n": 3
+        }
+      }
+    }
+  ],
+  "conjunct_count": 19,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "sold": 17,
+    "unsold": 18,
+    "v8_rerun": {
+      "stdout": "0\t0\t0\t0",
+      "sql_file": "C:\\Users\\闪电\\Desktop\\仓库\\OxStore-sut\\backend\\src\\main\\resources\\db\\migrations\\V8__close_legacy_fixed_price_intents.sql"
+    }
+  }
+}

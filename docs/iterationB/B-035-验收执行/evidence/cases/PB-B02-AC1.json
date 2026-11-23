@@ -1,0 +1,89 @@
+{
+  "ac": "PB-B02-AC1",
+  "pb": "PB-B02",
+  "title": "口径A仍生效；关闭旧意向不扣/不回补库存",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "legacy_close_does_not_touch_stock",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "10 and 5 unchanged",
+      "actual": {
+        "B030-在售足库存-10": "10",
+        "B030-在售足库存-5": "5",
+        "B030-低库存-1": "1"
+      }
+    },
+    {
+      "name": "new_order_deducts_stock",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "10-2=8",
+      "actual": "8"
+    },
+    {
+      "name": "new_order_not_in_legacy_queue",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "QUEUING stays 1 (old only)",
+      "actual": {
+        "QUEUING": 1,
+        "SUCCESS": 1,
+        "IN_TRANSACTION": 1
+      }
+    },
+    {
+      "name": "legacy_intents_not_orders",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "only the new order exists",
+      "actual": "1 new order"
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "order": {
+      "http": 201,
+      "body": {
+        "code": 0,
+        "message": "下单成功",
+        "data": {
+          "orderId": "15",
+          "orderNo": "113847c6-1f65-4795-aeb8-d535f3e99d69",
+          "customerId": "1",
+          "status": "PLACED",
+          "items": [
+            {
+              "productId": "1",
+              "productName": "B030-在售足库存-10",
+              "unitPrice": "12.50",
+              "quantity": "2",
+              "lineAmount": "25.00"
+            }
+          ],
+          "totalAmount": "25.00",
+          "createdAt": "2026-11-21T22:00:48.144144",
+          "cancelledBy": null,
+          "cancelledAt": null,
+          "cancelReason": null,
+          "allowedActions": [
+            "CANCEL"
+          ]
+        }
+      },
+      "idempotencyKey": "5379a3c2-76c3-4d75-8760-37479d9abd90",
+      "confirmationToken": "fc3d4ac4-d4ae-440d-bb2f-ad4da715369f",
+      "orderId": "15",
+      "orderNo": "113847c6-1f65-4795-aeb8-d535f3e99d69",
+      "message": "下单成功",
+      "token": "<jwt-redacted>",
+      "cartItemId": "18",
+      "product": "P-ON-10",
+      "qty": "2"
+    },
+    "stock_after": "8"
+  }
+}

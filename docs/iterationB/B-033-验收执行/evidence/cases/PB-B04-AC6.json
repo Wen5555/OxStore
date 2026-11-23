@@ -1,0 +1,153 @@
+{
+  "ac": "PB-B04-AC6",
+  "pb": "PB-B04",
+  "title": "取消原因选填；入口与二次确认属 UI",
+  "status": "PASS_API_DEFERRED",
+  "conjuncts": [
+    {
+      "name": "cancel_without_reason_allowed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "200 & CANCELLED",
+      "actual": [
+        200,
+        {
+          "code": 0,
+          "message": "ok",
+          "data": {
+            "orderId": "11",
+            "orderNo": "445653a8-ee83-4a25-9cd6-47db96f7e526",
+            "customerId": "1",
+            "status": "CANCELLED",
+            "items": [
+              {
+                "productId": "1",
+                "productName": "B030-在售足库存-10",
+                "unitPrice": "12.50",
+                "quantity": "1",
+                "lineAmount": "12.50"
+              }
+            ],
+            "totalAmount": "12.50",
+            "createdAt": "2026-11-21T15:31:31.857867",
+            "cancelledBy": "CUSTOMER",
+            "cancelledAt": "2026-11-21T15:31:31.892374",
+            "cancelReason": null,
+            "allowedActions": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "reason_null_ok",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "cancel_with_reason_stored",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "reason stored",
+      "actual": [
+        200,
+        {
+          "code": 0,
+          "message": "ok",
+          "data": {
+            "orderId": "12",
+            "orderNo": "edacbce6-5c85-407b-9e77-5a0a7c5cef59",
+            "customerId": "1",
+            "status": "CANCELLED",
+            "items": [
+              {
+                "productId": "1",
+                "productName": "B030-在售足库存-10",
+                "unitPrice": "12.50",
+                "quantity": "1",
+                "lineAmount": "12.50"
+              }
+            ],
+            "totalAmount": "12.50",
+            "createdAt": "2026-11-21T15:31:32.042172",
+            "cancelledBy": "CUSTOMER",
+            "cancelledAt": "2026-11-21T15:31:32.062139",
+            "cancelReason": "不想要了",
+            "allowedActions": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "cancel_confirm_dialog",
+      "pass": false,
+      "disposition_if_fail": "DEFER_TO_B036",
+      "expected": "入口在列表/详情，二次确认",
+      "actual": "deferred to B-036"
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [
+    "cancel_confirm_dialog"
+  ],
+  "evidence": {
+    "no_reason": [
+      200,
+      {
+        "code": 0,
+        "message": "ok",
+        "data": {
+          "orderId": "11",
+          "orderNo": "445653a8-ee83-4a25-9cd6-47db96f7e526",
+          "customerId": "1",
+          "status": "CANCELLED",
+          "items": [
+            {
+              "productId": "1",
+              "productName": "B030-在售足库存-10",
+              "unitPrice": "12.50",
+              "quantity": "1",
+              "lineAmount": "12.50"
+            }
+          ],
+          "totalAmount": "12.50",
+          "createdAt": "2026-11-21T15:31:31.857867",
+          "cancelledBy": "CUSTOMER",
+          "cancelledAt": "2026-11-21T15:31:31.892374",
+          "cancelReason": null,
+          "allowedActions": []
+        }
+      }
+    ],
+    "with_reason": [
+      200,
+      {
+        "code": 0,
+        "message": "ok",
+        "data": {
+          "orderId": "12",
+          "orderNo": "edacbce6-5c85-407b-9e77-5a0a7c5cef59",
+          "customerId": "1",
+          "status": "CANCELLED",
+          "items": [
+            {
+              "productId": "1",
+              "productName": "B030-在售足库存-10",
+              "unitPrice": "12.50",
+              "quantity": "1",
+              "lineAmount": "12.50"
+            }
+          ],
+          "totalAmount": "12.50",
+          "createdAt": "2026-11-21T15:31:32.042172",
+          "cancelledBy": "CUSTOMER",
+          "cancelledAt": "2026-11-21T15:31:32.062139",
+          "cancelReason": "不想要了",
+          "allowedActions": []
+        }
+      }
+    ]
+  }
+}

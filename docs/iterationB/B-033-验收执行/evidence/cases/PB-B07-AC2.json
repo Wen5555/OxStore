@@ -1,0 +1,232 @@
+{
+  "ac": "PB-B07-AC2",
+  "pb": "PB-B07",
+  "title": "双方取消/取消与完成并发：先成功者生效，回补一次",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "customer_vs_seller_cancel_one_winner",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "CANCELLED, stock restored once",
+      "actual": {
+        "a": [
+          200,
+          {
+            "code": 0,
+            "message": "ok",
+            "data": {
+              "orderId": "29",
+              "orderNo": "f5ea0895-8317-4390-a99b-391108bca1af",
+              "customerId": "1",
+              "status": "CANCELLED",
+              "items": [
+                {
+                  "productId": "1",
+                  "productName": "B030-在售足库存-10",
+                  "unitPrice": "12.50",
+                  "quantity": "1",
+                  "lineAmount": "12.50"
+                }
+              ],
+              "totalAmount": "12.50",
+              "createdAt": "2026-11-21T15:31:39.268912",
+              "cancelledBy": "CUSTOMER",
+              "cancelledAt": "2026-11-21T15:31:39.287325",
+              "cancelReason": "B033-test",
+              "allowedActions": []
+            }
+          }
+        ],
+        "b": [
+          409,
+          {
+            "code": 40911,
+            "message": "订单已取消",
+            "data": null
+          }
+        ],
+        "status": "CANCELLED",
+        "stock": "10"
+      }
+    },
+    {
+      "name": "seller_cancel_vs_complete",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "CANCELLED+restock or COMPLETED+no restock",
+      "actual": {
+        "cancel": [
+          200,
+          {
+            "code": 0,
+            "message": "ok",
+            "data": {
+              "orderId": "30",
+              "orderNo": "6f638149-31b7-448e-bf90-75402b0e51f1",
+              "customerId": "1",
+              "status": "CANCELLED",
+              "items": [
+                {
+                  "productId": "1",
+                  "productName": "B030-在售足库存-10",
+                  "unitPrice": "12.50",
+                  "quantity": "2",
+                  "lineAmount": "25.00"
+                }
+              ],
+              "totalAmount": "25.00",
+              "createdAt": "2026-11-21T15:31:39.552286",
+              "cancelledBy": "SELLER",
+              "cancelledAt": "2026-11-21T15:31:39.745290",
+              "cancelReason": "B033-test",
+              "allowedActions": []
+            }
+          }
+        ],
+        "complete": [
+          409,
+          {
+            "code": 40911,
+            "message": "订单已取消，不可推进",
+            "data": null
+          }
+        ],
+        "status": "CANCELLED",
+        "stock": [
+          "8",
+          "10"
+        ]
+      }
+    },
+    {
+      "name": "confirm_does_not_block_cancel",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "cancel after CONFIRM succeeds",
+      "actual": [
+        200,
+        {
+          "code": 0,
+          "message": "ok",
+          "data": {
+            "orderId": "31",
+            "orderNo": "9f4e074c-7fcc-40cd-b558-9009e67ab4fe",
+            "customerId": "1",
+            "status": "CANCELLED",
+            "items": [
+              {
+                "productId": "1",
+                "productName": "B030-在售足库存-10",
+                "unitPrice": "12.50",
+                "quantity": "1",
+                "lineAmount": "12.50"
+              }
+            ],
+            "totalAmount": "12.50",
+            "createdAt": "2026-11-21T15:31:39.983734",
+            "cancelledBy": "CUSTOMER",
+            "cancelledAt": "2026-11-21T15:31:40.091118",
+            "cancelReason": "B033-test",
+            "allowedActions": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "no_5xx",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "no 5xx",
+      "actual": [
+        200,
+        409,
+        200,
+        409
+      ]
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "customer_vs_seller": {
+      "a": [
+        200,
+        {
+          "code": 0,
+          "message": "ok",
+          "data": {
+            "orderId": "29",
+            "orderNo": "f5ea0895-8317-4390-a99b-391108bca1af",
+            "customerId": "1",
+            "status": "CANCELLED",
+            "items": [
+              {
+                "productId": "1",
+                "productName": "B030-在售足库存-10",
+                "unitPrice": "12.50",
+                "quantity": "1",
+                "lineAmount": "12.50"
+              }
+            ],
+            "totalAmount": "12.50",
+            "createdAt": "2026-11-21T15:31:39.268912",
+            "cancelledBy": "CUSTOMER",
+            "cancelledAt": "2026-11-21T15:31:39.287325",
+            "cancelReason": "B033-test",
+            "allowedActions": []
+          }
+        }
+      ],
+      "b": [
+        409,
+        {
+          "code": 40911,
+          "message": "订单已取消",
+          "data": null
+        }
+      ],
+      "status": "CANCELLED"
+    },
+    "cancel_vs_complete": {
+      "cancel": [
+        200,
+        {
+          "code": 0,
+          "message": "ok",
+          "data": {
+            "orderId": "30",
+            "orderNo": "6f638149-31b7-448e-bf90-75402b0e51f1",
+            "customerId": "1",
+            "status": "CANCELLED",
+            "items": [
+              {
+                "productId": "1",
+                "productName": "B030-在售足库存-10",
+                "unitPrice": "12.50",
+                "quantity": "2",
+                "lineAmount": "25.00"
+              }
+            ],
+            "totalAmount": "25.00",
+            "createdAt": "2026-11-21T15:31:39.552286",
+            "cancelledBy": "SELLER",
+            "cancelledAt": "2026-11-21T15:31:39.745290",
+            "cancelReason": "B033-test",
+            "allowedActions": []
+          }
+        }
+      ],
+      "complete": [
+        409,
+        {
+          "code": 40911,
+          "message": "订单已取消，不可推进",
+          "data": null
+        }
+      ],
+      "status": "CANCELLED"
+    }
+  }
+}

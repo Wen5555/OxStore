@@ -1,0 +1,114 @@
+{
+  "ac": "PB-B15-AC4",
+  "pb": "PB-B15",
+  "title": "提交期删行：跳过已删；全删=请选择商品",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "deleted_row_skipped_not_failed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "200; moved=1; skipped contains deleted id",
+      "actual": [
+        200,
+        {
+          "movedLineCount": 1,
+          "movedCartItemIds": [
+            "122"
+          ],
+          "skippedDeletedCartItemIds": [
+            "123"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "other_row_moved",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "cart=0, favorites=1",
+      "actual": {
+        "cart": 0,
+        "favorites": 1,
+        "orders": 0,
+        "tombstones": 2,
+        "receipts": 3
+      }
+    },
+    {
+      "name": "all_deleted_400_select_goods",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "400 / 请选择商品",
+      "actual": [
+        400,
+        "请选择商品"
+      ]
+    },
+    {
+      "name": "concurrent_delete_race_no_partial",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "no half state; cart=0; no 5xx",
+      "actual": {
+        "move": [
+          400,
+          "请选择商品"
+        ],
+        "delete": [
+          200,
+          {
+            "code": 0,
+            "message": "已移除",
+            "data": null
+          }
+        ],
+        "counts": {
+          "cart": 0,
+          "favorites": 0,
+          "orders": 0,
+          "tombstones": 1,
+          "receipts": 1
+        }
+      }
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "skip": {
+      "code": 0,
+      "message": "已收藏 1 件商品",
+      "data": {
+        "movedLineCount": 1,
+        "movedCartItemIds": [
+          "122"
+        ],
+        "skippedDeletedCartItemIds": [
+          "123"
+        ]
+      }
+    },
+    "all_deleted": {
+      "code": 40005,
+      "message": "请选择商品",
+      "data": null
+    },
+    "race": {
+      "move": {
+        "code": 40005,
+        "message": "请选择商品",
+        "data": null
+      },
+      "delete": [
+        200,
+        {
+          "code": 0,
+          "message": "已移除",
+          "data": null
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "seq": "SEQ-01",
+  "mode": "b_first",
+  "sut_sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
+  "db": "oxstore_b030_local",
+  "productId": "4",
+  "barrier_returncode": 0,
+  "responses": {
+    "A": {
+      "code": 40910,
+      "message": "所选商品无法下单",
+      "data": {
+        "errors": [
+          {
+            "cartItemId": "11",
+            "productId": "4",
+            "productName": "B030-低库存-1",
+            "reason": "OFFLINE",
+            "message": "商品「B030-低库存-1」已下架，请从购物车移除后重试。"
+          }
+        ]
+      }
+    },
+    "B": {
+      "code": 0,
+      "message": "下单成功",
+      "data": {
+        "orderId": "6",
+        "orderNo": "3c13fe7e-b4bb-4516-90f0-37e41e53dc9d",
+        "customerId": "2",
+        "status": "PLACED",
+        "items": [
+          {
+            "productId": "4",
+            "productName": "B030-低库存-1",
+            "unitPrice": "3.30",
+            "quantity": "1",
+            "lineAmount": "3.30"
+          }
+        ],
+        "totalAmount": "3.30",
+        "createdAt": "2026-11-20T16:11:52.715805",
+        "cancelledBy": null,
+        "cancelledAt": null,
+        "cancelReason": null,
+        "allowedActions": [
+          "CANCEL"
+        ]
+      }
+    }
+  },
+  "before": {
+    "product": {
+      "id": 4,
+      "stock": "1",
+      "status": "ONLINE",
+      "offline_reason": null
+    },
+    "orders": [],
+    "carts_for_product": [],
+    "order_items": []
+  },
+  "after": {
+    "product": {
+      "id": 4,
+      "stock": "0",
+      "status": "OFFLINE",
+      "offline_reason": "AUTO_ZERO"
+    },
+    "orders": [
+      {
+        "id": 6,
+        "order_no": "3c13fe7e-b4bb-4516-90f0-37e41e53dc9d",
+        "status": "PLACED",
+        "total_amount": "3.30",
+        "username": "b030_buyer_b"
+      }
+    ],
+    "carts_for_product": [
+      {
+        "id": 11,
+        "username": "b030_buyer_a",
+        "product_id": 4,
+        "quantity": "1"
+      }
+    ],
+    "order_items": [
+      {
+        "order_id": 6,
+        "product_id": 4,
+        "quantity": "1",
+        "username": "b030_buyer_b"
+      }
+    ]
+  },
+  "assertions": {
+    "exactly_one_success_http": true,
+    "exactly_one_placed_order": true,
+    "stock_is_zero": true,
+    "no_half_orders": true,
+    "loser_cart_not_miscleared": true,
+    "winner": "B",
+    "stock": "0",
+    "order_count": 1,
+    "pass": true
+  },
+  "note": "tokens redacted; dual_confirm tokens not stored"
+}

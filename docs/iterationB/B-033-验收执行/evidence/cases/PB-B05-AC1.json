@@ -1,0 +1,62 @@
+{
+  "ac": "PB-B05-AC1",
+  "pb": "PB-B05",
+  "title": "按快照回补一次；不回车、不重复回补",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "order_deducts_snapshot_qty",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "10-2",
+      "actual": "8"
+    },
+    {
+      "name": "cancel_restores_exactly_snapshot",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "10",
+      "actual": "10"
+    },
+    {
+      "name": "repeat_and_triple_do_not_restock",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409/409 & stock stable",
+      "actual": {
+        "r2": [
+          409,
+          {
+            "code": 40911,
+            "message": "订单已取消",
+            "data": null
+          }
+        ],
+        "r3": [
+          409,
+          {
+            "code": 40911,
+            "message": "订单已取消",
+            "data": null
+          }
+        ],
+        "stock": "10"
+      }
+    },
+    {
+      "name": "no_auto_return_to_cart",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "cart=0",
+      "actual": 0
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "before": "10",
+    "after_order": "8",
+    "after_cancel": "10"
+  }
+}

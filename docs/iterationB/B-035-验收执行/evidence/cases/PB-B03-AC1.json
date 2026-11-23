@@ -1,0 +1,58 @@
+{
+  "ac": "PB-B03-AC1",
+  "pb": "PB-B03",
+  "title": "旧快照不改写；新订单按当前商品固化快照",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "legacy_snapshot_preserved",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "B030-在售足库存-10",
+      "actual": "B030-在售足库存-10"
+    },
+    {
+      "name": "legacy_status_not_rewritten",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "QUEUING",
+      "actual": "QUEUING"
+    },
+    {
+      "name": "product_not_mutated_by_v8",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "stock unchanged by V8 (order may follow)",
+      "actual": "10"
+    },
+    {
+      "name": "new_order_snapshot_name",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "B030-在售足库存-10",
+      "actual": "B030-在售足库存-10"
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "legacy": {
+      "id": "29",
+      "product_name": "B030-在售足库存-10",
+      "username": "b030_buyer_a",
+      "original_status": "QUEUING",
+      "product_name_snapshot": "B030-在售足库存-10",
+      "legacy_closed_at": "2026-11-21 22:00:47.632410",
+      "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+      "submitted_at": "2026-11-21 21:57:47.491306"
+    },
+    "new_order_item": {
+      "productId": "1",
+      "productName": "B030-在售足库存-10",
+      "unitPrice": "12.50",
+      "quantity": "1",
+      "lineAmount": "12.50"
+    }
+  }
+}

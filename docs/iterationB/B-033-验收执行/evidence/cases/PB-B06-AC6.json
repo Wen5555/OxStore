@@ -1,0 +1,44 @@
+{
+  "ac": "PB-B06-AC6",
+  "pb": "PB-B06",
+  "title": "旧意向不进入商家取消流程",
+  "status": "PASS_API_DEFERRED",
+  "conjuncts": [
+    {
+      "name": "closed_intent_has_no_seller_cancel_path",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "404 / 订单不存在",
+      "actual": [
+        404,
+        {
+          "code": 40405,
+          "message": "订单不存在",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "legacy_intent_fixture",
+      "pass": false,
+      "disposition_if_fail": "DEFER_TO_B035",
+      "expected": "已关闭旧意向不进入新取消流程（需 V8 数据）",
+      "actual": "purchase_intent rows=0; deferred to B-035"
+    }
+  ],
+  "conjunct_count": 2,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [
+    "legacy_intent_fixture"
+  ],
+  "evidence": {
+    "legacy": [
+      404,
+      {
+        "code": 40405,
+        "message": "订单不存在",
+        "data": null
+      }
+    ]
+  }
+}
