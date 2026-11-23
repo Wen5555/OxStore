@@ -1,0 +1,78 @@
+{
+  "ac": "PB-B14-AC6",
+  "pb": "PB-B14",
+  "title": "仅在售可新建收藏；已有失效收藏不因本次操作转成功",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "offline_product_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409 / 商品已下架",
+      "actual": [
+        409,
+        {
+          "code": 40914,
+          "message": "所选商品无法加入收藏",
+          "data": {
+            "errors": [
+              {
+                "cartItemId": "108",
+                "productId": "1",
+                "productName": "B030-在售足库存-10",
+                "reason": "OFFLINE",
+                "message": "商品已下架"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "invalid_favorite_not_revived",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "existing invalid favorite unchanged",
+      "actual": {
+        "count": 1,
+        "created_at": "2026-11-21 15:27:39.853191"
+      }
+    },
+    {
+      "name": "no_favorite_added",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "favorites=1",
+      "actual": 1
+    },
+    {
+      "name": "cart_row_kept_on_batch_failure",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "cart=1",
+      "actual": 1
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "response": {
+      "code": 40914,
+      "message": "所选商品无法加入收藏",
+      "data": {
+        "errors": [
+          {
+            "cartItemId": "108",
+            "productId": "1",
+            "productName": "B030-在售足库存-10",
+            "reason": "OFFLINE",
+            "message": "商品已下架"
+          }
+        ]
+      }
+    },
+    "favorite_before": "2026-11-21 15:27:39.853191",
+    "favorite_after": "2026-11-21 15:27:39.853191"
+  }
+}

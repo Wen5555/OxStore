@@ -1,0 +1,2060 @@
+{
+  "ac_count": 79,
+  "case_count": 148,
+  "cases": [
+    {
+      "case_id": "PB-B01-AC1-POS",
+      "ac_id": "PB-B01-AC1",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [],
+      "forbidden": [
+        "失败",
+        "每笔数量固定为 1"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B01-AC2-POS",
+      "ac_id": "PB-B01-AC2",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B01-AC2-NEG",
+      "ac_id": "PB-B01-AC2",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B01-AC3-POS",
+      "ac_id": "PB-B01-AC3",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B01-AC4-POS",
+      "ac_id": "PB-B01-AC4",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B01-AC5-BND",
+      "ac_id": "PB-B01-AC5",
+      "kind": "BND",
+      "seq": "SEQ-12",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B01-AC5-CON",
+      "ac_id": "PB-B01-AC5",
+      "kind": "CON",
+      "seq": "SEQ-12",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B02-AC1-POS",
+      "ac_id": "PB-B02-AC1",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [
+        "已扣减量"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B02-AC2-POS",
+      "ac_id": "PB-B02-AC2",
+      "kind": "POS",
+      "seq": "SEQ-01",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B02-AC3-POS",
+      "ac_id": "PB-B02-AC3",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "库存不能为负数，请输入非负整数。"
+      ],
+      "forbidden": [
+        "不得低于未完成订单扣减总量"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B02-AC3-NEG",
+      "ac_id": "PB-B02-AC3",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-5"
+      ],
+      "required_messages": [
+        "库存不能为负数，请输入非负整数。"
+      ],
+      "forbidden": [
+        "不得低于未完成订单扣减总量"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B02-AC4-NEG",
+      "ac_id": "PB-B02-AC4",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-1",
+        "P-ON-0",
+        "P-OFF-M"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B02-AC5-BND",
+      "ac_id": "PB-B02-AC5",
+      "kind": "BND",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-1",
+        "P-ON-0",
+        "P-OFF-M"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B03-AC1-POS",
+      "ac_id": "PB-B03-AC1",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B03-AC2-POS",
+      "ac_id": "PB-B03-AC2",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [
+        "原商品原地改价"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B03-AC3-POS",
+      "ac_id": "PB-B03-AC3",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [
+        "下单历史"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B03-AC4-POS",
+      "ac_id": "PB-B03-AC4",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "请先登录",
+        "请重新登录"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B03-AC5-POS",
+      "ac_id": "PB-B03-AC5",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B03-AC5-POS",
+      "ac_id": "PB-B03-AC5",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "LEGACY_INTENT"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC1-POS",
+      "ac_id": "PB-B04-AC1",
+      "kind": "POS",
+      "seq": "SEQ-04",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC1-NEG",
+      "ac_id": "PB-B04-AC1",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC1-NEG",
+      "ac_id": "PB-B04-AC1",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC2-POS",
+      "ac_id": "PB-B04-AC2",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "请先登录",
+        "请重新登录",
+        "无权操作该订单"
+      ],
+      "forbidden": [
+        "订单不存在"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC3-POS",
+      "ac_id": "PB-B04-AC3",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "不支持部分取消"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC3-NEG",
+      "ac_id": "PB-B04-AC3",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "不支持部分取消"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC4-POS",
+      "ac_id": "PB-B04-AC4",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC5-POS",
+      "ac_id": "PB-B04-AC5",
+      "kind": "POS",
+      "seq": "SEQ-04",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "订单已取消",
+        "订单已开始发货，不可取消",
+        "订单已完成，不可取消"
+      ],
+      "forbidden": [
+        "开始发货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC5-NEG",
+      "ac_id": "PB-B04-AC5",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "订单已取消",
+        "订单已开始发货，不可取消",
+        "订单已完成，不可取消"
+      ],
+      "forbidden": [
+        "开始发货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC5-NEG",
+      "ac_id": "PB-B04-AC5",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "订单已取消",
+        "订单已开始发货，不可取消",
+        "订单已完成，不可取消"
+      ],
+      "forbidden": [
+        "开始发货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC5-BND",
+      "ac_id": "PB-B04-AC5",
+      "kind": "BND",
+      "seq": null,
+      "fixtures": [
+        "P-ON-0",
+        "P-OFF-M"
+      ],
+      "required_messages": [
+        "订单已取消",
+        "订单已开始发货，不可取消",
+        "订单已完成，不可取消"
+      ],
+      "forbidden": [
+        "开始发货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC6-POS",
+      "ac_id": "PB-B04-AC6",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC7-POS",
+      "ac_id": "PB-B04-AC7",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B04-AC7-NEG",
+      "ac_id": "PB-B04-AC7",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B05-AC1-POS",
+      "ac_id": "PB-B05-AC1",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B05-AC1-BND",
+      "ac_id": "PB-B05-AC1",
+      "kind": "BND",
+      "seq": null,
+      "fixtures": [
+        "P-ON-0",
+        "P-OFF-M"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B05-AC2-POS",
+      "ac_id": "PB-B05-AC2",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "已下架"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B05-AC2-BND",
+      "ac_id": "PB-B05-AC2",
+      "kind": "BND",
+      "seq": null,
+      "fixtures": [
+        "P-ON-0",
+        "P-OFF-M"
+      ],
+      "required_messages": [
+        "已下架"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B05-AC3-POS",
+      "ac_id": "PB-B05-AC3",
+      "kind": "POS",
+      "seq": "SEQ-04",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "订单已开始发货，不可取消",
+        "订单已取消，不可发货"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B05-AC3-NEG",
+      "ac_id": "PB-B05-AC3",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "订单已开始发货，不可取消",
+        "订单已取消，不可发货"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B05-AC3-CON",
+      "ac_id": "PB-B05-AC3",
+      "kind": "CON",
+      "seq": "SEQ-04",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "订单已开始发货，不可取消",
+        "订单已取消，不可发货"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B05-AC4-POS",
+      "ac_id": "PB-B05-AC4",
+      "kind": "POS",
+      "seq": "SEQ-04",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B05-AC4-NEG",
+      "ac_id": "PB-B05-AC4",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B05-AC4-NEG",
+      "ac_id": "PB-B05-AC4",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B05-AC4-CON",
+      "ac_id": "PB-B05-AC4",
+      "kind": "CON",
+      "seq": "SEQ-04",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B06-AC1-POS",
+      "ac_id": "PB-B06-AC1",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "请先登录后台"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B06-AC2-POS",
+      "ac_id": "PB-B06-AC2",
+      "kind": "POS",
+      "seq": "SEQ-04",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B06-AC2-NEG",
+      "ac_id": "PB-B06-AC2",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B06-AC2-NEG",
+      "ac_id": "PB-B06-AC2",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B06-AC3-POS",
+      "ac_id": "PB-B06-AC3",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B06-AC4-POS",
+      "ac_id": "PB-B06-AC4",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "订单已取消",
+        "订单已完成，不可取消"
+      ],
+      "forbidden": [
+        "交易完成"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B06-AC4-NEG",
+      "ac_id": "PB-B06-AC4",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "订单已取消",
+        "订单已完成，不可取消"
+      ],
+      "forbidden": [
+        "交易完成"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B06-AC4-NEG",
+      "ac_id": "PB-B06-AC4",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "订单已取消",
+        "订单已完成，不可取消"
+      ],
+      "forbidden": [
+        "交易完成"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B06-AC4-BND",
+      "ac_id": "PB-B06-AC4",
+      "kind": "BND",
+      "seq": null,
+      "fixtures": [
+        "P-ON-0",
+        "P-OFF-M"
+      ],
+      "required_messages": [
+        "订单已取消",
+        "订单已完成，不可取消"
+      ],
+      "forbidden": [
+        "交易完成"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B06-AC5-POS",
+      "ac_id": "PB-B06-AC5",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B06-AC5-NEG",
+      "ac_id": "PB-B06-AC5",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B06-AC6-POS",
+      "ac_id": "PB-B06-AC6",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B07-AC1-POS",
+      "ac_id": "PB-B07-AC1",
+      "kind": "POS",
+      "seq": "SEQ-04",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B07-AC1-NEG",
+      "ac_id": "PB-B07-AC1",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B07-AC1-BND",
+      "ac_id": "PB-B07-AC1",
+      "kind": "BND",
+      "seq": null,
+      "fixtures": [
+        "P-ON-0",
+        "P-OFF-M"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B07-AC2-POS",
+      "ac_id": "PB-B07-AC2",
+      "kind": "POS",
+      "seq": "SEQ-04",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B07-AC2-NEG",
+      "ac_id": "PB-B07-AC2",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B07-AC2-NEG",
+      "ac_id": "PB-B07-AC2",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B07-AC2-CON",
+      "ac_id": "PB-B07-AC2",
+      "kind": "CON",
+      "seq": "SEQ-04",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B07-AC2-BND",
+      "ac_id": "PB-B07-AC2",
+      "kind": "BND",
+      "seq": null,
+      "fixtures": [
+        "P-ON-0",
+        "P-OFF-M"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B08-AC1-POS",
+      "ac_id": "PB-B08-AC1",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "请先登录",
+        "请重新登录",
+        "无权操作"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B08-AC1-NEG",
+      "ac_id": "PB-B08-AC1",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "请先登录",
+        "请重新登录",
+        "无权操作"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B08-AC2-POS",
+      "ac_id": "PB-B08-AC2",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B08-AC3-POS",
+      "ac_id": "PB-B08-AC3",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "已收藏"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B08-AC3-POS",
+      "ac_id": "PB-B08-AC3",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "已收藏"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B08-AC3-POS",
+      "ac_id": "PB-B08-AC3",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "已收藏"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B08-AC4-NEG",
+      "ac_id": "PB-B08-AC4",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-OFF-M"
+      ],
+      "required_messages": [
+        "商品已下架",
+        "商品不存在"
+      ],
+      "forbidden": [
+        "无货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B08-AC4-POS",
+      "ac_id": "PB-B08-AC4",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "商品已下架",
+        "商品不存在"
+      ],
+      "forbidden": [
+        "无货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B08-AC5-POS",
+      "ac_id": "PB-B08-AC5",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC1-POS",
+      "ac_id": "PB-B09-AC1",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "已下架"
+      ],
+      "forbidden": [
+        "无货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC1-NEG",
+      "ac_id": "PB-B09-AC1",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-OFF-M"
+      ],
+      "required_messages": [
+        "已下架"
+      ],
+      "forbidden": [
+        "无货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC1-POS",
+      "ac_id": "PB-B09-AC1",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "已下架"
+      ],
+      "forbidden": [
+        "无货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC1-POS",
+      "ac_id": "PB-B09-AC1",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "已下架"
+      ],
+      "forbidden": [
+        "无货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC2-POS",
+      "ac_id": "PB-B09-AC2",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC2-POS",
+      "ac_id": "PB-B09-AC2",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC3-POS",
+      "ac_id": "PB-B09-AC3",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "已取消收藏",
+        "未收藏"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC3-POS",
+      "ac_id": "PB-B09-AC3",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "已取消收藏",
+        "未收藏"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC4-POS",
+      "ac_id": "PB-B09-AC4",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "暂无收藏"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC4-POS",
+      "ac_id": "PB-B09-AC4",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "暂无收藏"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC4-POS",
+      "ac_id": "PB-B09-AC4",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "暂无收藏"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC5-POS",
+      "ac_id": "PB-B09-AC5",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC5-NEG",
+      "ac_id": "PB-B09-AC5",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B09-AC5-POS",
+      "ac_id": "PB-B09-AC5",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B10-AC1-POS",
+      "ac_id": "PB-B10-AC1",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "请先登录",
+        "请重新登录",
+        "无权操作"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B10-AC1-NEG",
+      "ac_id": "PB-B10-AC1",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "请先登录",
+        "请重新登录",
+        "无权操作"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B10-AC2-POS",
+      "ac_id": "PB-B10-AC2",
+      "kind": "POS",
+      "seq": "SEQ-08",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [
+        "已加入购物车"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B10-AC2-CON",
+      "ac_id": "PB-B10-AC2",
+      "kind": "CON",
+      "seq": "SEQ-08",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [
+        "已加入购物车"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B10-AC3-POS",
+      "ac_id": "PB-B10-AC3",
+      "kind": "POS",
+      "seq": "SEQ-09",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B10-AC4-POS",
+      "ac_id": "PB-B10-AC4",
+      "kind": "POS",
+      "seq": "SEQ-09",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "已移除",
+        "数量无效，请输入正整数",
+        "已更新",
+        "已加入购物车"
+      ],
+      "forbidden": [
+        "超限"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B10-AC5-POS",
+      "ac_id": "PB-B10-AC5",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B10-AC6-POS",
+      "ac_id": "PB-B10-AC6",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "商品已下架",
+        "商品不存在"
+      ],
+      "forbidden": [
+        "无货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B11-AC1-POS",
+      "ac_id": "PB-B11-AC1",
+      "kind": "POS",
+      "seq": "SEQ-09",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "已下架"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B11-AC2-POS",
+      "ac_id": "PB-B11-AC2",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "购物车是空的"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B11-AC2-POS",
+      "ac_id": "PB-B11-AC2",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "购物车是空的"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B11-AC3-POS",
+      "ac_id": "PB-B11-AC3",
+      "kind": "POS",
+      "seq": "SEQ-08",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B11-AC3-CON",
+      "ac_id": "PB-B11-AC3",
+      "kind": "CON",
+      "seq": "SEQ-08",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B11-AC4-POS",
+      "ac_id": "PB-B11-AC4",
+      "kind": "POS",
+      "seq": "SEQ-09",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B11-AC4-CON",
+      "ac_id": "PB-B11-AC4",
+      "kind": "CON",
+      "seq": "SEQ-08",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B11-AC5-POS",
+      "ac_id": "PB-B11-AC5",
+      "kind": "POS",
+      "seq": "SEQ-09",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "该商品已不在购物车，请刷新页面后查看。"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B12-AC1-POS",
+      "ac_id": "PB-B12-AC1",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10",
+        "P-OFF-M"
+      ],
+      "required_messages": [
+        "请先登录",
+        "请重新登录",
+        "无权操作"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B12-AC2-POS",
+      "ac_id": "PB-B12-AC2",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10",
+        "P-OFF-M"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B12-AC3-POS",
+      "ac_id": "PB-B12-AC3",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10",
+        "P-OFF-M"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B12-AC3-NEG",
+      "ac_id": "PB-B12-AC3",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B12-AC4-POS",
+      "ac_id": "PB-B12-AC4",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10",
+        "P-OFF-M"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B12-AC5-POS",
+      "ac_id": "PB-B12-AC5",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10",
+        "P-OFF-M"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B12-AC6-POS",
+      "ac_id": "PB-B12-AC6",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10",
+        "P-OFF-M"
+      ],
+      "required_messages": [
+        "商品「XX",
+        "请选择商品"
+      ],
+      "forbidden": [
+        "缺货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B12-AC6-NEG",
+      "ac_id": "PB-B12-AC6",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "商品「XX",
+        "请选择商品"
+      ],
+      "forbidden": [
+        "缺货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B13-AC1-POS",
+      "ac_id": "PB-B13-AC1",
+      "kind": "POS",
+      "seq": "SEQ-02",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "下单成功"
+      ],
+      "forbidden": [
+        "订单已生成但购物车未清理",
+        "库存已扣但清车未完成",
+        "订单成功、清车未完成、客户重试时只清车"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B13-AC1-NEG",
+      "ac_id": "PB-B13-AC1",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-1"
+      ],
+      "required_messages": [
+        "下单成功"
+      ],
+      "forbidden": [
+        "订单已生成但购物车未清理",
+        "库存已扣但清车未完成",
+        "订单成功、清车未完成、客户重试时只清车"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B13-AC2-POS",
+      "ac_id": "PB-B13-AC2",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10",
+        "P-OFF-M"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B13-AC3-POS",
+      "ac_id": "PB-B13-AC3",
+      "kind": "POS",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10",
+        "P-OFF-M"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B13-AC3-NEG",
+      "ac_id": "PB-B13-AC3",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B13-AC4-BND",
+      "ac_id": "PB-B13-AC4",
+      "kind": "BND",
+      "seq": "SEQ-02",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "订单已提交，请勿重复下单"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B13-AC5-CON",
+      "ac_id": "PB-B13-AC5",
+      "kind": "CON",
+      "seq": "SEQ-01",
+      "fixtures": [
+        "P-ON-1"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B14-AC1-POS",
+      "ac_id": "PB-B14-AC1",
+      "kind": "POS",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B14-AC2-POS",
+      "ac_id": "PB-B14-AC2",
+      "kind": "POS",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [
+        "请先登录",
+        "请重新登录",
+        "无权操作",
+        "无此权限"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B14-AC3-POS",
+      "ac_id": "PB-B14-AC3",
+      "kind": "POS",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [
+        "请选择商品"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B14-AC3-CON",
+      "ac_id": "PB-B14-AC3",
+      "kind": "CON",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "请选择商品"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B14-AC3-CON",
+      "ac_id": "PB-B14-AC3",
+      "kind": "CON",
+      "seq": "SEQ-11",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "请选择商品"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B14-AC4-POS",
+      "ac_id": "PB-B14-AC4",
+      "kind": "POS",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [
+        "所选 N 件商品将从购物车移除并加入收藏",
+        "已收藏 N 件商品"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B14-AC5-POS",
+      "ac_id": "PB-B14-AC5",
+      "kind": "POS",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B14-AC5-CON",
+      "ac_id": "PB-B14-AC5",
+      "kind": "CON",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B14-AC5-CON",
+      "ac_id": "PB-B14-AC5",
+      "kind": "CON",
+      "seq": "SEQ-11",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B14-AC6-POS",
+      "ac_id": "PB-B14-AC6",
+      "kind": "POS",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B14-AC7-POS",
+      "ac_id": "PB-B14-AC7",
+      "kind": "POS",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [
+        "商品已下架"
+      ],
+      "forbidden": [
+        "商品不存在",
+        "无货"
+      ],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC1-POS",
+      "ac_id": "PB-B15-AC1",
+      "kind": "POS",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC1-CON",
+      "ac_id": "PB-B15-AC1",
+      "kind": "CON",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC1-CON",
+      "ac_id": "PB-B15-AC1",
+      "kind": "CON",
+      "seq": "SEQ-11",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC2-POS",
+      "ac_id": "PB-B15-AC2",
+      "kind": "POS",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [
+        "请勿重复操作",
+        "操作失败，请重试"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC2-CON",
+      "ac_id": "PB-B15-AC2",
+      "kind": "CON",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "请勿重复操作",
+        "操作失败，请重试"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC2-CON",
+      "ac_id": "PB-B15-AC2",
+      "kind": "CON",
+      "seq": "SEQ-11",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "请勿重复操作",
+        "操作失败，请重试"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC3-POS",
+      "ac_id": "PB-B15-AC3",
+      "kind": "POS",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC3-CON",
+      "ac_id": "PB-B15-AC3",
+      "kind": "CON",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC3-CON",
+      "ac_id": "PB-B15-AC3",
+      "kind": "CON",
+      "seq": "SEQ-11",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC4-POS",
+      "ac_id": "PB-B15-AC4",
+      "kind": "POS",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [
+        "请选择商品"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC4-CON",
+      "ac_id": "PB-B15-AC4",
+      "kind": "CON",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "请选择商品"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC4-CON",
+      "ac_id": "PB-B15-AC4",
+      "kind": "CON",
+      "seq": "SEQ-11",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "请选择商品"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC4-NEG",
+      "ac_id": "PB-B15-AC4",
+      "kind": "NEG",
+      "seq": null,
+      "fixtures": [],
+      "required_messages": [
+        "请选择商品"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC5-POS",
+      "ac_id": "PB-B15-AC5",
+      "kind": "POS",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [
+        "已收藏 N 件商品",
+        "已取消收藏"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC5-CON",
+      "ac_id": "PB-B15-AC5",
+      "kind": "CON",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "已收藏 N 件商品",
+        "已取消收藏"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC5-CON",
+      "ac_id": "PB-B15-AC5",
+      "kind": "CON",
+      "seq": "SEQ-11",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [
+        "已收藏 N 件商品",
+        "已取消收藏"
+      ],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC6-POS",
+      "ac_id": "PB-B15-AC6",
+      "kind": "POS",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10",
+        "P-ON-5"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC6-CON",
+      "ac_id": "PB-B15-AC6",
+      "kind": "CON",
+      "seq": "SEQ-10",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    },
+    {
+      "case_id": "PB-B15-AC6-CON",
+      "ac_id": "PB-B15-AC6",
+      "kind": "CON",
+      "seq": "SEQ-11",
+      "fixtures": [
+        "P-ON-10"
+      ],
+      "required_messages": [],
+      "forbidden": [],
+      "status": "待执行"
+    }
+  ]
+}

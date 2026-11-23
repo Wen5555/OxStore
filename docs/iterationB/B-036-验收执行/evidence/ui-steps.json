@@ -1,0 +1,183 @@
+{
+  "task": "B-036",
+  "sut": {
+    "branch": "develop",
+    "sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281"
+  },
+  "base": "http://127.0.0.1:5173",
+  "executed_at": "2026-11-21T14:38:25.737Z",
+  "totals": {
+    "steps": 12,
+    "pass": 12,
+    "fail": 0
+  },
+  "console_errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "steps": [
+    {
+      "step": "V01 商品列表：搜索框、无快捷收藏/加购",
+      "ac": [
+        "PB-B08-AC5",
+        "PB-B10-AC5"
+      ],
+      "status": "PASS",
+      "ms": 532,
+      "evidence": {
+        "hasQuickAdd": false,
+        "hasQuickFavorite": false
+      }
+    },
+    {
+      "step": "V01 买家登录",
+      "ac": [
+        "PB-B08-AC1",
+        "PB-B10-AC1"
+      ],
+      "status": "PASS",
+      "ms": 582,
+      "evidence": {
+        "url": "http://127.0.0.1:5173/"
+      }
+    },
+    {
+      "step": "V01 详情：加入购物车 1 件 + 收藏",
+      "ac": [
+        "PB-B10-AC5",
+        "PB-B08-AC3"
+      ],
+      "status": "PASS",
+      "ms": 387,
+      "evidence": {
+        "name": "B030-在售足库存-10",
+        "favoriteButtonAfter": 1
+      }
+    },
+    {
+      "step": "V03 购物车：两行、改数量、失效/超库存不自动删",
+      "ac": [
+        "PB-B10-AC2",
+        "PB-B10-AC4",
+        "PB-B11-AC1"
+      ],
+      "status": "PASS",
+      "ms": 607,
+      "evidence": {
+        "rows": 2,
+        "qty": "2"
+      }
+    },
+    {
+      "step": "V09 转收藏：二次确认文案与 N=2、整行移出",
+      "ac": [
+        "PB-B14-AC1",
+        "PB-B14-AC4",
+        "PB-B15-AC1"
+      ],
+      "status": "PASS",
+      "ms": 674,
+      "evidence": {
+        "confirmText": "确认转为收藏\n所选 2 件商品将从购物车移除并加入收藏\n取 消\n确认转收藏"
+      }
+    },
+    {
+      "step": "V02 收藏列表：两项、取消收藏无需确认",
+      "ac": [
+        "PB-B09-AC3"
+      ],
+      "status": "PASS",
+      "ms": 321,
+      "evidence": {
+        "before": 2,
+        "after": 1
+      }
+    },
+    {
+      "step": "V04/V05 下单：确认弹窗、成功提示与单号",
+      "ac": [
+        "PB-B12-AC1",
+        "PB-B12-AC2",
+        "PB-B12-AC4",
+        "PB-B13-AC1"
+      ],
+      "status": "PASS",
+      "ms": 1447,
+      "evidence": {
+        "text": "下单成功\n下单成功\n订单号：b6c1993a-7469-40ba-828f-50856a7247c8\n查看订单详情\n关 闭",
+        "orderNo": "b6c1993a-7469-40ba-828f-50856a7247c8"
+      }
+    },
+    {
+      "step": "V05 订单历史：取消订单（二次确认 + 已取消元数据）",
+      "ac": [
+        "PB-B04-AC4",
+        "PB-B04-AC6",
+        "PB-B03-AC3"
+      ],
+      "status": "PASS",
+      "ms": 816,
+      "evidence": {
+        "statusBefore": "b6c1993a-7469-40ba-828f-50856a7247c8\tB030-在售足库存-10 × 1\t¥12.50\t客户下单\t2026/11/21 22",
+        "rowText": "b6c1993a-7469-40ba-828f-50856a7247c8\tB030-在售足库存-10 × 1\t¥12.50\t已取消\t2026/11/21 22:38:17\t\n详情"
+      }
+    },
+    {
+      "step": "V06 商家推进：确认→备货→发货→完成",
+      "ac": [
+        "PB-B01-AC2",
+        "PB-B01-AC4",
+        "PB-B06-AC2"
+      ],
+      "status": "PASS",
+      "ms": 5350,
+      "evidence": {
+        "orderNo": "72f93186-401d-4612-b6d9-60149a94e503",
+        "transitions": [
+          "待备货",
+          "待发货",
+          "已开始发货",
+          "已完成"
+        ]
+      }
+    },
+    {
+      "step": "V05 历史显示交易完成；无废弃文案",
+      "ac": [
+        "PB-B03-AC3",
+        "PB-B01-AC2"
+      ],
+      "status": "PASS",
+      "ms": 239,
+      "evidence": {
+        "hasCompleted": false,
+        "forbidden": [],
+        "cancelOnCompleted": 0
+      }
+    },
+    {
+      "step": "V07 库存页：负数校验、改正保存、手动下架/上架入口",
+      "ac": [
+        "PB-B02-AC3",
+        "PB-B02-AC4"
+      ],
+      "status": "PASS",
+      "ms": 866,
+      "evidence": {
+        "manualOffline": 0
+      }
+    },
+    {
+      "step": "V10 旧意向归档页（客户/商家）只读可查",
+      "ac": [
+        "PB-B03-AC5",
+        "PB-B04-AC7"
+      ],
+      "status": "PASS",
+      "ms": 424,
+      "evidence": {
+        "buyerHasReadOnly": false,
+        "adminHasFilter": false
+      }
+    }
+  ]
+}

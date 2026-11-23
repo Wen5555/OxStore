@@ -1,0 +1,56 @@
+{
+  "ac": "PB-B04-AC7",
+  "pb": "PB-B04",
+  "title": "旧意向不进入新取消流程",
+  "status": "PASS_API_DEFERRED",
+  "conjuncts": [
+    {
+      "name": "no_legacy_intent_in_new_orders",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "new order list total=0",
+      "actual": 0
+    },
+    {
+      "name": "closed_intent_has_no_new_cancel_path",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "404 / 订单不存在",
+      "actual": [
+        404,
+        {
+          "code": 40405,
+          "message": "订单不存在",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "legacy_intent_fixture",
+      "pass": false,
+      "disposition_if_fail": "DEFER_TO_B035",
+      "expected": "已关闭旧意向（purchase_intent.legacy_closed）不可取消，需 V8 归档数据",
+      "actual": "purchase_intent rows=0; deferred to B-035"
+    }
+  ],
+  "conjunct_count": 3,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [
+    "legacy_intent_fixture"
+  ],
+  "evidence": {
+    "legacy_cancel": [
+      404,
+      {
+        "code": 40405,
+        "message": "订单不存在",
+        "data": null
+      }
+    ],
+    "purchase_intent": [
+      {
+        "c": 0
+      }
+    ]
+  }
+}

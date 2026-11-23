@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-23",
+  "sut": "develop@ebe3f32",
+  "fix_pr": "#35 (4e10352)",
+  "step": "点击失效收藏",
+  "url_before": "http://127.0.0.1:5173/me/favorites",
+  "url_after": "http://127.0.0.1:5173/me/favorites",
+  "toast": [
+    "已下架"
+  ],
+  "has_exact_tip": true,
+  "row_label": "已下架",
+  "screenshot": "evidence/screenshots/15-d002-invalid-favorite-notice.png"
+}

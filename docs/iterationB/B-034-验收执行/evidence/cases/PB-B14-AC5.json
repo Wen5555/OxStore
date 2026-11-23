@@ -1,0 +1,58 @@
+{
+  "ac": "PB-B14-AC5",
+  "pb": "PB-B14",
+  "title": "已收藏商品再转收藏：保持原收藏、不刷新时间、仍移车",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "existing_favorite_move_succeeds",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "200 / 已收藏 1 件商品",
+      "actual": [
+        200,
+        "已收藏 1 件商品"
+      ]
+    },
+    {
+      "name": "favorite_not_duplicated",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "1 row",
+      "actual": 1
+    },
+    {
+      "name": "favorite_time_unchanged",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "created_at unchanged",
+      "actual": {
+        "before": "2026-11-21 15:27:39.513411",
+        "after": "2026-11-21 15:27:39.513411"
+      }
+    },
+    {
+      "name": "cart_row_still_removed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "cart=0",
+      "actual": 0
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "favorite": {
+      "code": 0,
+      "message": "已收藏",
+      "data": {
+        "favoriteId": "58",
+        "productId": "1",
+        "createdAt": "2026-11-21T15:27:39.513411"
+      }
+    },
+    "before": "2026-11-21 15:27:39.513411",
+    "after": "2026-11-21 15:27:39.513411"
+  }
+}

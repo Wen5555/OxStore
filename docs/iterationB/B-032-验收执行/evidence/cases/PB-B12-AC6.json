@@ -1,0 +1,142 @@
+{
+  "conjuncts": [
+    {
+      "name": "valid_confirm_first",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 200,
+        "message": "ok"
+      }
+    },
+    {
+      "name": "final_submit_multi_problem_exact_templates",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "path": "confirm_then_break_then_submit",
+        "http": 409,
+        "messages": "所选商品无法下单 商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。 商品「B032-在售-10」已下架，请从购物车移除后重试。",
+        "expect_insuf": "商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。",
+        "expect_off": "商品「B032-在售-10」已下架，请从购物车移除后重试。"
+      }
+    },
+    {
+      "name": "final_submit_fail_full_set_unchanged",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "stock_before": {
+          "27": "1",
+          "25": "10"
+        },
+        "stock_after": {
+          "27": "1",
+          "25": "10"
+        },
+        "cart_before": [
+          {
+            "id": "1285",
+            "product_id": "27",
+            "quantity": "5"
+          },
+          {
+            "id": "1286",
+            "product_id": "25",
+            "quantity": "1"
+          }
+        ],
+        "cart_after": [
+          {
+            "id": "1285",
+            "product_id": "27",
+            "quantity": "5"
+          },
+          {
+            "id": "1286",
+            "product_id": "25",
+            "quantity": "1"
+          }
+        ],
+        "orders_before": 0,
+        "orders_after": 0
+      }
+    },
+    {
+      "name": "empty_select_message",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 400,
+        "message": "请选择商品"
+      }
+    },
+    {
+      "name": "missing_product_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 409,
+        "message": "所选商品无法下单",
+        "nested": "所选商品无法下单 该商品已不在购物车，请刷新页面后查看。"
+      }
+    },
+    {
+      "name": "ui_confirm_then_break_then_submit",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "ok": true,
+        "modalVisibleBeforeBreak": true,
+        "submitAfterBreak": true,
+        "modalText": "确认下单\nB032-低库存-1\n¥3.30 × 1\n¥3.30\nB032-在售-10\n¥12.50 × 1\n¥12.50\n总金额：¥15.80\n返回购物车\n确认下单",
+        "validConfirm": true,
+        "patchHttp": 200,
+        "offlineHttp": 200,
+        "brokeAfterModal": true,
+        "shots": [
+          "b12-submit-error-tip.png"
+        ],
+        "toast": "商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\n商品「B032-在售-10」已下架，请从购物车移除后重试。",
+        "text": "购物车\n返回买家账户\n下单选择\n转收藏选择\n全选可下单商品\n清空购物车\n转为收藏\n下 单\nB032-低库存-1\n单价：¥3.30\n更新数量\n删 除\nB032-在售-10\n单价：¥12.50\n更新数量\n删 除\n已选 2 件商品，金额合计：¥15.80\n商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\n商品「B032-在售-10」已下架，请从购物车移除后重试。",
+        "hasStockOrOffline": true,
+        "hasConfirmChanged": false,
+        "onlyEmptySelect": false,
+        "hasSuccess": false,
+        "stderr_tail": "",
+        "stdout_tail": "{\"ok\":true,\"modalVisibleBeforeBreak\":true,\"submitAfterBreak\":true,\"modalText\":\"确认下单\\nB032-低库存-1\\n¥3.30 × 1\\n¥3.30\\nB032-在售-10\\n¥12.50 × 1\\n¥12.50\\n总金额：¥15.80\\n返回购物车\\n确认下单\",\"validConfirm\":true,\"patchHttp\":200,\"offlineHttp\":200,\"brokeAfterModal\":true,\"shots\":[\"b12-submit-error-tip.png\"],\"toast\":\"商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\\n商品「B032-在售-10」已下架，请从购物车移除后重试。\",\"text\":\"购物车\\n返回买家账户\\n下单选择\\n转收藏选择\\n全选可下单商品\\n清空购物车\\n转为收藏\\n下 单\\nB032-低库存-1\\n单价：¥3.30\\n更新数量\\n删 除\\nB032-在售-10\\n单价：¥12.50\\n更新数量\\n删 除\\n已选 2 件商品，金额合计：¥15.80\\n商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\\n商品「B032-在售-10」已下架，请从购物车移除后重试。\",\"hasStockOrOffline\":true,\"hasConfirmChanged\":false,\"onlyEmptySelect\":false,\"hasSuccess\":false}\n",
+        "node_exit": 0
+      }
+    },
+    {
+      "name": "ui_error_tip_stock_or_offline",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "ok": true,
+        "modalVisibleBeforeBreak": true,
+        "submitAfterBreak": true,
+        "modalText": "确认下单\nB032-低库存-1\n¥3.30 × 1\n¥3.30\nB032-在售-10\n¥12.50 × 1\n¥12.50\n总金额：¥15.80\n返回购物车\n确认下单",
+        "validConfirm": true,
+        "patchHttp": 200,
+        "offlineHttp": 200,
+        "brokeAfterModal": true,
+        "shots": [
+          "b12-submit-error-tip.png"
+        ],
+        "toast": "商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\n商品「B032-在售-10」已下架，请从购物车移除后重试。",
+        "text": "购物车\n返回买家账户\n下单选择\n转收藏选择\n全选可下单商品\n清空购物车\n转为收藏\n下 单\nB032-低库存-1\n单价：¥3.30\n更新数量\n删 除\nB032-在售-10\n单价：¥12.50\n更新数量\n删 除\n已选 2 件商品，金额合计：¥15.80\n商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\n商品「B032-在售-10」已下架，请从购物车移除后重试。",
+        "hasStockOrOffline": true,
+        "hasConfirmChanged": false,
+        "onlyEmptySelect": false,
+        "hasSuccess": false,
+        "stderr_tail": "",
+        "stdout_tail": "{\"ok\":true,\"modalVisibleBeforeBreak\":true,\"submitAfterBreak\":true,\"modalText\":\"确认下单\\nB032-低库存-1\\n¥3.30 × 1\\n¥3.30\\nB032-在售-10\\n¥12.50 × 1\\n¥12.50\\n总金额：¥15.80\\n返回购物车\\n确认下单\",\"validConfirm\":true,\"patchHttp\":200,\"offlineHttp\":200,\"brokeAfterModal\":true,\"shots\":[\"b12-submit-error-tip.png\"],\"toast\":\"商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\\n商品「B032-在售-10」已下架，请从购物车移除后重试。\",\"text\":\"购物车\\n返回买家账户\\n下单选择\\n转收藏选择\\n全选可下单商品\\n清空购物车\\n转为收藏\\n下 单\\nB032-低库存-1\\n单价：¥3.30\\n更新数量\\n删 除\\nB032-在售-10\\n单价：¥12.50\\n更新数量\\n删 除\\n已选 2 件商品，金额合计：¥15.80\\n商品「B032-低库存-1」库存不足：当前可售 1 件，您选购了 5 件，请减少数量或移除后重试。\\n商品「B032-在售-10」已下架，请从购物车移除后重试。\",\"hasStockOrOffline\":true,\"hasConfirmChanged\":false,\"onlyEmptySelect\":false,\"hasSuccess\":false}\n",
+        "node_exit": 0
+      }
+    }
+  ],
+  "conjunct_pass": 7,
+  "conjunct_total": 7,
+  "conjunct_fail_names": []
+}

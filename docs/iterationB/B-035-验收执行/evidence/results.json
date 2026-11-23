@@ -1,0 +1,121 @@
+{
+  "task": "B-035",
+  "execution_window": {
+    "started_at": "2026-11-21T14:00:46Z",
+    "ended_at": "2026-11-21T14:02:01Z",
+    "started_at_cst": "2026-11-21T22:00:46+08:00",
+    "ended_at_cst": "2026-11-21T22:02:01+08:00",
+    "sut_sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
+    "sut_branch": "develop",
+    "db": "oxstore_test_b035",
+    "base": "http://127.0.0.1:8082",
+    "delivery_baseline": "topic/r2@0cef9ec2764486651037479f2f94e881691791a9",
+    "plan": "docs/iterationB/B-030-本轮验收用例/execution/B035.md + cases/PB-B02..B03.md",
+    "v8_migration": "C:\\Users\\闪电\\Desktop\\仓库\\OxStore-sut\\backend\\src\\main\\resources\\db\\migrations\\V8__close_legacy_fixed_price_intents.sql",
+    "seed": {
+      "customers": {
+        "a": 1,
+        "b": 2
+      },
+      "seeded": {
+        "trade": {
+          "product": "B030-在售足库存-10",
+          "stock": "10",
+          "snapshot": "B030-在售足库存-10"
+        },
+        "intrans": {
+          "product": "B030-在售足库存-5",
+          "stock": "5",
+          "snapshot": "B030-在售足库存-5"
+        },
+        "manual": {
+          "product": "B030-低库存-1",
+          "stock": "1",
+          "snapshot": "B030-低库存-1"
+        },
+        "history": {
+          "product": "B030-大整数库存",
+          "stock": "9007199254740993",
+          "snapshot": "B030-大整数库存"
+        }
+      }
+    },
+    "git_ops": "local-only; no commit/push during execution"
+  },
+  "totals": {
+    "acs": 10,
+    "pass": 10,
+    "fail": 0,
+    "blocked": 0,
+    "conjuncts": 63,
+    "failed_conjuncts": 0
+  },
+  "acs": [
+    {
+      "ac": "PB-B02-AC1",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": []
+    },
+    {
+      "ac": "PB-B02-AC2",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": []
+    },
+    {
+      "ac": "PB-B02-AC3",
+      "status": "PASS",
+      "conjuncts": 5,
+      "failed": []
+    },
+    {
+      "ac": "PB-B02-AC4",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": []
+    },
+    {
+      "ac": "PB-B02-AC5",
+      "status": "PASS",
+      "conjuncts": 3,
+      "failed": []
+    },
+    {
+      "ac": "PB-B03-AC1",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": []
+    },
+    {
+      "ac": "PB-B03-AC2",
+      "status": "PASS",
+      "conjuncts": 3,
+      "failed": []
+    },
+    {
+      "ac": "PB-B03-AC3",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": []
+    },
+    {
+      "ac": "PB-B03-AC4",
+      "status": "PASS",
+      "conjuncts": 3,
+      "failed": []
+    },
+    {
+      "ac": "PB-B03-AC5",
+      "status": "PASS",
+      "conjuncts": 10,
+      "failed": []
+    },
+    {
+      "ac": "AUCTION-REG",
+      "status": "PASS",
+      "conjuncts": 19,
+      "failed": []
+    }
+  ]
+}

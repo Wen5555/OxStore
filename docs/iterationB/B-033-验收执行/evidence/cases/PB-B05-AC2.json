@@ -1,0 +1,77 @@
+{
+  "ac": "PB-B05-AC2",
+  "pb": "PB-B05",
+  "title": "取消回补只在 AUTO_ZERO 时自动上架；手动下架保持",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "auto_zero_offline_on_depletion",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "0/OFFLINE/AUTO_ZERO",
+      "actual": {
+        "stock": "0",
+        "status": "OFFLINE",
+        "offline_reason": "AUTO_ZERO"
+      }
+    },
+    {
+      "name": "cancel_auto_restores_online",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "1/ONLINE/null",
+      "actual": {
+        "stock": "1",
+        "status": "ONLINE",
+        "offline_reason": null
+      }
+    },
+    {
+      "name": "manual_offline_stays_offline",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "OFFLINE/MANUAL after restock",
+      "actual": {
+        "stock": "10",
+        "status": "OFFLINE",
+        "offline_reason": "MANUAL"
+      }
+    },
+    {
+      "name": "manual_stock_added_back",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "9+1",
+      "actual": "10"
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "auto": {
+      "before": {
+        "stock": "0",
+        "status": "OFFLINE",
+        "offline_reason": "AUTO_ZERO"
+      },
+      "after": {
+        "stock": "1",
+        "status": "ONLINE",
+        "offline_reason": null
+      }
+    },
+    "manual": {
+      "before": {
+        "stock": "9",
+        "status": "OFFLINE",
+        "offline_reason": "MANUAL"
+      },
+      "after": {
+        "stock": "10",
+        "status": "OFFLINE",
+        "offline_reason": "MANUAL"
+      }
+    }
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "ac": "PB-B14-AC7",
+  "pb": "PB-B14",
+  "title": "混合批次全成或全败；逐项原因",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "mixed_batch_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409",
+      "actual": [
+        409,
+        "所选商品无法加入收藏"
+      ]
+    },
+    {
+      "name": "per_item_offline_reason",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "errors[] contains 商品已下架",
+      "actual": [
+        {
+          "cartItemId": "110",
+          "productId": "2",
+          "productName": "B030-在售足库存-5",
+          "reason": "OFFLINE",
+          "message": "商品已下架"
+        }
+      ]
+    },
+    {
+      "name": "whole_batch_rollback",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "cart=2, favorites=0",
+      "actual": {
+        "cart": 2,
+        "favorites": 0,
+        "orders": 0,
+        "tombstones": 0,
+        "receipts": 2
+      }
+    },
+    {
+      "name": "no_partial_success_message",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "no all-success message",
+      "actual": "所选商品无法加入收藏"
+    },
+    {
+      "name": "missing_product_reason",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409 / errors[] 商品不存在",
+      "actual": [
+        409,
+        [
+          {
+            "cartItemId": "112",
+            "productId": "999999",
+            "reason": "NOT_FOUND",
+            "message": "商品不存在"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "missing_batch_rollback",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "cart=2, favorites=0",
+      "actual": {
+        "cart": 2,
+        "favorites": 0,
+        "orders": 0,
+        "tombstones": 0,
+        "receipts": 2
+      }
+    }
+  ],
+  "conjunct_count": 6,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "offline_mixed": {
+      "code": 40914,
+      "message": "所选商品无法加入收藏",
+      "data": {
+        "errors": [
+          {
+            "cartItemId": "110",
+            "productId": "2",
+            "productName": "B030-在售足库存-5",
+            "reason": "OFFLINE",
+            "message": "商品已下架"
+          }
+        ]
+      }
+    },
+    "missing_mixed": {
+      "code": 40914,
+      "message": "所选商品无法加入收藏",
+      "data": {
+        "errors": [
+          {
+            "cartItemId": "112",
+            "productId": "999999",
+            "reason": "NOT_FOUND",
+            "message": "商品不存在"
+          }
+        ]
+      }
+    }
+  }
+}

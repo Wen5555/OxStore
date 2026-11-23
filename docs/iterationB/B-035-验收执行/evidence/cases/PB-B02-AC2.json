@@ -1,0 +1,68 @@
+{
+  "ac": "PB-B02-AC2",
+  "pb": "PB-B02",
+  "title": "下单即扣保证防超卖，旧意向不干扰",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "first_buyer_deducts",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "2 left",
+      "actual": "2"
+    },
+    {
+      "name": "second_buyer_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "rejected with 库存不足",
+      "actual": [
+        409,
+        "{\"code\": 40910, \"message\": \"所选商品无法下单\", \"data\": {\"errors\": [{\"cartItemId\": \"20\", \"productId\": \"1\", \"productName\": \"B030-在售足库存-10\", \"reason\": \"INSUFFICIENT_STOCK\", \"message\": \"商品「B030-在售足库存-10」库存不足：当前可售 2 件，您选购了 3 件，请减少数量或移除后重试。\", \"availableStock\": \"2\", \"requestedQuantity\": \"3\"}]}}"
+      ]
+    },
+    {
+      "name": "stock_never_negative",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "2",
+      "actual": "2"
+    },
+    {
+      "name": "no_half_order",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "B has 0 orders",
+      "actual": "0"
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "attempt": {
+      "http": 409,
+      "body": {
+        "code": 40910,
+        "message": "所选商品无法下单",
+        "data": {
+          "errors": [
+            {
+              "cartItemId": "20",
+              "productId": "1",
+              "productName": "B030-在售足库存-10",
+              "reason": "INSUFFICIENT_STOCK",
+              "message": "商品「B030-在售足库存-10」库存不足：当前可售 2 件，您选购了 3 件，请减少数量或移除后重试。",
+              "availableStock": "2",
+              "requestedQuantity": "3"
+            }
+          ]
+        }
+      }
+    },
+    "stock": [
+      "2",
+      "2"
+    ]
+  }
+}

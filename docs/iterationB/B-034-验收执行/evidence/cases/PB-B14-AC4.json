@@ -1,0 +1,65 @@
+{
+  "ac": "PB-B14-AC4",
+  "pb": "PB-B14",
+  "title": "N=所选商品行数；成功提示「已收藏 N 件商品」",
+  "status": "PASS_API_UI_DEFERRED",
+  "conjuncts": [
+    {
+      "name": "two_lines_message_n2",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "已收藏 2 件商品",
+      "actual": [
+        200,
+        "已收藏 2 件商品"
+      ]
+    },
+    {
+      "name": "single_line_message_n1",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "已收藏 1 件商品",
+      "actual": [
+        200,
+        "已收藏 1 件商品"
+      ]
+    },
+    {
+      "name": "ui_confirm_text",
+      "pass": false,
+      "disposition_if_fail": "DEFER_TO_B036",
+      "expected": "UI 二次确认：所选 N 件商品将从购物车移除并加入收藏（N=行数）",
+      "actual": "not executed here; deferred to B-036 real-page run"
+    }
+  ],
+  "conjunct_count": 3,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [
+    "ui_confirm_text"
+  ],
+  "evidence": {
+    "two": {
+      "code": 0,
+      "message": "已收藏 2 件商品",
+      "data": {
+        "movedLineCount": 2,
+        "movedCartItemIds": [
+          "104",
+          "105"
+        ],
+        "skippedDeletedCartItemIds": []
+      }
+    },
+    "single": {
+      "code": 0,
+      "message": "已收藏 1 件商品",
+      "data": {
+        "movedLineCount": 1,
+        "movedCartItemIds": [
+          "106"
+        ],
+        "skippedDeletedCartItemIds": []
+      }
+    }
+  }
+}

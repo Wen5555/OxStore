@@ -1,0 +1,117 @@
+{
+  "ac": "SEQ-12",
+  "pb": "PB-B01",
+  "title": "两连接同时确认：恰一成功、不重复",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "exactly_one_confirm_success",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "one 200 + one 409",
+      "actual": [
+        [
+          409,
+          {
+            "code": 40904,
+            "message": "订单状态已变化，请刷新后重试",
+            "data": null
+          }
+        ],
+        [
+          200,
+          {
+            "code": 0,
+            "message": "ok",
+            "data": {
+              "orderId": "32",
+              "orderNo": "133cabdd-c2a2-4dcc-88e9-e8355082f81c",
+              "customerId": "1",
+              "status": "CONFIRMED",
+              "items": [
+                {
+                  "productId": "1",
+                  "productName": "B030-在售足库存-10",
+                  "unitPrice": "12.50",
+                  "quantity": "1",
+                  "lineAmount": "12.50"
+                }
+              ],
+              "totalAmount": "12.50",
+              "createdAt": "2026-11-21T15:31:40.356196",
+              "cancelledBy": null,
+              "cancelledAt": null,
+              "cancelReason": null,
+              "allowedActions": [
+                "PREPARE",
+                "CANCEL"
+              ]
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "status_confirmed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "CONFIRMED",
+      "actual": "CONFIRMED"
+    },
+    {
+      "name": "no_stock_change_on_confirm",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "9",
+      "actual": {
+        "before": "9",
+        "after": "9"
+      }
+    }
+  ],
+  "conjunct_count": 3,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "a": [
+      409,
+      {
+        "code": 40904,
+        "message": "订单状态已变化，请刷新后重试",
+        "data": null
+      }
+    ],
+    "b": [
+      200,
+      {
+        "code": 0,
+        "message": "ok",
+        "data": {
+          "orderId": "32",
+          "orderNo": "133cabdd-c2a2-4dcc-88e9-e8355082f81c",
+          "customerId": "1",
+          "status": "CONFIRMED",
+          "items": [
+            {
+              "productId": "1",
+              "productName": "B030-在售足库存-10",
+              "unitPrice": "12.50",
+              "quantity": "1",
+              "lineAmount": "12.50"
+            }
+          ],
+          "totalAmount": "12.50",
+          "createdAt": "2026-11-21T15:31:40.356196",
+          "cancelledBy": null,
+          "cancelledAt": null,
+          "cancelReason": null,
+          "allowedActions": [
+            "PREPARE",
+            "CANCEL"
+          ]
+        }
+      }
+    ],
+    "status": "CONFIRMED"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "conjuncts": [
+    {
+      "name": "multi_product_one_order_placed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 201,
+        "message": "下单成功",
+        "items": [
+          {
+            "product_id": 25,
+            "product_name": "B032-在售-10",
+            "quantity": "3",
+            "unit_price": "12.50",
+            "line_amount": "37.50"
+          },
+          {
+            "product_id": 26,
+            "product_name": "B032-在售-5",
+            "quantity": "1",
+            "unit_price": "8.00",
+            "line_amount": "8.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "multi_product_whole_order_cancel",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "order": {
+          "id": 748,
+          "order_no": "a6a4e205-eacb-40bf-9707-6f96765e9f6f",
+          "status": "CANCELLED",
+          "total_amount": "45.50",
+          "created_at": "2026-11-21T06:19:59.441443",
+          "cancelled_by": "CUSTOMER",
+          "cancelled_at": "2026-11-21T06:19:59.484940"
+        }
+      }
+    },
+    {
+      "name": "single_qty_order",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 201,
+        "message": "下单成功"
+      }
+    }
+  ],
+  "conjunct_pass": 3,
+  "conjunct_total": 3,
+  "conjunct_fail_names": []
+}

@@ -1,0 +1,536 @@
+{
+  "path": "fixtures/V8__close_legacy_fixed_price_intents.sql → CALL upgrade_oxstore_v8()",
+  "migration": {
+    "ok": true,
+    "returncode": 0,
+    "stdout": "closed_intents\tclosed_attempts\tunfrozen_products\tpaused_products\n2\t1\t1\t1\n",
+    "stderr": "mysql: [Warning] Using a password on the command line interface can be insecure.\n",
+    "sql_path": "/tmp/oxstore-develop/backend/src/main/resources/db/migrations/V8__close_legacy_fixed_price_intents.sql",
+    "sql_sha256": "afc64e7913e23dae52a4651c1d1ee146ef57f0b582accb48be8b5097fde17306"
+  },
+  "seed": {
+    "intents": [
+      {
+        "id": 53,
+        "status": "SUCCESS",
+        "product_name_snapshot": "LEGACY-SUCCESS"
+      },
+      {
+        "id": 54,
+        "status": "FAILED",
+        "product_name_snapshot": "LEGACY-FAILED"
+      },
+      {
+        "id": 55,
+        "status": "QUEUING",
+        "product_name_snapshot": "LEGACY-QUEUING"
+      },
+      {
+        "id": 56,
+        "status": "IN_TRANSACTION",
+        "product_name_snapshot": "LEGACY-IN-TX"
+      }
+    ],
+    "attempt": {
+      "id": 11,
+      "intent_id": 56,
+      "finished_at": null,
+      "result": null,
+      "legacy_closed_at": null
+    },
+    "products_before": {
+      "25": {
+        "id": 25,
+        "stock": "10",
+        "status": "FROZEN",
+        "freeze_source": "TRADE"
+      },
+      "26": {
+        "id": 26,
+        "stock": "5",
+        "status": "FROZEN",
+        "freeze_source": "MANUAL"
+      }
+    },
+    "orders_before": 0,
+    "customer_b_id": 4
+  },
+  "intents_after": [
+    {
+      "id": 53,
+      "status": "SUCCESS",
+      "legacy_closed_at": null,
+      "legacy_close_reason": null,
+      "product_name_snapshot": "LEGACY-SUCCESS"
+    },
+    {
+      "id": 54,
+      "status": "FAILED",
+      "legacy_closed_at": null,
+      "legacy_close_reason": null,
+      "product_name_snapshot": "LEGACY-FAILED"
+    },
+    {
+      "id": 55,
+      "status": "QUEUING",
+      "legacy_closed_at": "2026-11-20T22:19:56.179413",
+      "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+      "product_name_snapshot": "LEGACY-QUEUING"
+    },
+    {
+      "id": 56,
+      "status": "IN_TRANSACTION",
+      "legacy_closed_at": "2026-11-20T22:19:56.179413",
+      "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+      "product_name_snapshot": "LEGACY-IN-TX"
+    }
+  ],
+  "attempt_after": {
+    "id": 11,
+    "intent_id": 56,
+    "finished_at": null,
+    "result": null,
+    "legacy_closed_at": "2026-11-20T22:19:56.179413"
+  },
+  "products_after": {
+    "25": {
+      "id": 25,
+      "stock": "10",
+      "status": "ONLINE",
+      "freeze_source": null,
+      "offline_reason": null
+    },
+    "26": {
+      "id": 26,
+      "stock": "5",
+      "status": "OFFLINE",
+      "freeze_source": null,
+      "offline_reason": "MANUAL"
+    }
+  },
+  "revoked_charge": "previous BLOCKED for missing close API — wrong test path; V8 is the close/unfreeze mechanism",
+  "conjuncts": [
+    {
+      "name": "seed_statuses_SUCCESS_FAILED_QUEUING_IN_TRANSACTION",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "statuses": [
+          "SUCCESS",
+          "FAILED",
+          "QUEUING",
+          "IN_TRANSACTION"
+        ]
+      }
+    },
+    {
+      "name": "seed_FROZEN_TRADE_and_MANUAL_products",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "25": {
+          "id": 25,
+          "stock": "10",
+          "status": "FROZEN",
+          "freeze_source": "TRADE"
+        },
+        "26": {
+          "id": 26,
+          "stock": "5",
+          "status": "FROZEN",
+          "freeze_source": "MANUAL"
+        }
+      }
+    },
+    {
+      "name": "seed_unfinished_trade_attempt",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "id": 11,
+        "intent_id": 56,
+        "finished_at": null,
+        "result": null,
+        "legacy_closed_at": null
+      }
+    },
+    {
+      "name": "v8_migration_executed",
+      "pass": true,
+      "disposition_if_fail": "NOT_EXECUTED",
+      "evidence": {
+        "ok": true,
+        "returncode": 0,
+        "stdout": "closed_intents\tclosed_attempts\tunfrozen_products\tpaused_products\n2\t1\t1\t1\n",
+        "stderr": "mysql: [Warning] Using a password on the command line interface can be insecure.\n",
+        "sql_path": "/tmp/oxstore-develop/backend/src/main/resources/db/migrations/V8__close_legacy_fixed_price_intents.sql",
+        "sql_sha256": "afc64e7913e23dae52a4651c1d1ee146ef57f0b582accb48be8b5097fde17306"
+      }
+    },
+    {
+      "name": "migration_closes_QUEUING_IN_TRANSACTION_keep_status",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "LEGACY-QUEUING": {
+          "id": 55,
+          "status": "QUEUING",
+          "legacy_closed_at": "2026-11-20T22:19:56.179413",
+          "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+          "product_name_snapshot": "LEGACY-QUEUING"
+        },
+        "LEGACY-IN-TX": {
+          "id": 56,
+          "status": "IN_TRANSACTION",
+          "legacy_closed_at": "2026-11-20T22:19:56.179413",
+          "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+          "product_name_snapshot": "LEGACY-IN-TX"
+        }
+      }
+    },
+    {
+      "name": "SUCCESS_FAILED_history_untouched",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "LEGACY-SUCCESS": {
+          "id": 53,
+          "status": "SUCCESS",
+          "legacy_closed_at": null,
+          "legacy_close_reason": null,
+          "product_name_snapshot": "LEGACY-SUCCESS"
+        },
+        "LEGACY-FAILED": {
+          "id": 54,
+          "status": "FAILED",
+          "legacy_closed_at": null,
+          "legacy_close_reason": null,
+          "product_name_snapshot": "LEGACY-FAILED"
+        }
+      }
+    },
+    {
+      "name": "trade_attempt_legacy_closed_unfinished",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "id": 11,
+        "intent_id": 56,
+        "finished_at": null,
+        "result": null,
+        "legacy_closed_at": "2026-11-20T22:19:56.179413"
+      }
+    },
+    {
+      "name": "TRADE_product_unfrozen_ONLINE",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "id": 25,
+        "stock": "10",
+        "status": "ONLINE",
+        "freeze_source": null,
+        "offline_reason": null
+      }
+    },
+    {
+      "name": "MANUAL_frozen_becomes_OFFLINE_MANUAL",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "id": 26,
+        "stock": "5",
+        "status": "OFFLINE",
+        "freeze_source": null,
+        "offline_reason": "MANUAL"
+      }
+    },
+    {
+      "name": "stock_not_replenished",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "trade": [
+          "10",
+          "10"
+        ],
+        "manual": [
+          "5",
+          "5"
+        ]
+      }
+    },
+    {
+      "name": "no_new_order_from_migration",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "before": 0,
+        "after": 0
+      }
+    },
+    {
+      "name": "archive_admin_response_content",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 200,
+        "message": "ok",
+        "snaps": [
+          "LEGACY-FAILED",
+          "LEGACY-IN-TX",
+          "LEGACY-QUEUING",
+          "LEGACY-SUCCESS"
+        ],
+        "sample": [
+          {
+            "legacyIntentId": "56",
+            "productId": "25",
+            "productNameSnapshot": "LEGACY-IN-TX",
+            "originalStatus": "IN_TRANSACTION",
+            "submittedAt": "2026-11-20T06:19:56.144191",
+            "processedAt": null,
+            "closedAt": "2026-11-20T14:19:56.179413",
+            "displayStatus": "CLOSED",
+            "readOnly": true
+          },
+          {
+            "legacyIntentId": "55",
+            "productId": "25",
+            "productNameSnapshot": "LEGACY-QUEUING",
+            "originalStatus": "QUEUING",
+            "submittedAt": "2026-11-20T06:19:56.144191",
+            "processedAt": null,
+            "closedAt": "2026-11-20T14:19:56.179413",
+            "displayStatus": "CLOSED",
+            "readOnly": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "archive_customer_own_response_content",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 200,
+        "message": "ok",
+        "snaps": [
+          "LEGACY-FAILED",
+          "LEGACY-IN-TX",
+          "LEGACY-QUEUING",
+          "LEGACY-SUCCESS"
+        ],
+        "sample": [
+          {
+            "legacyIntentId": "56",
+            "productId": "25",
+            "productNameSnapshot": "LEGACY-IN-TX",
+            "originalStatus": "IN_TRANSACTION",
+            "submittedAt": "2026-11-20T06:19:56.144191",
+            "processedAt": null,
+            "closedAt": "2026-11-20T14:19:56.179413",
+            "displayStatus": "CLOSED",
+            "readOnly": true
+          },
+          {
+            "legacyIntentId": "55",
+            "productId": "25",
+            "productNameSnapshot": "LEGACY-QUEUING",
+            "originalStatus": "QUEUING",
+            "submittedAt": "2026-11-20T06:19:56.144191",
+            "processedAt": null,
+            "closedAt": "2026-11-20T14:19:56.179413",
+            "displayStatus": "CLOSED",
+            "readOnly": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "archive_customer_isolation",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 200,
+        "snaps": []
+      }
+    },
+    {
+      "name": "archive_real_id_mutations_rejected_no_state_write",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "attempts": [
+          {
+            "entry": "POST /api/products/{productId}/intents",
+            "id": "25",
+            "http": 409,
+            "message": "一口价旧购买意向已关闭，请通过购物车下单"
+          },
+          {
+            "entry": "GET /api/admin/intents",
+            "id": "25",
+            "http": 409,
+            "message": "一口价旧购买意向已关闭，请查看只读归档"
+          },
+          {
+            "entry": "POST /api/admin/intents/{id}/start",
+            "id": "53",
+            "status": "SUCCESS",
+            "http": 409,
+            "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+          },
+          {
+            "entry": "POST /api/admin/intents/{id}/success",
+            "id": "53",
+            "status": "SUCCESS",
+            "http": 409,
+            "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+          },
+          {
+            "entry": "POST /api/admin/intents/{id}/fail",
+            "id": "53",
+            "status": "SUCCESS",
+            "http": 409,
+            "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+          },
+          {
+            "entry": "POST /api/admin/intents/{id}/start",
+            "id": "54",
+            "status": "FAILED",
+            "http": 409,
+            "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+          },
+          {
+            "entry": "POST /api/admin/intents/{id}/success",
+            "id": "54",
+            "status": "FAILED",
+            "http": 409,
+            "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+          },
+          {
+            "entry": "POST /api/admin/intents/{id}/fail",
+            "id": "54",
+            "status": "FAILED",
+            "http": 409,
+            "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+          },
+          {
+            "entry": "POST /api/admin/intents/{id}/start",
+            "id": "55",
+            "status": "QUEUING",
+            "http": 409,
+            "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+          },
+          {
+            "entry": "POST /api/admin/intents/{id}/success",
+            "id": "55",
+            "status": "QUEUING",
+            "http": 409,
+            "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+          },
+          {
+            "entry": "POST /api/admin/intents/{id}/fail",
+            "id": "55",
+            "status": "QUEUING",
+            "http": 409,
+            "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+          },
+          {
+            "entry": "POST /api/admin/intents/{id}/start",
+            "id": "56",
+            "status": "IN_TRANSACTION",
+            "http": 409,
+            "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+          },
+          {
+            "entry": "POST /api/admin/intents/{id}/success",
+            "id": "56",
+            "status": "IN_TRANSACTION",
+            "http": 409,
+            "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+          },
+          {
+            "entry": "POST /api/admin/intents/{id}/fail",
+            "id": "56",
+            "status": "IN_TRANSACTION",
+            "http": 409,
+            "message": "一口价旧交易已关闭，仅拍卖中标履约保留原入口"
+          }
+        ],
+        "writes_rejected": true,
+        "queue_not_writable": true,
+        "legacy_entry": {
+          "http": 409,
+          "message": "一口价旧购买意向已关闭，请通过购物车下单"
+        },
+        "unchanged": true,
+        "before": {
+          "53": {
+            "id": 53,
+            "status": "SUCCESS",
+            "legacy_closed_at": null,
+            "legacy_close_reason": null,
+            "product_name_snapshot": "LEGACY-SUCCESS"
+          },
+          "54": {
+            "id": 54,
+            "status": "FAILED",
+            "legacy_closed_at": null,
+            "legacy_close_reason": null,
+            "product_name_snapshot": "LEGACY-FAILED"
+          },
+          "55": {
+            "id": 55,
+            "status": "QUEUING",
+            "legacy_closed_at": "2026-11-20T22:19:56.179413",
+            "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+            "product_name_snapshot": "LEGACY-QUEUING"
+          },
+          "56": {
+            "id": 56,
+            "status": "IN_TRANSACTION",
+            "legacy_closed_at": "2026-11-20T22:19:56.179413",
+            "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+            "product_name_snapshot": "LEGACY-IN-TX"
+          }
+        },
+        "after": [
+          {
+            "id": 53,
+            "status": "SUCCESS",
+            "legacy_closed_at": null,
+            "legacy_close_reason": null,
+            "product_name_snapshot": "LEGACY-SUCCESS"
+          },
+          {
+            "id": 54,
+            "status": "FAILED",
+            "legacy_closed_at": null,
+            "legacy_close_reason": null,
+            "product_name_snapshot": "LEGACY-FAILED"
+          },
+          {
+            "id": 55,
+            "status": "QUEUING",
+            "legacy_closed_at": "2026-11-20T22:19:56.179413",
+            "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+            "product_name_snapshot": "LEGACY-QUEUING"
+          },
+          {
+            "id": 56,
+            "status": "IN_TRANSACTION",
+            "legacy_closed_at": "2026-11-20T22:19:56.179413",
+            "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+            "product_name_snapshot": "LEGACY-IN-TX"
+          }
+        ],
+        "note": "IntentController POST /api/products/{id}/intents; AdminIntentController GET /api/admin/intents; TradeController POST /api/admin/intents/{id}/start|success|fail"
+      }
+    }
+  ],
+  "conjunct_pass": 15,
+  "conjunct_total": 15,
+  "conjunct_fail_names": []
+}
