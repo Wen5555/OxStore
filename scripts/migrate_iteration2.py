@@ -18,7 +18,9 @@ import subprocess
 import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
-MIGRATIONS = ROOT / "backend/src/main/resources/db/migrations"
+# Source checkout layout first; a delivered bundle keeps the same files under database/migrations.
+MIGRATIONS = next((p for p in (ROOT / "backend/src/main/resources/db/migrations", ROOT / "database/migrations") if p.is_dir()),
+                  ROOT / "backend/src/main/resources/db/migrations")
 ITERATION2_TABLES = {"seller", "customer", "category", "product", "product_image",
                      "purchase_intent", "trade_attempt", "order_history", "product_status_event"}
 AUCTION_TABLES = {"auction_session", "auction_bid", "auction_notification"}

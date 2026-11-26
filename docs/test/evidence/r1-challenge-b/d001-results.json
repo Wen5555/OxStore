@@ -1,0 +1,210 @@
+{
+  "date": "2026-11-22",
+  "task": "B-011",
+  "defect": "D-001",
+  "acceptance": "PB-B13-AC2",
+  "baseCommit": "4dd570c462d595397b6b4175264d5f35b9c8cd22",
+  "r2Source": {
+    "pr": "https://github.com/Wen5555/OxStore/pull/32",
+    "headRepository": "YanPeng240607/OxStore-",
+    "headCommit": "c6db1df5fe04f0ff4798d7d6c34de097020e7ead",
+    "defectLog": "docs/iterationB/B-040-验收执行/defect-log.md",
+    "serialCheck": "docs/iterationB/B-037-验收执行/scripts/run_checks.py",
+    "b032RuntimeInjectionLogAvailableAtThisHead": false
+  },
+  "finding": "Serial quantity change before submit correctly returns 40913. An add reaching the service after checkout locks waits for commit and survives as a new cart row.",
+  "productionApplicationCodeChanges": false,
+  "hook": "Test-only Mockito spy pauses at ShopOrderRepository.saveAndFlush after checkout has acquired locks and validated confirmation. CartService spy records real add entry and calls the original method.",
+  "transport": "Real HTTP via random-port Spring Boot server; fixture identity/product seeding only uses repositories/JWT; all cart/order business actions and queries use public API.",
+  "backendVerify": {
+    "command": "mvn -B -ntp -f backend/pom.xml clean verify",
+    "tests": 118,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "mysql": {
+    "version": "8.0.25",
+    "isolatedDatabase": "oxstore_d001_20261122",
+    "ddlAuto": "none",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "lockedAdd": {
+      "checkoutHttp": 201,
+      "order": {
+        "orderId": "1",
+        "orderNo": "54b76da0-b369-4e45-b370-b195278a3510",
+        "customerId": "1",
+        "status": "PLACED",
+        "items": [
+          {
+            "productId": "1",
+            "productName": "http-4887f4af-2973-469c-85ae-03df941fbac2",
+            "unitPrice": "1.25",
+            "quantity": "2",
+            "lineAmount": "2.50"
+          }
+        ],
+        "totalAmount": "2.50",
+        "createdAt": "2026-11-22T17:15:33.450207",
+        "cancelledBy": null,
+        "cancelledAt": null,
+        "cancelReason": null,
+        "allowedActions": [
+          "CANCEL"
+        ]
+      },
+      "cartAfter": [
+        {
+          "cartItemId": "2",
+          "productId": "1",
+          "productName": "http-4887f4af-2973-469c-85ae-03df941fbac2",
+          "unitPrice": "1.25",
+          "mainImageUrl": null,
+          "quantity": "1",
+          "stock": "3",
+          "online": true,
+          "invalidLabel": null,
+          "defaultCheckoutSelected": true,
+          "canCheckoutSelect": true,
+          "canFavoriteSelect": true,
+          "updatedAt": "2026-11-22T17:15:33.855025"
+        }
+      ],
+      "addHttp": 200,
+      "addReachedServiceBeforeRelease": true,
+      "addWaitedForCheckout": true,
+      "duplicateCheckoutCode": 40909,
+      "originalCartItemId": "1",
+      "stockAfter": "3"
+    },
+    "beforeLockChange": {
+      "cartAfter": [
+        {
+          "cartItemId": "3",
+          "productId": "2",
+          "productName": "http-1514e99f-52a8-4ff9-88b3-9a10c3ebeb2f",
+          "unitPrice": "1.25",
+          "mainImageUrl": null,
+          "quantity": "3",
+          "stock": "5",
+          "online": true,
+          "invalidLabel": null,
+          "defaultCheckoutSelected": true,
+          "canCheckoutSelect": true,
+          "canFavoriteSelect": true,
+          "updatedAt": "2026-11-22T17:15:34.200494"
+        }
+      ],
+      "stockAfter": "5",
+      "submitHttp": 409,
+      "response": {
+        "code": 40913,
+        "message": "确认信息已变化，请重新确认",
+        "data": {
+          "errors": [
+            {
+              "cartItemId": "3",
+              "productId": "2",
+              "productName": "http-1514e99f-52a8-4ff9-88b3-9a10c3ebeb2f",
+              "reason": "CONFIRMATION_CHANGED",
+              "message": "商品「http-1514e99f-52a8-4ff9-88b3-9a10c3ebeb2f」的确认信息已变化，请重新确认"
+            }
+          ]
+        }
+      },
+      "orderCount": 0
+    }
+  },
+  "h2": {
+    "lockedAdd": {
+      "stockAfter": "3",
+      "checkoutHttp": 201,
+      "order": {
+        "orderId": "1",
+        "orderNo": "6e10dbe0-364d-4f3f-8473-3a75688d0969",
+        "customerId": "1",
+        "status": "PLACED",
+        "items": [
+          {
+            "productId": "1",
+            "productName": "http-f8bd5714-c8a5-4c23-b935-91138b83041b",
+            "unitPrice": "1.25",
+            "quantity": "2",
+            "lineAmount": "2.50"
+          }
+        ],
+        "totalAmount": "2.50",
+        "createdAt": "2026-11-22T17:16:45.383903",
+        "cancelledBy": null,
+        "cancelledAt": null,
+        "cancelReason": null,
+        "allowedActions": [
+          "CANCEL"
+        ]
+      },
+      "cartAfter": [
+        {
+          "cartItemId": "2",
+          "productId": "1",
+          "productName": "http-f8bd5714-c8a5-4c23-b935-91138b83041b",
+          "unitPrice": "1.25",
+          "mainImageUrl": null,
+          "quantity": "1",
+          "stock": "3",
+          "online": true,
+          "invalidLabel": null,
+          "defaultCheckoutSelected": true,
+          "canCheckoutSelect": true,
+          "canFavoriteSelect": true,
+          "updatedAt": "2026-11-22T17:16:45.724537"
+        }
+      ],
+      "addHttp": 200,
+      "addReachedServiceBeforeRelease": true,
+      "addWaitedForCheckout": true,
+      "duplicateCheckoutCode": 40909,
+      "originalCartItemId": "1"
+    },
+    "beforeLockChange": {
+      "cartAfter": [
+        {
+          "cartItemId": "3",
+          "productId": "2",
+          "productName": "http-5a7cb7f6-c4b0-4be1-b2bd-6e7f092d1735",
+          "unitPrice": "1.25",
+          "mainImageUrl": null,
+          "quantity": "3",
+          "stock": "5",
+          "online": true,
+          "invalidLabel": null,
+          "defaultCheckoutSelected": true,
+          "canCheckoutSelect": true,
+          "canFavoriteSelect": true,
+          "updatedAt": "2026-11-22T17:16:45.891171"
+        }
+      ],
+      "stockAfter": "5",
+      "submitHttp": 409,
+      "response": {
+        "code": 40913,
+        "message": "确认信息已变化，请重新确认",
+        "data": {
+          "errors": [
+            {
+              "cartItemId": "3",
+              "productId": "2",
+              "productName": "http-5a7cb7f6-c4b0-4be1-b2bd-6e7f092d1735",
+              "reason": "CONFIRMATION_CHANGED",
+              "message": "商品「http-5a7cb7f6-c4b0-4be1-b2bd-6e7f092d1735」的确认信息已变化，请重新确认"
+            }
+          ]
+        }
+      },
+      "orderCount": 0
+    }
+  },
+  "reviewStatus": "R1 reproducibility evidence only; R2 must independently retest and update D-001/PR #32. No acceptance status overwritten."
+}

@@ -1,0 +1,56 @@
+{
+  "modes": {
+    "a_first": {
+      "pass": true,
+      "winner": "A",
+      "stock": "0",
+      "assertions": {
+        "exactly_one_success_http": true,
+        "exactly_one_placed_order": true,
+        "stock_is_zero": true,
+        "no_half_orders": true,
+        "loser_cart_not_miscleared": true,
+        "winner": "A",
+        "stock": "0",
+        "order_count": 1,
+        "pass": true
+      },
+      "file": "review/seq01/a_first.json"
+    },
+    "b_first": {
+      "pass": true,
+      "winner": "B",
+      "stock": "0",
+      "assertions": {
+        "exactly_one_success_http": true,
+        "exactly_one_placed_order": true,
+        "stock_is_zero": true,
+        "no_half_orders": true,
+        "loser_cart_not_miscleared": true,
+        "winner": "B",
+        "stock": "0",
+        "order_count": 1,
+        "pass": true
+      },
+      "file": "review/seq01/b_first.json"
+    },
+    "simultaneous": {
+      "pass": true,
+      "winner": "A",
+      "stock": "0",
+      "assertions": {
+        "exactly_one_success_http": true,
+        "exactly_one_placed_order": true,
+        "stock_is_zero": true,
+        "no_half_orders": true,
+        "loser_cart_not_miscleared": true,
+        "winner": "A",
+        "stock": "0",
+        "order_count": 1,
+        "pass": true
+      },
+      "file": "review/seq01/simultaneous.json"
+    }
+  },
+  "all_pass": true
+}

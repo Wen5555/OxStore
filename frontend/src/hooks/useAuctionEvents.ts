@@ -4,7 +4,7 @@ import type { AuctionBidEvent, AuctionSettledEvent, AuctionSnapshot } from '../t
 
 export type AuctionEvent = AuctionSnapshot | AuctionBidEvent | AuctionSettledEvent
 
-export function useAuctionEvents(productId: number | undefined, onEvent: (event: AuctionEvent) => void) {
+export function useAuctionEvents(productId: string | number | undefined, onEvent: (event: AuctionEvent) => void) {
   const onEventRef = useRef(onEvent)
   onEventRef.current = onEvent
 

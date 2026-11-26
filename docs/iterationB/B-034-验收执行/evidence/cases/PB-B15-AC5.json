@@ -1,0 +1,105 @@
+{
+  "ac": "PB-B15-AC5",
+  "pb": "PB-B15",
+  "title": "转收藏成功后取消收藏；同键重试返回原结果不复活",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "move_first_success",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "200 / 已收藏 1 件商品",
+      "actual": [
+        200,
+        "已收藏 1 件商品"
+      ]
+    },
+    {
+      "name": "late_cancel_success",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "200 / 已取消收藏",
+      "actual": [
+        200,
+        {
+          "code": 0,
+          "message": "已取消收藏",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "final_favorite_cancelled",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "favorites=0",
+      "actual": 0
+    },
+    {
+      "name": "cart_row_still_removed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "cart=0",
+      "actual": 0
+    },
+    {
+      "name": "same_key_returns_original_result",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "200 + original payload, no re-favorite",
+      "actual": [
+        200,
+        "已收藏 1 件商品",
+        {
+          "movedLineCount": 1,
+          "movedCartItemIds": [
+            "126"
+          ],
+          "skippedDeletedCartItemIds": []
+        }
+      ]
+    },
+    {
+      "name": "no_revival_after_replay",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "favorites=0, 1 move receipt",
+      "actual": {
+        "favorites": 0,
+        "move_receipts": 1
+      }
+    }
+  ],
+  "conjunct_count": 6,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "first": {
+      "code": 0,
+      "message": "已收藏 1 件商品",
+      "data": {
+        "movedLineCount": 1,
+        "movedCartItemIds": [
+          "126"
+        ],
+        "skippedDeletedCartItemIds": []
+      }
+    },
+    "cancel": {
+      "code": 0,
+      "message": "已取消收藏",
+      "data": null
+    },
+    "replay": {
+      "code": 0,
+      "message": "已收藏 1 件商品",
+      "data": {
+        "movedLineCount": 1,
+        "movedCartItemIds": [
+          "126"
+        ],
+        "skippedDeletedCartItemIds": []
+      }
+    }
+  }
+}

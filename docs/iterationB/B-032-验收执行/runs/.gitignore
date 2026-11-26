@@ -1,0 +1,6 @@
+.env.local
+be.env
+*.log
+__pycache__/
+_ui_*.js
+fixture-ids.json

@@ -1,0 +1,165 @@
+{
+  "date": "2026-11-16",
+  "tasks": [
+    "B-005",
+    "B-006"
+  ],
+  "baseCommit": "018b172c30ed7281316ab54ba7d8c6a46efefa34",
+  "localJdk": "21.0.10, compiler release 17",
+  "backendFullVerify": {
+    "tests": 68,
+    "failures": 0,
+    "errors": 0,
+    "command": "mvn -B -ntp -f backend/pom.xml clean verify"
+  },
+  "mysqlInventory": {
+    "version": "8.0.25",
+    "isolatedPort": 33316,
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "ddlAuto": "none"
+  },
+  "frontend": {
+    "build": "passed",
+    "mockPlaywrightTests": 18,
+    "failures": 0
+  },
+  "latestSuiteReports": [
+    {
+      "name": "com.team.shop.ChallengeBInventoryIntegrationTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "20.778"
+    },
+    {
+      "name": "com.team.shop.controller.admin.AdminProductControllerTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.53"
+    },
+    {
+      "name": "com.team.shop.domain.IntentStateMachineTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.015"
+    },
+    {
+      "name": "com.team.shop.domain.ProductStateMachineTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.029"
+    },
+    {
+      "name": "com.team.shop.dto.PhoneAndTradeRequestTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.099"
+    },
+    {
+      "name": "com.team.shop.entity.AuctionSessionTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.019"
+    },
+    {
+      "name": "com.team.shop.entity.ChallengeBInventoryTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.01"
+    },
+    {
+      "name": "com.team.shop.entity.TradeHistoryTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.008"
+    },
+    {
+      "name": "com.team.shop.exception.GlobalExceptionHandlerBugFixTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.007"
+    },
+    {
+      "name": "com.team.shop.Iteration2ApiIntegrationTest",
+      "tests": "12",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "12.244"
+    },
+    {
+      "name": "com.team.shop.repository.AuctionRepositoryTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.63"
+    },
+    {
+      "name": "com.team.shop.repository.ChallengeBRepositoryTest",
+      "tests": "10",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.432"
+    },
+    {
+      "name": "com.team.shop.security.ChallengeBSecurityIntegrationTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "2.074"
+    },
+    {
+      "name": "com.team.shop.security.JwtUtilTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.009"
+    },
+    {
+      "name": "com.team.shop.service.ImageStorageServiceTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.378"
+    },
+    {
+      "name": "com.team.shop.service.TradeServiceImplTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.274"
+    }
+  ],
+  "notClaimed": [
+    "R2独立业务验收",
+    "完整购物车/订单/取消/转收藏链路",
+    "B-028并发专项",
+    "B-000五人签认",
+    "旧库升级部署"
+  ]
+}

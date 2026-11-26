@@ -1,0 +1,42 @@
+{
+  "conjuncts": [
+    {
+      "name": "unauth_tip",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 401,
+        "message": "请先登录"
+      }
+    },
+    {
+      "name": "invalid_token_tip",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 401,
+        "message": "请重新登录"
+      }
+    },
+    {
+      "name": "multi_incomplete_orders_allowed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "placed_count": 2
+      }
+    },
+    {
+      "name": "other_buyer_access_denied",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 403,
+        "message": "无权操作该订单"
+      }
+    }
+  ],
+  "conjunct_pass": 4,
+  "conjunct_total": 4,
+  "conjunct_fail_names": []
+}

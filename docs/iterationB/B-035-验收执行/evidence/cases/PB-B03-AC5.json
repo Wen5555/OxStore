@@ -1,0 +1,176 @@
+{
+  "ac": "PB-B03-AC5",
+  "pb": "PB-B03",
+  "title": "旧记录只读关闭、不迁取消、解冻不补库存",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "status_preserved_not_cancelled",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "QUEUING/IN_TRANSACTION preserved",
+      "actual": [
+        "QUEUING",
+        "IN_TRANSACTION"
+      ]
+    },
+    {
+      "name": "legacy_closed_metadata",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "closed_at + FIXED_PRICE_CHALLENGE_B",
+      "actual": [
+        "2026-11-21 22:00:47.632410",
+        "FIXED_PRICE_CHALLENGE_B"
+      ]
+    },
+    {
+      "name": "attempt_closed_without_result",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "attempt closed, result null",
+      "actual": [
+        {
+          "id": "13",
+          "intent_id": "30",
+          "finished_at": null,
+          "result": null,
+          "legacy_closed_at": "2026-11-21 22:00:47.632410"
+        }
+      ]
+    },
+    {
+      "name": "products_unfrozen",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "both ONLINE",
+      "actual": {
+        "B030-在售足库存-10": "ONLINE",
+        "B030-在售足库存-5": "ONLINE",
+        "B030-低库存-1": "ONLINE"
+      }
+    },
+    {
+      "name": "no_stock_restock",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "10/5",
+      "actual": {
+        "B030-在售足库存-10": "10",
+        "B030-在售足库存-5": "5",
+        "B030-低库存-1": "1"
+      }
+    },
+    {
+      "name": "success_history_untouched",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "SUCCESS, not closed",
+      "actual": {
+        "id": "31",
+        "product_name": "B030-大整数库存",
+        "username": "b030_buyer_a",
+        "original_status": "SUCCESS",
+        "product_name_snapshot": "B030-大整数库存",
+        "legacy_closed_at": null,
+        "legacy_close_reason": null,
+        "submitted_at": "2026-11-20 22:00:47.497462"
+      }
+    },
+    {
+      "name": "archive_marks_closed_readonly",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "CLOSED + readOnly + originalStatus",
+      "actual": {
+        "legacyIntentId": "29",
+        "productId": "1",
+        "productNameSnapshot": "B030-在售足库存-10",
+        "originalStatus": "QUEUING",
+        "submittedAt": "2026-11-21T21:57:47.491306",
+        "processedAt": null,
+        "closedAt": "2026-11-21T22:00:47.63241",
+        "displayStatus": "CLOSED",
+        "readOnly": true
+      }
+    },
+    {
+      "name": "no_legacy_cancel_path",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "404 订单不存在 (not a new order)",
+      "actual": [
+        404,
+        {
+          "code": 40405,
+          "message": "订单不存在",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "old_fixed_price_entry_closed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409 已关闭",
+      "actual": [
+        409,
+        {
+          "code": 40917,
+          "message": "一口价旧购买意向已关闭，请通过购物车下单",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "old_queue_readonly",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "405 (no GET) or 409 只读归档",
+      "actual": [
+        405,
+        {
+          "code": 405,
+          "message": "请求方法不支持：GET",
+          "data": null
+        }
+      ]
+    }
+  ],
+  "conjunct_count": 10,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "v8_stdout": "2\t1\t2\t1",
+    "trade": {
+      "id": "29",
+      "product_name": "B030-在售足库存-10",
+      "username": "b030_buyer_a",
+      "original_status": "QUEUING",
+      "product_name_snapshot": "B030-在售足库存-10",
+      "legacy_closed_at": "2026-11-21 22:00:47.632410",
+      "legacy_close_reason": "FIXED_PRICE_CHALLENGE_B",
+      "submitted_at": "2026-11-21 21:57:47.491306"
+    },
+    "attempts": [
+      {
+        "id": "13",
+        "intent_id": "30",
+        "finished_at": null,
+        "result": null,
+        "legacy_closed_at": "2026-11-21 22:00:47.632410"
+      }
+    ],
+    "closed_item": {
+      "legacyIntentId": "29",
+      "productId": "1",
+      "productNameSnapshot": "B030-在售足库存-10",
+      "originalStatus": "QUEUING",
+      "submittedAt": "2026-11-21T21:57:47.491306",
+      "processedAt": null,
+      "closedAt": "2026-11-21T22:00:47.63241",
+      "displayStatus": "CLOSED",
+      "readOnly": true
+    }
+  }
+}

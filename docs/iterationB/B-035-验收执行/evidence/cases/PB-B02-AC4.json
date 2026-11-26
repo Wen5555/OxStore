@@ -1,0 +1,74 @@
+{
+  "ac": "PB-B02-AC4",
+  "pb": "PB-B02",
+  "title": "V8 解冻规则：TRADE→在售，MANUAL→已下架待手动上架",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "trade_frozen_returns_online",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "ONLINE/null",
+      "actual": {
+        "stock": "10",
+        "status": "ONLINE",
+        "offline_reason": null
+      }
+    },
+    {
+      "name": "manual_frozen_becomes_offline_manual",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "OFFLINE/MANUAL",
+      "actual": {
+        "stock": "1",
+        "status": "OFFLINE",
+        "offline_reason": "MANUAL"
+      }
+    },
+    {
+      "name": "stock_positive_does_not_auto_online",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "still OFFLINE",
+      "actual": {
+        "stock": "5",
+        "status": "OFFLINE",
+        "offline_reason": "MANUAL"
+      }
+    },
+    {
+      "name": "manual_online_works",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "ONLINE",
+      "actual": {
+        "stock": "5",
+        "status": "ONLINE",
+        "offline_reason": null
+      }
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "v8": {
+      "P-ON-10": {
+        "stock": "10",
+        "status": "ONLINE",
+        "offline_reason": null
+      },
+      "P-ON-1": {
+        "stock": "1",
+        "status": "OFFLINE",
+        "offline_reason": "MANUAL"
+      }
+    },
+    "after_online": {
+      "stock": "5",
+      "status": "ONLINE",
+      "offline_reason": null
+    }
+  }
+}

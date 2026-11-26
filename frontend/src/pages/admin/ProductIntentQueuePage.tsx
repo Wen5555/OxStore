@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Empty, Pagination, Popconfirm, Space, Spin, Tag, Typography, message } from 'antd'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { confirmFail, confirmSuccess, getProductIntentQueue, startTrade } from '../../api/intent'
 import { getAdminProduct } from '../../api/admin'
 import type { Product } from '../../types/product'
@@ -24,7 +24,8 @@ function toAuctionSummary(snapshot: AuctionSnapshot) {
 
 export default function ProductIntentQueuePage() {
   const { id } = useParams()
-  const productId = Number(id)
+  const navigate = useNavigate()
+  const productId = id ?? ''
   const [items, setItems] = useState<Intent[]>([])
   const [currentIntent, setCurrentIntent] = useState<Intent>()
   const [total, setTotal] = useState(0)
@@ -84,7 +85,7 @@ export default function ProductIntentQueuePage() {
   }, [product?.id, product?.sellingMode])
 
   const load = async () => {
-    if (!Number.isInteger(productId) || productId <= 0) {
+    if (!/^[1-9]\d*$/.test(productId)) {
       setLoadError(true)
       setLoading(false)
       return
@@ -93,15 +94,20 @@ export default function ProductIntentQueuePage() {
     try {
       setLoading(true)
       setLoadError(false)
-      const [result, firstPage, productResult] = await Promise.all([
+      const productResult = await getAdminProduct(productId)
+      setProduct(productResult)
+      if (productResult.sellingMode !== 'AUCTION') {
+        navigate('/admin/products', { replace: true })
+        return
+      }
+
+      const [result, firstPage] = await Promise.all([
         getProductIntentQueue(productId, page, PAGE_SIZE),
         page === 1 ? Promise.resolve(null) : getProductIntentQueue(productId, 1, PAGE_SIZE),
-        getAdminProduct(productId),
       ])
       setItems(result.items)
       setTotal(result.total)
       setCurrentIntent((firstPage?.items ?? result.items).find((intent) => intent.status === 'IN_TRANSACTION'))
-      setProduct(productResult)
     } catch (error) {
       console.error('获取商品意向队列失败:', error)
       setLoadError(true)

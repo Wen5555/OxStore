@@ -1,0 +1,19 @@
+{
+  "seq": "SEQ-01",
+  "mode": "simultaneous",
+  "results": {
+    "B": {
+      "returncode": 0,
+      "stdout": "{\"code\":0,\"message\":\"下单成功\",\"data\":{\"orderId\":\"4\",\"orderNo\":\"c3dd4550-f619-4dcb-8b2e-64682bce28f4\",\"customerId\":\"2\",\"status\":\"PLACED\",\"items\":[{\"productId\":\"4\",\"productName\":\"B030-低库存-1\",\"unitPrice\":\"3.30\",\"quantity\":\"1\",\"lineAmount\":\"3.30\"}],\"totalAmount\":\"3.30\",\"createdAt\":\"2026-11-20T16:02:37.352825\",\"cancelledBy\":null,\"cancelledAt\":null,\"cancelReason\":null,\"allowedActions\":[\"CANCEL\"]}}",
+      "stderr": "",
+      "elapsed_ms": 20
+    },
+    "A": {
+      "returncode": 0,
+      "stdout": "{\"code\":40910,\"message\":\"所选商品无法下单\",\"data\":{\"errors\":[{\"cartItemId\":\"7\",\"productId\":\"4\",\"productName\":\"B030-低库存-1\",\"reason\":\"OFFLINE\",\"message\":\"商品「B030-低库存-1」已下架，请从购物车移除后重试。\"}]}}",
+      "stderr": "",
+      "elapsed_ms": 23
+    }
+  },
+  "note": "Compare against concurrency/SEQ.md expected outcomes; do not mark pass without DB check"
+}

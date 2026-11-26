@@ -1,15 +1,54 @@
 import axios, { AxiosError, type AxiosRequestConfig } from 'axios'
 import { message } from 'antd'
+import type { CartItemError } from '../types/challengeB'
 import type { ApiResponse } from '../types/common'
 
+const cartItemErrorReasons = new Set<string>([
+  'OFFLINE',
+  'NOT_FOUND',
+  'INSUFFICIENT_STOCK',
+  'CART_ITEM_REMOVED',
+  'CONFIRMATION_CHANGED',
+])
+
 export class ApiError extends Error {
-  constructor(public readonly code: number | undefined, messageText: string, public readonly traceId?: string) {
+  public readonly itemErrors: CartItemError[]
+
+  constructor(
+    public readonly code: number | undefined,
+    messageText: string,
+    public readonly traceId?: string,
+    public readonly data?: unknown,
+  ) {
     super(messageText)
     this.name = 'ApiError'
+    this.itemErrors = getCartItemErrors(data)
   }
 }
 
+function getCartItemErrors(data: unknown): CartItemError[] {
+  if (!data || typeof data !== 'object' || !('errors' in data) || !Array.isArray(data.errors)) return []
+  return data.errors.filter((item): item is CartItemError => {
+    if (!item || typeof item !== 'object') return false
+    return 'cartItemId' in item
+      && typeof item.cartItemId === 'string'
+      && 'reason' in item
+      && typeof item.reason === 'string'
+      && cartItemErrorReasons.has(item.reason)
+      && 'message' in item
+      && typeof item.message === 'string'
+  })
+}
+
+function isChallengeBRequest(url?: string) {
+  const path = url?.replace(/^\/api(?=\/)/, '').split('?')[0] ?? ''
+  return path.startsWith('/me/')
+    || /^\/admin\/(orders|legacy-intents)(\/|$)/.test(path)
+    || /^\/admin\/products(\/|$)/.test(path)
+}
+
 function apiErrorMessage(code: number | undefined, fallback: string, url?: string) {
+  if (code === 40001 && url?.startsWith('/admin/products') && fallback === '库存不能为负数，请输入非负整数。') return fallback
   if (code === 40903 && url === '/auth/register') return '用户名已存在，请更换用户名。'
   switch (code) {
     case 40001: return '请检查必填字段和输入格式。'
@@ -36,6 +75,63 @@ function apiErrorMessage(code: number | undefined, fallback: string, url?: strin
   }
 }
 
+function errorMessage(code: number | undefined, fallback: string, url?: string) {
+  const isMappedAuctionError = [40906, 40907, 40908].includes(code ?? 0)
+    && /\/auction(s)?(\/|$)/.test(url?.split('?')[0] ?? '')
+  if (isChallengeBRequest(url) && !isMappedAuctionError) return fallback
+  return apiErrorMessage(code, fallback, url)
+}
+
+function currentPath() {
+  return `${window.location.pathname}${window.location.search}${window.location.hash}`
+}
+
+function redirectToLogin(isSellerRequest: boolean, text: string) {
+  const loginPath = isSellerRequest ? '/admin/login' : '/login'
+  if (window.location.pathname === loginPath) {
+    message.error(text)
+    return
+  }
+
+  const returnTo = currentPath()
+  sessionStorage.setItem('auth_redirect_message', text)
+  window.location.assign(`${loginPath}?returnTo=${encodeURIComponent(returnTo)}`)
+}
+
+function createApiError(
+  code: number | undefined,
+  serverMessage: string | undefined,
+  data: unknown,
+  traceId: string | undefined,
+  url: string | undefined,
+  status?: number,
+) {
+  const itemErrors = getCartItemErrors(data)
+  const isSellerRequest = url?.startsWith('/admin/') ?? false
+  const hasToken = Boolean(localStorage.getItem(isSellerRequest ? 'seller_token' : 'customer_token'))
+  const fallbackMessage = status === 401
+    ? isSellerRequest ? '请先登录后台' : hasToken ? '请重新登录' : '请先登录'
+    : '网络错误'
+  const text = itemErrors.length > 0
+    ? serverMessage || fallbackMessage
+    : errorMessage(code, serverMessage || fallbackMessage, url)
+  if (traceId) console.error('API 请求失败', { code, traceId })
+
+  if (code === 40101 || status === 401) {
+    const isAuthRequest = url?.endsWith('/auth/login') || url?.endsWith('/auth/register')
+    if (!isAuthRequest) {
+      localStorage.removeItem(isSellerRequest ? 'seller_token' : 'customer_token')
+      redirectToLogin(isSellerRequest, text)
+    } else {
+      message.error(text)
+    }
+  } else if (itemErrors.length === 0) {
+    message.error(text)
+  }
+
+  return new ApiError(code, text, traceId, data)
+}
+
 const instance = axios.create({
   baseURL: '/api',
   timeout: 10000,
@@ -54,35 +150,43 @@ instance.interceptors.response.use(
   (response) => {
     const body = response.data as ApiResponse<unknown>
     if (body.code !== 0) {
-      const text = apiErrorMessage(body.code, body.message || '请求失败', response.config.url)
-      if (body.traceId) console.error('API 请求失败', { code: body.code, traceId: body.traceId })
-      message.error(text)
-      return Promise.reject(new ApiError(body.code, text, body.traceId))
+      return Promise.reject(createApiError(
+        body.code,
+        body.message,
+        body.data,
+        body.traceId,
+        response.config.url,
+        response.status,
+      ))
     }
     return response
   },
   (error: AxiosError<ApiResponse<unknown>>) => {
     const body = error.response?.data
-    const errorCode = body?.code
-    const text = apiErrorMessage(errorCode, body?.message || '网络错误', error.config?.url)
-    if (body?.traceId) console.error('API 请求失败', { code: errorCode, traceId: body.traceId })
-    message.error(text)
-    if (errorCode === 40101 || error.response?.status === 401) {
-      const isSellerRequest = error.config?.url?.startsWith('/admin/') ?? false
-      localStorage.removeItem(isSellerRequest ? 'seller_token' : 'customer_token')
-      if (isSellerRequest && !error.config?.url?.endsWith('/admin/auth/login')) {
-        window.location.href = '/admin/login'
-      } else if (!isSellerRequest && !error.config?.url?.endsWith('/auth/login')) {
-        window.location.href = '/login'
-      }
-    }
-    return Promise.reject(new ApiError(errorCode, text, body?.traceId))
+    return Promise.reject(createApiError(
+      body?.code,
+      body?.message,
+      body?.data,
+      body?.traceId,
+      error.config?.url,
+      error.response?.status,
+    ))
   },
 )
 
-export async function request<T>(config: AxiosRequestConfig): Promise<T> {
+export interface RequestResult<T> {
+  data: T
+  message: string
+}
+
+export async function requestWithMessage<T>(config: AxiosRequestConfig): Promise<RequestResult<T>> {
   const response = await instance.request<ApiResponse<T>>(config)
-  return response.data.data
+  return { data: response.data.data, message: response.data.message }
+}
+
+export async function request<T>(config: AxiosRequestConfig): Promise<T> {
+  const result = await requestWithMessage<T>(config)
+  return result.data
 }
 
 export default request

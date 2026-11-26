@@ -1,0 +1,108 @@
+{
+  "conjuncts": [
+    {
+      "name": "place_success",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 201,
+        "message": "下单成功"
+      }
+    },
+    {
+      "name": "five_state_sequence",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "seq": [
+          {
+            "action": "CONFIRM",
+            "http": 200,
+            "message": "ok",
+            "status": "CONFIRMED"
+          },
+          {
+            "action": "PREPARE",
+            "http": 200,
+            "message": "ok",
+            "status": "PREPARED"
+          },
+          {
+            "action": "SHIP",
+            "http": 200,
+            "message": "ok",
+            "status": "SHIPPED"
+          },
+          {
+            "action": "COMPLETE",
+            "http": 200,
+            "message": "ok",
+            "status": "COMPLETED"
+          }
+        ]
+      }
+    },
+    {
+      "name": "skip_step_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 409,
+        "message": "订单不允许跳步、回退或重复推进"
+      }
+    },
+    {
+      "name": "no_rollback_to_prior_state",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 409,
+        "message": "订单状态已变化，请刷新后重试"
+      }
+    },
+    {
+      "name": "customer_admin_advance_tip",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "http": 403,
+        "message": "角色无权访问"
+      }
+    },
+    {
+      "name": "no_auto_transition_after_wait",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "mid": {
+          "id": 723,
+          "order_no": "8970799c-db23-4c76-8d99-51edaa91cda3",
+          "status": "CONFIRMED",
+          "total_amount": "8.00",
+          "created_at": "2026-11-21T06:19:32.689878",
+          "cancelled_by": null,
+          "cancelled_at": null
+        }
+      }
+    },
+    {
+      "name": "completed_terminal",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "evidence": {
+        "order": {
+          "id": 722,
+          "order_no": "3a405ad5-c8e8-439a-a2b2-b6582ffb6cd8",
+          "status": "COMPLETED",
+          "total_amount": "12.50",
+          "created_at": "2026-11-21T06:19:32.654153",
+          "cancelled_by": null,
+          "cancelled_at": null
+        }
+      }
+    }
+  ],
+  "conjunct_pass": 7,
+  "conjunct_total": 7,
+  "conjunct_fail_names": []
+}

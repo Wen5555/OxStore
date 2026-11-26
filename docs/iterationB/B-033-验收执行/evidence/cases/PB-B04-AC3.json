@@ -1,0 +1,52 @@
+{
+  "ac": "PB-B04-AC3",
+  "pb": "PB-B04",
+  "title": "只能整单取消；部分取消整单拒绝",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "partial_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "400 / 不支持部分取消",
+      "actual": [
+        400,
+        {
+          "code": 40004,
+          "message": "不支持部分取消",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "order_unchanged",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "PLACED",
+      "actual": "PLACED"
+    },
+    {
+      "name": "stock_unchanged",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "8",
+      "actual": {
+        "before": "8",
+        "after": "8"
+      }
+    }
+  ],
+  "conjunct_count": 3,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "response": [
+      400,
+      {
+        "code": 40004,
+        "message": "不支持部分取消",
+        "data": null
+      }
+    ]
+  }
+}

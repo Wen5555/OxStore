@@ -1,0 +1,144 @@
+{
+  "ac": "PB-B15-AC6",
+  "pb": "PB-B15",
+  "title": "提交期下架/不存在：整批失败回滚",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "offline_row_rejects_batch",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409 / 商品已下架",
+      "actual": [
+        409,
+        "所选商品无法加入收藏"
+      ]
+    },
+    {
+      "name": "whole_batch_rollback",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "favorites=0, cart=2",
+      "actual": {
+        "cart": 2,
+        "favorites": 0,
+        "orders": 0,
+        "tombstones": 0,
+        "receipts": 2
+      }
+    },
+    {
+      "name": "missing_row_rejects_batch",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409 / 商品不存在",
+      "actual": [
+        409,
+        "所选商品无法加入收藏"
+      ]
+    },
+    {
+      "name": "missing_batch_rollback",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "favorites=0, cart=2",
+      "actual": {
+        "cart": 2,
+        "favorites": 0,
+        "orders": 0,
+        "tombstones": 0,
+        "receipts": 2
+      }
+    },
+    {
+      "name": "in_flight_offline_no_partial",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "either success+offline or 409+kept, never favorite+carted",
+      "actual": {
+        "move": [
+          200,
+          "已收藏 1 件商品"
+        ],
+        "offline": 200,
+        "counts": {
+          "cart": 0,
+          "favorites": 1,
+          "orders": 0,
+          "tombstones": 1,
+          "receipts": 2
+        }
+      }
+    }
+  ],
+  "conjunct_count": 5,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "offline": {
+      "code": 40914,
+      "message": "所选商品无法加入收藏",
+      "data": {
+        "errors": [
+          {
+            "cartItemId": "128",
+            "productId": "2",
+            "productName": "B030-在售足库存-5",
+            "reason": "OFFLINE",
+            "message": "商品已下架"
+          }
+        ]
+      }
+    },
+    "missing": {
+      "code": 40914,
+      "message": "所选商品无法加入收藏",
+      "data": {
+        "errors": [
+          {
+            "cartItemId": "130",
+            "productId": "999999",
+            "reason": "NOT_FOUND",
+            "message": "商品不存在"
+          }
+        ]
+      }
+    },
+    "race": {
+      "move": {
+        "code": 0,
+        "message": "已收藏 1 件商品",
+        "data": {
+          "movedLineCount": 1,
+          "movedCartItemIds": [
+            "131"
+          ],
+          "skippedDeletedCartItemIds": []
+        }
+      },
+      "offline": {
+        "code": 0,
+        "message": "ok",
+        "data": {
+          "productId": 1,
+          "name": "B030-在售足库存-10",
+          "price": 12.5,
+          "category2Id": 2,
+          "category2Name": "手机数码",
+          "stock": "10",
+          "descriptionHtml": "<p>常规加购/下单/收藏</p>",
+          "images": [
+            "/api/images/302b849d-c211-4f92-920f-5434aff062f7.png"
+          ],
+          "mainImagePath": "/api/images/302b849d-c211-4f92-920f-5434aff062f7.png",
+          "status": "OFFLINE",
+          "canPurchase": false,
+          "publishedAt": "2026-11-21T15:23:32.932851",
+          "statusUpdatedAt": "2026-11-21T15:27:44.2950733",
+          "sellingMode": "FIXED_PRICE",
+          "auction": null
+        }
+      }
+    }
+  }
+}

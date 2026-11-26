@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { Button, Card, Form, Input } from 'antd'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Button, Card, Form, Input, message } from 'antd'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { sellerLogin } from '../../api/auth'
+import { consumeAuthRedirectMessage, getReturnPath } from '../../utils/navigation'
 
 interface LoginFormValues {
   username: string
@@ -11,13 +12,20 @@ interface LoginFormValues {
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
+  const returnTo = getReturnPath(location.state, location.search, '/admin')
+
+  useEffect(() => {
+    const authMessage = consumeAuthRedirectMessage()
+    if (authMessage) message.error(authMessage)
+  }, [])
 
   const handleLogin = async (values: LoginFormValues) => {
     try {
       setLoading(true)
       const result = await sellerLogin(values)
       localStorage.setItem('seller_token', result.token)
-      navigate('/admin', { replace: true })
+      navigate(returnTo, { replace: true })
     } catch (error) {
       console.error('卖家登录失败:', error)
     } finally {

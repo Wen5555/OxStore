@@ -1,0 +1,141 @@
+{
+  "ac": "PB-B15-AC3",
+  "pb": "PB-B15",
+  "title": "整行移动；数量与收藏无关；提交期改数量",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "qty5_whole_row_moved",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "cart=0, favorites=1",
+      "actual": {
+        "http": 200,
+        "counts": {
+          "cart": 0,
+          "favorites": 1,
+          "orders": 0,
+          "tombstones": 1,
+          "receipts": 2
+        }
+      }
+    },
+    {
+      "name": "favorite_has_no_quantity",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "favorite row carries no quantity",
+      "actual": {
+        "id": 63,
+        "customer_id": 1,
+        "product_id": 1,
+        "created_at": "2026-11-21 15:27:41.898286"
+      }
+    },
+    {
+      "name": "late_add_creates_new_cart_row",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "re-added line is a fresh cart row, not auto-favorited",
+      "actual": {
+        "cart": 1,
+        "favorites": 1,
+        "orders": 0,
+        "tombstones": 1,
+        "receipts": 3
+      }
+    },
+    {
+      "name": "qty_change_race_final_state",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "cart=0, favorites=1, no 5xx",
+      "actual": {
+        "patch": [
+          200,
+          {
+            "code": 0,
+            "message": "已更新",
+            "data": {
+              "cartItemId": "121",
+              "productId": "1",
+              "productName": "B030-在售足库存-10",
+              "unitPrice": "12.50",
+              "mainImageUrl": "/api/images/302b849d-c211-4f92-920f-5434aff062f7.png",
+              "quantity": "5",
+              "stock": "10",
+              "online": true,
+              "invalidLabel": null,
+              "defaultCheckoutSelected": true,
+              "canCheckoutSelect": true,
+              "canFavoriteSelect": true,
+              "updatedAt": "2026-11-21T15:27:42.215683"
+            }
+          }
+        ],
+        "move": [
+          200,
+          "已收藏 1 件商品"
+        ],
+        "counts": {
+          "cart": 0,
+          "favorites": 1,
+          "orders": 0,
+          "tombstones": 1,
+          "receipts": 2
+        }
+      }
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "move": {
+      "code": 0,
+      "message": "已收藏 1 件商品",
+      "data": {
+        "movedLineCount": 1,
+        "movedCartItemIds": [
+          "119"
+        ],
+        "skippedDeletedCartItemIds": []
+      }
+    },
+    "race": {
+      "patch": [
+        200,
+        {
+          "code": 0,
+          "message": "已更新",
+          "data": {
+            "cartItemId": "121",
+            "productId": "1",
+            "productName": "B030-在售足库存-10",
+            "unitPrice": "12.50",
+            "mainImageUrl": "/api/images/302b849d-c211-4f92-920f-5434aff062f7.png",
+            "quantity": "5",
+            "stock": "10",
+            "online": true,
+            "invalidLabel": null,
+            "defaultCheckoutSelected": true,
+            "canCheckoutSelect": true,
+            "canFavoriteSelect": true,
+            "updatedAt": "2026-11-21T15:27:42.215683"
+          }
+        }
+      ],
+      "move": {
+        "code": 0,
+        "message": "已收藏 1 件商品",
+        "data": {
+          "movedLineCount": 1,
+          "movedCartItemIds": [
+            "121"
+          ],
+          "skippedDeletedCartItemIds": []
+        }
+      }
+    }
+  }
+}

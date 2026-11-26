@@ -1,0 +1,104 @@
+{
+  "ac": "PB-B15-AC2",
+  "pb": "PB-B15",
+  "title": "同键重放拦截，不重复收藏/清车",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "first_submit_success",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "200 / 已收藏 1 件商品",
+      "actual": [
+        200,
+        "已收藏 1 件商品"
+      ]
+    },
+    {
+      "name": "same_key_blocked",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "409 / 请勿重复操作",
+      "actual": [
+        409,
+        "请勿重复操作"
+      ]
+    },
+    {
+      "name": "no_double_processing",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "favorites=1, cart=0",
+      "actual": {
+        "cart": 0,
+        "favorites": 1,
+        "orders": 0,
+        "tombstones": 1,
+        "receipts": 2
+      }
+    },
+    {
+      "name": "single_receipt",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "1 MOVE_TO_FAVORITES receipt",
+      "actual": 1
+    },
+    {
+      "name": "new_key_new_request_allowed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "200; cart=0; favorites still 1",
+      "actual": {
+        "http": 200,
+        "counts": {
+          "cart": 0,
+          "favorites": 1,
+          "orders": 0,
+          "tombstones": 2,
+          "receipts": 4
+        }
+      }
+    }
+  ],
+  "conjunct_count": 5,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "first": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "message": "已收藏 1 件商品",
+        "data": {
+          "movedLineCount": 1,
+          "movedCartItemIds": [
+            "117"
+          ],
+          "skippedDeletedCartItemIds": []
+        }
+      },
+      "idempotencyKey": "37ca8ee3-fb41-436a-bf4d-2a78e039e72d"
+    },
+    "replay": {
+      "http": 409,
+      "body": {
+        "code": 40915,
+        "message": "请勿重复操作",
+        "data": null
+      },
+      "idempotencyKey": "37ca8ee3-fb41-436a-bf4d-2a78e039e72d"
+    },
+    "new_request": {
+      "code": 0,
+      "message": "已收藏 1 件商品",
+      "data": {
+        "movedLineCount": 1,
+        "movedCartItemIds": [
+          "118"
+        ],
+        "skippedDeletedCartItemIds": []
+      }
+    }
+  }
+}

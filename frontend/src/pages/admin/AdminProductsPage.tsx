@@ -62,7 +62,9 @@ export default function AdminProductsPage() {
                   render: (_, product) => (
                     <Space wrap>
                       <Button type="link" onClick={() => navigate(`/admin/products/${product.id}/edit`)}>编辑库存/类目</Button>
-                      <Button type="link" onClick={() => navigate(`/admin/products/${product.id}/intents`)}>意向队列</Button>
+                      {product.sellingMode === 'AUCTION' && (
+                        <Button type="link" onClick={() => navigate(`/admin/products/${product.id}/intents`)}>拍卖履约</Button>
+                      )}
                     </Space>
                   ),
                 },

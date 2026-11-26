@@ -86,6 +86,8 @@ V4 不会创建顾客账号或转换旧口令记录为新顾客历史；旧队�
 
 Docker MySQL 可以在停写后使用 `python -X utf8 scripts/migrate_iteration2.py --container 实际容器名 --database 实际数据库名`。该入口先备份，识别五表基线后执行 V4→V5→V6；完整迭代 2 库跳过 V4。重复执行不重置库存或复制旧数据，部分结构会被拒绝。备份默认保存在 `.work/db-backups/`，不得提交到 Git；容器须提供 `MYSQL_ROOT_PASSWORD`。恢复演练应先在独立空库进行，不能将演练命令直接用于业务库。
 
+升级到挑战需求 B（V7、V8）请使用 `python -X utf8 scripts/migrate_challenge_b.py --container 实际容器名 --database 实际数据库名`，步骤、异常处理和恢复见[挑战 B 数据库字典与升级运维说明](iterationB/B-042-数据库字典与升级运维说明.md)。Docker Compose 的已有数据卷**不会**因为换镜像或重启而升级表，必须先运行该工具再启动新镜像。
+
 ## 构建与验证
 
 - 完整步骤见 `docs/build.md`（离线包后续可参考 `build-guide.md`），包含工具安装要求、源码版本、Docker 与本机构建、产物位置及离线打包。

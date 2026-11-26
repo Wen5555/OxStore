@@ -1,0 +1,176 @@
+{
+  "task": "B-033",
+  "execution_window": {
+    "started_at": "2026-11-21T07:31:27Z",
+    "ended_at": "2026-11-21T07:31:40Z",
+    "started_at_cst": "2026-11-21T15:31:27+08:00",
+    "ended_at_cst": "2026-11-21T15:31:40+08:00",
+    "sut_sha": "29c20ea0927528a98f873f4a1a0e169a6fa12281",
+    "sut_branch": "develop",
+    "db": "oxstore_test_b033",
+    "base": "http://127.0.0.1:8081",
+    "delivery_baseline": "topic/r2@0cef9ec2764486651037479f2f94e881691791a9",
+    "plan": "docs/iterationB/B-030-本轮验收用例/cases/PB-B04..B07.md, concurrency/SEQ.md, execution/B033.md",
+    "git_ops": "local-only; no commit/push during execution"
+  },
+  "totals": {
+    "acs": 19,
+    "pass": 19,
+    "fail": 0,
+    "blocked": 0,
+    "conjuncts": 79,
+    "failed_conjuncts": 0
+  },
+  "acs": [
+    {
+      "ac": "PB-B04-AC1",
+      "status": "PASS",
+      "conjuncts": 5,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B04-AC2",
+      "status": "PASS",
+      "conjuncts": 5,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B04-AC3",
+      "status": "PASS",
+      "conjuncts": 3,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B04-AC4",
+      "status": "PASS",
+      "conjuncts": 7,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B04-AC5",
+      "status": "PASS_API_DEFERRED",
+      "conjuncts": 6,
+      "failed": [],
+      "deferred": [
+        "cancel_entry_ui"
+      ]
+    },
+    {
+      "ac": "PB-B04-AC6",
+      "status": "PASS_API_DEFERRED",
+      "conjuncts": 4,
+      "failed": [],
+      "deferred": [
+        "cancel_confirm_dialog"
+      ]
+    },
+    {
+      "ac": "PB-B04-AC7",
+      "status": "PASS_API_DEFERRED",
+      "conjuncts": 3,
+      "failed": [],
+      "deferred": [
+        "legacy_intent_fixture"
+      ]
+    },
+    {
+      "ac": "PB-B05-AC1",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B05-AC2",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B05-AC3",
+      "status": "PASS",
+      "conjuncts": 3,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B05-AC4",
+      "status": "PASS",
+      "conjuncts": 3,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B06-AC1",
+      "status": "PASS",
+      "conjuncts": 3,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B06-AC2",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B06-AC3",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B06-AC4",
+      "status": "PASS",
+      "conjuncts": 5,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B06-AC5",
+      "status": "PASS_API_DEFERRED",
+      "conjuncts": 3,
+      "failed": [],
+      "deferred": [
+        "entry_and_confirm_ui"
+      ]
+    },
+    {
+      "ac": "PB-B06-AC6",
+      "status": "PASS_API_DEFERRED",
+      "conjuncts": 2,
+      "failed": [],
+      "deferred": [
+        "legacy_intent_fixture"
+      ]
+    },
+    {
+      "ac": "PB-B07-AC1",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "PB-B07-AC2",
+      "status": "PASS",
+      "conjuncts": 4,
+      "failed": [],
+      "deferred": []
+    },
+    {
+      "ac": "SEQ-12",
+      "status": "PASS",
+      "conjuncts": 3,
+      "failed": [],
+      "deferred": []
+    }
+  ]
+}

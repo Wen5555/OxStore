@@ -99,39 +99,15 @@ class Iteration2ApiIntegrationTest {
         assertTrue(detail.path("canPurchase").asBoolean());
         assertTrue(detail.path("descriptionHtml").asText().contains("<strong>"));
 
-        long firstIntent = submitIntent(productId, buyerToken);
-        long waitingIntent = submitIntent(productId, buyerToken);
-        assertEquals(firstIntent, queueHead(productId, sellerToken));
-        startTrade(firstIntent, sellerToken);
-        confirmSuccess(firstIntent, sellerToken);
-        JsonNode afterFirstSuccess = http.getForObject("/api/products/" + productId, JsonNode.class).path("data");
-        assertEquals(1, afterFirstSuccess.path("stock").asInt());
-        assertEquals("ONLINE", afterFirstSuccess.path("status").asText());
-        JsonNode waitingQueue = get("/api/admin/intents?productId=" + productId, sellerToken).path("data");
-        assertEquals(1, waitingQueue.path("total").asInt());
-        assertEquals(waitingIntent, waitingQueue.path("items").get(0).path("intentId").asLong());
-        assertEquals("QUEUING", waitingQueue.path("items").get(0).path("status").asText());
-
-        startTrade(waitingIntent, sellerToken);
-        long discardedIntent = waitingIntent;
-        post("/api/admin/intents/" + discardedIntent + "/fail",
-                Map.of("action", "DISCARD"), sellerToken, 200);
-
-        long finalSale = submitIntent(productId, buyerToken);
-        long queuedAtZero = submitIntent(productId, buyerToken);
-        startTrade(finalSale, sellerToken);
-        confirmSuccess(finalSale, sellerToken);
-        assertEquals(404, http.getForEntity("/api/products/" + productId, JsonNode.class)
-                .getStatusCode().value());
+        ResponseEntity<JsonNode> closedIntent = http.exchange("/api/products/" + productId + "/intents",
+                HttpMethod.POST, new HttpEntity<>(headers(buyerToken)), JsonNode.class);
+        assertEquals(409, closedIntent.getStatusCode().value());
+        assertEquals(40917, closedIntent.getBody().path("code").asInt());
+        JsonNode closedQueue = get("/api/admin/intents?productId=" + productId, sellerToken);
+        assertEquals(40917, closedQueue.path("code").asInt());
 
         JsonNode buyerHistory = get("/api/me/order-history?page=1&size=10", buyerToken).path("data");
-        assertEquals(4, buyerHistory.path("total").asInt());
-        assertTrue(hasHistoryStatus(buyerHistory, "SUCCESS"));
-        assertTrue(hasHistoryStatus(buyerHistory, "FAILED"));
-
-        JsonNode queueAfterOffline = get("/api/admin/intents?productId=" + productId, sellerToken).path("data");
-        assertEquals(0, queueAfterOffline.path("total").asInt());
-        assertNotNull(queuedAtZero);
+        assertEquals(0, buyerHistory.path("total").asInt());
 
         JsonNode customers = get("/api/admin/customers?page=1&size=10", sellerToken).path("data");
         assertTrue(customers.path("total").asInt() >= 1);
@@ -147,26 +123,25 @@ class Iteration2ApiIntegrationTest {
         long customerId = firstCustomer.path("customerId").asLong();
         JsonNode sellerHistory = get(
                 "/api/admin/customers/" + customerId + "/order-history?page=1&size=10", sellerToken).path("data");
-        assertEquals(4, sellerHistory.path("total").asInt());
+        assertEquals(0, sellerHistory.path("total").asInt());
         assertEquals(403, http.exchange("/api/admin/customers", HttpMethod.GET,
                 new HttpEntity<>(headers(buyerToken)), JsonNode.class).getStatusCode().value());
 
         JsonNode manuallyManaged = publish(sellerToken, "手动上下架商品", 1, category2Id, "");
         long manualProductId = manuallyManaged.path("productId").asLong();
-        submitIntent(manualProductId, buyerToken);
         post("/api/admin/products/" + manualProductId + "/offline", null, sellerToken, 200);
         assertEquals(404, http.getForEntity("/api/products/" + manualProductId, JsonNode.class)
                 .getStatusCode().value());
-        assertEquals(0, get("/api/admin/intents?productId=" + manualProductId, sellerToken)
-                .path("data").path("total").asInt());
+        assertEquals(40917, get("/api/admin/intents?productId=" + manualProductId, sellerToken)
+                .path("code").asInt());
         JsonNode historyAfterManualOffline = get("/api/me/order-history?page=1&size=10", buyerToken).path("data");
-        assertEquals(5, historyAfterManualOffline.path("total").asInt());
+        assertEquals(0, historyAfterManualOffline.path("total").asInt());
         HttpRequest inventoryRequest = HttpRequest.newBuilder(URI.create(
                         http.getRootUri() + "/api/admin/products/" + manualProductId))
                 .header("Authorization", "Bearer " + sellerToken)
                 .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(
-                        objectMapper.writeValueAsString(Map.of("stock", 2, "category2Id", category2Id))))
+                        objectMapper.writeValueAsString(Map.of("stock", "2", "category2Id", category2Id))))
                 .build();
         HttpResponse<String> inventoryResponse = HttpClient.newHttpClient().send(inventoryRequest,
                 HttpResponse.BodyHandlers.ofString());
@@ -201,7 +176,7 @@ class Iteration2ApiIntegrationTest {
     }
 
     @Test
-    void independentProductQueuesCanEnterTradeAtTheSameTime() {
+    void fixedPriceProductsDoNotExposeLegacyQueues() {
         String suffix = Long.toString(System.nanoTime());
         String customerA = "r1-queue-a-" + suffix;
         String customerB = "r1-queue-b-" + suffix;
@@ -220,21 +195,13 @@ class Iteration2ApiIntegrationTest {
                 .path("productId").asLong();
         long productB = publish(sellerToken, "R1独立队列B-" + suffix, 2, category2Id, "")
                 .path("productId").asLong();
-        long intentA = submitIntent(productA, buyerTokenA);
-        long intentB = submitIntent(productB, buyerTokenB);
-
-        startTrade(intentA, sellerToken);
-        startTrade(intentB, sellerToken);
-
-        JsonNode queueA = get("/api/admin/intents?productId=" + productA, sellerToken)
-                .path("data").path("items");
-        JsonNode queueB = get("/api/admin/intents?productId=" + productB, sellerToken)
-                .path("data").path("items");
-        assertEquals("IN_TRANSACTION", queueA.get(0).path("status").asText());
-        assertEquals("IN_TRANSACTION", queueB.get(0).path("status").asText());
-
-        post("/api/admin/intents/" + intentA + "/fail", Map.of("action", "DISCARD"), sellerToken, 200);
-        post("/api/admin/intents/" + intentB + "/fail", Map.of("action", "DISCARD"), sellerToken, 200);
+        for (long productId : new long[]{productA, productB}) {
+            ResponseEntity<JsonNode> submit = http.exchange("/api/products/" + productId + "/intents",
+                    HttpMethod.POST, new HttpEntity<>(headers(buyerTokenA)), JsonNode.class);
+            assertEquals(40917, submit.getBody().path("code").asInt());
+            assertEquals(40917, get("/api/admin/intents?productId=" + productId, sellerToken)
+                    .path("code").asInt());
+        }
     }
 
     @Test
@@ -270,7 +237,7 @@ class Iteration2ApiIntegrationTest {
     }
 
     @Test
-    void fixedPriceProductsKeepTheIntentFlowAndRejectAuctionOperations() {
+    void fixedPriceProductsUseTheCartAndRejectLegacyAndAuctionOperations() {
         String suffix = Long.toString(System.nanoTime());
         String buyerName = "r4-fixed-" + suffix;
         register(buyerName, "13800000005");
@@ -293,12 +260,21 @@ class Iteration2ApiIntegrationTest {
         assertEquals(409, bidResponse.getStatusCode().value());
         assertEquals(40908, bidResponse.getBody().path("code").asInt());
 
-        long intentId = submitIntent(productId, buyerToken);
-        startTrade(intentId, sellerToken);
-        confirmSuccess(intentId, sellerToken);
+        ResponseEntity<JsonNode> oldIntent = http.exchange("/api/products/" + productId + "/intents",
+                HttpMethod.POST, new HttpEntity<>(headers(buyerToken)), JsonNode.class);
+        assertEquals(40917, oldIntent.getBody().path("code").asInt());
+        String requestKey = java.util.UUID.randomUUID().toString();
+        HttpHeaders cartHeaders = headers(buyerToken);
+        cartHeaders.set("Idempotency-Key", requestKey);
+        ResponseEntity<JsonNode> cart = http.postForEntity("/api/me/cart/items",
+                new HttpEntity<>(Map.of("productId", Long.toString(productId)), cartHeaders), JsonNode.class);
+        assertEquals(200, cart.getStatusCode().value());
+        assertEquals("已加入购物车", cart.getBody().path("message").asText());
+        assertEquals("1", cart.getBody().path("data").path("quantity").asText());
+        assertEquals(2, http.getForObject("/api/products/" + productId, JsonNode.class)
+                .path("data").path("stock").asInt());
         JsonNode history = get("/api/me/order-history?page=1&size=10", buyerToken).path("data");
-        assertEquals(1, history.path("total").asInt());
-        assertEquals("SUCCESS", history.path("items").get(0).path("status").asText());
+        assertEquals(0, history.path("total").asInt());
     }
 
     @Test
@@ -808,20 +784,6 @@ class Iteration2ApiIntegrationTest {
         assertEquals(201, response.getStatusCode().value());
     }
 
-    private long submitIntent(long productId, String buyerToken) {
-        ResponseEntity<JsonNode> response = http.postForEntity(
-                "/api/products/" + productId + "/intents", new HttpEntity<>(headers(buyerToken)), JsonNode.class);
-        assertEquals(200, response.getStatusCode().value());
-        return response.getBody().path("data").path("intentId").asLong();
-    }
-
-    private long queueHead(long productId, String sellerToken) {
-        JsonNode items = get("/api/admin/intents?productId=" + productId, sellerToken)
-                .path("data").path("items");
-        assertTrue(items.size() > 0);
-        return items.get(0).path("intentId").asLong();
-    }
-
     private void startTrade(long intentId, String sellerToken) {
         post("/api/admin/intents/" + intentId + "/start", null, sellerToken, 200);
     }
@@ -846,12 +808,4 @@ class Iteration2ApiIntegrationTest {
         return http.exchange(path, HttpMethod.GET, new HttpEntity<>(headers(token)), JsonNode.class).getBody();
     }
 
-    private boolean hasHistoryStatus(JsonNode history, String status) {
-        for (JsonNode item : history.path("items")) {
-            if (status.equals(item.path("status").asText())) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

@@ -1,0 +1,91 @@
+{
+  "ac": "PB-B06-AC3",
+  "pb": "PB-B06",
+  "title": "商家取消记录发起方与时间，进入订单管理",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "cancelled_by_seller",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "SELLER",
+      "actual": "SELLER"
+    },
+    {
+      "name": "cancelled_at_set",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "not null",
+      "actual": "2026-11-21 15:31:36.866728"
+    },
+    {
+      "name": "admin_list_shows",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "admin list shows cancelledBy=SELLER",
+      "actual": {
+        "orderId": "23",
+        "orderNo": "f1c80f78-c523-4380-86ae-d07a984efd99",
+        "customerId": "1",
+        "status": "CANCELLED",
+        "items": [
+          {
+            "productId": "1",
+            "productName": "B030-在售足库存-10",
+            "unitPrice": "12.50",
+            "quantity": "2",
+            "lineAmount": "25.00"
+          }
+        ],
+        "totalAmount": "25.00",
+        "createdAt": "2026-11-21T15:31:36.823481",
+        "cancelledBy": "SELLER",
+        "cancelledAt": "2026-11-21T15:31:36.866728",
+        "cancelReason": "商家取消测试",
+        "allowedActions": []
+      }
+    },
+    {
+      "name": "reason_kept",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "reason kept",
+      "actual": "商家取消测试"
+    }
+  ],
+  "conjunct_count": 4,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "db": {
+      "id": 23,
+      "customer_id": 1,
+      "status": "CANCELLED",
+      "cancelled_by": "SELLER",
+      "cancelled_at": "2026-11-21 15:31:36.866728",
+      "cancel_reason": "商家取消测试",
+      "total_amount": "25.00"
+    },
+    "listed": {
+      "orderId": "23",
+      "orderNo": "f1c80f78-c523-4380-86ae-d07a984efd99",
+      "customerId": "1",
+      "status": "CANCELLED",
+      "items": [
+        {
+          "productId": "1",
+          "productName": "B030-在售足库存-10",
+          "unitPrice": "12.50",
+          "quantity": "2",
+          "lineAmount": "25.00"
+        }
+      ],
+      "totalAmount": "25.00",
+      "createdAt": "2026-11-21T15:31:36.823481",
+      "cancelledBy": "SELLER",
+      "cancelledAt": "2026-11-21T15:31:36.866728",
+      "cancelReason": "商家取消测试",
+      "allowedActions": []
+    }
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "ac": "PB-B14-AC2",
+  "pb": "PB-B14",
+  "title": "登录与归属校验；商家无代操作权限",
+  "status": "PASS",
+  "conjuncts": [
+    {
+      "name": "anonymous_401_please_login",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "401 / 请先登录",
+      "actual": [
+        401,
+        {
+          "code": 40101,
+          "message": "请先登录",
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "expired_401_relogin",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "401 / 请重新登录",
+      "actual": [
+        401,
+        "请重新登录"
+      ]
+    },
+    {
+      "name": "foreign_row_403",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "403 / 无权操作",
+      "actual": [
+        403,
+        "无权操作"
+      ]
+    },
+    {
+      "name": "mixed_foreign_whole_batch_rejected",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "403 / 无权操作",
+      "actual": [
+        403,
+        "无权操作"
+      ]
+    },
+    {
+      "name": "seller_403_no_permission",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "403 / 无此权限",
+      "actual": [
+        403,
+        "无此权限"
+      ]
+    },
+    {
+      "name": "no_data_changed",
+      "pass": true,
+      "disposition_if_fail": "FAIL",
+      "expected": "cart=2, favorites=0 after all rejects",
+      "actual": {
+        "cart": 2,
+        "favorites": 0,
+        "orders": 0,
+        "tombstones": 0,
+        "receipts": 2
+      }
+    }
+  ],
+  "conjunct_count": 6,
+  "failed_conjuncts": [],
+  "deferred_conjuncts": [],
+  "evidence": {
+    "responses": {
+      "anonymous": [
+        401,
+        {
+          "code": 40101,
+          "message": "请先登录",
+          "data": null
+        }
+      ],
+      "invalid": {
+        "http": 401,
+        "body": {
+          "code": 40101,
+          "message": "请重新登录",
+          "data": null
+        },
+        "idempotencyKey": "1552c14b-7d72-46f5-807d-1a2d328342c0"
+      },
+      "foreign": {
+        "http": 403,
+        "body": {
+          "code": 40302,
+          "message": "无权操作",
+          "data": null
+        },
+        "idempotencyKey": "f38e4bde-6b43-43d7-a447-f8b6be7f2436"
+      },
+      "mixed": {
+        "http": 403,
+        "body": {
+          "code": 40302,
+          "message": "无权操作",
+          "data": null
+        },
+        "idempotencyKey": "6d692474-f44e-4264-a19e-545480d12bd5"
+      },
+      "seller": {
+        "http": 403,
+        "body": {
+          "code": 40301,
+          "message": "无此权限",
+          "data": null
+        },
+        "idempotencyKey": "126a2312-40cd-428b-9926-df3c846b9bc3"
+      }
+    }
+  }
+}
